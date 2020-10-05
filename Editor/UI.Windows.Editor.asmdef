@@ -1,0 +1,18 @@
+{
+    "name": "UI.Windows.Editor",
+    "references": [
+        "GUID:2df4fd010e8cc4ac8ac47736afb07034",
+        "GUID:69448af7b92c7f342b298e06a37122aa"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

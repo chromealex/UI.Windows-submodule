@@ -133,12 +133,6 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public override void OnDeInit() {
-
-            base.OnDeInit();
-
-        }
-
         public float GetZDepth() {
 
             return this.currentZDepth;

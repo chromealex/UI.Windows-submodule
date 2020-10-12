@@ -143,8 +143,10 @@ namespace UnityEditor.UI.Windows {
 
                     GUILayoutExt.DrawHeader("Main");
                     EditorGUILayout.PropertyField(this.hiddenByDefault);
-                    EditorGUILayout.PropertyField(this.animationParameters);
                     EditorGUILayout.PropertyField(this.subObjects);
+                    
+                    GUILayoutExt.DrawHeader("Animations");
+                    EditorGUILayout.PropertyField(this.animationParameters);
 
                     GUILayoutExt.DrawHeader("Performance Options");
                     EditorGUILayout.PropertyField(this.createPool);
@@ -155,7 +157,7 @@ namespace UnityEditor.UI.Windows {
                     GUILayoutExt.DrawHeader("Render Behaviour");
                     EditorGUILayout.PropertyField(this.renderBehaviourOnHidden);
 
-                    GUILayoutExt.DrawHeader("Animation");
+                    GUILayoutExt.DrawHeader("Animations");
                     EditorGUILayout.PropertyField(this.animationParameters);
 
                     GUILayoutExt.DrawHeader("Graph");
@@ -176,35 +178,39 @@ namespace UnityEditor.UI.Windows {
             EditorGUILayout.PropertyField(this.useSafeZone);
             if (this.useSafeZone.boolValue == true) {
                 
-                GUILayoutExt.Box(2f, 2f, () => {
+                GUILayoutExt.Box(6f, 2f, () => {
                     
                     EditorGUILayout.PropertyField(this.safeZone);
                     if (this.safeZone.objectReferenceValue == null && this.targets.Length == 1) {
 
-                        GUILayout.BeginHorizontal();
-                        GUILayout.FlexibleSpace();
-                        if (GUILayout.Button("Generate", GUILayout.Width(80f), GUILayout.Height(30f)) == true) {
+                        GUILayoutExt.Box(2f, 2f, () => {
+                            
+                            GUILayout.BeginHorizontal();
+                            GUILayout.FlexibleSpace();
+                            if (GUILayout.Button("Generate", GUILayout.Width(80f), GUILayout.Height(30f)) == true) {
 
-                            var obj = this.target as Component;
-                            if (PrefabUtility.IsPartOfAnyPrefab(obj) == true) {
+                                var obj = (Component)this.target;
+                                if (PrefabUtility.IsPartOfAnyPrefab(obj) == true) {
 
-                                var path = AssetDatabase.GetAssetPath(obj.gameObject);
-                                using (var edit = new EditPrefabAssetScope(path)) {
+                                    var path = AssetDatabase.GetAssetPath(obj.gameObject);
+                                    using (var edit = new EditPrefabAssetScope(path)) {
 
-                                    EditorHelpers.AddSafeZone(edit.prefabRoot.transform);
+                                        EditorHelpers.AddSafeZone(edit.prefabRoot.transform);
                                 
-                                }
+                                    }
                             
-                            } else {
+                                } else {
 
-                                var root = obj.gameObject;
-                                EditorHelpers.AddSafeZone(root.transform);
+                                    var root = obj.gameObject;
+                                    EditorHelpers.AddSafeZone(root.transform);
                             
-                            }
+                                }
                         
-                        }
-                        GUILayout.FlexibleSpace();
-                        GUILayout.EndHorizontal();
+                            }
+                            GUILayout.FlexibleSpace();
+                            GUILayout.EndHorizontal();
+                            
+                        }, GUIStyle.none);
                         
                     }
 

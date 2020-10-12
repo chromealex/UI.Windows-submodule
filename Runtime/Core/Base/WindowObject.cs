@@ -73,7 +73,7 @@ namespace UnityEngine.UI.Windows {
     
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
-    public abstract class WindowObject : MonoBehaviour {
+    public abstract class WindowObject : MonoBehaviour, ISearchComponentByTypeSingleEditor {
 
         [System.Serializable]
         public struct RenderItem {
@@ -106,6 +106,20 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        [System.Serializable]
+        public struct AnimationParametersContainer {
+
+            [SearchComponentsByTypePopupAttribute(typeof(AnimationParameters), menuName: "Animations", singleOnly: true)]
+            public AnimationParameters[] items;
+
+        }
+        
+        IList ISearchComponentByTypeSingleEditor.GetSearchTypeArray() {
+
+            return this.animationParameters.items;
+
+        }
+
         internal int windowId;
         internal WindowBase window;
 
@@ -120,8 +134,8 @@ namespace UnityEngine.UI.Windows {
         [Tooltip("Should this object return in pool when window is hidden? Object will returns into pool only if parent object is not mark as `createPool`.")]
         public bool createPool;
         
-        [SearchComponentsByTypePopupAttribute(typeof(AnimationParameters), menuName: "Animations")]
-        public AnimationParameters animationParameters;
+        [AnimationParameters]
+        public AnimationParametersContainer animationParameters;
         
         public ObjectState objectState;
         [Tooltip("Render behaviour when hidden state set or if hiddenByDefault is true.")]

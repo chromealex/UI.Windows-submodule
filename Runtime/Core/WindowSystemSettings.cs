@@ -29,7 +29,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public Layers layers;
+        public Layers layers = new Layers() { depthStep = 0.1f, zDepthStep = 1f };
 
         [System.Serializable]
         public struct Components {
@@ -38,7 +38,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public Components components;
+        public Components components = new Components() { renderBehaviourOnHidden = RenderBehaviour.HideGameObject };
 
         [System.Serializable]
         public struct Canvas {
@@ -47,7 +47,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public Canvas canvas;
+        public Canvas canvas = new Canvas() { renderMode = RenderMode.ScreenSpaceCamera };
 
         [System.Serializable]
         public struct Camera {

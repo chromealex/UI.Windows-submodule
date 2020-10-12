@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace UnityEngine.UI.Windows.Modules {
 
+    using Utilities;
+    
     public enum AnimationState {
 
         Reset,
@@ -18,6 +20,8 @@ namespace UnityEngine.UI.Windows.Modules {
         public float durationHide = 1f;
         public float delayShow = 0f;
         public float delayHide = 0f;
+        public Tweener.EaseFunction easeShow = Tweener.EaseFunction.Linear;
+        public Tweener.EaseFunction easeHide = Tweener.EaseFunction.Linear;
 
         public abstract class State {
 

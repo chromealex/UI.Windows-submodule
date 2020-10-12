@@ -271,8 +271,10 @@ namespace UnityEditor.UI.Windows {
                     
                     GUILayoutExt.DrawHeader("Main");
                     GUILayoutExt.PropertyField(this.hiddenByDefault, (reg) => reg.hiddenByDefault == true ? reg.hiddenByDefaultDescription : string.Empty);
-                    EditorGUILayout.PropertyField(this.animationParameters);
                     EditorGUILayout.PropertyField(this.subObjects);
+                    
+                    GUILayoutExt.DrawHeader("Animations");
+                    EditorGUILayout.PropertyField(this.animationParameters);
 
                     GUILayoutExt.DrawHeader("Performance Options");
                     EditorGUILayout.PropertyField(this.createPool);
@@ -283,7 +285,7 @@ namespace UnityEditor.UI.Windows {
                     GUILayoutExt.DrawHeader("Render Behaviour");
                     EditorGUILayout.PropertyField(this.renderBehaviourOnHidden);
 
-                    GUILayoutExt.DrawHeader("Animation");
+                    GUILayoutExt.DrawHeader("Animations");
                     EditorGUILayout.PropertyField(this.animationParameters);
 
                     GUILayoutExt.DrawHeader("Graph");

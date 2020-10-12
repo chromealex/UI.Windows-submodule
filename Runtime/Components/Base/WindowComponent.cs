@@ -12,7 +12,7 @@ namespace UnityEngine.UI.Windows {
 
             public WindowComponent windowComponent;
             
-            [UnityEngine.UI.Windows.Utilities.SearchComponentsByTypePopup(typeof(WindowComponentModule), "Window Component Module", allowClassOverrides: true)]
+            [UnityEngine.UI.Windows.Utilities.SearchComponentsByTypePopup(typeof(WindowComponentModule), "Window Component Module", allowClassOverrides: true, singleOnly: true)]
             public WindowComponentModule[] modules;
 
             public void ValidateEditor() {

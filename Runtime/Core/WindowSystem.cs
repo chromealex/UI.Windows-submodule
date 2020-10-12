@@ -1051,8 +1051,10 @@ namespace UnityEngine.UI.Windows {
             }
             this.currentWindows.Add(item);
 
-            instance.LoadAsync(() => {
+            GameObject.DontDestroyOnLoad(instance.gameObject);
 
+            instance.LoadAsync(() => {
+            
                 { // Setup for each instance
 
                     instance.Setup(instance);

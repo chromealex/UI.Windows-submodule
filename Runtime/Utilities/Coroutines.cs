@@ -21,6 +21,12 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
+        public static void CallInSequence<T, TState>(TState state, System.Action<TState> callback, System.Action<T, System.Action<TState>, TState> each, params T[] collection) {
+
+	        Coroutines.CallInSequence(state, callback, (IEnumerable<T>)collection, each);
+
+        }
+
 		public static void CallInSequence<T>(System.Action callback, System.Action<T, System.Action> each, params T[] collection) {
 
 			Coroutines.CallInSequence(callback, (IEnumerable<T>)collection, each);
@@ -52,6 +58,85 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
+		public static void CallInSequence<T, TState>(TState state, System.Action<TState> callback, IEnumerable<T> collection, System.Action<T, System.Action<TState>, TState> each, bool waitPrevious = false) {
+
+			if (collection == null) {
+
+				if (callback != null) callback.Invoke(state);
+				return;
+
+			}
+
+			var count = collection.Count();
+
+			var completed = false;
+			var counter = 0;
+			System.Action<TState> callbackItem = (stateInner) => {
+
+				++counter;
+				if (counter < count) return;
+
+				completed = true;
+
+				if (callback != null) callback.Invoke(stateInner);
+				
+			};
+
+			if (waitPrevious == true) {
+
+				var ie = collection.GetEnumerator();
+
+				System.Action doNext = null;
+				doNext = () => {
+
+                    if (Coroutines.MoveNext(ie, collection) == true) {
+
+						if (ie.Current != null) {
+
+							each(ie.Current, (st) => {
+								
+								callbackItem(st);
+								doNext();
+
+							}, state);
+
+						} else {
+
+							callbackItem(state);
+							doNext();
+
+						}
+
+					}
+
+				};
+				doNext();
+
+			} else {
+
+                var ie = collection.GetEnumerator();
+                while (Coroutines.MoveNext(ie, collection) == true) {
+
+					if (ie.Current != null) {
+
+						each(ie.Current, callbackItem, state);
+
+					} else {
+
+						callbackItem(state);
+
+					}
+
+					if (completed == true) break;
+
+				}
+
+			}
+
+			if (count == 0 && callback != null) callback(state);
+
+		}
+		
 		public static void CallInSequence<T>(System.Action callback, IEnumerable<T> collection, System.Action<T, System.Action> each, bool waitPrevious = false) {
 
 			if (collection == null) {
@@ -72,7 +157,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 				completed = true;
 
-				if (callback != null) callback();
+				if (callback != null) callback.Invoke();
 				
 			};
 
@@ -83,7 +168,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 				System.Action doNext = null;
 				doNext = () => {
 
-                    if (Coroutines.MoveNext(ie, collection) == true) {
+					if (Coroutines.MoveNext(ie, collection) == true) {
 
 						if (ie.Current != null) {
 
@@ -108,8 +193,8 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 			} else {
 
-                var ie = collection.GetEnumerator();
-                while (Coroutines.MoveNext(ie, collection) == true) {
+				var ie = collection.GetEnumerator();
+				while (Coroutines.MoveNext(ie, collection) == true) {
 
 					if (ie.Current != null) {
 
@@ -130,7 +215,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 			if (count == 0 && callback != null) callback();
 
 		}
-		
+
     }
 
 }

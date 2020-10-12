@@ -50,6 +50,7 @@ namespace UnityEngine.UI.Windows.Utilities {
             internal float delay;
 
             internal System.Action<T> onComplete;
+            internal System.Action onCompleteParameterless;
             internal System.Action<T, float> onUpdate;
             internal System.Action onCancel;
 
@@ -70,11 +71,27 @@ namespace UnityEngine.UI.Windows.Utilities {
                 if (this.delay <= 0f) {
 
                     this.timer += dt / this.duration;
-                    if (this.onUpdate != null) this.onUpdate.Invoke(this.obj, EaseFunctions.funcs[(int)this.easeFunction].Invoke(this.@from, this.to, this.timer));
 
+                    try {
+
+                        if (this.onUpdate != null) this.onUpdate.Invoke(this.obj, EaseFunctions.funcs[(int)this.easeFunction].Invoke(this.@from, this.to, this.timer));
+
+                        if (this.timer >= 1f) {
+
+                            if (this.onComplete != null) this.onComplete.Invoke(this.obj);
+                            if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
+                            return true;
+
+                        }
+
+                    } catch (System.Exception ex) {
+
+                        Debug.LogException(ex);
+
+                    }
+                    
                     if (this.timer >= 1f) {
 
-                        if (this.onComplete != null) this.onComplete.Invoke(this.obj);
                         return true;
 
                     }
@@ -128,6 +145,13 @@ namespace UnityEngine.UI.Windows.Utilities {
             public Tween<T> OnComplete(System.Action<T> onResult) {
 
                 this.onComplete = onResult;
+                return this;
+
+            }
+
+            public Tween<T> OnComplete(System.Action onResult) {
+
+                this.onCompleteParameterless = onResult;
                 return this;
 
             }

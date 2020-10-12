@@ -185,10 +185,14 @@ namespace UnityEditor.UI.Windows {
 				    
 			    }
 
-			    GUILayout.Space(-10f);
+			    GUILayout.Space(-6f);
 			    using (new GUIColorUsing(new Color(1f, 1f, 1f, 1f))) {
 
-				    GUILayout.Label(EditorHelpers.StringToCaption(value), EditorStyles.largeLabel);
+				    GUILayoutExt.Padding(5f, 0f, () => {
+					    
+					    GUILayout.Label(EditorHelpers.StringToCaption(value), EditorStyles.label);
+					    
+				    }, GUIStyle.none);
 
 			    }
 

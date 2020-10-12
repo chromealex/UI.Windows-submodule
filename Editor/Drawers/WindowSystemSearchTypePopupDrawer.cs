@@ -66,7 +66,12 @@ namespace UnityEditor.UI.Windows {
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
 
-            var attr = (SearchComponentsByTypePopupAttribute)this.attribute;
+            WindowSystemSearchComponentsByTypePopupPropertyDrawer.DrawGUI(position, label, (SearchComponentsByTypePopupAttribute)this.attribute, property);
+            
+        }
+        
+        public static void DrawGUI(Rect position, GUIContent label, SearchComponentsByTypePopupAttribute attr, SerializedProperty property) {
+            
             var searchType = attr.baseType;
             if (attr.allowClassOverrides == true && property.serializedObject.targetObject is ISearchComponentByTypeEditor searchComponentByTypeEditor) {
 
@@ -76,7 +81,7 @@ namespace UnityEditor.UI.Windows {
 
             IList searchArray = null;
             var singleOnly = false;
-            if (attr.allowClassOverrides == true && property.serializedObject.targetObject is ISearchComponentByTypeSingleEditor searchComponentByTypeSingleEditor) {
+            if (attr.singleOnly == true && property.serializedObject.targetObject is ISearchComponentByTypeSingleEditor searchComponentByTypeSingleEditor) {
 
                 searchArray = searchComponentByTypeSingleEditor.GetSearchTypeArray();
                 singleOnly = true;
@@ -142,7 +147,7 @@ namespace UnityEditor.UI.Windows {
                             foreach (var item in searchArray) {
 
                                 if (item == null) continue;
-                                if (item.GetType() == itemType) {
+                                if (item.GetType().IsSubclassOf(itemType) == true) {
 
                                     found = true;
                                     break;

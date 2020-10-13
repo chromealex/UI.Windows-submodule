@@ -263,12 +263,12 @@ public static class ScriptTemplates {
             var dir = path + "/" + assetName;
             var newAssetPath = dir + "/" + assetName + "Screen.cs";
 
-            EditorPrefs.SetBool("Temp.EditorWaitCompilation.CreateFeatureComplex", true);
-            EditorPrefs.SetString("Temp.EditorWaitCompilation.CreateFeatureComplex.Dir", dir);
-            EditorPrefs.SetString("Temp.EditorWaitCompilation.CreateFeatureComplex.Name", assetName);
-            EditorPrefs.SetString("Temp.EditorWaitCompilation.CreateFeatureComplex.Name.Orig", asset.name);
-            EditorPrefs.SetString("Temp.EditorWaitCompilation.CreateFeatureComplex.ScriptPath", AssetDatabase.GetAssetPath(asset));
-            EditorPrefs.SetString("Temp.EditorWaitCompilation.CreateFeatureComplex.NewScriptPath", newAssetPath);
+            EditorPrefs.SetBool("Temp.EditorWaitCompilation.UIWindows.CreateScreen", true);
+            EditorPrefs.SetString("Temp.EditorWaitCompilation.UIWindows.CreateScreen.Dir", dir);
+            EditorPrefs.SetString("Temp.EditorWaitCompilation.UIWindows.CreateScreen.Name", assetName);
+            EditorPrefs.SetString("Temp.EditorWaitCompilation.UIWindows.CreateScreen.Name.Orig", asset.name);
+            EditorPrefs.SetString("Temp.EditorWaitCompilation.UIWindows.CreateScreen.ScriptPath", AssetDatabase.GetAssetPath(asset));
+            EditorPrefs.SetString("Temp.EditorWaitCompilation.UIWindows.CreateScreen.NewScriptPath", newAssetPath);
             
         });
 

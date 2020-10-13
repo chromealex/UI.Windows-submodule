@@ -105,7 +105,7 @@ namespace UnityEditor.UI.Windows {
 
                 } else {
 
-                    if (UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(value.guid) != null) {
+                    if (UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(result.resource.guid) != null) {
 
                         //if (loadType.enumValueIndex != (int)Resource.Type.Addressables)
                         {

@@ -180,16 +180,16 @@ public static class ScriptTemplates {
 
     private static void CreateScreen_AfterCompilation() {
             
-        var waitForCompilation = EditorPrefs.GetBool("Temp.EditorWaitCompilation.CreateFeatureComplex");
+        var waitForCompilation = EditorPrefs.GetBool("Temp.EditorWaitCompilation.UIWindows.CreateScreen");
         if (waitForCompilation == true) {
                 
-            EditorPrefs.DeleteKey("Temp.EditorWaitCompilation.CreateFeatureComplex");
+            EditorPrefs.DeleteKey("Temp.EditorWaitCompilation.UIWindows.CreateScreen");
                 
-            var dir = EditorPrefs.GetString("Temp.EditorWaitCompilation.CreateFeatureComplex.Dir");
-            var assetName = EditorPrefs.GetString("Temp.EditorWaitCompilation.CreateFeatureComplex.Name");
-            var assetNameOrig = EditorPrefs.GetString("Temp.EditorWaitCompilation.CreateFeatureComplex.Name.Orig");
-            var assetPath = EditorPrefs.GetString("Temp.EditorWaitCompilation.CreateFeatureComplex.ScriptPath");
-            var newAssetPath = EditorPrefs.GetString("Temp.EditorWaitCompilation.CreateFeatureComplex.NewScriptPath");
+            var dir = EditorPrefs.GetString("Temp.EditorWaitCompilation.UIWindows.CreateScreen.Dir");
+            var assetName = EditorPrefs.GetString("Temp.EditorWaitCompilation.UIWindows.CreateScreen.Name");
+            var assetNameOrig = EditorPrefs.GetString("Temp.EditorWaitCompilation.UIWindows.CreateScreen.Name.Orig");
+            var assetPath = EditorPrefs.GetString("Temp.EditorWaitCompilation.UIWindows.CreateScreen.ScriptPath");
+            var newAssetPath = EditorPrefs.GetString("Temp.EditorWaitCompilation.UIWindows.CreateScreen.NewScriptPath");
 
             if (assetNameOrig.EndsWith("Screen") == false) {
 

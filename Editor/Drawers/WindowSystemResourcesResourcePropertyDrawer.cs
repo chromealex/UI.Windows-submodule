@@ -11,11 +11,22 @@ namespace UnityEditor.UI.Windows {
     [CustomPropertyDrawer(typeof(Resource))]
     public class WindowSystemResourcesResourcePropertyDrawer : PropertyDrawer {
 
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+        public struct Result {
 
-            UnityEngine.UI.Windows.Utilities.RequiredType requiredType = UnityEngine.UI.Windows.Utilities.RequiredType.None;
+            public Resource resource;
+            public bool changed;
+
+        }
+        
+        public static Result DrawGUI(Rect position, GUIContent label, System.Reflection.FieldInfo field, Resource value) {
+
+            var result = new Result() {
+                resource = value,
+                changed = false
+            };
+            
+            var requiredType = UnityEngine.UI.Windows.Utilities.RequiredType.None;
             var type = typeof(Object);
-            var field = UnityEditor.UI.Windows.EditorHelpers.GetFieldViaPath(property.serializedObject.targetObject.GetType(), property.propertyPath);
             if (field != null) {
 
                 var attrs = field.GetCustomAttributes(typeof(ResourceTypeAttribute), inherit: false);
@@ -41,19 +52,15 @@ namespace UnityEditor.UI.Windows {
             labelRect.y += labelPadding;
             labelRect.height -= labelPadding * 2f;
 
-            var guid = property.FindPropertyRelative("guid");
-            var loadType = property.FindPropertyRelative("type");
-            var objectType = property.FindPropertyRelative("objectType");
-            var directRef = property.FindPropertyRelative("directRef");
-            var obj = Resource.GetEditorRef(guid.stringValue, type, (Resource.ObjectType)objectType.enumValueIndex, directRef.objectReferenceValue);
+            var obj = Resource.GetEditorRef(value.guid, type, value.objectType, value.directRef);
             var newObj = EditorGUI.ObjectField(objRect, label, obj, type, allowSceneObjects: true);
             if (newObj == null) WindowSystemRequiredReferenceDrawer.DrawRequired(objRect, requiredType);
             if (newObj != obj) {
 
-                property.serializedObject.Update();
+                result.changed = true;
                 {
                     var assetPath = AssetDatabase.GetAssetPath(newObj);
-                    guid.stringValue = AssetDatabase.AssetPathToGUID(assetPath);
+                    result.resource.guid = AssetDatabase.AssetPathToGUID(assetPath);
                 }
                 
                 if (newObj != null) {
@@ -87,26 +94,26 @@ namespace UnityEditor.UI.Windows {
                             break;
 
                     }
-                    objectType.enumValueIndex = val;
+                    result.resource.objectType = (Resource.ObjectType)val;
 
                 }
                 
                 if (newObj == null) {
 
-                    loadType.enumValueIndex = (int)Resource.Type.Manual;
-                    directRef.objectReferenceValue = null;
+                    result.resource.type = Resource.Type.Manual;
+                    result.resource.directRef = null;
 
                 } else {
 
-                    if (UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(guid.stringValue) != null) {
+                    if (UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(value.guid) != null) {
 
                         //if (loadType.enumValueIndex != (int)Resource.Type.Addressables)
                         {
 
                             // addressables
                             {
-                                loadType.enumValueIndex = (int)Resource.Type.Addressables; //AssetDatabase.AssetPathToGUID(assetPath);
-                                directRef.objectReferenceValue = null;
+                                result.resource.type = Resource.Type.Addressables; //AssetDatabase.AssetPathToGUID(assetPath);
+                                result.resource.directRef = null;
                             }
 
                         }
@@ -118,8 +125,8 @@ namespace UnityEditor.UI.Windows {
 
                             // direct
                             {
-                                loadType.enumValueIndex = (int)Resource.Type.Direct;
-                                directRef.objectReferenceValue = newObj;
+                                result.resource.type = Resource.Type.Direct;
+                                result.resource.directRef = newObj;
                             }
 
                         }
@@ -128,8 +135,6 @@ namespace UnityEditor.UI.Windows {
 
                 }
 
-                property.serializedObject.ApplyModifiedProperties();
-
             }
 
             var tooltip = "This object will be stored through GUID link.";
@@ -137,7 +142,7 @@ namespace UnityEditor.UI.Windows {
 
                 var typeRect = labelRect;
                 //typeRect.x -= labelRect.width + labelPadding + 18f;
-                var resType = (Resource.Type)loadType.enumValueIndex;
+                var resType = result.resource.type;
                 switch (resType) {
 
                     case Resource.Type.Manual:
@@ -157,6 +162,38 @@ namespace UnityEditor.UI.Windows {
             } else {
 
                 DrawLabel(labelRect, new GUIContent("GUID", tooltip), new Color(0.2f, 0.6f, 1f, 0.7f));
+
+            }
+
+            return result;
+
+        }
+        
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+
+            var field = UnityEditor.UI.Windows.EditorHelpers.GetFieldViaPath(property.serializedObject.targetObject.GetType(), property.propertyPath);
+            var guid = property.FindPropertyRelative("guid");
+            var loadType = property.FindPropertyRelative("type");
+            var objectType = property.FindPropertyRelative("objectType");
+            var directRef = property.FindPropertyRelative("directRef");
+
+            var newRes = WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, label, field, new Resource() {
+                guid = guid.stringValue,
+                type = (Resource.Type)loadType.enumValueIndex,
+                objectType = (Resource.ObjectType)objectType.enumValueIndex,
+                directRef = directRef.objectReferenceValue
+            });
+
+            if (newRes.changed == true) {
+
+                property.serializedObject.Update();
+                {
+                    guid.stringValue = newRes.resource.guid;
+                    loadType.enumValueIndex = (int)newRes.resource.type;
+                    objectType.enumValueIndex = (int)newRes.resource.objectType;
+                    directRef.objectReferenceValue = newRes.resource.directRef;
+                }
+                property.serializedObject.ApplyModifiedProperties();
 
             }
 

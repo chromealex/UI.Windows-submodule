@@ -218,9 +218,8 @@ public static class ScriptTemplates {
             ScriptTemplates.CreateEmptyDirectory(dir, "Layouts");
 
             var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(newAssetPath);
-            AssignIcon(asset, new GUIContent(Resources.Load<Texture>("EditorAssets/Scripts/window_icon")));
-
-
+            ScriptTemplates.AssignIcon(asset, new GUIContent(Resources.Load<Texture>("EditorAssets/Scripts/window_icon")));
+            
             ScriptTemplates.Create(dir + "/Screens", assetName + "Screen.prefab", "61-ScreenAsset", allowRename: false, customDefines: defs);
 
         }

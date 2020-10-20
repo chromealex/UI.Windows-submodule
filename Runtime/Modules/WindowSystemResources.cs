@@ -40,6 +40,12 @@ namespace UnityEngine.UI.Windows {
         public string guid;
         public Object directRef;
 
+        public override int GetHashCode() {
+            
+            return (int)this.type ^ (int)this.objectType ^ this.guid.GetHashCode() ^ (this.directRef != null ? this.directRef.GetHashCode() : 0);
+            
+        }
+
         public bool IsEmpty() {
 
             return this.directRef == null && string.IsNullOrEmpty(this.guid) == true;
@@ -164,16 +170,81 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
+        public readonly struct InternalTask : System.IEquatable<InternalTask> {
+
+            public readonly int resourceId;
+            public readonly Resource resourceSource;
+            
+            public InternalTask(Resource resourceSource) {
+
+                this.resourceId = resourceSource.GetHashCode();
+                this.resourceSource = resourceSource;
+
+            }
+
+            public bool Equals(InternalTask other) {
+
+                return other.resourceId == this.resourceId;
+
+            }
+
+            public override int GetHashCode() {
+
+                return this.resourceId;
+
+            }
+
+        }
+
+        private Dictionary<InternalTask, System.Action<object>> tasks = new Dictionary<InternalTask, System.Action<object>>();
         private Dictionary<int, HashSet<InternalResourceItem>> handlerToObjects = new Dictionary<int, HashSet<InternalResourceItem>>();
         private Dictionary<int, HashSet<System.Action>> handlerToTasks = new Dictionary<int, HashSet<System.Action>>();
+
+        private bool RequestLoad<T>(object handler, Resource resource, System.Action<T> onComplete) where T : class {
+            
+            var item = new InternalTask(resource);
+            if (this.tasks.TryGetValue(item, out var onCompleteActions) == true) {
+
+                onCompleteActions += (obj) => onComplete.Invoke((T)obj);
+                this.tasks[item] = onCompleteActions;
+                return true;
+
+            } else {
+                
+                onCompleteActions += (obj) => onComplete.Invoke((T)obj);
+                this.tasks.Add(item, onCompleteActions);
+                
+            }
+
+            return false;
+
+        }
+
+        private void CompleteTask(object handler, Resource resource, object result) {
+
+            var item = new InternalTask(resource);
+            if (this.tasks.TryGetValue(item, out var onCompleteActions) == true) {
+                
+                onCompleteActions.Invoke(result);
+                this.tasks.Remove(item);
+
+            }
+
+        }
         
         public IEnumerator LoadAsync<T>(object handler, Resource resource, System.Action<T> onComplete) where T : class {
 
+            if (this.RequestLoad(handler, resource, onComplete) == true) {
+                
+                yield break;
+                
+            }
+            
             switch (resource.type) {
 
                 case Resource.Type.Manual: {
 
-                    onComplete.Invoke(default);
+                    this.CompleteTask(handler, resource, default);
 
                     break;
 
@@ -185,12 +256,12 @@ namespace UnityEngine.UI.Windows.Modules {
 
                         this.AddObject(handler, direct, resource);
 
-                        onComplete.Invoke(direct);
+                        this.CompleteTask(handler, resource, direct);
                         yield break;
 
                     }
 
-                    onComplete.Invoke(default);
+                    this.CompleteTask(handler, resource, default);
 
                     break;
 
@@ -210,13 +281,13 @@ namespace UnityEngine.UI.Windows.Modules {
                             var asset = op.Result;
                             if (asset == null) {
 
-                                onComplete.Invoke(default);
+                                this.CompleteTask(handler, resource, default);
 
                             } else {
 
                                 this.AddObject(handler, asset, resource);
 
-                                onComplete.Invoke(asset.GetComponent<T>());
+                                this.CompleteTask(handler, resource, asset.GetComponent<T>());
 
                             }
 
@@ -236,13 +307,13 @@ namespace UnityEngine.UI.Windows.Modules {
                             var asset = op.Result;
                             if (asset == null) {
 
-                                onComplete.Invoke(default);
+                                this.CompleteTask(handler, resource, default);
 
                             } else {
 
                                 this.AddObject(handler, asset, resource);
 
-                                onComplete.Invoke(asset);
+                                this.CompleteTask(handler, resource, asset);
 
                             }
 

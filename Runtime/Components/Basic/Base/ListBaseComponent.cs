@@ -290,8 +290,29 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
+        private bool isLoadingRequest = false;
         public virtual void SetItems<T>(int count, Resource source, System.Action<T, int> onItem, System.Action onComplete = null) where T : WindowComponent {
 
+            if (this.isLoadingRequest == true) {
+
+                return;
+
+            }
+            
+            if (count == this.Count) {
+
+                for (int i = 0; i < this.Count; ++i) {
+                    
+                    onItem.Invoke((T)this.items[i], i);
+                    
+                }
+
+                if (onComplete != null) onComplete.Invoke();
+                return;
+
+            }
+
+            this.isLoadingRequest = true;
             this.Clear();
             var loaded = 0;
             for (int i = 0; i < count; ++i) {
@@ -305,6 +326,7 @@ namespace UnityEngine.UI.Windows.Components {
                     if (loaded == count) {
                         
                         if (onComplete != null) onComplete.Invoke();
+                        this.isLoadingRequest = false;
                         
                     }
                     

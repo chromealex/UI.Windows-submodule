@@ -16,6 +16,8 @@ namespace UnityEngine.UI.Windows.Components {
         public UnityEngine.UI.Graphic graphics;
         private Object currentLoaded;
 
+        public bool preserveAspect;
+
         public UnloadResourceEventType autoUnloadResourcesOnEvent;
 
         private struct Texture2DConstructor : IResourceConstructor<Texture2D> {
@@ -152,6 +154,7 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.graphics is UnityEngine.UI.Image image) {
 
                 image.sprite = sprite;
+                image.preserveAspect = this.preserveAspect;
 
             } else if (this.graphics is UnityEngine.UI.RawImage rawImage) {
 
@@ -163,7 +166,7 @@ namespace UnityEngine.UI.Windows.Components {
                 tex.SetPixels(block);
                 tex.Apply();
                 rawImage.texture = sprite.texture;
-
+                
             }
 
         }

@@ -331,7 +331,7 @@ namespace UnityEngine.UI.Windows.Components {
             
             base.ValidateEditor();
 
-            this.graphics = this.GetComponent<Graphic>();
+            if (this.graphics == null) this.graphics = this.GetComponent<Graphic>();
 
         }
 

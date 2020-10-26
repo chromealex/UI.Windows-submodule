@@ -281,6 +281,9 @@ namespace UnityEngine.UI.Windows.Components {
             }
             
             switch (sourceValue) {
+                case SourceValue.Digits:
+                    this.SetText(value.ToString());
+                    return;
                 case SourceValue.Seconds:
                     this.SetText(new TimeFormatFromSeconds() { format = strFormat }.GetValue(value));
                     return;

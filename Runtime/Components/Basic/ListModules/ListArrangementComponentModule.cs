@@ -16,7 +16,6 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        [RequiredReference]
         public ScrollRect scrollRect;
         [RequiredReference]
         public RectTransform view;
@@ -94,7 +93,7 @@ namespace UnityEngine.UI.Windows {
             base.ValidateEditor();
             
             if (this.scrollRect == null) this.scrollRect = this.windowComponent.GetComponent<ScrollRect>();
-            if (this.view == null) this.view = this.scrollRect.transform as RectTransform;
+            if (this.view == null && this.scrollRect != null) this.view = this.scrollRect.transform as RectTransform;
             if (this.root == null && this.scrollRect != null) this.root = this.scrollRect.content;
             
             this.tracker.Clear();

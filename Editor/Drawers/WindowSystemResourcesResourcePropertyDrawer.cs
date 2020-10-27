@@ -114,6 +114,7 @@ namespace UnityEditor.UI.Windows {
                             {
                                 result.resource.type = Resource.Type.Addressables; //AssetDatabase.AssetPathToGUID(assetPath);
                                 result.resource.directRef = null;
+                                newObj.SetAddressableID(result.resource.guid);
                             }
 
                         }

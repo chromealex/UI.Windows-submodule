@@ -271,9 +271,10 @@ namespace UnityEngine.UI.Windows.Modules {
 
                     if (resource.objectType == Resource.ObjectType.Component) {
 
+                        Debug.Log("Loading: " + resource.guid);
                         var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(resource.guid);
-                        System.Action token = () => { UnityEngine.AddressableAssets.Addressables.Release(op); };
-                        this.LoadBegin(handler, token);
+                        System.Action cancellationTask = () => { UnityEngine.AddressableAssets.Addressables.Release(op); };
+                        this.LoadBegin(handler, cancellationTask);
                         while (op.IsDone == false) yield return null;
 
                         if (op.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded) {
@@ -293,7 +294,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                         }
 
-                        this.LoadEnd(handler, token);
+                        this.LoadEnd(handler, cancellationTask);
 
                     } else {
 

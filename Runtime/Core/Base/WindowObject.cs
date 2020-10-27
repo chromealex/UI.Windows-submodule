@@ -120,7 +120,9 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        [SerializeField]
         internal int windowId;
+        [SerializeField]
         internal WindowBase window;
 
         public RectTransform rectTransform;

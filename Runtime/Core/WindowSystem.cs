@@ -223,7 +223,14 @@ namespace UnityEngine.UI.Windows {
 
             foreach (var item in this.registeredPrefabs) {
 
-                this.hashToPrefabs.Add(item.windowId, item);
+                var key = item.GetType().GetHashCode();
+                if (this.hashToPrefabs.ContainsKey(key) == true) {
+                    
+                    Debug.LogWarning($"Window with hash `{key}` already exists in windows hash map!");
+                    continue;
+                    
+                }
+                this.hashToPrefabs.Add(key, item);
 
             }
 

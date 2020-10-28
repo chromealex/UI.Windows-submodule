@@ -35,9 +35,13 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        [HideInInspector]
         public Type type;
+        [HideInInspector]
         public ObjectType objectType;
+        [HideInInspector]
         public string guid;
+        [HideInInspector]
         public Object directRef;
 
         public override int GetHashCode() {

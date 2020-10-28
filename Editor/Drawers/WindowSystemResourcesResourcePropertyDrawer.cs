@@ -18,7 +18,7 @@ namespace UnityEditor.UI.Windows {
 
         }
         
-        public static Result DrawGUI(Rect position, GUIContent label, System.Reflection.FieldInfo field, Resource value) {
+        public static Result DrawGUI(Rect position, GUIContent label, System.Reflection.FieldInfo field, Resource value, bool hasMultipleDifferentValues) {
 
             var result = new Result() {
                 resource = value,
@@ -53,7 +53,10 @@ namespace UnityEditor.UI.Windows {
             labelRect.height -= labelPadding * 2f;
 
             var obj = Resource.GetEditorRef(value.guid, type, value.objectType, value.directRef);
+            var oldValue = EditorGUI.showMixedValue;
+            EditorGUI.showMixedValue = hasMultipleDifferentValues;
             var newObj = EditorGUI.ObjectField(objRect, label, obj, type, allowSceneObjects: true);
+            EditorGUI.showMixedValue = oldValue;
             if (newObj == null) WindowSystemRequiredReferenceDrawer.DrawRequired(objRect, requiredType);
             if (newObj != obj) {
 
@@ -183,7 +186,7 @@ namespace UnityEditor.UI.Windows {
                 type = (Resource.Type)loadType.enumValueIndex,
                 objectType = (Resource.ObjectType)objectType.enumValueIndex,
                 directRef = directRef.objectReferenceValue
-            });
+            }, hasMultipleDifferentValues: property.hasMultipleDifferentValues);
 
             if (newRes.changed == true) {
 

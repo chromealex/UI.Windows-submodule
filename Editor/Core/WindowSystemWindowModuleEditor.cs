@@ -24,6 +24,8 @@ namespace UnityEditor.UI.Windows {
         private SerializedProperty autoRegisterSubObjects;
         private SerializedProperty hiddenByDefault;
 
+        private SerializedProperty defaultOrder;
+
         private int selectedTab {
             get {
                 return EditorPrefs.GetInt("UnityEditor.UI.Windows.WindowModule.TabIndex");
@@ -71,6 +73,8 @@ namespace UnityEditor.UI.Windows {
             this.allowRegisterInRoot = this.serializedObject.FindProperty("allowRegisterInRoot");
             this.autoRegisterSubObjects = this.serializedObject.FindProperty("autoRegisterSubObjects");
             this.hiddenByDefault = this.serializedObject.FindProperty("hiddenByDefault");
+            
+            this.defaultOrder = this.serializedObject.FindProperty("defaultOrder");
         
             EditorHelpers.SetFirstSibling(this.targets);
 
@@ -101,6 +105,9 @@ namespace UnityEditor.UI.Windows {
                     
                     GUILayoutExt.DrawHeader("Performance Options");
                     EditorGUILayout.PropertyField(this.createPool);
+                    
+                    GUILayoutExt.DrawHeader("Module Options");
+                    EditorGUILayout.PropertyField(this.defaultOrder);
 
                 }),
                 new GUITab("Advanced", () => {
@@ -119,6 +126,9 @@ namespace UnityEditor.UI.Windows {
 
                     GUILayoutExt.DrawHeader("Performance Options");
                     EditorGUILayout.PropertyField(this.createPool);
+
+                    GUILayoutExt.DrawHeader("Module Options");
+                    EditorGUILayout.PropertyField(this.defaultOrder);
 
                 })
                 );

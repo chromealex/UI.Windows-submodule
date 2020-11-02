@@ -127,7 +127,8 @@ namespace UnityEngine.UI.Windows {
         public override void OnInit() {
 	        
 	        base.OnInit();
-	        
+
+	        if (this.listComponent.customRoot == null) this.listComponent.customRoot = this.root;
 	        if (this.scrollRect != null) this.scrollRect.onValueChanged.AddListener(this.OnScrollValueChanged);
 	        
         }

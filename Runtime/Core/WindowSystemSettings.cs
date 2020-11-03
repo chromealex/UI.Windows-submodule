@@ -18,8 +18,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public int windowsPerLayer;
-        //public Layer[] layers;
+        public int windowsPerLayer = 1000;
 
         [System.Serializable]
         public struct Layers {
@@ -29,7 +28,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public Layers layers = new Layers() { depthStep = 0.1f, zDepthStep = 1f };
+        public Layers layers = new Layers() { depthStep = 10f, zDepthStep = 1000f };
 
         [System.Serializable]
         public struct Components {
@@ -72,7 +71,7 @@ namespace UnityEngine.UI.Windows {
             orthographicFarClippingPlane = 1000f,
 
             perspectiveSize = 60f,
-            perspectiveNearClippingPlane = 0.03f,
+            perspectiveNearClippingPlane = 0.01f,
             perspectiveFarClippingPlane = 1000f,
         };
 

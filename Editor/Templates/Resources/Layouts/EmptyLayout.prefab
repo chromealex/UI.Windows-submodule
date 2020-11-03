@@ -31,7 +31,7 @@ RectTransform:
   m_GameObject: {fileID: 2835211755995118023}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 84540096282021974}
   m_Father: {fileID: 0}
@@ -40,8 +40,8 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0, y: 0}
+  m_SizeDelta: {x: 800.00006, y: 600}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &9075030843538608721
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -54,6 +54,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4620c4a99853845bb9a5638b97a94cda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  windowId: 0
+  window: {fileID: 0}
   rectTransform: {fileID: 1817090086723872307}
   hasObjectCanvas: 1
   objectCanvas: {fileID: 3002262861325224963}
@@ -214,6 +216,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6a522cc6dd1d4cdeb9a6d03b5cedb12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  windowId: 0
+  window: {fileID: 0}
   rectTransform: {fileID: 84540096282021974}
   hasObjectCanvas: 0
   objectCanvas: {fileID: 0}

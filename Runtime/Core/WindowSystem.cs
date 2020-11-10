@@ -564,7 +564,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static void ShowInstance(WindowObject instance, TransitionParameters parameters) {
+        public static void ShowInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
 
             if (instance.objectState == ObjectState.Showing || instance.objectState == ObjectState.Shown) {
                 
@@ -597,9 +597,17 @@ namespace UnityEngine.UI.Windows {
                     }
 
                 }, instance.subObjects, (obj, cb) => {
-                    
-                    obj.Show(parameters.ReplaceCallback(cb));
-                    
+
+                    if (internalCall == true) {
+                       
+                        obj.ShowInternal(parameters.ReplaceCallback(cb));
+ 
+                    } else {
+
+                        obj.Show(parameters.ReplaceCallback(cb));
+
+                    }
+
                 });
                 
                 var closureParameters = new ShowHideClosureParameters() {

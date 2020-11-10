@@ -637,7 +637,7 @@ namespace UnityEngine.UI.Windows {
 
                             if (windowObject.hiddenByDefault == false) {
 
-                                WindowSystem.ShowInstance(windowObject, TransitionParameters.Default.ReplaceImmediately(true));
+                                WindowSystem.ShowInstance(windowObject, TransitionParameters.Default.ReplaceImmediately(true), internalCall: true);
 
                             }
                             break;
@@ -654,7 +654,7 @@ namespace UnityEngine.UI.Windows {
                                     windowObject,
                                     TransitionParameters.Default.ReplaceImmediately(true).ReplaceCallback(() => {
                                         WindowSystem.SetShown(windowObject, TransitionParameters.Default.ReplaceImmediately(true));
-                                    }));
+                                    }), internalCall: true);
 
                             }
 
@@ -885,15 +885,8 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public void Show(TransitionParameters parameters = default) {
-
-            if (this.objectState <= ObjectState.Initializing) {
-                
-                Debug.LogWarning("Object is out of state: " + this, this);
-                return;
-                
-            }
-
+        internal void ShowInternal(TransitionParameters parameters = default) {
+            
             if (this.hiddenByDefault == true && this.window.GetState() == ObjectState.Showing) {
 
                 {
@@ -904,6 +897,19 @@ namespace UnityEngine.UI.Windows {
                 parameters.RaiseCallback();
                 return;
 
+            }
+            
+            this.Show(parameters);
+
+        }
+        
+        public void Show(TransitionParameters parameters = default) {
+
+            if (this.objectState <= ObjectState.Initializing) {
+                
+                Debug.LogWarning("Object is out of state: " + this, this);
+                return;
+                
             }
 
             var cbParameters = parameters.ReplaceCallback(() => {

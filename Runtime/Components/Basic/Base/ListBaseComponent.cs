@@ -269,9 +269,9 @@ namespace UnityEngine.UI.Windows.Components {
                 
                 var instance = pools.Spawn(asset, this.GetRoot());
                 this.RegisterSubObject(instance);
-                if (onComplete != null) onComplete.Invoke(instance);
                 this.items.Add(instance);
                 this.OnElementsChanged();
+                if (onComplete != null) onComplete.Invoke(instance);
 
             }));
             

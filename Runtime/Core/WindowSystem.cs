@@ -919,14 +919,14 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private bool IsOpenedBySource_INTERNAL(WindowBase source, out WindowBase result, ObjectState minimumState = ObjectState.NotInitialized, bool last = false) {
+        private bool IsOpenedBySource_INTERNAL(WindowBase source, out WindowBase result, ObjectState minimumState = ObjectState.NotInitialized, ObjectState maximumState = ObjectState.DeInitialized, bool last = false) {
 
             if (last == true) {
 
                 for (int i = this.currentWindows.Count - 1; i >= 0; --i) {
 
                     var win = this.currentWindows[i];
-                    if (win.prefab == source && win.instance.GetState() >= minimumState) {
+                    if (win.prefab == source && win.instance.GetState() >= minimumState && win.instance.GetState() <= maximumState) {
 
                         result = win.instance;
                         return true;
@@ -940,7 +940,7 @@ namespace UnityEngine.UI.Windows {
                 for (int i = 0; i < this.currentWindows.Count; ++i) {
 
                     var win = this.currentWindows[i];
-                    if (win.prefab == source && win.instance.GetState() >= minimumState) {
+                    if (win.prefab == source && win.instance.GetState() >= minimumState && win.instance.GetState() <= maximumState) {
 
                         result = win.instance;
                         return true;
@@ -994,6 +994,12 @@ namespace UnityEngine.UI.Windows {
 
         private void Show_INTERNAL(WindowBase source, InitialParameters initialParameters, System.Action<WindowBase> onInitialized) {
 
+            if (source == null) {
+
+                throw new System.Exception("Window Source is null, did you forget to collect your screens?");
+
+            }
+            
             WindowBase instance;
             var singleInstance = source.preferences.singleInstance;
             if (initialParameters.overrideSingleInstance == true) {
@@ -1004,7 +1010,7 @@ namespace UnityEngine.UI.Windows {
 
             if (singleInstance == true) {
 
-                if (this.IsOpenedBySource_INTERNAL(source, out instance) == true) {
+                if (this.IsOpenedBySource_INTERNAL(source, out instance, maximumState: ObjectState.Shown) == true) {
 
                     onInitialized.Invoke(instance);
                     return;
@@ -1016,7 +1022,9 @@ namespace UnityEngine.UI.Windows {
             if (source.createPool == true) this.pools.CreatePool(source);
             instance = this.pools.Spawn(source, null, out var fromPool);
             instance.identifier = ++this.nextWindowId;
+            #if UNITY_EDITOR
             instance.name = "[" + instance.identifier.ToString("00") + "] " + source.name;
+            #endif
             instance.SetInitialParameters(initialParameters);
             GameObject.DontDestroyOnLoad(instance.gameObject);
 

@@ -21,6 +21,13 @@ namespace UnityEngine.UI.Windows.Components {
         internal ListRectTransformChangedInternal listRectTransformChangedInternal;
 
         private void ValidateEditorRectTransformInternal() {
+
+            if (this.listRectTransformChangedInternal != null && this.listRectTransformChangedInternal.listBaseComponent == null) {
+
+                this.listRectTransformChangedInternal.listBaseComponent = this;
+                this.listRectTransformChangedInternal.hideFlags = HideFlags.HideInInspector;
+
+            }
             
             if (this.listRectTransformChangedInternal == null) {
 

@@ -78,8 +78,18 @@ namespace UnityEditor.UI.Windows {
 
                 var camera = new GameObject("Camera", typeof(Camera));
                 camera.hideFlags = HideFlags.HideAndDontSave;
-                
+
+                var window = component.GetWindow();
                 var cameraInstance = camera.GetComponent<Camera>();
+                if (window != null) {
+                    
+                    cameraInstance.CopyFrom(window.workCamera);
+                    
+                } else {
+
+                    cameraInstance.cullingMask = 1 << component.gameObject.layer;
+
+                }
                 var canvas = new GameObject("Canvas", typeof(Canvas), typeof(UnityEngine.UI.CanvasScaler));
                 canvas.hideFlags = HideFlags.HideAndDontSave;
 

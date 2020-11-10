@@ -1098,7 +1098,7 @@ namespace UnityEngine.UI.Windows {
 
                 if (onInitialized != null) onInitialized.Invoke(instance);
 
-                instance.Show();
+                instance.ShowInternal();
 
             });
 

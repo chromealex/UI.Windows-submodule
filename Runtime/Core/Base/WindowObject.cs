@@ -156,6 +156,9 @@ namespace UnityEngine.UI.Windows {
         public WindowObject rootObject;
         public List<WindowObject> subObjects = new List<WindowObject>();
 
+        internal bool internalManualShow;
+        internal bool internalManualHide;
+        
         public void SetState(ObjectState state) {
 
             this.debugStateLog.Add(state);
@@ -889,9 +892,11 @@ namespace UnityEngine.UI.Windows {
             
             if (this.hiddenByDefault == true && this.window.GetState() == ObjectState.Showing) {
 
-                {
+                if (this.internalManualShow == false) {
+                    
                     this.Hide(TransitionParameters.Default.ReplaceImmediately(true));
                     this.SetInvisible();
+                    
                 }
 
                 parameters.RaiseCallback();
@@ -899,12 +904,6 @@ namespace UnityEngine.UI.Windows {
 
             }
             
-            this.Show(parameters);
-
-        }
-        
-        public void Show(TransitionParameters parameters = default) {
-
             if (this.objectState <= ObjectState.Initializing) {
                 
                 Debug.LogWarning("Object is out of state: " + this, this);
@@ -917,11 +916,33 @@ namespace UnityEngine.UI.Windows {
                 WindowSystem.SetShown(this, parameters);
 
             });
-            WindowSystem.ShowInstance(this, cbParameters);
+            WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
+
+        }
+        
+        public void Show(TransitionParameters parameters = default) {
+
+            if (this.objectState <= ObjectState.Initializing) {
+                
+                Debug.LogWarning("Object is out of state: " + this, this);
+                return;
+                
+            }
+
+            this.internalManualShow = true;
+
+            var cbParameters = parameters.ReplaceCallback(() => {
+                
+                WindowSystem.SetShown(this, parameters);
+
+            });
+            WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
 
         public virtual void Hide(TransitionParameters parameters = default) {
+
+            this.internalManualHide = true;
 
             var cbParameters = parameters.ReplaceCallback(() => {
                 

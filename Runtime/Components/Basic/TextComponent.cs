@@ -238,6 +238,20 @@ namespace UnityEngine.UI.Windows.Components {
             daysString = @"d\d\ ",
         };
 
+        public void SetColor(Color color) {
+
+            if (this.graphics == null) return;
+            this.graphics.color = color;
+
+        }
+
+        public Color GetColor() {
+
+            if (this.graphics == null) return Color.white;
+            return this.graphics.color;
+
+        }
+        
         public void SetTimeResultString(TimeValue timeValue, FormatTimeString str) {
 
             switch (timeValue) {

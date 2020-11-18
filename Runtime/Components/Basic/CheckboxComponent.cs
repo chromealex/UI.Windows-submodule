@@ -70,16 +70,20 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public void SetCheckedState(bool state) {
+        public void SetCheckedState(bool state, bool call = true) {
 
             if (this.isChecked != state) {
 
                 this.isChecked = state;
                 this.UpdateCheckState();
-                
-                if (this.callback != null) this.callback.Invoke(state);
-                if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this, state);
 
+                if (call == true) {
+
+                    if (this.callback != null) this.callback.Invoke(state);
+                    if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this, state);
+
+                }
+                
             }
 
         }

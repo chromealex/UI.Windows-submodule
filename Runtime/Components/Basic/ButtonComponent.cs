@@ -58,7 +58,6 @@ namespace UnityEngine.UI.Windows.Components {
         public override void OnDeInit() {
             
             base.OnDeInit();
-            Debug.Log("Deinit");
             
             this.button.onClick.RemoveAllListeners();
             this.RemoveCallbacks();

@@ -50,9 +50,17 @@ namespace UnityEngine.UI.Windows.Components {
 
             if (this.autoToggle == true) {
                 
-                this.AddCallback(this.Toggle);
+                this.button.onClick.AddListener(this.Toggle);
                 
             }
+            
+        }
+
+        public override void OnDeInit() {
+            
+            this.button.onClick.RemoveListener(this.Toggle);
+            
+            base.OnDeInit();
             
         }
 

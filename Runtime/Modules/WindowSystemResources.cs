@@ -44,6 +44,12 @@ namespace UnityEngine.UI.Windows {
         [HideInInspector]
         public Object directRef;
 
+        public override string ToString() {
+            
+            return "Resource: " + this.type + "/" + this.objectType + "/" + this.guid + ". Ref: " + this.directRef;
+            
+        }
+
         public override int GetHashCode() {
             
             return (int)this.type ^ (int)this.objectType ^ this.guid.GetHashCode() ^ (this.directRef != null ? this.directRef.GetHashCode() : 0);

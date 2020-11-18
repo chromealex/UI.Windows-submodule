@@ -214,18 +214,36 @@ namespace UnityEngine.UI.Windows.Components {
 
         public virtual void Clear() {
 
+            this.RemoveRange(0, this.items.Count);
+            
+        }
+
+        public void RemoveAt(int index) {
+            
             var pools = WindowSystem.GetPools();
-            for (int i = this.items.Count - 1; i >= 0; --i) {
+        
+            this.UnRegisterSubObject(this.items[index]);
+            pools.Despawn(this.items[index]);
+            this.items.RemoveAt(index);
+            
+            this.OnElementsChanged();
+            
+        }
+
+        public void RemoveRange(int from, int to) {
+            
+            var pools = WindowSystem.GetPools();
+            for (int i = to - 1; i >= from; --i) {
 
                 this.UnRegisterSubObject(this.items[i]);
                 pools.Despawn(this.items[i]);
                 
             }
-            this.items.Clear();
+            this.items.RemoveRange(from, to - from);
             this.OnElementsChanged();
-            
-        }
 
+        }
+        
         public virtual void OnElementsChanged() {
 
             for (int i = 0; i < this.componentModules.modules.Length; ++i) {
@@ -317,14 +335,39 @@ namespace UnityEngine.UI.Windows.Components {
                 if (onComplete != null) onComplete.Invoke();
                 return;
 
+            } else {
+
+                var delta = count - this.Count;
+                if (delta > 0) {
+
+                    this.Emit(delta, source, onItem, onComplete);
+
+                } else {
+                    
+                    this.RemoveRange(this.Count + delta, this.Count);
+                    
+                }
+
             }
 
+        }
+
+        private void Emit<T>(int count, Resource source, System.Action<T, int> onItem, System.Action onComplete = null) where T : WindowComponent {
+
+            if (count == 0) {
+                
+                if (onComplete != null) onComplete.Invoke();
+                this.isLoadingRequest = false;
+                return;
+
+            }
+            
             this.isLoadingRequest = true;
-            this.Clear();
+            var offset = this.Count;
             var loaded = 0;
             for (int i = 0; i < count; ++i) {
 
-                var index = i;
+                var index = i + offset;
                 this.AddItem<T>(source, (item) => {
 
                     onItem.Invoke(item, index);
@@ -340,7 +383,7 @@ namespace UnityEngine.UI.Windows.Components {
                 });
                 
             }
-
+            
         }
 
     }

@@ -75,6 +75,8 @@ namespace UnityEngine.UI.Windows {
             perspectiveFarClippingPlane = 1000f,
         };
 
+        public bool collectDebugInfo;
+        
         public Layer GetLayerInfo(int index) {
 
             return new Layer() {

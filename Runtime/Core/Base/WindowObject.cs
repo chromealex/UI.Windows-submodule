@@ -161,7 +161,8 @@ namespace UnityEngine.UI.Windows {
         
         public void SetState(ObjectState state) {
 
-            this.debugStateLog.Add(state);
+            var isDebug = WindowSystem.GetSettings().collectDebugInfo;
+            if (isDebug == true) this.debugStateLog.Add(state);
             this.objectState = state;
 
         }

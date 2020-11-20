@@ -45,8 +45,6 @@ namespace UnityEngine.UI.Windows.Components {
         public override void OnInit() {
             
             base.OnInit();
-            
-            this.SetCheckedState(this.isChecked);
 
             if (this.autoToggle == true) {
                 
@@ -64,6 +62,14 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
+        public override void OnShowBegin() {
+            
+            base.OnShowBegin();
+            
+            this.SetCheckedState(this.isChecked);
+
+        }
+
         public void Toggle() {
             
             this.SetCheckedState(!this.isChecked);
@@ -72,20 +78,16 @@ namespace UnityEngine.UI.Windows.Components {
 
         public void SetCheckedState(bool state, bool call = true) {
 
-            if (this.isChecked != state) {
+            if (call == true && this.isChecked != state) {
 
-                this.isChecked = state;
-                this.UpdateCheckState();
+                if (this.callback != null) this.callback.Invoke(state);
+                if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this, state);
 
-                if (call == true) {
-
-                    if (this.callback != null) this.callback.Invoke(state);
-                    if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this, state);
-
-                }
-                
             }
-
+            
+            this.isChecked = state;
+            this.UpdateCheckState();
+            
         }
 
         private void UpdateCheckState() {

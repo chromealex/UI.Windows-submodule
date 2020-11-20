@@ -891,7 +891,7 @@ namespace UnityEngine.UI.Windows {
 
         internal void ShowInternal(TransitionParameters parameters = default) {
             
-            if (this.hiddenByDefault == true && this.window.GetState() == ObjectState.Showing) {
+            if (this.hiddenByDefault == true /*&& this.window.GetState() == ObjectState.Showing*/) {
 
                 if (this.internalManualShow == false) {
                     

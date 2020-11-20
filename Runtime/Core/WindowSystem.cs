@@ -681,7 +681,7 @@ namespace UnityEngine.UI.Windows {
             parameters.RaiseCallback();
 
         }
-
+        
         public static void HideInstance(WindowObject instance, TransitionParameters parameters) {
 
             if (instance.objectState <= ObjectState.Initializing) {

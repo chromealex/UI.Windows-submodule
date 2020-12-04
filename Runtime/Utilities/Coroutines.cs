@@ -15,6 +15,19 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
+        public static void Wait(System.Func<bool> waitFor, System.Action callback) {
+	        
+	        Coroutines.instance.StartCoroutine(Coroutines.Waiter_INTERNAL(waitFor, callback));
+	        
+        }
+
+        private static IEnumerator Waiter_INTERNAL(System.Func<bool> waitFor, System.Action callback) {
+
+	        while (waitFor.Invoke() == false) yield return null;
+	        callback.Invoke();
+
+        }
+        
         public static void Run(IEnumerator coroutine) {
 
             Coroutines.instance.StartCoroutine(coroutine);

@@ -333,7 +333,6 @@ namespace UnityEngine.UI.Windows.Components {
                 }
 
                 if (onComplete != null) onComplete.Invoke();
-                return;
 
             } else {
 
@@ -345,6 +344,7 @@ namespace UnityEngine.UI.Windows.Components {
                 } else {
                     
                     this.RemoveRange(this.Count + delta, this.Count);
+                    if (onComplete != null) onComplete.Invoke();
                     
                 }
 

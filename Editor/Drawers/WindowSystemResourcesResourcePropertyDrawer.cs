@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 
@@ -52,7 +53,7 @@ namespace UnityEditor.UI.Windows {
             labelRect.y += labelPadding;
             labelRect.height -= labelPadding * 2f;
 
-            var obj = Resource.GetEditorRef(value.guid, type, value.objectType, value.directRef);
+            var obj = Resource.GetEditorRef(value.guid, value.subObjectName, type, value.objectType, value.directRef);
             var oldValue = EditorGUI.showMixedValue;
             EditorGUI.showMixedValue = hasMultipleDifferentValues;
             var newObj = EditorGUI.ObjectField(objRect, label, obj, type, allowSceneObjects: true);
@@ -64,6 +65,7 @@ namespace UnityEditor.UI.Windows {
                 {
                     var assetPath = AssetDatabase.GetAssetPath(newObj);
                     result.resource.guid = AssetDatabase.AssetPathToGUID(assetPath);
+                    result.resource.subObjectName = (newObj != null && AssetDatabase.IsSubAsset(newObj) == true ? AssetDatabase.LoadAllAssetsAtPath(assetPath).FirstOrDefault(x => x.name == newObj.name).name : string.Empty);
                 }
                 
                 if (newObj != null) {

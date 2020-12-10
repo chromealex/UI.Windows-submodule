@@ -42,6 +42,8 @@ namespace UnityEngine.UI.Windows {
         [HideInInspector]
         public string guid;
         [HideInInspector]
+        public string subObjectName;
+        [HideInInspector]
         public Object directRef;
 
         public override string ToString() {
@@ -70,17 +72,17 @@ namespace UnityEngine.UI.Windows {
 
         public static T GetEditorRef<T>(Resource resource) where T : Object {
 
-            return Resource.GetEditorRef<T>(resource.guid, resource.objectType, resource.directRef);
+            return Resource.GetEditorRef<T>(resource.guid, resource.subObjectName, resource.objectType, resource.directRef);
 
         }
 
-        public static T GetEditorRef<T>(string guid, ObjectType objectType, Object directRef) where T : Object {
+        public static T GetEditorRef<T>(string guid, string subObjectName, ObjectType objectType, Object directRef) where T : Object {
 
-            return Resource.GetEditorRef(guid, typeof(T), objectType, directRef) as T;
+            return Resource.GetEditorRef(guid, subObjectName, typeof(T), objectType, directRef) as T;
 
         }
 
-        public static Object GetEditorRef(string guid, System.Type type, ObjectType objectType, Object directRef) {
+        public static Object GetEditorRef(string guid, string subObjectName, System.Type type, ObjectType objectType, Object directRef) {
 
             #if UNITY_EDITOR
             if (directRef != null) return directRef;
@@ -93,6 +95,19 @@ namespace UnityEngine.UI.Windows {
                 
                 return go.GetComponent(type);
 
+            } else if (objectType == ObjectType.Sprite) {
+                
+                var objs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+                foreach (var obj in objs) {
+
+                    if (obj.name == subObjectName && obj.GetType().IsSubclassOf(type) == true) {
+
+                        return obj;
+
+                    }
+                    
+                }
+                
             }
             return UnityEditor.AssetDatabase.LoadAssetAtPath(path, type);
             #else
@@ -281,7 +296,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                     if (resource.objectType == Resource.ObjectType.Component) {
 
-                        Debug.Log("Loading: " + resource.guid);
+                        //Debug.Log("Loading: " + resource.guid);
                         var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(resource.guid);
                         System.Action cancellationTask = () => { UnityEngine.AddressableAssets.Addressables.Release(op); };
                         this.LoadBegin(handler, cancellationTask);
@@ -306,6 +321,32 @@ namespace UnityEngine.UI.Windows.Modules {
 
                         this.LoadEnd(handler, cancellationTask);
 
+                    } else if (resource.objectType == Resource.ObjectType.Sprite) {
+                        
+                        var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<Sprite>(resource.guid + "[" + resource.subObjectName + "]");
+                        System.Action cancellationTask = () => { UnityEngine.AddressableAssets.Addressables.Release(op); };
+                        this.LoadBegin(handler, cancellationTask);
+                        while (op.IsDone == false) yield return null;
+
+                        if (op.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded) {
+
+                            var asset = op.Result;
+                            if (asset == null) {
+
+                                this.CompleteTask(handler, resource, default);
+
+                            } else {
+
+                                this.AddObject(handler, asset, resource);
+
+                                this.CompleteTask(handler, resource, asset);
+
+                            }
+
+                        }
+
+                        this.LoadEnd(handler, cancellationTask);
+                        
                     } else {
 
                         var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(resource.guid);

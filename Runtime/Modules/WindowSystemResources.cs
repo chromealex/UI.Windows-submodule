@@ -321,35 +321,19 @@ namespace UnityEngine.UI.Windows.Modules {
 
                         this.LoadEnd(handler, cancellationTask);
 
-                    } else if (resource.objectType == Resource.ObjectType.Sprite) {
-                        
-                        var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<Sprite>(resource.guid + "[" + resource.subObjectName + "]");
-                        System.Action cancellationTask = () => { UnityEngine.AddressableAssets.Addressables.Release(op); };
-                        this.LoadBegin(handler, cancellationTask);
-                        while (op.IsDone == false) yield return null;
-
-                        if (op.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded) {
-
-                            var asset = op.Result;
-                            if (asset == null) {
-
-                                this.CompleteTask(handler, resource, default);
-
-                            } else {
-
-                                this.AddObject(handler, asset, resource);
-
-                                this.CompleteTask(handler, resource, asset);
-
-                            }
-
-                        }
-
-                        this.LoadEnd(handler, cancellationTask);
-                        
                     } else {
 
-                        var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(resource.guid);
+                        UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle<T> op;
+                        if (string.IsNullOrEmpty(resource.subObjectName) == false) {
+                            
+                            op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(resource.guid + "[" + resource.subObjectName + "]");
+                            
+                        } else {
+                            
+                            op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(resource.guid);
+                            
+                        }
+                        
                         System.Action token = () => { UnityEngine.AddressableAssets.Addressables.Release(op); };
                         this.LoadBegin(handler, token);
                         while (op.IsDone == false) yield return null;

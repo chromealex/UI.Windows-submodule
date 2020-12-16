@@ -344,6 +344,11 @@ namespace UnityEngine.UI.Windows.Components {
                 } else {
                     
                     this.RemoveRange(this.Count + delta, this.Count);
+                    for (int i = 0; i < this.Count; ++i) {
+                    
+                        onItem.Invoke((T)this.items[i], i);
+                    
+                    }
                     if (onComplete != null) onComplete.Invoke();
                     
                 }

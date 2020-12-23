@@ -49,9 +49,9 @@ namespace UnityEngine.UI.Windows.Components {
 
         public override void OnInit() {
             
-            base.OnInit();
-            
             this.button.onClick.AddListener(this.DoClick);
+            
+            base.OnInit();
             
         }
 
@@ -76,6 +76,12 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        public void RaiseClick() {
+            
+            this.DoClick();
+            
+        }
+        
         protected virtual void DoClick() {
 
             if (this.GetWindow().GetState() != ObjectState.Showing &&

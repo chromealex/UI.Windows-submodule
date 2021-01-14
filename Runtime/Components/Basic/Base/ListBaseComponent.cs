@@ -217,19 +217,7 @@ namespace UnityEngine.UI.Windows.Components {
             this.RemoveRange(0, this.items.Count);
             
         }
-
-        public void RemoveAt(int index) {
-            
-            var pools = WindowSystem.GetPools();
         
-            this.UnRegisterSubObject(this.items[index]);
-            pools.Despawn(this.items[index]);
-            this.items.RemoveAt(index);
-            
-            this.OnElementsChanged();
-            
-        }
-
         public void RemoveRange(int from, int to) {
             
             var pools = WindowSystem.GetPools();
@@ -237,6 +225,7 @@ namespace UnityEngine.UI.Windows.Components {
 
                 this.UnRegisterSubObject(this.items[i]);
                 pools.Despawn(this.items[i]);
+                this.NotifyModulesComponentRemoved(this.items[i]);
                 
             }
             this.items.RemoveRange(from, to - from);
@@ -258,7 +247,7 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.onElementsChangedCallback != null) this.onElementsChangedCallback.Invoke();
             
         }
-
+        
         public virtual T GetItem<T>(int index) where T : WindowComponent {
 
             return this.items[index] as T;
@@ -288,6 +277,7 @@ namespace UnityEngine.UI.Windows.Components {
                 var instance = pools.Spawn(asset, this.GetRoot());
                 this.RegisterSubObject(instance);
                 this.items.Add(instance);
+                this.NotifyModulesComponentAdded(instance);
                 this.OnElementsChanged();
                 if (onComplete != null) onComplete.Invoke(instance);
 
@@ -295,13 +285,14 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public virtual void RemoveItem(int index) {
+        public virtual void RemoveAt(int index) {
 
             if (index < this.items.Count) {
 
                 var pools = WindowSystem.GetPools();
                 this.UnRegisterSubObject(this.items[index]);
                 pools.Despawn(this.items[index]);
+                this.NotifyModulesComponentRemoved(this.items[index]);
                 this.items.RemoveAt(index);
                 this.OnElementsChanged();
 
@@ -389,6 +380,18 @@ namespace UnityEngine.UI.Windows.Components {
                 
             }
             
+        }
+        
+        private void NotifyModulesComponentAdded(WindowComponent component) {
+            foreach (var module in this.componentModules.modules) {
+                (module as ListComponentModule)?.OnElementAdded(component);
+            }
+        }
+        
+        private void NotifyModulesComponentRemoved(WindowComponent component) {
+            foreach (var module in this.componentModules.modules) {
+                (module as ListComponentModule)?.OnElementRemoved(component);
+            }
         }
 
     }

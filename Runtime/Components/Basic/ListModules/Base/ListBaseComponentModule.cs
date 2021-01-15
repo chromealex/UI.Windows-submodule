@@ -17,7 +17,9 @@ namespace UnityEngine.UI.Windows {
         }
 
         public virtual void OnElementsChanged() {}
-
+        public virtual void OnElementAdded(WindowComponent windowComponent) { }
+        public virtual void OnElementRemoved(WindowComponent windowComponent) { }
+        
         public virtual void OnDragBegin(UnityEngine.EventSystems.PointerEventData data) { }
         public virtual void OnDragMove(UnityEngine.EventSystems.PointerEventData data) { }
         public virtual void OnDragEnd(UnityEngine.EventSystems.PointerEventData data) { }

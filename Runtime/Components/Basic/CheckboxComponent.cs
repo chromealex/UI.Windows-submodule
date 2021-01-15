@@ -1,15 +1,20 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnityEngine.UI.Windows.Components {
 
+    public interface ICheckboxGroup {
+        void OnChecked(CheckboxComponent checkbox);
+        bool CanBeUnchecked(CheckboxComponent checkbox);
+    }
+    
     public class CheckboxComponent : ButtonComponent {
 
         public WindowComponent checkedContainer;
         public WindowComponent uncheckedContainer;
         public bool isChecked;
         public bool autoToggle = true;
+        public ICheckboxGroup group;
 
         private System.Action<bool> callback;
         private System.Action<CheckboxComponent, bool> callbackWithInstance;
@@ -78,17 +83,32 @@ namespace UnityEngine.UI.Windows.Components {
 
         public void SetCheckedState(bool state, bool call = true) {
 
-            var checkState = this.isChecked;
+            var stateChanged = this.isChecked != state;
             this.isChecked = state;
+            if (group != null) {
+                if (state == false && group.CanBeUnchecked(this) == false) {
+                    isChecked = true;
+                    stateChanged = false;
+                }
+
+                if (isChecked) {
+                    group.OnChecked(this);
+                }
+            }
+            
             this.UpdateCheckState();
             
-            if (call == true && checkState != state) {
+            if (call == true && stateChanged == true) {
 
                 if (this.callback != null) this.callback.Invoke(state);
                 if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this, state);
 
             }
 
+        }
+
+        public void SetGroup(ICheckboxGroup group) {
+            this.group = group;
         }
 
         private void UpdateCheckState() {

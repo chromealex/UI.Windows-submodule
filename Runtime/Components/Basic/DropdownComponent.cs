@@ -317,7 +317,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         public virtual void RemoveItem(int index) {
 
-            this.list.RemoveItem(index);
+            this.list.RemoveAt(index);
 
         }
 

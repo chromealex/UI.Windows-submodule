@@ -279,9 +279,61 @@ namespace UnityEngine.UI.Windows.Components {
             return new TimeFormat(ts, result).GetString();
 
         }
-        
+
+        public struct ValueData {
+
+            public bool Equals(ValueData other) {
+                
+                return this.sourceValue == other.sourceValue &&
+                       this.timeValueResult == other.timeValueResult &&
+                       this.timeShortestVariant == other.timeShortestVariant &&
+                       this.value.Equals(other.value);
+                
+            }
+
+            public override bool Equals(object obj) {
+                return obj is ValueData other && this.Equals(other);
+            }
+
+            public override int GetHashCode() {
+                unchecked {
+                    var hashCode = this.value.GetHashCode();
+                    hashCode = (hashCode * 397) ^ (int)this.sourceValue;
+                    hashCode = (hashCode * 397) ^ (int)this.timeValueResult;
+                    hashCode = (hashCode * 397) ^ (int)this.timeShortestVariant;
+                    return hashCode;
+                }
+            }
+
+            public double value;
+            public SourceValue sourceValue;
+            public TimeResult timeValueResult;
+            public TimeResult timeShortestVariant;
+            
+            public static bool operator ==(ValueData v1, ValueData v2) {
+
+                return v1.Equals(v2);
+
+            }
+
+            public static bool operator !=(ValueData v1, ValueData v2) {
+                return !(v1 == v2);
+            }
+
+        }
+
+        private ValueData lastValueData;
         public void SetValue(double value, SourceValue sourceValue = SourceValue.Digits, TimeResult timeValueResult = TimeResult.None, TimeResult timeShortestVariant = TimeResult.None) {
 
+            var currentData = new ValueData() {
+                value = value,
+                sourceValue = sourceValue,
+                timeValueResult = timeValueResult,
+                timeShortestVariant = timeShortestVariant
+            };
+            if (this.lastValueData == currentData) return;
+            this.lastValueData = currentData;
+            
             string strFormat = string.Empty;
             if (timeShortestVariant > TimeResult.None && timeShortestVariant < timeValueResult) {
 
@@ -326,9 +378,13 @@ namespace UnityEngine.UI.Windows.Components {
             return null;
 
         }
-        
+
+        private string lastText;
         public void SetText(string text) {
 
+            if (this.lastText == text) return;
+            this.lastText = text;
+            
             if (this.graphics is UnityEngine.UI.Text textGraphic) {
 
                 textGraphic.text = text;

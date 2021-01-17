@@ -932,6 +932,13 @@ namespace UnityEngine.UI.Windows {
 
             this.internalManualShow = true;
 
+            if (this.objectState == ObjectState.Showing || this.objectState == ObjectState.Shown) {
+                
+                parameters.RaiseCallback();
+                return;
+                
+            }
+            
             var cbParameters = parameters.ReplaceCallback(() => {
                 
                 WindowSystem.SetShown(this, parameters);
@@ -944,6 +951,13 @@ namespace UnityEngine.UI.Windows {
         public virtual void Hide(TransitionParameters parameters = default) {
 
             this.internalManualHide = true;
+
+            if (this.objectState == ObjectState.Hiding || this.objectState == ObjectState.Hidden) {
+                
+                parameters.RaiseCallback();
+                return;
+                
+            }
 
             var cbParameters = parameters.ReplaceCallback(() => {
                 

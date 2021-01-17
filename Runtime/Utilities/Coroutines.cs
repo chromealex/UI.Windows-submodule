@@ -34,11 +34,11 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-        public static void CallInSequence<T, TState>(TState state, System.Action<TState> callback, System.Action<T, System.Action<TState>, TState> each, params T[] collection) {
+        /*public static void CallInSequence<T, TState>(TState state, System.Action<TState> callback, System.Action<T, System.Action<TState>, TState> each, params T[] collection) {
 
 	        Coroutines.CallInSequence(state, callback, (IEnumerable<T>)collection, each);
 
-        }
+        }*/
 
 		public static void CallInSequence<T>(System.Action callback, System.Action<T, System.Action> each, params T[] collection) {
 
@@ -71,7 +71,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-		public static void CallInSequence<T, TState>(TState state, System.Action<TState> callback, IEnumerable<T> collection, System.Action<T, System.Action<TState>, TState> each, bool waitPrevious = false) {
+		public static void CallInSequence<T, TState>(System.Action<TState> callback, TState state, IEnumerable<T> collection, System.Action<T, System.Action<TState>, TState> each, bool waitPrevious = false) {
 
 			if (collection == null) {
 
@@ -149,7 +149,91 @@ namespace UnityEngine.UI.Windows.Utilities {
 			if (count == 0 && callback != null) callback(state);
 
 		}
-		
+
+		public delegate void ClosureDelegateCallback<T>(ref T obj);
+		public delegate void ClosureDelegateCallbackContext<T>(WindowObject context, ref T obj);
+		public delegate void ClosureDelegateCallbackContext<T, TC>(WindowObject context, ref T obj, TC custom);
+		public delegate void ClosureDelegateEachCallback<in T, TClosure>(T item, ClosureDelegateCallback<TClosure> cb, ref TClosure obj);
+
+		public static void CallInSequence<T, TClosure>(ref TClosure closure, ClosureDelegateCallback<TClosure> callback, IEnumerable<T> collection, ClosureDelegateEachCallback<T, TClosure> each, bool waitPrevious = false) {
+			
+			if (collection == null) {
+
+				if (callback != null) callback.Invoke(ref closure);
+				return;
+
+			}
+
+			var count = collection.Count();
+
+			var completed = false;
+			var counter = 0;
+			ClosureDelegateCallback<TClosure> callbackItem = (ref TClosure cParamsInner) => {
+
+				++counter;
+				if (counter < count) return;
+
+				completed = true;
+
+				if (callback != null) callback.Invoke(ref cParamsInner);
+				
+			};
+
+			if (waitPrevious == true) {
+
+				var ie = collection.GetEnumerator();
+
+				ClosureDelegateCallback<TClosure> doNext = null;
+				doNext = (ref TClosure cParamsInner) => {
+
+					if (Coroutines.MoveNext(ie, collection) == true) {
+
+						if (ie.Current != null) {
+
+							each.Invoke(ie.Current, (ref TClosure cParams) => {
+								
+								callbackItem(ref cParams);
+								doNext(ref cParams);
+
+							}, ref cParamsInner);
+
+						} else {
+
+							callbackItem.Invoke(ref cParamsInner);
+							doNext.Invoke(ref cParamsInner);
+
+						}
+
+					}
+
+				};
+				doNext.Invoke(ref closure);
+
+			} else {
+
+				var ie = collection.GetEnumerator();
+				while (Coroutines.MoveNext(ie, collection) == true) {
+
+					if (ie.Current != null) {
+
+						each.Invoke(ie.Current, callbackItem, ref closure);
+
+					} else {
+
+						callbackItem.Invoke(ref closure);
+
+					}
+
+					if (completed == true) break;
+
+				}
+
+			}
+
+			if (count == 0 && callback != null) callback(ref closure);
+
+		}
+
 		public static void CallInSequence<T>(System.Action callback, IEnumerable<T> collection, System.Action<T, System.Action> each, bool waitPrevious = false) {
 
 			if (collection == null) {

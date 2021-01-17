@@ -18,6 +18,8 @@ namespace UnityEngine.UI.Windows.Modules {
 
         private struct AnimationGroupInfo<T> {
 
+            public TransitionParameters transitionParameters;
+            public AnimationState animationState;
             public System.Action<T> onComplete;
             public T closureParameters;
 
@@ -82,24 +84,26 @@ namespace UnityEngine.UI.Windows.Modules {
             }
 
             var animationGroupInfo = new AnimationGroupInfo<T>();
+            animationGroupInfo.transitionParameters = parameters;
+            animationGroupInfo.animationState = animationState;
             animationGroupInfo.closureParameters = closureParameters;
             animationGroupInfo.onComplete = onComplete;
-            UnityEngine.UI.Windows.Utilities.Coroutines.CallInSequence(animationGroupInfo, (x) => {
+            UnityEngine.UI.Windows.Utilities.Coroutines.CallInSequence((x) => {
                 
                 x.onComplete.Invoke(x.closureParameters);
                 
-            }, animationParameters, (anim, cb, state) => {
+            }, animationGroupInfo, animationParameters, (anim, cb, state) => {
                 
                 if (anim != null) {
 
                     AnimationParameters.State fromState = null;
-                    if (parameters.resetAnimation == true) {
+                    if (state.transitionParameters.resetAnimation == true) {
 
                         fromState = anim.GetState(AnimationState.Reset);
 
                     }
 
-                    var toState = anim.GetState(animationState);
+                    var toState = anim.GetState(state.animationState);
 
                     var animationInfo = new AnimationInfo<AnimationGroupInfo<T>>() {
                         animationParameters = anim,
@@ -109,11 +113,11 @@ namespace UnityEngine.UI.Windows.Modules {
                         closureParameters = state,
                     };
 
-                    var ease = (animationState == AnimationState.Show ? anim.easeShow : anim.easeHide);
+                    var ease = (state.animationState == AnimationState.Show ? anim.easeShow : anim.easeHide);
                     var tweener = WindowSystem.GetTweener();
                     tweener.Stop(anim);
-                    tweener.Add(animationInfo, anim.GetDuration(animationState), 0f, 1f)
-                           .Delay(anim.GetDelay(animationState))
+                    tweener.Add(animationInfo, anim.GetDuration(state.animationState), 0f, 1f)
+                           .Delay(anim.GetDelay(state.animationState))
                            .Tag(anim)
                            .Ease(ease)
                            .OnUpdate((obj, value) => { obj.animationParameters.ApplyState(obj.animationParameters.LerpState(obj.fromState, obj.toState, value)); })

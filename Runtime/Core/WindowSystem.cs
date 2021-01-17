@@ -564,6 +564,23 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public class ShowHideClosureParametersClass {
+
+            public WindowObject instance;
+            public TransitionParameters parameters;
+            public bool animationComplete;
+            public bool hierarchyComplete;
+
+            public void Dispose() {
+
+                this.instance = null;
+                this.parameters.callback = null;
+                PoolClass<ShowHideClosureParametersClass>.Recycle(this);
+                
+            }
+
+        }
+
         public static void ShowInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
 
             if (instance.objectState == ObjectState.Showing || instance.objectState == ObjectState.Shown) {
@@ -583,43 +600,46 @@ namespace UnityEngine.UI.Windows {
                 if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
                 instance.SetVisible();
                 instance.SetResetState();
+                
+                var closure = PoolClass<ShowHideClosureParametersClass>.Spawn();
+                closure.animationComplete = false;
+                closure.hierarchyComplete = false;
+                closure.instance = instance;
+                closure.parameters = parameters;
 
-                var animationComplete = false;
-                var childsComplete = false;
-                Coroutines.CallInSequence(() => {
+                Coroutines.CallInSequence((p) => {
 
-                    childsComplete = true;
-                    
-                    if (animationComplete == true) {
+                    p.hierarchyComplete = true;
+                    if (p.animationComplete == true) {
 
-                        parameters.RaiseCallback();
+                        var pars = p.parameters;
+                        p.Dispose();
+                        pars.RaiseCallback();
 
                     }
 
-                }, instance.subObjects, (obj, cb) => {
+                }, closure, instance.subObjects, (obj, cb, p) => {
 
                     if (internalCall == true) {
                        
-                        obj.ShowInternal(parameters.ReplaceCallback(cb));
+                        obj.ShowInternal(p.parameters.ReplaceCallback(() => cb.Invoke(p)));
  
                     } else {
 
-                        obj.Show(parameters.ReplaceCallback(cb));
+                        obj.Show(p.parameters.ReplaceCallback(() => cb.Invoke(p)));
 
                     }
 
                 });
                 
-                var closureParameters = new ShowHideClosureParameters() {
-                    instance = instance,
-                    parameters = parameters,
-                };
-                WindowObjectAnimation.Show(closureParameters, instance, parameters, (cParams) => {
+                WindowObjectAnimation.Show(closure, instance, parameters, (cParams) => {
                     
-                    animationComplete = true;
-                    if (childsComplete == true) {
+                    cParams.animationComplete = true;
+                    if (cParams.hierarchyComplete == true) {
                         
-                        cParams.parameters.RaiseCallback();
+                        var pars = cParams.parameters;
+                        cParams.Dispose();
+                        pars.RaiseCallback();
                         
                     }
                     
@@ -705,34 +725,38 @@ namespace UnityEngine.UI.Windows {
 
             {
 
-                var animationComplete = false;
-                var childsComplete = false;
-                Coroutines.CallInSequence(() => {
+                var closure = PoolClass<ShowHideClosureParametersClass>.Spawn();
+                closure.animationComplete = false;
+                closure.hierarchyComplete = false;
+                closure.instance = instance;
+                closure.parameters = parameters;
+                
+                Coroutines.CallInSequence((p) => {
 
-                    childsComplete = true;
+                    p.hierarchyComplete = true;
                     
-                    if (animationComplete == true) {
+                    if (p.animationComplete == true) {
 
-                        parameters.RaiseCallback();
+                        var pars = p.parameters;
+                        p.Dispose();
+                        pars.RaiseCallback();
 
                     }
 
-                }, instance.subObjects, (obj, cb) => {
+                }, closure, instance.subObjects, (obj, cb, p) => {
                     
-                    obj.Hide(parameters.ReplaceCallback(cb));
+                    obj.Hide(p.parameters.ReplaceCallback(() => cb.Invoke(p)));
                     
                 });
                 
-                var closureParameters = new ShowHideClosureParameters() {
-                    instance = instance,
-                    parameters = parameters,
-                };
-                WindowObjectAnimation.Hide(closureParameters, instance, parameters, (cParams) => {
+                WindowObjectAnimation.Hide(closure, instance, parameters, (cParams) => {
                     
-                    animationComplete = true;
-                    if (childsComplete == true) {
+                    cParams.animationComplete = true;
+                    if (cParams.hierarchyComplete == true) {
                         
-                        cParams.parameters.RaiseCallback();
+                        var pars = cParams.parameters;
+                        cParams.Dispose();
+                        pars.RaiseCallback();
                         
                     }
                     

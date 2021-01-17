@@ -368,7 +368,7 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
             #if TEXTMESHPRO_SUPPORT
-            else if (this.graphics is TextMeshPro.TMP_Text textGraphicTmp) {
+            else if (this.graphics is TMPro.TMP_Text textGraphicTmp) {
                 
                 return textGraphicTmp.text;
 
@@ -391,8 +391,8 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
             #if TEXTMESHPRO_SUPPORT
-            else if (this.graphics is TextMeshPro.TMP_Text textGraphicTmp) {
-                
+            else if (this.graphics is TMPro.TMP_Text textGraphicTmp) {
+
                 textGraphicTmp.text = text;
 
             }

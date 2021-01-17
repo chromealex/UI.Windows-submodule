@@ -12,6 +12,8 @@ namespace UnityEngine.UI.Windows.Components {
         public Resource prefab;
         public bool autoLoad;
 
+        private WindowObject loadedAsset;
+
         protected override void OnLoadScreenAsync(System.Action onComplete) {
 
             if (this.autoLoad == true) {
@@ -25,7 +27,9 @@ namespace UnityEngine.UI.Windows.Components {
                             base.OnLoadScreenAsync(onComplete);
 
                         });
-                        
+
+                        this.loadedAsset = instance;
+
                     } else {
 
                         base.OnLoadScreenAsync(onComplete);
@@ -46,6 +50,12 @@ namespace UnityEngine.UI.Windows.Components {
             
             this.LoadAsync<T>(this.prefab);
             
+        }
+
+        public T Get<T>() where T : WindowObject {
+
+            return this.loadedAsset as T;
+
         }
         
     }

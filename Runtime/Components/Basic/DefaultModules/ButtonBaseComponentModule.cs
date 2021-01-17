@@ -8,6 +8,7 @@ namespace UnityEngine.UI.Windows {
 
         public UnityEngine.UI.Windows.Components.ButtonComponent buttonComponent;
 
+
         public override void ValidateEditor() {
             
             base.ValidateEditor();

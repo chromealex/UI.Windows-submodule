@@ -46,9 +46,21 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        public float GetMaxValue() {
+
+            return this.slider.maxValue;
+
+        }
+
         public void SetNormalizedValue(float value) {
 
             this.slider.normalizedValue = value;
+
+        }
+
+        public void SetMaxValue(float value) {
+
+            this.slider.maxValue = value;
 
         }
 

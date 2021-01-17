@@ -65,7 +65,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
             }
 
-            if (parameters.IsImmediately() == true) {
+            if (parameters.data.immediately == true) {
 
                 for (int i = 0; i < animationParameters.Length; ++i) {
 
@@ -97,7 +97,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 if (anim != null) {
 
                     AnimationParameters.State fromState = null;
-                    if (state.transitionParameters.resetAnimation == true) {
+                    if (state.transitionParameters.data.resetAnimation == true) {
 
                         fromState = anim.GetState(AnimationState.Reset);
 

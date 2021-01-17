@@ -656,9 +656,11 @@ namespace UnityEngine.UI.Windows {
 
                                 WindowSystem.ShowInstance(
                                     windowObject,
-                                    TransitionParameters.Default.ReplaceImmediately(true).ReplaceCallback(() => {
-                                        WindowSystem.SetShown(windowObject, TransitionParameters.Default.ReplaceImmediately(true));
-                                    }), internalCall: true);
+                                    TransitionParameters.Default.ReplaceImmediately(true).ReplaceCallback((context, pars) => {
+                                        
+                                        WindowSystem.SetShown(context, TransitionParameters.Default.ReplaceImmediately(true));
+                                        
+                                    }, TransitionParameters.Default, windowObject), internalCall: true);
 
                             }
 
@@ -912,11 +914,7 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
-            var cbParameters = parameters.ReplaceCallback(() => {
-                
-                WindowSystem.SetShown(this, parameters);
-
-            });
+            var cbParameters = parameters.ReplaceCallback(WindowSystem.SetShown, parameters, this);
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
@@ -939,16 +937,19 @@ namespace UnityEngine.UI.Windows {
                 
             }
             
-            var cbParameters = parameters.ReplaceCallback(() => {
-                
-                WindowSystem.SetShown(this, parameters);
-
-            });
+            var cbParameters = parameters.ReplaceCallback(WindowSystem.SetShown, parameters, this);
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
 
         public virtual void Hide(TransitionParameters parameters = default) {
+
+            if (this.objectState <= ObjectState.Initializing) {
+                
+                Debug.LogWarning("Object is out of state: " + this, this);
+                return;
+                
+            }
 
             this.internalManualHide = true;
 
@@ -959,11 +960,7 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
-            var cbParameters = parameters.ReplaceCallback(() => {
-                
-                WindowSystem.SetHidden(this, parameters);
-
-            });
+            var cbParameters = parameters.ReplaceCallback(WindowSystem.SetHidden, parameters, this);
             WindowSystem.HideInstance(this, cbParameters);
 
         }

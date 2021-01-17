@@ -51,14 +51,14 @@ namespace UnityEngine.UI.Windows {
 
         public override void Hide(TransitionParameters parameters = default) {
 
-            var newParameters = parameters.ReplaceCallback(() => {
-
-                this.PushToPool();
-                parameters.RaiseCallback();
-
-            });
-
-            base.Hide(newParameters);
+            var cbParameters = parameters.ReplaceCallback((context, pars) => {
+                
+                context.PushToPool();
+                pars.RaiseCallback();
+                
+            }, parameters, this);
+            
+            base.Hide(cbParameters);
 
         }
 

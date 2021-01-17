@@ -525,6 +525,13 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             for (int j = 0; j < windowLayout.layoutElements.Length; ++j) {
 
                 var layoutElement = windowLayout.layoutElements[j];
+                if (layoutElement.hideInScreen == true) {
+                
+                    layoutItem.Remove(layoutElement.tagId, windowLayout);
+                    continue;
+                    
+                }
+                
                 if (layoutItem.GetLayoutComponentItemByTagId(layoutElement.tagId, windowLayout, out var layoutComponentItem) == false) {
 
                     layoutItem.Add(layoutElement.tagId, windowLayout);

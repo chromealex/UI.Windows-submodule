@@ -8,6 +8,7 @@ namespace UnityEngine.UI.Windows {
 
         public int tagId;
         public WindowLayout innerLayout;
+        public bool hideInScreen;
 
         WindowLayout ILayoutInstance.windowLayoutInstance {
             get;

@@ -91,33 +91,38 @@ namespace UnityEngine.UI.Windows {
     }
 
     [System.Serializable]
-    public struct TransitionParameters {
+    public struct TransitionParametersData {
 
         internal bool resetAnimation;
+        internal bool immediately;
+
         internal System.Action callback;
 
-        internal bool immediately;
+    }
+
+    [System.Serializable]
+    public struct TransitionParameters {
+
+        internal TransitionParametersData data;
+
+        internal System.Action<WindowObject, TransitionParameters> callbackParameters;
+        internal TransitionParametersData pars;
+        internal WindowObject context;
         
         public static TransitionParameters Default => new TransitionParameters() {
-            resetAnimation = false,
+            data = new TransitionParametersData() { resetAnimation = false },
         };
 
         public void RaiseCallback() {
 
-            if (this.callback != null) this.callback.Invoke();
+            if (this.data.callback != null) this.data.callback.Invoke();
 
         }
 
-        public bool IsImmediately() {
-
-            return this.immediately;
-
-        }
-        
         public TransitionParameters ReplaceImmediately(bool state) {
 
             var instance = this;
-            instance.immediately = state;
+            instance.data.immediately = state;
             return instance;
 
         }
@@ -125,7 +130,18 @@ namespace UnityEngine.UI.Windows {
         public TransitionParameters ReplaceCallback(System.Action callback) {
 
             var instance = this;
-            instance.callback = callback;
+            instance.data.callback = callback;
+            return instance;
+
+        }
+
+        internal TransitionParameters ReplaceCallback(System.Action<WindowObject, TransitionParameters> callback, TransitionParameters pars, WindowObject context) {
+
+            var instance = this;
+            instance.data.callback = null;
+            instance.callbackParameters = callback;
+            instance.pars = pars.data;
+            instance.context = context;
             return instance;
 
         }
@@ -574,7 +590,7 @@ namespace UnityEngine.UI.Windows {
             public void Dispose() {
 
                 this.instance = null;
-                this.parameters.callback = null;
+                this.parameters.data.callback = null;
                 PoolClass<ShowHideClosureParametersClass>.Recycle(this);
                 
             }

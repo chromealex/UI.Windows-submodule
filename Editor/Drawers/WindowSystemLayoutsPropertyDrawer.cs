@@ -211,7 +211,7 @@ namespace UnityEditor.UI.Windows {
                                 var compProp = componentsProp.GetArrayElementAtIndex(index);
                                 var component = compProp.FindPropertyRelative("component");
                                 
-                                var localRagId = compProp.FindPropertyRelative("localTag").intValue;
+                                var localTagId = compProp.FindPropertyRelative("localTag").intValue;
                                 var windowLayoutInner = (WindowLayout)compProp.FindPropertyRelative("windowLayout").objectReferenceValue;
                                 string layoutName = string.Empty;
                                 if (windowLayoutInner != null) {
@@ -228,7 +228,7 @@ namespace UnityEditor.UI.Windows {
                                 }
                                 
                                 GUI.Label(captionRect, EditorHelpers.StringToCaption(layoutName), EditorStyles.boldLabel);
-                                GUI.Label(tagRect, "Tag: " + localRagId.ToString(), tagStyle);
+                                GUI.Label(tagRect, "Tag: " + localTagId.ToString(), tagStyle);
                                 EditorGUI.PropertyField(objectRect, component, new GUIContent(string.Empty));
                             }
                             

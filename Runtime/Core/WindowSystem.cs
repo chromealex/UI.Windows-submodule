@@ -105,17 +105,12 @@ namespace UnityEngine.UI.Windows {
 
         internal TransitionParametersData data;
 
-        internal System.Action<WindowObject, TransitionParameters> callbackParameters;
-        internal TransitionParametersData pars;
-        internal WindowObject context;
-        
         public static TransitionParameters Default => new TransitionParameters() {
             data = new TransitionParametersData() { resetAnimation = false },
         };
 
         public void RaiseCallback() {
 
-            if (this.callbackParameters != null) this.callbackParameters.Invoke(this.context, new TransitionParameters() { data = this.pars });
             if (this.data.callback != null) this.data.callback.Invoke();
 
         }
@@ -132,17 +127,6 @@ namespace UnityEngine.UI.Windows {
 
             var instance = this;
             instance.data.callback = callback;
-            return instance;
-
-        }
-
-        internal TransitionParameters ReplaceCallback(System.Action<WindowObject, TransitionParameters> callback, TransitionParameters pars, WindowObject context) {
-
-            var instance = this;
-            instance.data.callback = null;
-            instance.callbackParameters = callback;
-            instance.pars = pars.data;
-            instance.context = context;
             return instance;
 
         }

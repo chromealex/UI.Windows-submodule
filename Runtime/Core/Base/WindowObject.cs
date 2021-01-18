@@ -656,11 +656,11 @@ namespace UnityEngine.UI.Windows {
 
                                 WindowSystem.ShowInstance(
                                     windowObject,
-                                    TransitionParameters.Default.ReplaceImmediately(true).ReplaceCallback((context, pars) => {
+                                    TransitionParameters.Default.ReplaceImmediately(true).ReplaceCallback(() => {
                                         
-                                        WindowSystem.SetShown(context, TransitionParameters.Default.ReplaceImmediately(true));
+                                        WindowSystem.SetShown(windowObject, TransitionParameters.Default.ReplaceImmediately(true));
                                         
-                                    }, TransitionParameters.Default, windowObject), internalCall: true);
+                                    }), internalCall: true);
 
                             }
 
@@ -914,7 +914,9 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
-            var cbParameters = parameters.ReplaceCallback(WindowSystem.SetShown, parameters, this);
+            var cbParameters = parameters.ReplaceCallback(() => {
+                WindowSystem.SetShown(this, parameters);
+            });
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
@@ -937,7 +939,9 @@ namespace UnityEngine.UI.Windows {
                 
             }
             
-            var cbParameters = parameters.ReplaceCallback(WindowSystem.SetShown, parameters, this);
+            var cbParameters = parameters.ReplaceCallback(() => {
+                WindowSystem.SetShown(this, parameters);
+            });
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
@@ -960,7 +964,9 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
-            var cbParameters = parameters.ReplaceCallback(WindowSystem.SetHidden, parameters, this);
+            var cbParameters = parameters.ReplaceCallback(() => {
+                WindowSystem.SetHidden(this, parameters);
+            });
             WindowSystem.HideInstance(this, cbParameters);
 
         }

@@ -44,6 +44,12 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
+        public Canvas GetCanvas() {
+
+            return this.windowLayoutInstance.GetCanvas();
+
+        }
+
         public void Validate() {
 
             this.localTag = 0;
@@ -373,6 +379,12 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         public override int GetCanvasOrder() {
 
             return this.layouts.GetActive().GetCanvasOrder();
+
+        }
+
+        public override Canvas GetCanvas() {
+
+            return this.layouts.GetActive().GetCanvas();
 
         }
 

@@ -593,6 +593,17 @@ namespace UnityEngine.UI.Windows {
 
         internal virtual void Setup(WindowBase source) {
 
+            if (this.hasObjectCanvas == true) {
+                
+                var windowCanvas = source.GetCanvas();
+                
+                this.objectCanvas.overrideSorting = true;
+                this.objectCanvas.sortingOrder = windowCanvas.sortingOrder;
+                this.objectCanvas.sortingLayerName = windowCanvas.sortingLayerName;
+                this.objectCanvas.sortingLayerID = windowCanvas.sortingLayerID;
+
+            }
+            
             for (int i = 0; i < this.subObjects.Count; ++i) {
                 
                 this.subObjects[i].Setup(source);

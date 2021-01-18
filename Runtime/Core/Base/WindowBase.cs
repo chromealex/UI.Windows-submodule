@@ -68,6 +68,12 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public virtual Canvas GetCanvas() {
+
+            return null;
+
+        }
+
         public void SetInitialParameters(InitialParameters parameters) {
 
             {

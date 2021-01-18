@@ -80,6 +80,12 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public Canvas GetCanvas() {
+
+            return this.canvas;
+
+        }
+
         internal override void Setup(WindowBase source) {
 
             base.Setup(source);

@@ -115,6 +115,7 @@ namespace UnityEngine.UI.Windows {
 
         public void RaiseCallback() {
 
+            if (this.callbackParameters != null) this.callbackParameters.Invoke(this.context, new TransitionParameters() { data = this.pars });
             if (this.data.callback != null) this.data.callback.Invoke();
 
         }

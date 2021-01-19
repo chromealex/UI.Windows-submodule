@@ -293,7 +293,8 @@ namespace UnityEngine.UI.Windows.Components {
 
             public bool Equals(ValueData other) {
                 
-                return this.sourceValue == other.sourceValue &&
+                return this.isCreated = other.isCreated &&
+                       this.sourceValue == other.sourceValue &&
                        this.timeValueResult == other.timeValueResult &&
                        this.timeShortestVariant == other.timeShortestVariant &&
                        this.value.Equals(other.value);
@@ -318,6 +319,7 @@ namespace UnityEngine.UI.Windows.Components {
             public SourceValue sourceValue;
             public TimeResult timeValueResult;
             public TimeResult timeShortestVariant;
+            public bool isCreated;
             
             public static bool operator ==(ValueData v1, ValueData v2) {
 
@@ -326,7 +328,9 @@ namespace UnityEngine.UI.Windows.Components {
             }
 
             public static bool operator !=(ValueData v1, ValueData v2) {
+                
                 return !(v1 == v2);
+                
             }
 
         }
@@ -338,13 +342,14 @@ namespace UnityEngine.UI.Windows.Components {
                 value = value,
                 sourceValue = sourceValue,
                 timeValueResult = timeValueResult,
-                timeShortestVariant = timeShortestVariant
+                timeShortestVariant = timeShortestVariant,
+                isCreated = true,
             };
             if (this.lastValueData == currentData) return;
             this.lastValueData = currentData;
             this.lastText = null;
             
-            string strFormat = string.Empty;
+            string strFormat;
             if (timeShortestVariant > TimeResult.None && timeShortestVariant < timeValueResult) {
 
                 var ts = new TimeShort(value, this.timeResultStrings, sourceValue);

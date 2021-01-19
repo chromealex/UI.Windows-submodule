@@ -71,7 +71,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-		public static void CallInSequence<T, TState>(System.Action<TState> callback, TState state, IEnumerable<T> collection, System.Action<T, System.Action<TState>, TState> each, bool waitPrevious = false) {
+		public static void CallInSequence<T, TState>(System.Action<TState> callback, TState state, IEnumerable<T> collection, System.Action<T, System.Action, TState> each, bool waitPrevious = false) {
 
 			if (collection == null) {
 
@@ -84,14 +84,14 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 			var completed = false;
 			var counter = 0;
-			System.Action<TState> callbackItem = (stateInner) => {
+			System.Action callbackItem = () => {
 
 				++counter;
 				if (counter < count) return;
 
 				completed = true;
 
-				if (callback != null) callback.Invoke(stateInner);
+				if (callback != null) callback.Invoke(state);
 				
 			};
 
@@ -106,16 +106,16 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 						if (ie.Current != null) {
 
-							each(ie.Current, (st) => {
+							each(ie.Current, () => {
 								
-								callbackItem(st);
+								callbackItem();
 								doNext();
 
 							}, state);
 
 						} else {
 
-							callbackItem(state);
+							callbackItem();
 							doNext();
 
 						}
@@ -136,7 +136,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 					} else {
 
-						callbackItem(state);
+						callbackItem();
 
 					}
 

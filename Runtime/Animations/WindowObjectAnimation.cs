@@ -11,7 +11,7 @@ namespace UnityEngine.UI.Windows.Modules {
             public AnimationParameters animationParameters;
             public AnimationParameters.State fromState;
             public AnimationParameters.State toState;
-            public System.Action<T> onComplete;
+            public System.Action onComplete;
             public T closureParameters;
 
         }
@@ -123,13 +123,13 @@ namespace UnityEngine.UI.Windows.Modules {
                            .OnUpdate((obj, value) => { obj.animationParameters.ApplyState(obj.animationParameters.LerpState(obj.fromState, obj.toState, value)); })
                            .OnComplete((obj) => {
                                
-                               obj.onComplete.Invoke(obj.closureParameters);
+                               obj.onComplete.Invoke();
                                
                            });
 
                 } else {
                     
-                    cb.Invoke(state);
+                    cb.Invoke();
                     
                 }
                 

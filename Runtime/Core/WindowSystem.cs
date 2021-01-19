@@ -558,24 +558,18 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public struct ShowHideClosureParameters {
-
-            public WindowObject instance;
-            public TransitionParameters parameters;
-
-        }
-
         public class ShowHideClosureParametersClass {
 
             public WindowObject instance;
             public TransitionParameters parameters;
+            public bool internalCall;
             public bool animationComplete;
             public bool hierarchyComplete;
 
             public void Dispose() {
 
                 this.instance = null;
-                this.parameters.data.callback = null;
+                this.parameters = default;
                 PoolClass<ShowHideClosureParametersClass>.Recycle(this);
                 
             }
@@ -607,6 +601,7 @@ namespace UnityEngine.UI.Windows {
                 closure.hierarchyComplete = false;
                 closure.instance = instance;
                 closure.parameters = parameters;
+                closure.internalCall = internalCall;
 
                 Coroutines.CallInSequence((p) => {
 
@@ -621,13 +616,13 @@ namespace UnityEngine.UI.Windows {
 
                 }, closure, instance.subObjects, (obj, cb, p) => {
 
-                    if (internalCall == true) {
+                    if (p.internalCall == true) {
                        
-                        obj.ShowInternal(p.parameters.ReplaceCallback(() => cb.Invoke(p)));
+                        obj.ShowInternal(p.parameters.ReplaceCallback(cb));
  
                     } else {
 
-                        obj.Show(p.parameters.ReplaceCallback(() => cb.Invoke(p)));
+                        obj.Show(p.parameters.ReplaceCallback(cb));
 
                     }
 
@@ -746,7 +741,7 @@ namespace UnityEngine.UI.Windows {
 
                 }, closure, instance.subObjects, (obj, cb, p) => {
                     
-                    obj.Hide(p.parameters.ReplaceCallback(() => cb.Invoke(p)));
+                    obj.Hide(p.parameters.ReplaceCallback(cb));
                     
                 });
                 

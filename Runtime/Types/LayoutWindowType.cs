@@ -40,12 +40,14 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         public int GetCanvasOrder() {
 
+            if (this.windowLayoutInstance == null) return 0;
             return this.windowLayoutInstance.GetCanvasOrder();
 
         }
 
         public Canvas GetCanvas() {
 
+            if (this.windowLayoutInstance == null) return null;
             return this.windowLayoutInstance.GetCanvas();
 
         }

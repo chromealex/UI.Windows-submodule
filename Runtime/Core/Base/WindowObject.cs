@@ -596,11 +596,14 @@ namespace UnityEngine.UI.Windows {
             if (this.hasObjectCanvas == true) {
                 
                 var windowCanvas = source.GetCanvas();
-                
-                this.objectCanvas.overrideSorting = true;
-                this.objectCanvas.sortingOrder = windowCanvas.sortingOrder;
-                this.objectCanvas.sortingLayerName = windowCanvas.sortingLayerName;
-                this.objectCanvas.sortingLayerID = windowCanvas.sortingLayerID;
+                if (windowCanvas != null) {
+                    
+                    this.objectCanvas.overrideSorting = true;
+                    this.objectCanvas.sortingOrder = windowCanvas.sortingOrder;
+                    this.objectCanvas.sortingLayerName = windowCanvas.sortingLayerName;
+                    this.objectCanvas.sortingLayerID = windowCanvas.sortingLayerID;
+                    
+                }
 
             }
             

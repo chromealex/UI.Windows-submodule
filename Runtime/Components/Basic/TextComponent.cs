@@ -238,6 +238,15 @@ namespace UnityEngine.UI.Windows.Components {
             daysString = @"d\d\ ",
         };
 
+        public override void OnDeInit() {
+            
+            base.OnDeInit();
+            
+            this.lastValueData = default;
+            this.lastText = null;
+
+        }
+
         public void SetColor(Color color) {
 
             if (this.graphics == null) return;
@@ -333,6 +342,7 @@ namespace UnityEngine.UI.Windows.Components {
             };
             if (this.lastValueData == currentData) return;
             this.lastValueData = currentData;
+            this.lastText = null;
             
             string strFormat = string.Empty;
             if (timeShortestVariant > TimeResult.None && timeShortestVariant < timeValueResult) {
@@ -384,6 +394,7 @@ namespace UnityEngine.UI.Windows.Components {
 
             if (this.lastText == text) return;
             this.lastText = text;
+            this.lastValueData = default;
             
             if (this.graphics is UnityEngine.UI.Text textGraphic) {
 

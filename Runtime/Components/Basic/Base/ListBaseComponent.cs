@@ -6,6 +6,12 @@ namespace UnityEngine.UI.Windows.Components {
 
     using Utilities;
     
+    public interface IListClosureParameters {
+
+        int index { get; set; }
+
+    }
+
     public abstract class ListBaseComponent : WindowComponent, ILayoutSelfController, UnityEngine.EventSystems.IBeginDragHandler, UnityEngine.EventSystems.IDragHandler, UnityEngine.EventSystems.IEndDragHandler {
 
         [UnityEngine.UI.Windows.Modules.ResourceTypeAttribute(typeof(WindowComponent), RequiredType.Warning)]
@@ -254,19 +260,25 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
         
-        public virtual void AddItem(System.Action<WindowComponent> onComplete = null) {
+        public virtual void AddItem(System.Action<WindowComponent, DefaultParameters> onComplete = null) {
             
-            this.AddItem(this.source, onComplete);
-            
-        }
-
-        public virtual void AddItem<T>(System.Action<T> onComplete = null) where T : WindowComponent {
-            
-            this.AddItem(this.source, onComplete);
+            this.AddItem(this.source, new DefaultParameters(), onComplete);
             
         }
 
-        public virtual void AddItem<T>(Resource source, System.Action<T> onComplete = null) where T : WindowComponent {
+        public virtual void AddItem<T>(Resource source, System.Action<T, DefaultParameters> onComplete = null) where T : WindowComponent {
+            
+            this.AddItem(source, new DefaultParameters(), onComplete);
+            
+        }
+
+        public virtual void AddItem<T>(System.Action<T, DefaultParameters> onComplete = null) where T : WindowComponent {
+            
+            this.AddItem(this.source, new DefaultParameters(), onComplete);
+            
+        }
+
+        public virtual void AddItem<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent {
 
             var resources = WindowSystem.GetResources();
             var pools = WindowSystem.GetPools();
@@ -279,7 +291,7 @@ namespace UnityEngine.UI.Windows.Components {
                 this.items.Add(instance);
                 this.NotifyModulesComponentAdded(instance);
                 this.OnElementsChanged();
-                if (onComplete != null) onComplete.Invoke(instance);
+                if (onComplete != null) onComplete.Invoke(instance, closure);
 
             }));
             
@@ -300,14 +312,25 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public virtual void SetItems<T>(int count, System.Action<T, int> onItem, System.Action onComplete = null) where T : WindowComponent {
+        public struct DefaultParameters : IListClosureParameters {
+
+            public int index { get; set; }
+
+        }
+        public virtual void SetItems<T>(int count, System.Action<T, DefaultParameters> onItem, System.Action onComplete = null) where T : WindowComponent {
             
-            this.SetItems(count, this.source, onItem, onComplete);
+            this.SetItems(count, this.source, onItem, new DefaultParameters(), onComplete);
+            
+        }
+
+        public virtual void SetItems<T, TClosure>(int count, System.Action<T, TClosure> onItem, TClosure closure, System.Action onComplete = null) where T : WindowComponent where TClosure : IListClosureParameters {
+            
+            this.SetItems(count, this.source, onItem, closure, onComplete);
             
         }
 
         private bool isLoadingRequest = false;
-        public virtual void SetItems<T>(int count, Resource source, System.Action<T, int> onItem, System.Action onComplete = null) where T : WindowComponent {
+        public virtual void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action onComplete) where T : WindowComponent where TClosure : IListClosureParameters {
 
             if (this.isLoadingRequest == true) {
 
@@ -318,8 +341,9 @@ namespace UnityEngine.UI.Windows.Components {
             if (count == this.Count) {
 
                 for (int i = 0; i < this.Count; ++i) {
-                    
-                    onItem.Invoke((T)this.items[i], i);
+
+                    closure.index = i;
+                    onItem.Invoke((T)this.items[i], closure);
                     
                 }
 
@@ -330,14 +354,15 @@ namespace UnityEngine.UI.Windows.Components {
                 var delta = count - this.Count;
                 if (delta > 0) {
 
-                    this.Emit(delta, source, onItem, onComplete);
+                    this.Emit(delta, source, onItem, closure, onComplete);
 
                 } else {
                     
                     this.RemoveRange(this.Count + delta, this.Count);
                     for (int i = 0; i < this.Count; ++i) {
                     
-                        onItem.Invoke((T)this.items[i], i);
+                        closure.index = i;
+                        onItem.Invoke((T)this.items[i], closure);
                     
                     }
                     if (onComplete != null) onComplete.Invoke();
@@ -348,7 +373,17 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        private void Emit<T>(int count, Resource source, System.Action<T, int> onItem, System.Action onComplete = null) where T : WindowComponent {
+        private struct EmitClosure<T, TClosure> {
+
+            public int index;
+            public ListBaseComponent list;
+            public int requiredCount;
+            public System.Action<T, TClosure> onItem;
+            public System.Action onComplete;
+            public TClosure data;
+
+        }
+        private void Emit<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action onComplete = null) where T : WindowComponent where TClosure : IListClosureParameters {
 
             if (count == 0) {
                 
@@ -358,21 +393,31 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
             
+            var closureInner = new EmitClosure<T, TClosure>();
+            closureInner.data = closure;
+            closureInner.onItem = onItem;
+            closureInner.onComplete = onComplete;
+            closureInner.list = this;
+            closureInner.requiredCount = count;
+            
             this.isLoadingRequest = true;
             var offset = this.Count;
             var loaded = 0;
             for (int i = 0; i < count; ++i) {
 
                 var index = i + offset;
-                this.AddItem<T>(source, (item) => {
+                closureInner.index = index;
+                
+                this.AddItem<T, EmitClosure<T, TClosure>>(source, closureInner, (item, c) => {
 
-                    onItem.Invoke(item, index);
+                    c.data.index = c.index;
+                    c.onItem.Invoke(item, c.data);
                     
                     ++loaded;
-                    if (loaded == count) {
+                    if (loaded == c.requiredCount) {
                         
-                        if (onComplete != null) onComplete.Invoke();
-                        this.isLoadingRequest = false;
+                        if (c.onComplete != null) c.onComplete.Invoke();
+                        c.list.isLoadingRequest = false;
                         
                     }
                     

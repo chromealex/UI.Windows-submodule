@@ -928,8 +928,10 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
+            var cObj = this;
+            var cParams = parameters;
             var cbParameters = parameters.ReplaceCallback(() => {
-                WindowSystem.SetShown(this, parameters);
+                WindowSystem.SetShown(cObj, cParams);
             });
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
@@ -952,9 +954,11 @@ namespace UnityEngine.UI.Windows {
                 return;
                 
             }
-            
+
+            var cObj = this;
+            var cParams = parameters;
             var cbParameters = parameters.ReplaceCallback(() => {
-                WindowSystem.SetShown(this, parameters);
+                WindowSystem.SetShown(cObj, cParams);
             });
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
@@ -977,9 +981,11 @@ namespace UnityEngine.UI.Windows {
                 return;
                 
             }
-
+            
+            var cObj = this;
+            var cParams = parameters;
             var cbParameters = parameters.ReplaceCallback(() => {
-                WindowSystem.SetHidden(this, parameters);
+                WindowSystem.SetHidden(cObj, cParams);
             });
             WindowSystem.HideInstance(this, cbParameters);
 

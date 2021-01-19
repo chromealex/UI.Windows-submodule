@@ -299,19 +299,19 @@ namespace UnityEngine.UI.Windows.Components {
         
         public virtual void AddItem(System.Action<WindowComponent> onComplete = null) {
             
-            this.list.AddItem(x => this.TrySetCallbackToInteractable(x, onComplete));
+            this.list.AddItem((x, p) => this.TrySetCallbackToInteractable(x, onComplete));
 
         }
 
         public virtual void AddItem<T>(System.Action<T> onComplete = null) where T : WindowComponent {
             
-            this.list.AddItem<T>(x => this.TrySetCallbackToInteractable(x, onComplete));
+            this.list.AddItem<T>((x, p) => this.TrySetCallbackToInteractable(x, onComplete));
 
         }
 
         public virtual void AddItem<T>(Resource source, System.Action<T> onComplete = null) where T : WindowComponent {
 
-            this.list.AddItem<T>(source, x => this.TrySetCallbackToInteractable(x, onComplete));
+            this.list.AddItem<T>(source, (x, p) => this.TrySetCallbackToInteractable(x, onComplete));
             
         }
 
@@ -321,24 +321,37 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        private struct DropdownClosureParameters<T> : IListClosureParameters where T : WindowComponent {
+
+            public int index { get; set; }
+            public DropdownComponent component;
+            public System.Action<T, int> onItem;
+
+        }
         public virtual void SetItems<T>(int count, System.Action<T, int> onItem, System.Action onComplete = null) where T : WindowComponent {
             
-            this.list.SetItems<T>(count, (item, index) => {
+            this.list.SetItems<T, DropdownClosureParameters<T>>(count, (item, c) => {
                 
-                this.TrySetCallbackToInteractable(item, null);
-                if (onItem != null) onItem.Invoke(item, index);
+                c.component.TrySetCallbackToInteractable(item, null);
+                if (c.onItem != null) c.onItem.Invoke(item, c.index);
                 
+            }, new DropdownClosureParameters<T>() {
+                component = this,
+                onItem = onItem,
             }, onComplete);
             
         }
 
         public virtual void SetItems<T>(int count, Resource source, System.Action<T, int> onItem, System.Action onComplete = null) where T : WindowComponent {
             
-            this.list.SetItems<T>(count, source, (item, index) => {
+            this.list.SetItems<T, DropdownClosureParameters<T>>(count, source, (item, c) => {
                 
-                this.TrySetCallbackToInteractable(item, null);
-                if (onItem != null) onItem.Invoke(item, index);
+                c.component.TrySetCallbackToInteractable(item, null);
+                if (c.onItem != null) c.onItem.Invoke(item, c.index);
                 
+            }, new DropdownClosureParameters<T>() {
+                component = this,
+                onItem = onItem,
             }, onComplete);
 
         }

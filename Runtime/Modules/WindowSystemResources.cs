@@ -266,7 +266,7 @@ namespace UnityEngine.UI.Windows.Modules {
             }
             
             switch (resource.type) {
-
+                
                 case Resource.Type.Manual: {
 
                     this.CompleteTask(handler, resource, default);

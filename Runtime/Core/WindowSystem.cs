@@ -99,11 +99,21 @@ namespace UnityEngine.UI.Windows {
         internal System.Action callback;
 
     }
+    
+    internal struct TransitionInternalData {
+
+        public WindowObject context;
+        public TransitionParametersData data;
+
+    }
 
     [System.Serializable]
     public struct TransitionParameters {
 
         internal TransitionParametersData data;
+
+        private System.Action<WindowObject, TransitionParameters> contextCallback;
+        private TransitionInternalData internalData;
 
         public static TransitionParameters Default => new TransitionParameters() {
             data = new TransitionParametersData() { resetAnimation = false },
@@ -111,7 +121,16 @@ namespace UnityEngine.UI.Windows {
 
         public void RaiseCallback() {
 
+            if (this.contextCallback != null) this.contextCallback.Invoke(this.internalData.context, new TransitionParameters() { data = this.internalData.data });
             if (this.data.callback != null) this.data.callback.Invoke();
+
+        }
+
+        public TransitionParameters ReplaceResetAnimation(bool state) {
+
+            var instance = this;
+            instance.data.resetAnimation = state;
+            return instance;
 
         }
 
@@ -127,12 +146,23 @@ namespace UnityEngine.UI.Windows {
 
             var instance = this;
             instance.data.callback = callback;
+            instance.contextCallback = null;
+            return instance;
+
+        }
+
+        public TransitionParameters ReplaceCallbackWithContext(System.Action<WindowObject, TransitionParameters> callback, WindowObject context, TransitionParameters other) {
+
+            var instance = this;
+            instance.data.callback = null;
+            instance.contextCallback = callback;
+            instance.internalData = new TransitionInternalData() { context = context, data = other.data };
             return instance;
 
         }
 
     }
-
+    
     public enum WindowEvent {
 
         None = 0,

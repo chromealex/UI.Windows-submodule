@@ -43,7 +43,7 @@ namespace UnityEngine.UI.Windows.Components {
 
     }
     
-    public class TextComponent : WindowComponent, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
+    public partial class TextComponent : WindowComponent, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
 
         System.Type ISearchComponentByTypeEditor.GetSearchType() { return typeof(TextComponentModule); }
         IList ISearchComponentByTypeSingleEditor.GetSearchTypeArray() { return this.componentModules.modules;}
@@ -415,7 +415,7 @@ namespace UnityEngine.UI.Windows.Components {
             #endif
 
         }
-        
+
         public override void ValidateEditor() {
             
             base.ValidateEditor();

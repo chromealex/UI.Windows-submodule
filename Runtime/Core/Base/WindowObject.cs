@@ -930,9 +930,7 @@ namespace UnityEngine.UI.Windows {
 
             var cObj = this;
             var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallback(() => {
-                WindowSystem.SetShown(cObj, cParams);
-            });
+            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetShown, cObj, cParams);
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
@@ -957,9 +955,7 @@ namespace UnityEngine.UI.Windows {
 
             var cObj = this;
             var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallback(() => {
-                WindowSystem.SetShown(cObj, cParams);
-            });
+            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetShown, cObj, cParams);
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
@@ -984,9 +980,7 @@ namespace UnityEngine.UI.Windows {
             
             var cObj = this;
             var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallback(() => {
-                WindowSystem.SetHidden(cObj, cParams);
-            });
+            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetHidden, cObj, cParams);
             WindowSystem.HideInstance(this, cbParameters);
 
         }

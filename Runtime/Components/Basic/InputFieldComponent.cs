@@ -41,6 +41,25 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
+        public void Clear() {
+
+            this.inputField.text = string.Empty;
+
+        }
+
+        public bool IsFocused() {
+
+            return this.inputField.isFocused;
+
+        }
+
+        public void SetFocus() {
+            
+            this.inputField.Select();
+            this.inputField.ActivateInputField();
+            
+        }
+
         public InputField GetSource() {
 
             return this.inputField;

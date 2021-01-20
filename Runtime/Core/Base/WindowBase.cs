@@ -29,6 +29,11 @@ namespace UnityEngine.UI.Windows {
         private float currentDepth;
         private float currentZDepth;
 
+        public virtual void OnParametersPass() {
+        }
+        
+        public virtual void OnEmptyPass() {}
+
         public WindowSystem.WindowItem GetBreadcrumbPrevious() {
 
             return this.breadcrumb.GetPreviousWindow(this);

@@ -215,6 +215,8 @@ namespace UnityEngine.UI.Windows {
         private Dictionary<int, WindowBase> topWindowsByLayer = new Dictionary<int, WindowBase>();
         private Dictionary<int, WindowBase> hashToPrefabs = new Dictionary<int, WindowBase>();
 
+        private WindowBase consoleWindowInstance;
+        
         private int nextWindowId;
         
         private static WindowSystem _instance;
@@ -279,6 +281,26 @@ namespace UnityEngine.UI.Windows {
         
         public void Update() {
 
+            if (Input.GetKeyDown(KeyCode.BackQuote) == true) {
+
+                if (this.consoleWindowInstance == null) {
+
+                    WindowSystem.Show<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(x => {
+
+                        this.consoleWindowInstance = x;
+                        x.OnEmptyPass();
+
+                    });
+
+                } else {
+                    
+                    this.consoleWindowInstance.Hide();
+                    this.consoleWindowInstance = null;
+                    
+                }
+
+            }
+            
             #if ENABLE_INPUT_SYSTEM
             if (UnityEngine.InputSystem.Mouse.current.leftButton.wasReleasedThisFrame == true ||
                 UnityEngine.InputSystem.Mouse.current.rightButton.wasReleasedThisFrame == true ||
@@ -877,11 +899,7 @@ namespace UnityEngine.UI.Windows {
 
         public static void Show<T>(WindowBase source, System.Action<T> onInitialized = null) where T : WindowBase {
 
-            WindowSystem.instance.Show_INTERNAL(source, new InitialParameters(), (x) => {
-
-                if (onInitialized != null) onInitialized.Invoke((T)x);
-
-            });
+            WindowSystem.instance.Show_INTERNAL(source, new InitialParameters(), onInitialized);
 
         }
 
@@ -899,11 +917,7 @@ namespace UnityEngine.UI.Windows {
 
         public static void Show<T>(WindowBase source, InitialParameters initialParameters, System.Action<T> onInitialized = null) where T : WindowBase {
 
-            WindowSystem.instance.Show_INTERNAL(source, initialParameters, (x) => {
-
-                if (onInitialized != null) onInitialized.Invoke((T)x);
-
-            });
+            WindowSystem.instance.Show_INTERNAL(source, initialParameters, onInitialized);
 
         }
 
@@ -1042,15 +1056,11 @@ namespace UnityEngine.UI.Windows {
         private void Show_INTERNAL<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null) where T : WindowBase {
 
             var source = this.GetSource<T>();
-            this.Show_INTERNAL(source, initialParameters, (x) => {
-
-                if (onInitialized != null) onInitialized.Invoke((T)x);
-
-            });
+            this.Show_INTERNAL(source, initialParameters, onInitialized);
 
         }
 
-        private void Show_INTERNAL(WindowBase source, InitialParameters initialParameters, System.Action<WindowBase> onInitialized) {
+        private void Show_INTERNAL<T>(WindowBase source, InitialParameters initialParameters, System.Action<T> onInitialized) where T : WindowBase {
 
             if (source == null) {
 
@@ -1070,7 +1080,15 @@ namespace UnityEngine.UI.Windows {
 
                 if (this.IsOpenedBySource_INTERNAL(source, out instance, maximumState: ObjectState.Shown) == true) {
 
-                    onInitialized.Invoke(instance);
+                    if (onInitialized != null) {
+                        
+                        onInitialized.Invoke((T)instance);
+                        
+                    } else {
+                        
+                        instance.OnEmptyPass();
+                        
+                    }
                     return;
 
                 }
@@ -1146,7 +1164,15 @@ namespace UnityEngine.UI.Windows {
 
                 instance.DoInit();
 
-                if (onInitialized != null) onInitialized.Invoke(instance);
+                if (onInitialized != null) {
+                    
+                    onInitialized.Invoke((T)instance);
+                    
+                } else {
+                    
+                    instance.OnEmptyPass();
+                    
+                }
 
                 instance.ShowInternal();
 

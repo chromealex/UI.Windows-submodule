@@ -35,6 +35,13 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
     /*[Help("Test module")]
     public class Test : ConsoleModule {
 
+        [Help("Prints help bool")]
+        public void Z(bool a) {
+
+            Debug.Log("Z: " + a);
+
+        }
+
         [Help("Prints help string")]
         public void Help1() {
 
@@ -87,6 +94,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         private int currentIndex;
 
         public bool autoConnectLogs = true;
+        private string helpInitPrint;
         
         public void OnParametersPass(char openCloseChar) {
 
@@ -117,6 +125,23 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 Application.logMessageReceived += this.OnAddLog;
 
             }
+
+            this.helpInitPrint = this.GetInitHelp();
+
+        }
+
+        private string GetInitHelp() {
+
+            return "<color=#0f0>Welcome to UI.Windows Console</color>\n------------------\n\tPrint `<color=#0f0>help</color>` to show all modules.\n\tPrint `<color=#0f0>[moduleName] help</color>` to show module's help.\n\tPrint `<color=#0f0>[moduleName] [methodName] arg1 arg2 ...</color>` to call method of the module.\n------------------";
+
+        }
+
+        public override void OnShowBegin() {
+            
+            base.OnShowBegin();
+
+            if (string.IsNullOrEmpty(this.helpInitPrint) == false) this.AddLine(this.helpInitPrint);
+            this.helpInitPrint = string.Empty;
 
         }
 
@@ -309,6 +334,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             if (type == typeof(ulong)) return "ulong";
             if (type == typeof(float)) return "float";
             if (type == typeof(double)) return "double";
+            if (type == typeof(bool)) return "bool";
             
             return type.ToString();
             
@@ -316,6 +342,18 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         
         private object ConvertArg(string arg, System.Type targetType) {
 
+            if (targetType == typeof(bool)) {
+
+                if (arg.Trim().ToLower() == "true" || arg.Trim().ToLower() == "1") {
+
+                    return true;
+
+                }
+                
+                return false;
+
+            }
+            
             return System.Convert.ChangeType(arg, targetType);
             
         }

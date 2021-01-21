@@ -384,6 +384,12 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
+        public override WindowLayoutPreferences GetCurrentLayoutPreferences() {
+
+            return this.layouts.GetActive().layoutPreferences;
+
+        }
+
         public override Canvas GetCanvas() {
 
             return this.layouts.GetActive().GetCanvas();

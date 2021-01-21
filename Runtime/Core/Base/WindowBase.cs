@@ -221,6 +221,12 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public virtual WindowLayoutPreferences GetCurrentLayoutPreferences() {
+
+            return null;
+
+        }
+
     }
 
 }

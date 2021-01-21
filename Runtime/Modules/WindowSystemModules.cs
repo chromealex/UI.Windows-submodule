@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace UnityEngine.UI.Windows.Modules {
 
@@ -54,6 +52,10 @@ namespace UnityEngine.UI.Windows.Modules {
                     instance = WindowSystem.GetPools().Spawn(asset, window.transform);
                     instance.Setup(window);
                     instance.SetCanvasOrder(window.GetCanvasOrder() + order);
+
+                    var layoutPreferences = window.GetCurrentLayoutPreferences();
+                    if (layoutPreferences != null) layoutPreferences.Apply(instance.canvasScaler);
+
                     window.RegisterSubObject(instance);
 
                 });

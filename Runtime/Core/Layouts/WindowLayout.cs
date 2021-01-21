@@ -100,6 +100,8 @@ namespace UnityEngine.UI.Windows {
 
             }
 
+            this.SetCanvasOrder(this.order);
+
         }
 
         internal void ApplyRenderMode() {

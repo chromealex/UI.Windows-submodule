@@ -54,7 +54,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     instance.SetCanvasOrder(window.GetCanvasOrder() + order);
 
                     var layoutPreferences = window.GetCurrentLayoutPreferences();
-                    if (layoutPreferences != null) layoutPreferences.Apply(instance.canvasScaler);
+                    if (layoutPreferences != null && instance.canvasScaler != null) layoutPreferences.Apply(instance.canvasScaler);
 
                     window.RegisterSubObject(instance);
 

@@ -81,6 +81,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             public string line;
             public LogType logType;
+            public bool isCommand;
 
         }
         
@@ -199,6 +200,12 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        public void ReplaceInput(string str) {
+            
+            this.inputField.SetText(str);
+            
+        }
+
         private void OnEditEnd(string text) {
 
             if (Input.GetKeyDown(KeyCode.KeypadEnter) == true || Input.GetKeyDown(KeyCode.Return)) {
@@ -211,6 +218,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         private void MoveUp() {
 
+            if (this.commands.Count == 0) return;
             --this.currentIndex;
             if (this.currentIndex < 0) this.currentIndex = 0;
             this.inputField.SetText(this.commands[this.currentIndex].str);
@@ -219,6 +227,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         private void MoveDown() {
 
+            if (this.commands.Count == 0) return;
             ++this.currentIndex;
             if (this.currentIndex >= this.commands.Count) this.currentIndex = this.commands.Count - 1;
             this.inputField.SetText(this.commands[this.currentIndex].str);
@@ -259,19 +268,26 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             this.moduleItems.Add(module);
             
         }
+
+        public void AddHR() {
+
+            this.AddLine("<color=#777>--------------------------------------</color>");
+
+        }
         
-        public void AddLine(string text, LogType logType = LogType.Log) {
+        public void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false) {
             
             this.drawItems.Add(new DrawItem() {
                 line = text,
-                logType = logType
+                logType = logType,
+                isCommand = isCommand,
             });
             
         }
 
         public void RunCommand(CommandItem command) {
 
-            this.AddLine(command.str);
+            this.AddLine(command.str, isCommand: true);
 
             var run = false;
             var module = this.GetModule(command);
@@ -383,7 +399,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
             this.AddLine(this.GetHelpString(module.GetType()).Trim());
             this.AddLine("Module methods:");
-            this.AddLine("<color=#777>--------------------------------------</color>");
+            this.AddHR();
             var methods = module.GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
             foreach (var method in methods) {
                 
@@ -394,20 +410,20 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 this.AddLine("\t<color=#3af>" + method.Name.ToLower() + "</color>(" + string.Join(", ", parameters) + ")" + this.GetHelpString(method.GetType()));
 
             }
-            this.AddLine("<color=#777>--------------------------------------</color>");
+            this.AddHR();
 
         }
 
         public void PrintHelp() {
             
             this.AddLine("Modules:");
-            this.AddLine("<color=#777>--------------------------------------</color>");
+            this.AddHR();
             foreach (var module in this.moduleItems) {
                 
                 this.AddLine("\t<color=#3af>" + module.GetType().Name.ToLower() + "</color>" + this.GetHelpString(module.GetType()));
                 
             }
-            this.AddLine("<color=#777>--------------------------------------</color>");
+            this.AddHR();
             
         }
 
@@ -431,7 +447,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             if (cmd == "modulesample") {
                 
-                this.AddLine(cmd);
+                this.AddLine(cmd, isCommand: true);
                 var itemHelp = new CommandItem() {
                     str = cmd,
                     moduleName = null,
@@ -448,7 +464,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
             if (cmd == "help") {
 
-                this.AddLine(cmd);
+                this.AddLine(cmd, isCommand: true);
                 var itemHelp = new CommandItem() {
                     str = cmd,
                     moduleName = null,
@@ -534,11 +550,16 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 
             }
             
-            this.list.SetItems<TextComponent, ClosureParameters>(this.drawItems.Count, (component, parameters) => {
+            this.list.SetItems<ButtonComponent, ClosureParameters>(this.drawItems.Count, (component, parameters) => {
 
                 var item = parameters.data[parameters.index];
-                component.SetText(item.line);
-                component.SetColor(ConsoleScreen.GetColorByLogType(item.logType));
+                var text = component.Get<TextComponent>();
+                text.SetText(item.isCommand == true ? "<color=#777><b>></b></color> " : string.Empty, item.line);
+                text.SetColor(item.isCommand == true ? new Color(0.15f, 0.6f, 1f) : ConsoleScreen.GetColorByLogType(item.logType));
+                component.SetCallback(() => {
+                    this.ReplaceInput(item.line);
+                });
+                component.SetInteractable(item.isCommand);
                 component.Show();
                 
             }, new ClosureParameters() {

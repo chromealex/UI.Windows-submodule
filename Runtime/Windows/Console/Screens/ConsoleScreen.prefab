@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1960064754754543746}
   - component: {fileID: 1124736939702713608}
   - component: {fileID: 2012446584845969934}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: ConsoleScreen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -49,7 +49,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bd59607f41fc40db8699a0014c282a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  windowId: 553029152
+  windowId: 195971152
   window: {fileID: 0}
   rectTransform: {fileID: 1960064754754543746}
   hasObjectCanvas: 0

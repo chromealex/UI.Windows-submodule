@@ -130,12 +130,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
-        private string GetInitHelp() {
-
-            return "<color=#0f0>Welcome to UI.Windows Console</color>\n------------------\n\tPrint `<color=#0f0>help</color>` to show all modules.\n\tPrint `<color=#0f0>[moduleName] help</color>` to show module's help.\n\tPrint `<color=#0f0>[moduleName] [methodName] arg1 arg2 ...</color>` to call method of the module.\n------------------";
-
-        }
-
         public override void OnShowBegin() {
             
             base.OnShowBegin();
@@ -151,6 +145,33 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
             Application.logMessageReceived -= this.OnAddLog;
             
+        }
+
+        private string GetInitHelp() {
+
+            var welcomeMessage = "<color=#0f0>Welcome to UI.Windows Console</color>\n" +
+                                 "------------------------------------\n" +
+                                 "\t<color=#3af>help</color>\t\t\t\t\t\t\t\t\tshow all modules.\n" +
+                                 "\t<color=#3af>[module] help</color>\t\t\t\t\t\tshow module's help.\n" +
+                                 "\t<color=#3af>[module] [method] arg1 arg2 ...</color>\t\tcall method of the module.\n" +
+                                 "\t<color=#3af>modulesample</color>\t\t\t\t\t\t\tshow module sample text.\n" +
+                                 "------------------------------------\n";
+            
+            return welcomeMessage;
+
+        }
+
+        public void PrintModuleSample() {
+            
+            this.AddLine("Check console log for more details.");
+            var file = Resources.Load<TextAsset>("uiws-resource-console-modulesample");
+            if (file != null) {
+
+                var text = file.text;
+                Debug.Log(text);
+
+            }
+
         }
 
         private void OnAddLog(string condition, string trace, LogType type) {
@@ -362,7 +383,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
             this.AddLine(this.GetHelpString(module.GetType()).Trim());
             this.AddLine("Module methods:");
-            this.AddLine("<color=#777>-------------------</color>");
+            this.AddLine("<color=#777>--------------------------------------</color>");
             var methods = module.GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
             foreach (var method in methods) {
                 
@@ -370,23 +391,23 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 
                 var pars = method.GetParameters();
                 var parameters = pars.Select(x => this.TypeToString(x.ParameterType) + " " + x.Name).ToArray();
-                this.AddLine("\t" + method.Name.ToLower() + "(" + string.Join(", ", parameters) + ")" + this.GetHelpString(method.GetType()));
+                this.AddLine("\t<color=#3af>" + method.Name.ToLower() + "</color>(" + string.Join(", ", parameters) + ")" + this.GetHelpString(method.GetType()));
 
             }
-            this.AddLine("<color=#777>-------------------</color>");
+            this.AddLine("<color=#777>--------------------------------------</color>");
 
         }
 
         public void PrintHelp() {
             
             this.AddLine("Modules:");
-            this.AddLine("<color=#777>-------------------</color>");
+            this.AddLine("<color=#777>--------------------------------------</color>");
             foreach (var module in this.moduleItems) {
                 
-                this.AddLine("\t" + module.GetType().Name.ToLower() + this.GetHelpString(module.GetType()));
+                this.AddLine("\t<color=#3af>" + module.GetType().Name.ToLower() + "</color>" + this.GetHelpString(module.GetType()));
                 
             }
-            this.AddLine("<color=#777>-------------------</color>");
+            this.AddLine("<color=#777>--------------------------------------</color>");
             
         }
 
@@ -408,6 +429,23 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             var cmd = command.Trim();
             if (string.IsNullOrEmpty(cmd) == true) return;
 
+            if (cmd == "modulesample") {
+                
+                this.AddLine(cmd);
+                var itemHelp = new CommandItem() {
+                    str = cmd,
+                    moduleName = null,
+                    methodName = null,
+                    argsCount = 0,
+                    args = null,
+                };
+                this.commands.Add(itemHelp);
+                this.PrintModuleSample();
+                this.ClearInput();
+                return;
+
+            }
+            
             if (cmd == "help") {
 
                 this.AddLine(cmd);

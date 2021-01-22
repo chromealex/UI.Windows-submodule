@@ -10,15 +10,15 @@ namespace UnityEngine.UI.Windows {
         
         private HashSet<CheckboxComponent> checkboxes = new HashSet<CheckboxComponent>();
         
-        public override void OnElementAdded(WindowComponent windowComponent) {
-            base.OnElementAdded(windowComponent);
+        public override void OnComponentAdded(WindowComponent windowComponent) {
+            base.OnComponentAdded(windowComponent);
             if (windowComponent is CheckboxComponent checkbox && this.checkboxes.Add(checkbox) == true) {
                 checkbox.SetGroup(this);
             }
         }
         
-        public override void OnElementRemoved(WindowComponent windowComponent) {
-            base.OnElementAdded(windowComponent);
+        public override void OnComponentRemoved(WindowComponent windowComponent) {
+            base.OnComponentAdded(windowComponent);
             if (windowComponent is CheckboxComponent checkbox && this.checkboxes.Remove(checkbox) == true) {
                 checkbox.SetGroup(null);
             }

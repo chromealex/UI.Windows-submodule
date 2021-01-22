@@ -208,9 +208,9 @@ namespace UnityEngine.UI.Windows {
 	        
         }
         
-        public override void OnElementsChanged() {
+        public override void OnComponentsChanged() {
 	        
-	        base.OnElementsChanged();
+	        base.OnComponentsChanged();
 
 	        this.CollectChildren();
 	        this.Arrange();

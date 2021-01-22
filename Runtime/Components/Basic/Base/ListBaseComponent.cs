@@ -246,7 +246,7 @@ namespace UnityEngine.UI.Windows.Components {
                 var module = this.componentModules.modules[i] as ListComponentModule;
                 if (module == null) continue;
                 
-                module.OnElementsChanged();
+                module.OnComponentsChanged();
 
             }
             
@@ -280,6 +280,12 @@ namespace UnityEngine.UI.Windows.Components {
 
         public virtual void AddItem<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent {
 
+            this.AddItemInternal(source, closure, onComplete);
+
+        }
+
+        internal void AddItemInternal<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent {
+            
             var resources = WindowSystem.GetResources();
             var pools = WindowSystem.GetPools();
             Coroutines.Run(resources.LoadAsync<T>(this, source, (asset) => {
@@ -294,7 +300,7 @@ namespace UnityEngine.UI.Windows.Components {
                 if (onComplete != null) onComplete.Invoke(instance, closure);
 
             }));
-            
+
         }
 
         public virtual void RemoveAt(int index) {
@@ -408,7 +414,7 @@ namespace UnityEngine.UI.Windows.Components {
                 var index = i + offset;
                 closureInner.index = index;
                 
-                this.AddItem<T, EmitClosure<T, TClosure>>(source, closureInner, (item, c) => {
+                this.AddItemInternal<T, EmitClosure<T, TClosure>>(source, closureInner, (item, c) => {
 
                     c.data.index = c.index;
                     c.onItem.Invoke(item, c.data);
@@ -428,15 +434,23 @@ namespace UnityEngine.UI.Windows.Components {
         }
         
         private void NotifyModulesComponentAdded(WindowComponent component) {
+            
             foreach (var module in this.componentModules.modules) {
-                (module as ListComponentModule)?.OnElementAdded(component);
+            
+                (module as ListComponentModule)?.OnComponentAdded(component);
+                
             }
+            
         }
         
         private void NotifyModulesComponentRemoved(WindowComponent component) {
+            
             foreach (var module in this.componentModules.modules) {
-                (module as ListComponentModule)?.OnElementRemoved(component);
+                
+                (module as ListComponentModule)?.OnComponentRemoved(component);
+                
             }
+            
         }
 
     }

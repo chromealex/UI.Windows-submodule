@@ -11,7 +11,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
     public abstract class ConsoleModule : IConsoleModule {
 
         public ConsoleScreen screen;
-
+        
         public void Help() {
 
             this.screen.PrintHelp(this);
@@ -31,8 +31,20 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         }
 
     }
-    
-    /*[Help("Test module")]
+
+    public class AliasAttribute : System.Attribute {
+
+        public string text;
+
+        public AliasAttribute(string text) {
+            
+            this.text = text;
+            
+        }
+
+    }
+
+    [Help("Test module")][Alias("T")]
     public class Test : ConsoleModule {
 
         [Help("Prints help bool")]
@@ -42,7 +54,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
-        [Help("Prints help string")]
+        [Help("Prints help string")][Alias("A")]
         public void Help1() {
 
             Debug.Log("Help");
@@ -63,7 +75,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
-    }*/
+    }
 
     public class ConsoleScreen : LayoutWindowType {
 
@@ -234,6 +246,12 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        private void AutoComplete() {
+            
+            this.ApplyCommand(this.inputField.GetText(), autoComplete: true);
+            
+        }
+
         private char OnChar(string arg1, int arg2, char arg3) {
 
             if (arg3 == this.openCloseChar) {
@@ -243,23 +261,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             }
             
             return arg3;
-
-        }
-
-        private IConsoleModule GetModule(CommandItem command) {
-
-            var moduleName = command.moduleName.ToLower();
-            foreach (var module in this.moduleItems) {
-
-                if (module.GetType().Name.ToLower() == moduleName) {
-
-                    return module;
-
-                }
-                
-            }
-            
-            return null;
 
         }
 
@@ -285,6 +286,14 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
         }
 
+        private string GetAlias(System.Reflection.ICustomAttributeProvider methodInfo) {
+
+            var aliasAttrs = methodInfo.GetCustomAttributes(typeof(AliasAttribute), false);
+            if (aliasAttrs.Length == 0) return string.Empty;
+            return (aliasAttrs[0] as AliasAttribute)?.text.ToLower();
+
+        }
+
         public void RunCommand(CommandItem command) {
 
             this.AddLine(command.str, isCommand: true);
@@ -301,11 +310,16 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                 var methodName = command.methodName.ToLower();
                 var methods = module.GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                System.Reflection.MethodInfo methodFound = null;
                 foreach (var method in methods) {
 
                     if (this.IsValidMethod(method) == false) continue;
 
-                    if (method.Name.ToLower() == methodName) {
+                    var alias = this.GetAlias(method);
+                    
+                    if (method.Name.ToLower() == methodName || alias == methodName) {
+
+                        methodFound = method;
 
                         var pars = method.GetParameters();
                         if (pars.Length == command.argsCount) {
@@ -338,7 +352,15 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                 if (run == false) {
 
-                    this.AddLine($"Module `{command.moduleName}` has no method with parameters length = {command.argsCount}", LogType.Warning);
+                    if (methodFound == null) {
+                        
+                        this.AddLine($"Module `{command.moduleName}` has no method `{methodName}`.", LogType.Warning);
+
+                    } else {
+
+                        this.AddLine($"Module `{command.moduleName}` has no method `{methodName}` with parameters length = {command.argsCount} (Required length {methodFound.GetParameters().Length})", LogType.Warning);
+
+                    }
 
                 }
 
@@ -397,7 +419,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         public void PrintHelp(IConsoleModule module) {
             
-            this.AddLine(this.GetHelpString(module.GetType()).Trim());
+            this.AddLine(this.GetHelpString(string.Empty, module.GetType()).Trim());
             this.AddLine("Module methods:");
             this.AddHR();
             var methods = module.GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
@@ -407,43 +429,165 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 
                 var pars = method.GetParameters();
                 var parameters = pars.Select(x => this.TypeToString(x.ParameterType) + " " + x.Name).ToArray();
-                this.AddLine("\t<color=#3af>" + method.Name.ToLower() + "</color>(" + string.Join(", ", parameters) + ")" + this.GetHelpString(method.GetType()));
+                var parsStr = string.Join(", ", parameters);
+                this.AddLine(this.GetSpace(4) + "<color=#3af>" + method.Name.ToLower() + "</color>(" + parsStr + ")" + this.GetHelpString(this.GetSpace(4) + method.Name.ToLower() + "(" + parsStr + ")", method));
 
             }
             this.AddHR();
 
         }
 
-        public void PrintHelp() {
+        public void PrintHelp(List<IConsoleModule> modules) {
             
             this.AddLine("Modules:");
             this.AddHR();
-            foreach (var module in this.moduleItems) {
+            foreach (var module in modules) {
                 
-                this.AddLine("\t<color=#3af>" + module.GetType().Name.ToLower() + "</color>" + this.GetHelpString(module.GetType()));
+                this.AddLine(this.GetSpace(4) + "<color=#3af>" + module.GetType().Name.ToLower() + "</color>" + this.GetHelpString(this.GetSpace(4) + module.GetType().Name.ToLower(), module.GetType()));
                 
             }
             this.AddHR();
             
         }
 
-        private string GetHelpString(System.Type type) {
+        public void PrintHelp(string moduleName, List<System.Reflection.MethodInfo> methods) {
+            
+            this.AddLine("Module " + moduleName);
+            this.AddLine("Methods:");
+            this.AddHR();
+            foreach (var methodInfo in methods) {
+                
+                this.AddLine(this.GetSpace(4) + "<color=#3af>" + methodInfo.Name.ToLower() + "</color>" + this.GetHelpString(this.GetSpace(4) + methodInfo.Name.ToLower(), methodInfo));
+                
+            }
+            this.AddHR();
+            
+        }
+
+        private string GetHelpString(string callStr, System.Reflection.ICustomAttributeProvider type) {
+
+            var length = callStr.Length;
+            var str = string.Empty;
             
             var attrs = type.GetCustomAttributes(typeof(HelpAttribute), false);
             if (attrs.Length > 0) {
 
-                return "\t<color=#999>" + ((HelpAttribute)attrs[0]).text + "</color>";
+                str += this.GetSpace(4) + "<color=#999>" + ((HelpAttribute)attrs[0]).text + "</color>";
 
             }
 
-            return string.Empty;
+            var attrsAlias = type.GetCustomAttributes(typeof(AliasAttribute), false);
+            if (attrsAlias.Length > 0) {
+
+                str += "\n" + this.GetSpace(length + 4) + "Alias: <color=#3af>" + ((AliasAttribute)attrsAlias[0]).text + "</color>";
+
+            }
+
+            return str;
+
+        }
+
+        private string GetSpace(int length) {
+
+            var str = string.Empty;
+            for (int i = 0; i < length; ++i) str += " ";
+            return str;
+
+        }
+
+        private IConsoleModule GetModule(CommandItem command) {
+
+            return this.GetModule(command.moduleName);
+
+        }
+
+        private IConsoleModule GetModule(string moduleName) {
+
+            moduleName = moduleName.ToLower();
+            foreach (var module in this.moduleItems) {
+
+                var alias = this.GetAlias(module.GetType());
+                if (module.GetType().Name.ToLower() == moduleName || alias == moduleName) {
+
+                    return module;
+
+                }
+                
+            }
+            
+            return null;
+
+        }
+
+        private List<System.Reflection.MethodInfo> GetMethodsByPart(string moduleName, string methodNamePart, out string first) {
+
+            first = methodNamePart;
+
+            var list = new List<System.Reflection.MethodInfo>();
+            var module = this.GetModule(moduleName);
+            if (module != null) {
+
+                var methods = module.GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                foreach (var method in methods) {
+                    
+                    if (this.IsValidMethod(method) == false) continue;
+
+                    var alias = this.GetAlias(method);
+                    if (method.Name.ToLower().StartsWith(methodNamePart) == true) {
+
+                        if (list.Contains(method) == false) list.Add(method);
+                        first = method.Name.ToLower();
+
+                    }
+                    
+                    if (alias.StartsWith(methodNamePart) == true) {
+
+                        if (list.Contains(method) == false) list.Add(method);
+                        first = alias;
+
+                    }
+
+                }
+                
+            }
+            
+            return list;
 
         }
         
-        public void ApplyCommand(string command) {
+        private List<IConsoleModule> GetModulesByPart(string moduleNamePart, out string first) {
+
+            moduleNamePart = moduleNamePart.ToLower();
+            first = moduleNamePart;
+            
+            var list = new List<IConsoleModule>();
+            foreach (var module in this.moduleItems) {
+
+                var alias = this.GetAlias(module.GetType());
+                var name = module.GetType().Name.ToLower();
+                if (name.StartsWith(moduleNamePart) == true) {
+                    
+                    if (list.Contains(module) == false) list.Add(module);
+                    first = name;
+
+                }
+                
+                if (alias.StartsWith(moduleNamePart) == true) {
+
+                    if (list.Contains(module) == false) list.Add(module);
+                    first = alias;
+
+                }
+                
+            }
+            
+            return list;
+
+        }
+        
+        public void ApplyCommand(string command, bool autoComplete = false) {
 
             var cmd = command.Trim();
-            if (string.IsNullOrEmpty(cmd) == true) return;
 
             if (cmd == "modulesample") {
                 
@@ -462,7 +606,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             }
             
-            if (cmd == "help") {
+            if (cmd == "help" || (string.IsNullOrEmpty(cmd) == true && autoComplete == true)) {
 
                 this.AddLine(cmd, isCommand: true);
                 var itemHelp = new CommandItem() {
@@ -473,17 +617,59 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                     args = null,
                 };
                 this.commands.Add(itemHelp);
-                this.PrintHelp();
+                this.PrintHelp(this.moduleItems);
                 this.ClearInput();
                 return;
                 
             }
             
+            if (string.IsNullOrEmpty(cmd) == true) return;
+            
             var splitted = cmd.Split(new [] { " " }, System.StringSplitOptions.RemoveEmptyEntries);
-            if (splitted.Length < 2) return;
+            if (splitted.Length < 2) {
+
+                if (autoComplete == true) {
+                    
+                    var moduleNamePart = splitted[0];
+                    var modules = this.GetModulesByPart(moduleNamePart, out var first);
+                    if (modules.Count == 1) {
+                        
+                        // Auto complete
+                        this.ReplaceInput(first + " ");
+                        
+                    } else {
+                        
+                        // Print all variants
+                        this.PrintHelp(modules);
+                        
+                    }
+                    
+                }
+                return;
+                
+            }
             
             var moduleName = splitted[0];
             var methodName = splitted[1];
+            if (autoComplete == true) {
+
+                var methodNamePart = methodName;
+                var methods = this.GetMethodsByPart(moduleName, methodNamePart, out var first);
+                if (methods.Count == 1) {
+                        
+                    // Auto complete
+                    this.ReplaceInput(moduleName + " " + first + " ");
+                        
+                } else {
+                        
+                    // Print all variants
+                    this.PrintHelp(moduleName, methods);
+                        
+                }
+                return;
+
+            }
+            
             var argsCount = splitted.Length - 2;
             var args = new string[argsCount];
             System.Array.Copy(splitted, 2, args, 0, argsCount);
@@ -541,6 +727,12 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             if (Input.GetKeyDown(KeyCode.DownArrow) == true) {
 
                 this.MoveDown();
+
+            }
+
+            if (Input.GetKeyDown(KeyCode.Tab) == true) {
+
+                this.AutoComplete();
 
             }
 

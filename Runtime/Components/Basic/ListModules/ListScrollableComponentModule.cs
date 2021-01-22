@@ -176,9 +176,9 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public override void OnElementsChanged() {
+        public override void OnComponentsChanged() {
             
-            base.OnElementsChanged();
+            base.OnComponentsChanged();
             
             if (this.scrollRect != null) this.OnScrollValueChanged(this.scrollRect.normalizedPosition);
 

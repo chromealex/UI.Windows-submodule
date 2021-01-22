@@ -70,6 +70,32 @@ namespace UnityEngine.UI.Windows {
 	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.ArrayBoundsChecks, false),
 	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.DivideByZeroChecks, false)]
 	#endif
+	public static class PoolClassCustom<T> where T : class {
+
+		private static PoolInternalBase poolCustom = new PoolInternalBase(null, null);
+
+		public static TCustom Spawn<TCustom>() where TCustom : class, T, new() {
+		    
+			var objBase = PoolClassCustom<T>.poolCustom.Spawn();
+			if (objBase != null && (objBase is TCustom) == false) PoolClassCustom<T>.poolCustom.Recycle(objBase);
+			if ((objBase as TCustom) == null) return new TCustom();
+			return (TCustom)objBase;
+
+		}
+
+		public static void Recycle<TCustom>(TCustom instance) where TCustom : class, T {
+		    
+			PoolClassCustom<T>.poolCustom.Recycle(instance);
+		    
+		}
+
+	}
+
+	#if ECS_COMPILE_IL2CPP_OPTIONS
+	[Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.NullChecks, false),
+	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.ArrayBoundsChecks, false),
+	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.DivideByZeroChecks, false)]
+	#endif
 	public static class PoolClassMainThread<T> where T : class, new() {
 
 		private static PoolInternalBaseNoStackPool pool = new PoolInternalBaseNoStackPool(() => new T(), null);

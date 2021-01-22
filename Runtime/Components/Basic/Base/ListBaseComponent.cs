@@ -360,6 +360,12 @@ namespace UnityEngine.UI.Windows.Components {
                 var delta = count - this.Count;
                 if (delta > 0) {
 
+                    for (int i = 0; i < this.Count; ++i) {
+
+                        closure.index = i;
+                        onItem.Invoke((T)this.items[i], closure);
+                    
+                    }
                     this.Emit(delta, source, onItem, closure, onComplete);
 
                 } else {

@@ -42,6 +42,16 @@ namespace UnityEngine.UI.Windows {
     }
 
     public interface IHasPreview {}
+
+    [System.Flags]
+    public enum DontDestroy {
+
+        Default = 0x0,
+        Ever = -1,
+        
+        OnHideAll = 0x1,
+
+    }
     
     [System.Serializable]
     public struct WindowPreferences {
@@ -63,6 +73,9 @@ namespace UnityEngine.UI.Windows {
         [Tooltip("Take focus on window open and send unfocused event to all windows behind.")]
         public bool takeFocus;
 
+        [Space(10f)]
+        public DontDestroy dontDestroy;
+        
         [Space(10f)]
         [Tooltip("Override canvas render mode.")]
         public UIWSRenderMode renderMode;
@@ -845,6 +858,12 @@ namespace UnityEngine.UI.Windows {
             WindowSystem.HideAll(null, parameters);
 
         }
+
+        private static bool CanBeDestroy(DontDestroy dontDestroy, DontDestroy windowInstanceFlag) {
+
+            return (windowInstanceFlag & dontDestroy) != 0;
+
+        }
         
         public static void HideAll(System.Predicate<WindowBase> predicate, TransitionParameters parameters = default) {
 
@@ -854,7 +873,7 @@ namespace UnityEngine.UI.Windows {
             for (int i = 0; i < count; ++i) {
                 
                 var instance = currentList[i].instance;
-                if (predicate == null || predicate.Invoke(instance) == true) ++filteredCount;
+                if ((predicate == null || predicate.Invoke(instance) == true) && WindowSystem.CanBeDestroy(DontDestroy.OnHideAll, instance.preferences.dontDestroy) == true) ++filteredCount;
 
             }
 
@@ -879,7 +898,7 @@ namespace UnityEngine.UI.Windows {
             for (int i = 0; i < count; ++i) {
 
                 var instance = currentList[i].instance;
-                if (predicate == null || predicate.Invoke(instance) == true) instance.Hide(instanceParameters);
+                if ((predicate == null || predicate.Invoke(instance) == true) && WindowSystem.CanBeDestroy(DontDestroy.OnHideAll, instance.preferences.dontDestroy) == true) instance.Hide(instanceParameters);
                 
             }
 
@@ -956,7 +975,7 @@ namespace UnityEngine.UI.Windows {
                     this.topWindowsByLayer.Remove(layer.value);
                     for (int i = 0; i < this.currentWindows.Count; ++i) {
 
-                        this.TryAddTopWindow(layer, this.currentWindows[i].instance);
+                        this.TryAddTopWindow(this.currentWindows[i].instance.preferences.layer, this.currentWindows[i].instance);
 
                     }
 

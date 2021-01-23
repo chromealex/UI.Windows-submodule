@@ -22,10 +22,34 @@ namespace UnityEngine.UI.Windows.Components {
 
         private bool HasCustomAddModule() {
 
+            foreach (var module in this.componentModules.modules) {
+
+                if (module is ListComponentModule listModule) {
+
+                    if (listModule.HasCustomAdd() == true) return true;
+
+                }
+
+            }
+            
             return false;
 
         }
-        
+
+        public void SetDataSource(IDataSource dataSource) {
+
+            foreach (var module in this.componentModules.modules) {
+
+                if (module is ListComponentModule listModule) {
+
+                    listModule.SetDataSource(dataSource);
+
+                }
+
+            }
+            
+        }
+
         public override void AddItem<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) {
 
             if (this.HasCustomAddModule() == true) {

@@ -44,7 +44,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
     }
 
-    [Help("Test module")][Alias("T")]
+    /*[Help("Test module")][Alias("T")]
     public class Test : ConsoleModule {
 
         [Help("Prints help bool")]
@@ -75,10 +75,11 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
-    }
+    }*/
 
-    public class ConsoleScreen : LayoutWindowType {
+    public class ConsoleScreen : LayoutWindowType, IDataSource {
 
+        [System.Serializable]
         public struct CommandItem {
 
             public string str;
@@ -89,6 +90,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        [System.Serializable]
         public struct DrawItem {
 
             public string line;
@@ -713,6 +715,19 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             return color;
 
         }
+
+        float IDataSource.GetSize(int index) {
+
+            var button = (this.list.source.directRef as ButtonComponent);
+            var layoutGroupPadding = button.GetComponent<LayoutGroup>().padding;
+            var size = this.list.rectTransform.rect.size;
+            size.x -= layoutGroupPadding.left + layoutGroupPadding.right;
+            var text = (button.Get<TextComponent>().graphics as Text);
+            var gen = text.GetGenerationSettings(size);
+            var textGen = text.cachedTextGenerator;
+            return textGen.GetPreferredHeight(this.drawItems[index].line, gen) + layoutGroupPadding.top + layoutGroupPadding.bottom;
+            
+        }
         
         public void LateUpdate() {
 
@@ -742,6 +757,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 
             }
             
+            this.list.SetDataSource(this);
             this.list.SetItems<ButtonComponent, ClosureParameters>(this.drawItems.Count, (component, parameters) => {
 
                 var item = parameters.data[parameters.index];

@@ -29,10 +29,12 @@ namespace UnityEngine.UI.Windows {
             return false;
             
         }
+
+        public virtual void SetDataSource(IDataSource dataSource) { }
+
+        public virtual void AddItem<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {}
         
-        public virtual void AddItem<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) {}
-        
-        public virtual void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action onComplete) {}
+        public virtual void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action onComplete) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {}
         
     }
     

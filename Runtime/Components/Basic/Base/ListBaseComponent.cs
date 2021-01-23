@@ -278,19 +278,24 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public virtual void AddItem<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent {
+        public virtual void AddItem<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
 
             this.AddItemInternal(source, closure, onComplete);
 
         }
 
-        internal void AddItemInternal<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent {
+        internal void AddItemInternal<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
             
             var resources = WindowSystem.GetResources();
             var pools = WindowSystem.GetPools();
             Coroutines.Run(resources.LoadAsync<T>(this, source, (asset) => {
 
-                if (this.loadedAssets.Contains(asset) == false) this.loadedAssets.Add(asset);
+                if (this.loadedAssets.Contains(asset) == false) {
+                    
+                    if (asset.createPool == true) WindowSystem.GetPools().CreatePool(asset);
+                    this.loadedAssets.Add(asset);
+                    
+                }
                 
                 var instance = pools.Spawn(asset, this.GetRoot());
                 this.RegisterSubObject(instance);
@@ -379,9 +384,9 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        private struct EmitClosure<T, TClosure> {
+        private struct EmitClosure<T, TClosure> : IListClosureParameters where T : WindowComponent where TClosure : IListClosureParameters {
 
-            public int index;
+            public int index { get; set; }
             public ListBaseComponent list;
             public int requiredCount;
             public System.Action<T, TClosure> onItem;

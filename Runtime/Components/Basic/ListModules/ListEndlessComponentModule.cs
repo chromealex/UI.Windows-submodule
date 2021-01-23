@@ -11,6 +11,12 @@ namespace UnityEngine.UI.Windows {
         void GetHeight();
 
     }
+
+    public interface IDataSource {
+
+        float GetSize(int index);
+        
+    }
     
     [ComponentModuleDisplayName("Endless List")]
     public class ListEndlessComponentModule : ListComponentModule {
@@ -21,13 +27,16 @@ namespace UnityEngine.UI.Windows {
             
             public abstract void Clear();
 
-            public abstract void UpdateContent();
+            public abstract void UpdateContent(bool forceRebuild = false);
 
         }
 
-        public class Registry<T, TClosure> : RegistryBase {
+        public class Registry<T, TClosure> : RegistryBase where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
 
             private List<Item<T, TClosure>> items = new List<Item<T, TClosure>>();
+            private int loadingCount;
+            private bool isDirty;
+            private bool forceRebuild;
 
             public override void Clear() {
                 
@@ -41,38 +50,170 @@ namespace UnityEngine.UI.Windows {
             
             }
 
-            public override void UpdateContent() {
+            private struct InnerClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
 
-                var allCount = this.module.allCount;
-                var currentVisibleCount = this.module.currentVisibleCount;
-                var requiredVisibleCount = this.module.requiredVisibleCount;
-                //this.module.listComponent.
+                public int index { get; set; }
+
+                public TClosure closure;
+                public Registry<T, TClosure> registry;
+                public Item<T, TClosure> item;
+
+            }
+            
+            public override void UpdateContent(bool forceRebuild = false) {
+
+                ref var currentVisibleCount = ref this.module.currentVisibleCount;
+                ref var requiredVisibleCount = ref this.module.requiredVisibleCount;
+                var fromIndex = this.module.fromIndex;
+                var toIndex = this.module.toIndex;
+                var contentSize = this.module.contentSize;
+
+                var delta = requiredVisibleCount - currentVisibleCount;
+                if (delta > 0) {
+
+                    if (this.loadingCount > 0) return;
+                    
+                    for (int i = 0; i < delta; ++i) {
+
+                        var k = i + fromIndex;
+                        var item = this.items[k];
+                        ++currentVisibleCount;
+                        ++this.loadingCount;
+                        this.module.listComponent.AddItemInternal<T, InnerClosure>(item.source, new InnerClosure() { closure = item.closure, registry = this, item = item }, (obj, closure) => {
+                            --closure.registry.loadingCount;
+                            closure.item.onItem.Invoke(obj, closure.closure);
+                            closure.registry.isDirty = true;
+                            closure.registry.forceRebuild = true;
+                        });
+                        this.isDirty = true;
+
+                    }
+
+                } else if (delta < 0) {
+
+                    if (this.loadingCount > 0) return;
+                    
+                    //Debug.Log("REMOVE ITEMS: " + delta);
+                    currentVisibleCount += delta;
+                    this.module.listComponent.RemoveRange(this.module.listComponent.items.Count + delta, this.module.listComponent.items.Count);
+                    this.isDirty = true;
+                    
+                }
+
+                if (this.isDirty == true || forceRebuild == true) {
+                
+                    // Update
+                    var k = 0;
+                    for (int i = fromIndex; i <= toIndex; ++i) {
+
+                        if (k >= this.module.listComponent.items.Count) break;
+
+                        var instance = this.module.listComponent.items[k];
+                        var item = this.items[i];
+                        var data = this.module.items[i];
+                        
+                        var isLocalDirty = false;
+                        var pos = instance.rectTransform.anchoredPosition;
+                        var posOffset = contentSize - data.accumulatedSize - data.size;
+
+                        if (this.module.direction == Direction.Vertical) {
+
+                            if (UnityEngine.Mathf.Abs(pos.y - posOffset) >= Mathf.Epsilon) {
+
+                                pos.y = posOffset;
+                                pos.x = 0f;
+                                instance.rectTransform.anchoredPosition = pos;
+                                isLocalDirty = true;
+
+                            }
+
+                            var newSize = new Vector2(0f, data.size);
+                            if (instance.rectTransform.sizeDelta != newSize) {
+
+                                instance.rectTransform.sizeDelta = newSize;
+                                isLocalDirty = true;
+
+                            }
+
+                        } else if (this.module.direction == Direction.Horizontal) {
+                            
+                            if (UnityEngine.Mathf.Abs(pos.x - posOffset) >= Mathf.Epsilon) {
+
+                                pos.x = posOffset;
+                                pos.y = 0f;
+                                instance.rectTransform.anchoredPosition = pos;
+                                isLocalDirty = true;
+
+                            }
+
+                            var newSize = new Vector2(data.size, 0f);
+                            if (instance.rectTransform.sizeDelta != newSize) {
+
+                                instance.rectTransform.sizeDelta = newSize;
+                                isLocalDirty = true;
+
+                            }
+
+                        }
+
+                        if (isLocalDirty == true || this.forceRebuild == true || forceRebuild == true) LayoutRebuilder.ForceRebuildLayoutImmediate(instance.rectTransform);
+
+                        item.closure.index = i;
+                        item.onItem.Invoke((T)instance, item.closure);
+                        ++k;
+
+                    }
+                    
+                    this.isDirty = false;
+                    
+                }
 
             }
 
         }
         
-        public struct Item<T, TClosure> {
+        public struct Item<T, TClosure> where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
 
             public Resource source;
             public System.Action<T, TClosure> onItem;
             public TClosure closure;
 
         }
+
+        [System.Serializable]
+        public struct Item {
+
+            public float size;
+            public float accumulatedSize;
+            
+        }
+
+        public enum Direction {
+
+            Vertical,
+            Horizontal,
+
+        }
         
         [Space(10f)]
         [RequiredReference]
         public ScrollRect scrollRect;
+        public Direction direction;
 
         [Space(10f)]
-        public LayoutElement top;
-        public LayoutElement bottom;
-
         public LayoutGroup layoutGroup;
         public List<RegistryBase> registries = new List<RegistryBase>();
+        public float createOffset = 50f;
+
         private int allCount;
         private int currentVisibleCount;
         private int requiredVisibleCount;
+        private int fromIndex;
+        private int toIndex;
+        private float contentSize;
+        private IDataSource dataSource;
+        private Item[] items;
+        private bool forceRebuild;
         
         public override void ValidateEditor() {
             
@@ -81,28 +222,14 @@ namespace UnityEngine.UI.Windows {
             if (this.scrollRect == null) {
 
                 this.scrollRect = this.GetComponentInChildren<ScrollRect>(true);
+                this.scrollRect.vertical = (this.direction == Direction.Vertical);
+                this.scrollRect.horizontal = (this.direction == Direction.Horizontal);
 
             }
 
             if (this.scrollRect != null && this.scrollRect.content != null && this.layoutGroup == null) {
 
                 this.layoutGroup = this.scrollRect.content.GetComponent<LayoutGroup>();
-
-            }
-            
-            if (this.top != null && this.scrollRect != null && this.scrollRect.content != null) {
-
-                var go = new GameObject("--Top--", typeof(LayoutElement));
-                go.transform.SetParent(this.scrollRect.content);
-                this.top = go.GetComponent<LayoutElement>();
-
-            }
-            
-            if (this.bottom != null && this.scrollRect != null && this.scrollRect.content != null) {
-
-                var go = new GameObject("--Bottom--", typeof(LayoutElement));
-                go.transform.SetParent(this.scrollRect.content);
-                this.bottom = go.GetComponent<LayoutElement>();
 
             }
             
@@ -148,6 +275,16 @@ namespace UnityEngine.UI.Windows {
             base.OnShowBegin();
             
             if (this.scrollRect != null) this.OnScrollValueChanged(this.scrollRect.normalizedPosition);
+            this.UpdateContentItems(true);
+
+        }
+
+        public override void OnShowEnd() {
+            
+            base.OnShowEnd();
+            
+            if (this.scrollRect != null) this.OnScrollValueChanged(this.scrollRect.normalizedPosition);
+            this.UpdateContentItems(true);
 
         }
 
@@ -156,6 +293,7 @@ namespace UnityEngine.UI.Windows {
             base.OnLayoutChanged();
             
             if (this.scrollRect != null) this.OnScrollValueChanged(this.scrollRect.normalizedPosition);
+            this.UpdateContentItems(true);
 
         }
 
@@ -171,7 +309,7 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        private Registry<T, TClosure> GetRegistry<T, TClosure>() {
+        private Registry<T, TClosure> GetRegistry<T, TClosure>() where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
 
             foreach (var regBase in this.registries) {
 
@@ -181,6 +319,12 @@ namespace UnityEngine.UI.Windows {
 
             var registry = PoolClassCustom<RegistryBase>.Spawn<Registry<T, TClosure>>();
             return registry;
+
+        }
+
+        public override void SetDataSource(IDataSource dataSource) {
+
+            this.dataSource = dataSource;
 
         }
         
@@ -195,6 +339,7 @@ namespace UnityEngine.UI.Windows {
             this.registries.Clear();
 
             this.allCount = count;
+            System.Array.Resize(ref this.items, count);
             var registry = this.GetRegistry<T, TClosure>();
             registry.module = this;
             for (int i = 0; i < count; ++i) {
@@ -209,19 +354,96 @@ namespace UnityEngine.UI.Windows {
 
             }
             this.registries.Add(registry);
+            this.forceRebuild = true;
 
             if (onComplete != null) onComplete.Invoke();
             
         }
 
-        public void UpdateContentItems() {
+        public void UpdateContentItems(bool forceRebuild) {
             
             foreach (var reg in this.registries) {
 
-                reg.UpdateContent();
+                reg.UpdateContent(forceRebuild);
 
             }
             
+        }
+
+        public int GetIndexByOffset(float pos) {
+            
+            for (int i = 0; i < this.allCount; ++i) {
+                
+                ref var item = ref this.items[i];
+                if (item.accumulatedSize >= pos) return i;
+
+            }
+
+            return -1;
+
+        }
+
+        public void CalculateBounds() {
+
+            var accumulatedSize = 0f;
+            for (int i = 0; i < this.allCount; ++i) {
+                
+                ref var item = ref this.items[i];
+                item.size = this.dataSource.GetSize(i);
+                item.accumulatedSize = accumulatedSize;
+                accumulatedSize += item.size;
+                
+            }
+
+            var contentSize = accumulatedSize;
+            var scrollRect = this.scrollRect.transform as RectTransform;
+            var contentRect = this.scrollRect.content;
+            var viewSize = (this.direction == Direction.Vertical ? scrollRect.rect.height + this.createOffset : scrollRect.rect.width);
+            this.contentSize = contentSize;
+            
+            contentRect.sizeDelta = (this.direction == Direction.Vertical ? new Vector2(0f, accumulatedSize) : new Vector2(accumulatedSize, 0f));
+            
+            var posOffset = (this.direction == Direction.Vertical ? this.scrollRect.normalizedPosition.y : this.scrollRect.normalizedPosition.x);
+            var offInv = 1f - posOffset;
+            var offset = offInv * contentSize - offInv * viewSize;
+            
+            if (contentSize <= viewSize) {
+                
+                offset = 0f;
+                
+            }
+
+            var visibleContentHeight = Mathf.Min(viewSize, contentSize);
+
+            var fromIndex = this.GetIndexByOffset(offset);
+            if (fromIndex == -1) {
+                
+                fromIndex = 0;
+                
+            } else {
+
+                --fromIndex;
+
+            }
+            
+            var toIndex = this.GetIndexByOffset(offset + visibleContentHeight);
+            if (toIndex == -1) {
+                
+                toIndex = this.allCount;
+                
+            } else {
+
+                ++toIndex;
+
+            }
+
+            fromIndex = Mathf.Clamp(fromIndex, 0, this.allCount);
+            toIndex = Mathf.Clamp(toIndex, 0, this.allCount);
+            
+            this.requiredVisibleCount = toIndex - fromIndex;
+            this.fromIndex = fromIndex;
+            this.toIndex = toIndex - 1;
+
         }
         
         private void OnScrollValueChanged(Vector2 position) {
@@ -229,13 +451,14 @@ namespace UnityEngine.UI.Windows {
             #if UNITY_EDITOR
             if (Application.isPlaying == false) return;
             #endif
-            
-            var contentRect = this.scrollRect.content.rect;
-            var borderRect = this.windowComponent.rectTransform.rect;
 
+            if (this.scrollRect == null || this.scrollRect.content == null) return;
+            
             {
 
-                this.UpdateContentItems();
+                this.CalculateBounds();
+                this.UpdateContentItems(this.forceRebuild);
+                this.forceRebuild = false;
 
             }
 

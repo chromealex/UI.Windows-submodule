@@ -76,6 +76,8 @@ namespace UnityEditor.UI.Windows {
                 
             } else if (Event.current.type == EventType.Repaint) {
 
+                if (Application.isPlaying == true) return;
+                
                 var camera = new GameObject("Camera", typeof(Camera));
                 camera.hideFlags = HideFlags.HideAndDontSave;
 
@@ -121,9 +123,19 @@ namespace UnityEditor.UI.Windows {
                 type.GetMethod("Handle", binds).Invoke(canvasScaler, null);
                 Canvas.ForceUpdateCanvases();
 
-                var rt = new RenderTexture((int)rect.width, (int)rect.height, 32, RenderTextureFormat.ARGB32);
-                WindowLayoutUtilities.tempPreviewBuffer.Add(key, rt);
+                RenderTexture rt = null;
+                var w = (int)rect.width;
+                var h = (int)rect.height;
+                if (w > 0 && h > 0) {
+
+                    rt = new RenderTexture(w, h, 32, RenderTextureFormat.ARGB32);
+                    WindowLayoutUtilities.tempPreviewBuffer.Add(key, rt);
+                    
+                }
+
+                WindowLayoutUtilities.tempPreviewRects.Remove(key);
                 WindowLayoutUtilities.tempPreviewRects.Add(key, rect);
+                WindowLayoutUtilities.tempPreviewTimers.Remove(key);
                 WindowLayoutUtilities.tempPreviewTimers.Add(key, EditorApplication.timeSinceStartup);
 
                 cameraInstance.Render();

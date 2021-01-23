@@ -371,11 +371,11 @@ namespace UnityEngine.UI.Windows {
 
         public void OnValidate() {
 
-            foreach (var item in this.registeredPrefabs) {
+            /*foreach (var item in this.registeredPrefabs) {
 
-                item.windowId = item.GetType().GetHashCode();
+                item.windowId = item.identifier;//.GetType().GetHashCode();
 
-            }
+            }*/
 
         }
 
@@ -1117,6 +1117,8 @@ namespace UnityEngine.UI.Windows {
             if (source.createPool == true) this.pools.CreatePool(source);
             instance = this.pools.Spawn(source, null, out var fromPool);
             instance.identifier = ++this.nextWindowId;
+            instance.windowSourceId = source.GetHashCode();
+            instance.windowId = instance.identifier;
             #if UNITY_EDITOR
             instance.name = "[" + instance.identifier.ToString("00") + "] " + source.name;
             #endif

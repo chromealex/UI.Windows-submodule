@@ -21,6 +21,7 @@ namespace UnityEngine.UI.Windows {
         public Breadcrumb breadcrumb;
 
         public int identifier;
+        public int windowSourceId;
         
         public FocusState focusState;
 

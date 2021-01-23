@@ -49,7 +49,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bd59607f41fc40db8699a0014c282a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  windowId: -164370320
+  windowId: -280176936
   window: {fileID: 0}
   rectTransform: {fileID: 1960064754754543746}
   hasObjectCanvas: 0
@@ -76,6 +76,7 @@ MonoBehaviour:
     singleInstance: 1
     addInHistory: 0
     takeFocus: 1
+    dontDestroy: 1
     renderMode: 0
     cameraMode: 0
     showInSequence: 0
@@ -86,6 +87,7 @@ MonoBehaviour:
   breadcrumb:
     history: []
   identifier: 0
+  windowSourceId: 0
   focusState: 0
   workCamera: {fileID: 2012446584845969934}
   layouts:
@@ -118,6 +120,17 @@ MonoBehaviour:
           guid: 957852f283c92495cadd753b12847282
           subObjectName: 
           directRef: {fileID: 7157483974793182015, guid: 957852f283c92495cadd753b12847282,
+            type: 3}
+      - windowLayout: {fileID: 9075030843538608721, guid: 4baf35e159b6b432d9f70f2917f07783,
+          type: 3}
+        tag: 7
+        localTag: 3
+        component:
+          type: 1
+          objectType: 2
+          guid: b525f1dcb523b4a6290e5518b5cbb118
+          subObjectName: 
+          directRef: {fileID: 1068094537600266531, guid: b525f1dcb523b4a6290e5518b5cbb118,
             type: 3}
   autoConnectLogs: 1
 --- !u!20 &2012446584845969934

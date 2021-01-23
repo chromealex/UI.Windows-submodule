@@ -78,6 +78,10 @@ namespace UnityEditor.UI.Windows {
 
                 if (Application.isPlaying == true) return;
                 
+                var w = (int)rect.width;
+                var h = (int)rect.height;
+                if (w <= 0 || h <= 0) return;
+                
                 var camera = new GameObject("Camera", typeof(Camera));
                 camera.hideFlags = HideFlags.HideAndDontSave;
 
@@ -124,8 +128,6 @@ namespace UnityEditor.UI.Windows {
                 Canvas.ForceUpdateCanvases();
 
                 RenderTexture rt = null;
-                var w = (int)rect.width;
-                var h = (int)rect.height;
                 if (w > 0 && h > 0) {
 
                     rt = new RenderTexture(w, h, 32, RenderTextureFormat.ARGB32);

@@ -44,7 +44,19 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
     }
 
-    /*[Help("Test module")][Alias("T")]
+    public class FastLinkAttribute : System.Attribute {
+
+        public string text;
+
+        public FastLinkAttribute(string text) {
+            
+            this.text = text;
+            
+        }
+
+    }
+
+    [Help("Test module")][Alias("T")]
     public class Test : ConsoleModule {
 
         [Help("Prints help bool")]
@@ -54,14 +66,14 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
-        [Help("Prints help string")][Alias("A")]
+        [Help("Prints help string")][Alias("A")][FastLink("T HELP1")]
         public void Help1() {
 
             Debug.Log("Help");
 
         }
 
-        [Help("Prints help string with a")]
+        [Help("Prints help string with a")][FastLink("T HELP2")]
         public void Help2(int a) {
 
             Debug.Log("Help2: " + a);
@@ -75,9 +87,17 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
-    }*/
+    }
 
     public class ConsoleScreen : LayoutWindowType, IDataSource {
+
+        public struct FastLink {
+
+            public string cmd;
+            public bool run;
+            public string caption;
+
+        }
 
         [System.Serializable]
         public struct CommandItem {
@@ -100,8 +120,10 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         }
         
         private ListComponent list;
+        private ListComponent fastLinks;
         private InputFieldComponent inputField;
         
+        private readonly List<FastLink> fastLinkItems = new List<FastLink>();
         private readonly List<CommandItem> commands = new List<CommandItem>();
         private readonly List<IConsoleModule> moduleItems = new List<IConsoleModule>();
         private readonly List<DrawItem> drawItems = new List<DrawItem>();
@@ -128,6 +150,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             base.OnInit();
 
             this.GetLayoutComponent(out this.list);
+            this.GetLayoutComponent(out this.fastLinks);
             this.GetLayoutComponent(out this.inputField);
             
             this.inputField.SetCallbackValidateChar(this.OnChar);
@@ -203,6 +226,23 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                 var module = (IConsoleModule)System.Activator.CreateInstance(type);
                 this.moduleItems.Add(module);
+                
+                var methods = module.GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                foreach (var method in methods) {
+
+                    if (this.IsValidMethod(method) == false) continue;
+
+                    if (this.GetFastLink(method, out var caption) == true) {
+
+                        this.fastLinkItems.Add(new FastLink() {
+                            run = method.GetParameters().Length == 0,
+                            cmd = module.GetType().Name.ToLower() + " " + method.Name.ToLower(),
+                            caption = caption
+                        });
+
+                    }
+
+                }
                 
             }
             
@@ -288,6 +328,17 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
         }
 
+        private bool GetFastLink(System.Reflection.ICustomAttributeProvider methodInfo, out string text) {
+            
+            text = string.Empty;
+            
+            var aliasAttrs = methodInfo.GetCustomAttributes(typeof(FastLinkAttribute), false);
+            if (aliasAttrs.Length == 0) return false;
+            text = (aliasAttrs[0] as FastLinkAttribute)?.text.ToLower();
+            return true;
+            
+        }
+
         private string GetAlias(System.Reflection.ICustomAttributeProvider methodInfo) {
 
             var aliasAttrs = methodInfo.GetCustomAttributes(typeof(AliasAttribute), false);
@@ -361,6 +412,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                     } else {
 
                         this.AddLine($"Module `{command.moduleName}` has no method `{methodName}` with parameters length = {command.argsCount} (Required length {methodFound.GetParameters().Length})", LogType.Warning);
+                        this.AddLine(this.GetMethodCallString(methodFound));
 
                     }
 
@@ -428,15 +480,22 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             foreach (var method in methods) {
                 
                 if (this.IsValidMethod(method) == false) continue;
-                
-                var pars = method.GetParameters();
-                var parameters = pars.Select(x => this.TypeToString(x.ParameterType) + " " + x.Name).ToArray();
-                var parsStr = string.Join(", ", parameters);
-                this.AddLine(this.GetSpace(4) + "<color=#3af>" + method.Name.ToLower() + "</color>(" + parsStr + ")" + this.GetHelpString(this.GetSpace(4) + method.Name.ToLower() + "(" + parsStr + ")", method));
+
+                var str = this.GetMethodCallString(method);
+                this.AddLine(this.GetSpace(4) + str);
 
             }
             this.AddHR();
 
+        }
+
+        private string GetMethodCallString(System.Reflection.MethodInfo methodInfo) {
+
+            var pars = methodInfo.GetParameters();
+            var parameters = pars.Select(x => this.TypeToString(x.ParameterType) + " " + x.Name).ToArray();
+            var parsStr = string.Join(", ", parameters);
+            return "<color=#3af>" + methodInfo.Name.ToLower() + "</color>(" + parsStr + ")" + this.GetHelpString(this.GetSpace(4) + methodInfo.Name.ToLower() + "(" + parsStr + ")", methodInfo);
+            
         }
 
         public void PrintHelp(List<IConsoleModule> modules) {
@@ -690,13 +749,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
-        private struct ClosureParameters : IListClosureParameters {
-
-            public int index { get; set; }
-            public List<DrawItem> data;
-
-        }
-
         public static Color GetColorByLogType(LogType logType) {
 
             var color = Color.white;
@@ -729,6 +781,20 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
         }
         
+        private struct ClosureParameters : IListClosureParameters {
+
+            public int index { get; set; }
+            public List<DrawItem> data;
+
+        }
+
+        private struct ClosureFastLinksParameters : IListClosureParameters {
+
+            public int index { get; set; }
+            public List<FastLink> data;
+
+        }
+
         public void LateUpdate() {
 
             if (this.GetState() != ObjectState.Shown) return;
@@ -756,6 +822,29 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 this.inputField.SetFocus();
                 
             }
+
+            this.fastLinks.SetItems<ButtonComponent, ClosureFastLinksParameters>(this.fastLinkItems.Count, (button, parameters) => {
+
+                var item = parameters.data[parameters.index];
+                button.Get<TextComponent>().SetText(item.caption);
+                button.SetCallback(() => {
+
+                    if (item.run == true) {
+
+                        this.ApplyCommand(item.cmd);
+
+                    } else {
+                        
+                        this.ReplaceInput(item.cmd + " ");
+                        
+                    }
+                    
+                });
+                button.Show();
+
+            }, new ClosureFastLinksParameters() {
+                data = this.fastLinkItems
+            });
             
             this.list.SetDataSource(this);
             this.list.SetItems<ButtonComponent, ClosureParameters>(this.drawItems.Count, (component, parameters) => {

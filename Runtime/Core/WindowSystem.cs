@@ -859,9 +859,9 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private static bool CanBeDestroy(DontDestroy dontDestroy, DontDestroy windowInstanceFlag) {
+        private static bool CanBeDestroy(DontDestroy state, DontDestroy windowInstanceFlag) {
 
-            return (windowInstanceFlag & dontDestroy) != 0;
+            return windowInstanceFlag == DontDestroy.Default || (state & windowInstanceFlag) != 0;
 
         }
         

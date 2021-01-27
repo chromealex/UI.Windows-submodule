@@ -895,7 +895,7 @@ namespace UnityEngine.UI.Windows {
                 }
                 
             });
-            for (int i = 0; i < count; ++i) {
+            for (int i = count - 1; i >= 0; --i) {
 
                 var instance = currentList[i].instance;
                 if ((predicate == null || predicate.Invoke(instance) == true) && WindowSystem.CanBeDestroy(DontDestroy.OnHideAll, instance.preferences.dontDestroy) == true) instance.Hide(instanceParameters);

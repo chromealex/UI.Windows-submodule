@@ -10,7 +10,7 @@ namespace UnityEngine.UI.Windows {
 
         public void OnRectTransformDimensionsChange() {
             
-            this.listBaseComponent.ForceLayoutChange();
+            if (this.listBaseComponent != null) this.listBaseComponent.ForceLayoutChange();
             
         }
 

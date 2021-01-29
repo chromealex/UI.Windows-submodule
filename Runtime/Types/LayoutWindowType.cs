@@ -213,7 +213,6 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                     if (layoutComponent.component.IsEmpty() == false) {
 
                         var resources = WindowSystem.GetResources();
-                        var loaded = false;
                         var data = new LoadingClosure() {
                             index = i,
                             element = layoutElement,

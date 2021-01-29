@@ -261,6 +261,9 @@ namespace UnityEngine.UI.Windows.Modules {
 
             if (this.RequestLoad(handler, closure, resource, onComplete) == true) {
                 
+                // Waiting for loading then break
+                var item = new InternalTask(resource);
+                while (this.tasks.ContainsKey(item) == true) yield return null;
                 yield break;
                 
             }

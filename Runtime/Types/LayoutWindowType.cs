@@ -156,6 +156,17 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
+        private struct LoadingClosure {
+
+            public int index;
+            public WindowLayoutElement element;
+            public WindowLayout windowLayoutInstance;
+            public LayoutComponentItem[] layoutComponentItems;
+            public LayoutItem instance;
+
+        }
+
+        private int loadingCount;
         private IEnumerator InitLayoutInstance(LayoutWindowType windowInstance, WindowObject root, WindowLayout windowLayout, HashSet<WindowLayout> used, System.Action onComplete, bool isInner = false) {
 
             if (((ILayoutInstance)root).windowLayoutInstance != null) {
@@ -184,6 +195,8 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             windowLayoutInstance.SetTransformFullRect();
             
             used.Add(this.windowLayout);
+
+            this.loadingCount = 0;
             var arr = this.components;
             for (int i = 0; i < arr.Length; ++i) {
 
@@ -193,15 +206,23 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                 var layoutElement = windowLayoutInstance.GetLayoutElementByTagId(layoutComponent.tag);
                 layoutComponent.componentInstance = windowLayoutInstance.GetLoadedComponent(layoutComponent.tag);
                 layoutElement.Setup(windowInstance);
+                arr[i] = layoutComponent;
 
                 if (layoutComponent.componentInstance == null) {
 
                     if (layoutComponent.component.IsEmpty() == false) {
 
-                        var index = i;
                         var resources = WindowSystem.GetResources();
                         var loaded = false;
-                        yield return resources.LoadAsync<WindowComponent>(windowInstance, layoutComponent.component, (asset) => {
+                        var data = new LoadingClosure() {
+                            index = i,
+                            element = layoutElement,
+                            windowLayoutInstance = windowLayoutInstance,
+                            layoutComponentItems = arr,
+                            instance = this,
+                        };
+                        ++this.loadingCount;
+                        yield return resources.LoadAsync<WindowComponent, LoadingClosure>(windowInstance, data, layoutComponent.component, (asset, closure) => {
 
                             if (asset == null) {
 
@@ -210,23 +231,22 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                             }
 
-                            var instance = layoutElement.Load(asset);
+                            ref var item = ref closure.layoutComponentItems[closure.index];
+
+                            var instance = closure.element.Load(asset);
                             instance.SetInvisible();
-                            windowLayoutInstance.SetLoadedComponent(layoutComponent.tag, instance);
-                            layoutComponent.componentInstance = instance;
-                            arr[index] = layoutComponent;
+                            closure.windowLayoutInstance.SetLoadedComponent(item.tag, instance);
+                            item.componentInstance = instance;
 
-                            instance.DoLoadScreenAsync(() => { loaded = true; });
-
+                            instance.DoLoadScreenAsync(() => { --closure.instance.loadingCount; });
+                            
                         });
-
-                        while (loaded == false) yield return null;
 
                     }
 
                 }
 
-                arr[i] = layoutComponent;
+                while (this.loadingCount > 0) yield return null;
 
                 if (layoutElement.innerLayout != null) {
 

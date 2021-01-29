@@ -284,25 +284,37 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        private struct AddItemClosure<T, TClosure> {
+
+            public TClosure data;
+            public System.Action<T, TClosure> onComplete;
+            public ListBaseComponent component;
+
+        }
         internal void AddItemInternal<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
             
             var resources = WindowSystem.GetResources();
-            var pools = WindowSystem.GetPools();
-            Coroutines.Run(resources.LoadAsync<T>(this, source, (asset) => {
+            var data = new AddItemClosure<T, TClosure>() {
+                data = closure,
+                onComplete = onComplete,
+                component = this,
+            };
+            Coroutines.Run(resources.LoadAsync<T, AddItemClosure<T, TClosure>>(this, data, source, (asset, innerClosure) => {
 
-                if (this.loadedAssets.Contains(asset) == false) {
+                if (innerClosure.component.loadedAssets.Contains(asset) == false) {
                     
                     if (asset.createPool == true) WindowSystem.GetPools().CreatePool(asset);
-                    this.loadedAssets.Add(asset);
+                    innerClosure.component.loadedAssets.Add(asset);
                     
                 }
                 
-                var instance = pools.Spawn(asset, this.GetRoot());
-                this.RegisterSubObject(instance);
-                this.items.Add(instance);
-                this.NotifyModulesComponentAdded(instance);
-                this.OnElementsChanged();
-                if (onComplete != null) onComplete.Invoke(instance, closure);
+                var pools = WindowSystem.GetPools();
+                var instance = pools.Spawn(asset, innerClosure.component.GetRoot());
+                innerClosure.component.RegisterSubObject(instance);
+                innerClosure.component.items.Add(instance);
+                innerClosure.component.NotifyModulesComponentAdded(instance);
+                innerClosure.component.OnElementsChanged();
+                if (innerClosure.onComplete != null) innerClosure.onComplete.Invoke(instance, innerClosure.data);
 
             }));
 

@@ -34,6 +34,15 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
+        private struct LoadingClosure {
+
+            public WindowBase window;
+            public int order;
+            public WindowModules windowModules;
+            public int index;
+
+        }
+        
         private IEnumerator InitModules(WindowBase window, System.Action onComplete) {
 
             var resources = WindowSystem.GetResources();
@@ -46,22 +55,26 @@ namespace UnityEngine.UI.Windows.Modules {
                 if (moduleInfo.moduleInstance != null) continue;
 
                 var order = moduleInfo.order;
-                WindowModule instance = null;
-                yield return resources.LoadAsync<WindowModule>(window, moduleInfo.module, (asset) => {
+                var data = new LoadingClosure() {
+                    windowModules = this,
+                    index = i,
+                    order = order,
+                    window = window,
+                };
+                yield return resources.LoadAsync<WindowModule, LoadingClosure>(window, data, moduleInfo.module, (asset, closure) => {
 
-                    instance = WindowSystem.GetPools().Spawn(asset, window.transform);
-                    instance.Setup(window);
-                    instance.SetCanvasOrder(window.GetCanvasOrder() + order);
+                    var instance = WindowSystem.GetPools().Spawn(asset, closure.window.transform);
+                    instance.Setup(closure.window);
+                    instance.SetCanvasOrder(closure.window.GetCanvasOrder() + closure.order);
 
-                    var layoutPreferences = window.GetCurrentLayoutPreferences();
+                    var layoutPreferences = closure.window.GetCurrentLayoutPreferences();
                     if (layoutPreferences != null && instance.canvasScaler != null) layoutPreferences.Apply(instance.canvasScaler);
 
-                    window.RegisterSubObject(instance);
+                    closure.window.RegisterSubObject(instance);
+
+                    closure.windowModules.modules[closure.index].moduleInstance = instance;
 
                 });
-
-                moduleInfo.moduleInstance = instance;
-                this.modules[i] = moduleInfo;
 
             }
 

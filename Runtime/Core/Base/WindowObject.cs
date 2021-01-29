@@ -997,19 +997,30 @@ namespace UnityEngine.UI.Windows {
             
         }
 
+        private struct LoadAsyncClosure<T> {
+
+            public WindowObject component;
+            public System.Action<T> onComplete;
+
+        }
+
         private IEnumerator LoadAsync_YIELD<T>(Resource resource, System.Action<T> onComplete = null) where T : WindowObject {
             
             var resources = WindowSystem.GetResources();
-            yield return resources.LoadAsync<T>(this.GetWindow(), resource, (asset) => {
+            var data = new LoadAsyncClosure<T>() {
+                component = this,
+                onComplete = onComplete,
+            };
+            yield return resources.LoadAsync<T, LoadAsyncClosure<T>>(this.GetWindow(), data, resource, (asset, closure) => {
 
                 if (asset != null) {
 
-                    var instance = this.Load(asset);
-                    if (onComplete != null) onComplete.Invoke(instance);
+                    var instance = closure.component.Load(asset);
+                    if (closure.onComplete != null) closure.onComplete.Invoke(instance);
 
                 } else {
                     
-                    if (onComplete != null) onComplete.Invoke(null);
+                    if (closure.onComplete != null) closure.onComplete.Invoke(null);
                     
                 }
 

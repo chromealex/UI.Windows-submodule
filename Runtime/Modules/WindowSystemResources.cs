@@ -225,18 +225,18 @@ namespace UnityEngine.UI.Windows.Modules {
         private Dictionary<int, HashSet<InternalResourceItem>> handlerToObjects = new Dictionary<int, HashSet<InternalResourceItem>>();
         private Dictionary<int, HashSet<System.Action>> handlerToTasks = new Dictionary<int, HashSet<System.Action>>();
 
-        private bool RequestLoad<T>(object handler, Resource resource, System.Action<T> onComplete) where T : class {
+        private bool RequestLoad<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
             
             var item = new InternalTask(resource);
             if (this.tasks.TryGetValue(item, out var onCompleteActions) == true) {
 
-                onCompleteActions += (obj) => onComplete.Invoke((T)obj);
+                onCompleteActions += (obj) => onComplete.Invoke((T)obj, closure);
                 this.tasks[item] = onCompleteActions;
                 return true;
 
             } else {
                 
-                onCompleteActions += (obj) => onComplete.Invoke((T)obj);
+                onCompleteActions += (obj) => onComplete.Invoke((T)obj, closure);
                 this.tasks.Add(item, onCompleteActions);
                 
             }
@@ -257,9 +257,9 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
         
-        public IEnumerator LoadAsync<T>(object handler, Resource resource, System.Action<T> onComplete) where T : class {
+        public IEnumerator LoadAsync<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
 
-            if (this.RequestLoad(handler, resource, onComplete) == true) {
+            if (this.RequestLoad(handler, closure, resource, onComplete) == true) {
                 
                 yield break;
                 

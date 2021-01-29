@@ -131,28 +131,37 @@ namespace UnityEngine.UI.Windows.Components {
             return this.graphics.color;
 
         }
+
+        private struct SetImageClosure {
+
+            public ImageComponent component;
+
+        }
         
         public void SetImage(Resource resource) {
 
             var resources = WindowSystem.GetResources();
             resources.StopLoadAll(this);
             resources.Delete(this, ref this.currentLoaded);
+            var data = new SetImageClosure() {
+                component = this,
+            };
             switch (resource.objectType) {
                 
                 case Resource.ObjectType.Sprite:
-                    Coroutines.Run(resources.LoadAsync<Sprite>(this, resource, (asset) => {
+                    Coroutines.Run(resources.LoadAsync<Sprite, SetImageClosure>(this, data, resource, (asset, closure) => {
                         
-                        this.currentLoaded = asset;
-                        this.SetImage(asset);
+                        closure.component.currentLoaded = asset;
+                        closure.component.SetImage(asset);
                         
                     }));
                     break;
 
                 case Resource.ObjectType.Texture:
-                    Coroutines.Run(resources.LoadAsync<Texture>(this, resource, (asset) => {
+                    Coroutines.Run(resources.LoadAsync<Texture, SetImageClosure>(this, data, resource, (asset, closure) => {
                         
-                        this.currentLoaded = asset;
-                        this.SetImage(asset);
+                        closure.component.currentLoaded = asset;
+                        closure.component.SetImage(asset);
 
                     }));
                     break;

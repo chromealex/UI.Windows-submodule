@@ -874,7 +874,6 @@ namespace UnityEngine.UI.Windows.Utilities {
         }
 
         public List<ITween> tweens = new List<ITween>();
-        private ITween tween;
 
         public Tween<T> Add<T>(T obj, float duration, float from, float to) {
 
@@ -884,7 +883,6 @@ namespace UnityEngine.UI.Windows.Utilities {
             tween.from = from;
             tween.to = to;
 
-            this.tween = tween;
             this.tweens.Add(tween);
 
             return tween;

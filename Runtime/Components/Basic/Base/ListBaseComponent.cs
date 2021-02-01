@@ -335,11 +335,41 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        public virtual int IndexOf<T>(T component) where T : WindowComponent {
+
+            for (int i = 0; i < this.items.Count; ++i) {
+
+                if (this.items[i] == component) return i;
+
+            }
+
+            return -1;
+
+        }
+
         public struct DefaultParameters : IListClosureParameters {
 
             public int index { get; set; }
 
         }
+
+        public virtual void ForEach<T>(System.Action<T, DefaultParameters> onItem) where T : WindowComponent {
+            
+            this.ForEach(onItem, new DefaultParameters());
+
+        }
+
+        public virtual void ForEach<T, TClosure>(System.Action<T, TClosure> onItem, TClosure closure) where T : WindowComponent where TClosure : IListClosureParameters {
+            
+            for (int i = 0; i < this.Count; ++i) {
+
+                closure.index = i;
+                onItem.Invoke((T)this.items[i], closure);
+                    
+            }
+            
+        }
+
         public virtual void SetItems<T>(int count, System.Action<T, DefaultParameters> onItem, System.Action onComplete = null) where T : WindowComponent {
             
             this.SetItems(count, this.source, onItem, new DefaultParameters(), onComplete);

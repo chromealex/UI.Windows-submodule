@@ -256,7 +256,15 @@ namespace UnityEngine.UI.Windows.Modules {
             }
 
         }
-        
+
+        public struct DefaultClosureData { }
+
+        public IEnumerator LoadAsync<T>(object handler, Resource resource, System.Action<T, DefaultClosureData> onComplete) where T : class {
+
+            yield return this.LoadAsync<T, DefaultClosureData>(handler, new DefaultClosureData(), resource, onComplete);
+
+        }
+
         public IEnumerator LoadAsync<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
 
             if (this.RequestLoad(handler, closure, resource, onComplete) == true) {

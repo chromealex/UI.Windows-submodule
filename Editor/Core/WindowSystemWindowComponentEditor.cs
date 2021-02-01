@@ -232,6 +232,8 @@ namespace UnityEditor.UI.Windows {
             EditorHelpers.SetFirstSibling(this.targets);
 
         }
+        
+        public virtual void OnDisable() {}
 
         public override GUIContent GetPreviewTitle() {
             

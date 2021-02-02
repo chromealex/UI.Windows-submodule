@@ -70,13 +70,32 @@ namespace UnityEngine.UI.Windows.Components {
             public int s3;
 
         }
-        private LastText3ssi lastText2ssi;
+        private LastText3ssi lastText3ssi;
         public void SetText(string text1, string text2, int text3) {
 
-            if (this.lastText2ssi.s1 == text1 && this.lastText2ssi.s2 == text2 && this.lastText2ssi.s3 == text3) return;
-            this.lastText2ssi = new LastText3ssi() { s1 = text1, s2 = text2, s3 = text3 };
+            if (this.lastText3ssi.s1 == text1 && this.lastText3ssi.s2 == text2 && this.lastText3ssi.s3 == text3) return;
+            this.lastText3ssi = new LastText3ssi() { s1 = text1, s2 = text2, s3 = text3 };
             
             if (this.sb == null) this.sb = new System.Text.StringBuilder(text1.Length + text2.Length);
+            this.sb.Clear().Append(text1).Append(text2).Append(text3);
+            this.SetText(this.sb.ToString());
+            
+        }
+
+        private struct LastText3sis {
+
+            public string s1;
+            public int s2;
+            public string s3;
+            
+        }
+        private LastText3sis lastText3sis;
+        public void SetText(string text1, int text2, string text3) {
+
+            if (this.lastText3sis.s1 == text1 && this.lastText3sis.s2 == text2 && this.lastText3sis.s3 == text3) return;
+            this.lastText3sis = new LastText3sis() { s1 = text1, s2 = text2, s3 = text3 };
+            
+            if (this.sb == null) this.sb = new System.Text.StringBuilder(text1.Length + text3.Length);
             this.sb.Clear().Append(text1).Append(text2).Append(text3);
             this.SetText(this.sb.ToString());
             
@@ -89,11 +108,11 @@ namespace UnityEngine.UI.Windows.Components {
             public int s3;
 
         }
-        private LastText3isi lastText2isi;
+        private LastText3isi lastText3isi;
         public void SetText(int text1, string text2, int text3) {
 
-            if (this.lastText2isi.s1 == text1 && this.lastText2isi.s2 == text2 && this.lastText2isi.s3 == text3) return;
-            this.lastText2isi = new LastText3isi() { s1 = text1, s2 = text2, s3 = text3 };
+            if (this.lastText3isi.s1 == text1 && this.lastText3isi.s2 == text2 && this.lastText3isi.s3 == text3) return;
+            this.lastText3isi = new LastText3isi() { s1 = text1, s2 = text2, s3 = text3 };
             
             if (this.sb == null) this.sb = new System.Text.StringBuilder(TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH + text2.Length + TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH);
             this.sb.Clear().Append(text1).Append(text2).Append(text3);

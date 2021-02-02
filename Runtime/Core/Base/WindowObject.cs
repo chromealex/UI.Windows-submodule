@@ -129,6 +129,7 @@ namespace UnityEngine.UI.Windows {
 
         public bool hasObjectCanvas;
         public Canvas objectCanvas;
+        public int canvasSortingOrderDelta;
         public RenderItem[] canvasRenderers;
         public bool isActiveSelf;
         //public CanvasGroup canvasGroupRender;
@@ -599,7 +600,7 @@ namespace UnityEngine.UI.Windows {
                 if (windowCanvas != null) {
                     
                     this.objectCanvas.overrideSorting = true;
-                    this.objectCanvas.sortingOrder = windowCanvas.sortingOrder;
+                    this.objectCanvas.sortingOrder = windowCanvas.sortingOrder + this.canvasSortingOrderDelta;
                     this.objectCanvas.sortingLayerName = windowCanvas.sortingLayerName;
                     this.objectCanvas.sortingLayerID = windowCanvas.sortingLayerID;
                     

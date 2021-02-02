@@ -841,9 +841,9 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public static void ShowRoot() {
+        public static void ShowRoot(TransitionParameters transitionParameters = default) {
             
-            WindowSystem.Show(WindowSystem.instance.rootScreen);
+            WindowSystem.Show(WindowSystem.instance.rootScreen, transitionParameters: transitionParameters);
             
         }
         
@@ -898,45 +898,49 @@ namespace UnityEngine.UI.Windows {
             for (int i = count - 1; i >= 0; --i) {
 
                 var instance = currentList[i].instance;
-                if ((predicate == null || predicate.Invoke(instance) == true) && WindowSystem.CanBeDestroy(DontDestroy.OnHideAll, instance.preferences.dontDestroy) == true) instance.Hide(instanceParameters);
+                if ((predicate == null || predicate.Invoke(instance) == true) && WindowSystem.CanBeDestroy(DontDestroy.OnHideAll, instance.preferences.dontDestroy) == true) {
+                    
+                    instance.Hide(instanceParameters);
+                    
+                }
                 
             }
 
         }
         
-        public static void Show<T>(System.Action<T> onInitialized = null) where T : WindowBase {
+        public static void Show<T>(System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
 
-            WindowSystem.instance.Show_INTERNAL(new InitialParameters(), onInitialized);
-
-        }
-
-        public static void Show(WindowBase source, System.Action<WindowBase> onInitialized = null) {
-
-            WindowSystem.instance.Show_INTERNAL(source, new InitialParameters(), onInitialized);
+            WindowSystem.instance.Show_INTERNAL(new InitialParameters(), onInitialized, transitionParameters);
 
         }
 
-        public static void Show<T>(WindowBase source, System.Action<T> onInitialized = null) where T : WindowBase {
+        public static void Show(WindowBase source, System.Action<WindowBase> onInitialized = null, TransitionParameters transitionParameters = default) {
 
-            WindowSystem.instance.Show_INTERNAL(source, new InitialParameters(), onInitialized);
-
-        }
-
-        public static void Show<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null) where T : WindowBase {
-
-            WindowSystem.instance.Show_INTERNAL(initialParameters, onInitialized);
+            WindowSystem.instance.Show_INTERNAL(source, new InitialParameters(), onInitialized, transitionParameters);
 
         }
 
-        public static void Show(WindowBase source, InitialParameters initialParameters, System.Action<WindowBase> onInitialized = null) {
+        public static void Show<T>(WindowBase source, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
 
-            WindowSystem.instance.Show_INTERNAL(source, initialParameters, onInitialized);
+            WindowSystem.instance.Show_INTERNAL(source, new InitialParameters(), onInitialized, transitionParameters);
 
         }
 
-        public static void Show<T>(WindowBase source, InitialParameters initialParameters, System.Action<T> onInitialized = null) where T : WindowBase {
+        public static void Show<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
 
-            WindowSystem.instance.Show_INTERNAL(source, initialParameters, onInitialized);
+            WindowSystem.instance.Show_INTERNAL(initialParameters, onInitialized, transitionParameters);
+
+        }
+
+        public static void Show(WindowBase source, InitialParameters initialParameters, System.Action<WindowBase> onInitialized = null, TransitionParameters transitionParameters = default) {
+
+            WindowSystem.instance.Show_INTERNAL(source, initialParameters, onInitialized, transitionParameters);
+
+        }
+
+        public static void Show<T>(WindowBase source, InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+
+            WindowSystem.instance.Show_INTERNAL(source, initialParameters, onInitialized, transitionParameters);
 
         }
 
@@ -1072,14 +1076,14 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        private void Show_INTERNAL<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null) where T : WindowBase {
+        private void Show_INTERNAL<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
 
             var source = this.GetSource<T>();
-            this.Show_INTERNAL(source, initialParameters, onInitialized);
+            this.Show_INTERNAL(source, initialParameters, onInitialized, transitionParameters);
 
         }
 
-        private void Show_INTERNAL<T>(WindowBase source, InitialParameters initialParameters, System.Action<T> onInitialized) where T : WindowBase {
+        private void Show_INTERNAL<T>(WindowBase source, InitialParameters initialParameters, System.Action<T> onInitialized, TransitionParameters transitionParameters) where T : WindowBase {
 
             if (source == null) {
 
@@ -1142,7 +1146,7 @@ namespace UnityEngine.UI.Windows {
 
                     }
 
-                    WindowSystem.RegisterActionOnce(existInstance, state, () => { this.Show_INTERNAL(existInstance, initialParameters, onInitialized); });
+                    WindowSystem.RegisterActionOnce(existInstance, state, () => { this.Show_INTERNAL(existInstance, initialParameters, onInitialized, transitionParameters); });
 
                     return;
 
@@ -1195,7 +1199,7 @@ namespace UnityEngine.UI.Windows {
                     
                 }
 
-                instance.ShowInternal();
+                instance.ShowInternal(transitionParameters);
 
             });
 

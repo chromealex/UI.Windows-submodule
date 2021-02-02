@@ -23,6 +23,9 @@ namespace UnityEditor.UI.Windows {
         private SerializedProperty allowRegisterInRoot;
         private SerializedProperty autoRegisterSubObjects;
         private SerializedProperty hiddenByDefault;
+        
+        private SerializedProperty objectCanvas;
+        private SerializedProperty canvasSortingOrderDelta;
 
         private UnityEditorInternal.ReorderableList listModules;
 
@@ -74,6 +77,9 @@ namespace UnityEditor.UI.Windows {
             this.allowRegisterInRoot = this.serializedObject.FindProperty("allowRegisterInRoot");
             this.autoRegisterSubObjects = this.serializedObject.FindProperty("autoRegisterSubObjects");
             this.hiddenByDefault = this.serializedObject.FindProperty("hiddenByDefault");
+            
+            this.objectCanvas = this.serializedObject.FindProperty("objectCanvas");
+            this.canvasSortingOrderDelta = this.serializedObject.FindProperty("canvasSortingOrderDelta");
 
             if (this.listModules == null) {
                 
@@ -253,6 +259,17 @@ namespace UnityEditor.UI.Windows {
             
         }
 
+        private void DrawCanvas() {
+
+            if (this.objectCanvas.objectReferenceValue != null) {
+                
+                GUILayoutExt.DrawHeader("Canvas Options");
+                EditorGUILayout.PropertyField(this.canvasSortingOrderDelta, new GUIContent("Canvas Order Delta"));
+                
+            }
+            
+        }
+
         public override void OnInspectorGUI() {
 
             this.serializedObject.Update();
@@ -281,6 +298,8 @@ namespace UnityEditor.UI.Windows {
                     GUILayoutExt.DrawHeader("Performance Options");
                     EditorGUILayout.PropertyField(this.createPool);
 
+                    this.DrawCanvas();
+
                 }),
                 new GUITab("Advanced", () => {
                     
@@ -298,6 +317,8 @@ namespace UnityEditor.UI.Windows {
 
                     GUILayoutExt.DrawHeader("Performance Options");
                     EditorGUILayout.PropertyField(this.createPool);
+                    
+                    this.DrawCanvas();
 
                 }),
                 this.listModules == null ? GUITab.none : new GUITab("Modules (" + this.listModules.count + ")", () => {

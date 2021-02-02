@@ -43,13 +43,13 @@ namespace UnityEngine.UI.Windows.Components {
         
         [SerializeField]
         [RequiredReference]
-        private ButtonComponent label;
+        public ButtonComponent label;
         [SerializeField]
         [RequiredReference]
-        private ListComponent list;
+        public ListComponent list;
         [SerializeField]
         [RequiredReference]
-        private ScrollRect scrollRect;
+        public ScrollRect scrollRect;
 
         public Side anchor;
         public Side dropSide;
@@ -86,6 +86,8 @@ namespace UnityEngine.UI.Windows.Components {
 
         private void OnPointerUp() {
 
+            if (this.autoCloseOnOutClick == false) return;
+            
             var position = WindowSystem.GetPointerPosition();
             if (RectTransformUtility.RectangleContainsScreenPoint(this.label.rectTransform, position, this.GetWindow().workCamera) == false) {
 
@@ -258,6 +260,12 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        public int GetSelectedIndex() {
+
+            return this.selectedIndex;
+
+        }
+        
         private void SetSelectedIndex(int index) {
             
             this.selectedIndex = index;
@@ -278,12 +286,11 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        private void TrySetCallbackToInteractable<T>(T instance, System.Action<T> callback) where T : WindowComponent {
+        private void TrySetCallbackToInteractable<T>(T instance, int index, System.Action<T> callback) where T : WindowComponent {
             
             if (instance is IInteractableButton button) {
 
-                var idx = this.list.Count;
-                button.SetCallback(() => this.DoSelect(idx));
+                button.SetCallback(() => this.DoSelect(index));
 
             }
             if (callback != null) callback.Invoke(instance);
@@ -299,19 +306,19 @@ namespace UnityEngine.UI.Windows.Components {
         
         public virtual void AddItem(System.Action<WindowComponent> onComplete = null) {
             
-            this.list.AddItem((x, p) => this.TrySetCallbackToInteractable(x, onComplete));
+            this.list.AddItem((x, p) => this.TrySetCallbackToInteractable(x, p.index, onComplete));
 
         }
 
         public virtual void AddItem<T>(System.Action<T> onComplete = null) where T : WindowComponent {
             
-            this.list.AddItem<T>((x, p) => this.TrySetCallbackToInteractable(x, onComplete));
+            this.list.AddItem<T>((x, p) => this.TrySetCallbackToInteractable(x, p.index, onComplete));
 
         }
 
         public virtual void AddItem<T>(Resource source, System.Action<T> onComplete = null) where T : WindowComponent {
 
-            this.list.AddItem<T>(source, (x, p) => this.TrySetCallbackToInteractable(x, onComplete));
+            this.list.AddItem<T>(source, (x, p) => this.TrySetCallbackToInteractable(x, p.index, onComplete));
             
         }
 
@@ -332,7 +339,7 @@ namespace UnityEngine.UI.Windows.Components {
             
             this.list.SetItems<T, DropdownClosureParameters<T>>(count, (item, c) => {
                 
-                c.component.TrySetCallbackToInteractable(item, null);
+                c.component.TrySetCallbackToInteractable(item, c.index, null);
                 if (c.onItem != null) c.onItem.Invoke(item, c.index);
                 
             }, new DropdownClosureParameters<T>() {
@@ -346,7 +353,7 @@ namespace UnityEngine.UI.Windows.Components {
             
             this.list.SetItems<T, DropdownClosureParameters<T>>(count, source, (item, c) => {
                 
-                c.component.TrySetCallbackToInteractable(item, null);
+                c.component.TrySetCallbackToInteractable(item, c.index, null);
                 if (c.onItem != null) c.onItem.Invoke(item, c.index);
                 
             }, new DropdownClosureParameters<T>() {

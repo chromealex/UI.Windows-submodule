@@ -33,15 +33,17 @@ namespace UnityEngine.UI.Windows {
         }
 
         public bool CanBeUnchecked(CheckboxComponent checkbox) {
-            if (this.allowSwitchOff == true)
-                return true;
+        
+            if (this.allowSwitchOff == true) return true;
             
             foreach (var current in this.checkboxes) {
-                if (current.isChecked && current != checkbox)
+                if (current.isChecked == true && current != checkbox) {
                     return true;
+                }
             }
 
             return false;
+            
         }
 
     }

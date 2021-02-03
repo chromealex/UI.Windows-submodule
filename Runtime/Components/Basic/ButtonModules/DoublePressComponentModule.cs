@@ -1,44 +1,41 @@
-﻿using System;
-using UnityEngine.EventSystems;
+﻿using UnityEngine.EventSystems;
 
-namespace UnityEngine.UI.Windows
-{
+namespace UnityEngine.UI.Windows {
 
-    public class DoublePressComponentModule : ButtonComponentModule, IPointerDownHandler
-    {
+    public class DoublePressComponentModule : ButtonComponentModule, IPointerDownHandler {
+
+        public float pressTime = 1f;
 
         private bool isPressed;
         private float pressTimer;
+        private System.Action onDoublePressed;
 
-        public float pressTime = 1f;
-        public Action onDoublePressed;
+        public void LateUpdate() {
 
-        public void LateUpdate()
-        {
-
-            if (isPressed && Time.realtimeSinceStartup - pressTimer > pressTime)
-            {
-                isPressed = false;
+            if (this.isPressed && Time.realtimeSinceStartup - this.pressTimer > this.pressTime) {
+                
+                this.isPressed = false;
+                
             }
 
         }
 
-        public void OnPointerDown(PointerEventData eventData)
-        {
+        public void OnPointerDown(PointerEventData eventData) {
 
-            if (isPressed == false)
-            {
-                isPressed = true;
-
-                pressTimer = Time.realtimeSinceStartup;
-            }
-            else
-            {
-                if (Time.realtimeSinceStartup - pressTimer <= pressTime)
-                {
-                    this.onDoublePressed?.Invoke();
-                    isPressed = false;
+            if (this.isPressed == false) {
+            
+                this.isPressed = true;
+                this.pressTimer = Time.realtimeSinceStartup;
+                
+            } else {
+            
+                if (Time.realtimeSinceStartup - this.pressTimer <= this.pressTime) {
+                    
+                    if (this.onDoublePressed != null) this.onDoublePressed.Invoke();
+                    this.isPressed = false;
+                    
                 }
+                
             }
 
         }

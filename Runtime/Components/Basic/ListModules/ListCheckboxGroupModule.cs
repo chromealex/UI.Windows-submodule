@@ -3,7 +3,7 @@ using UnityEngine.UI.Windows.Components;
 
 namespace UnityEngine.UI.Windows {
     
-    [ComponentModuleDisplayName("Checkbox group")]
+    [ComponentModuleDisplayName("Checkbox Group")]
     public class ListCheckboxGroupModule : ListComponentModule, ICheckboxGroup {
         
         public bool allowSwitchOff;

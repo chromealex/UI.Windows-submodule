@@ -15,6 +15,24 @@ namespace UnityEngine.UI.Windows {
             [UnityEngine.UI.Windows.Utilities.SearchComponentsByTypePopup(typeof(WindowComponentModule), "Window Component Module", allowClassOverrides: true, singleOnly: true)]
             public WindowComponentModule[] modules;
 
+            public T GetModule<T>() {
+	            
+	            if (this.modules == null) return default;
+                
+	            for (int i = 0; i < this.modules.Length; ++i) {
+
+		            if (this.modules[i] is T module) {
+
+			            return module;
+
+		            }
+
+	            }
+
+	            return default;
+
+            }
+            
             public void ValidateEditor() {
 
                 if (this.modules == null) return;
@@ -120,6 +138,12 @@ namespace UnityEngine.UI.Windows {
         
         public ComponentModules componentModules;
 
+        public T GetModule<T>() {
+
+	        return this.componentModules.GetModule<T>();
+
+        }
+        
         public override void ValidateEditor() {
             
             base.ValidateEditor();

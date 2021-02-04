@@ -792,26 +792,26 @@ namespace UnityEngine.UI.Windows {
                 closure.instance = instance;
                 closure.parameters = parameters;
                 
-                Coroutines.CallInSequence((p) => {
-
-                    p.hierarchyComplete = true;
-                    
-                    if (p.animationComplete == true) {
-
-                        var pars = p.parameters;
-                        p.Dispose();
-                        pars.RaiseCallback();
-
-                    }
-
-                }, closure, instance.subObjects, (obj, cb, p) => {
-                    
-                    obj.Hide(p.parameters.ReplaceCallback(cb));
-                    
-                });
-                
                 WindowObjectAnimation.Hide(closure, instance, parameters, (cParams) => {
                     
+                    Coroutines.CallInSequence((p) => {
+
+                        p.hierarchyComplete = true;
+                    
+                        if (p.animationComplete == true) {
+
+                            var pars = p.parameters;
+                            p.Dispose();
+                            pars.RaiseCallback();
+
+                        }
+
+                    }, cParams, cParams.instance.subObjects, (obj, cb, p) => {
+                    
+                        obj.Hide(p.parameters.ReplaceCallback(cb));
+                    
+                    });
+
                     cParams.animationComplete = true;
                     if (cParams.hierarchyComplete == true) {
                         

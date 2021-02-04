@@ -775,7 +775,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
                     try {
 
-                        if (this.onUpdate != null) this.onUpdate.Invoke(this.obj, EaseFunctions.GetEase(this.easeFunction).Invoke(this.@from, this.to, this.timer, 1f));
+                        if (this.onUpdate != null) this.onUpdate.Invoke(this.obj, EaseFunctions.GetEase(this.easeFunction).Invoke(this.timer, this.@from, this.to, 1f));
 
                         if (this.timer >= 1f) {
 

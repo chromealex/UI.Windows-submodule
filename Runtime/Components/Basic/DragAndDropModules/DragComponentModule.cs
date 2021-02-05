@@ -16,9 +16,81 @@ namespace UnityEngine.UI.Windows.Components.DragAndDropModules {
 		[Tooltip("Dragging object icon")]
 		public Image icon;
 
-		public Action<PointerEventData> OnDragEvent;
-		public Action<PointerEventData> OnBeginDragEvent;
-		public Action<PointerEventData> OnEndDragEvent;
+		private Action<PointerEventData> onDragCallback;
+		private Action<PointerEventData> onBeginDragCallback;
+		private Action<PointerEventData> onEndDragCallback;
+
+		public void SetDragCallback(System.Action<PointerEventData> callback) {
+
+			this.onDragCallback = callback;
+
+		}
+
+		public void SetBeginDragCallback(System.Action<PointerEventData> callback) {
+
+			this.onBeginDragCallback = callback;
+
+		}
+
+		public void SetEndDragCallback(System.Action<PointerEventData> callback) {
+
+			this.onEndDragCallback = callback;
+
+		}
+
+		public void AddDragCallback(System.Action<PointerEventData> callback) {
+
+			this.onDragCallback += callback;
+
+		}
+
+		public void AddBeginDragCallback(System.Action<PointerEventData> callback) {
+
+			this.onBeginDragCallback += callback;
+
+		}
+
+		public void AddEndDragCallback(System.Action<PointerEventData> callback) {
+
+			this.onEndDragCallback += callback;
+
+		}
+
+		public void RemoveDragCallback(System.Action<PointerEventData> callback) {
+
+			this.onDragCallback -= callback;
+
+		}
+
+		public void RemoveBeginDragCallback(System.Action<PointerEventData> callback) {
+
+			this.onBeginDragCallback -= callback;
+
+		}
+
+		public void RemoveEndDragCallback(System.Action<PointerEventData> callback) {
+
+			this.onEndDragCallback -= callback;
+
+		}
+
+		public void RemoveAllDragCallbacks(System.Action<PointerEventData> callback) {
+
+			this.onDragCallback = null;
+
+		}
+
+		public void RemoveAllBeginDragCallbacks(System.Action<PointerEventData> callback) {
+
+			this.onBeginDragCallback = null;
+
+		}
+
+		public void RemoveAllEndDragCallbacks(System.Action<PointerEventData> callback) {
+
+			this.onEndDragCallback = null;
+
+		}
 
 		private void Awake() {
 
@@ -37,7 +109,7 @@ namespace UnityEngine.UI.Windows.Components.DragAndDropModules {
 			this.rectTransform = dragObject.transform as RectTransform;
 			this.rectTransform.position = transform.position;
 
-			OnBeginDragEvent?.Invoke(eventData);
+			onBeginDragCallback?.Invoke(eventData);
 
 		}
 
@@ -58,7 +130,7 @@ namespace UnityEngine.UI.Windows.Components.DragAndDropModules {
 		public void OnDrag(PointerEventData eventData) {
 
 			this.rectTransform.anchoredPosition += eventData.delta;
-			OnDragEvent?.Invoke(eventData);
+			onDragCallback?.Invoke(eventData);
 
 		}
 
@@ -68,7 +140,7 @@ namespace UnityEngine.UI.Windows.Components.DragAndDropModules {
 			this.canvasGroup.blocksRaycasts = true;
 
 			Destroy(dragObject);
-			OnEndDragEvent?.Invoke(eventData);
+			onEndDragCallback?.Invoke(eventData);
 
 		}
 

@@ -8,6 +8,18 @@ namespace UnityEngine.UI.Windows.Modules {
 
     using Utilities;
 
+    public interface IOnPoolGet {
+
+        void OnPoolGet();
+
+    }
+
+    public interface IOnPoolAdd {
+
+        void OnPoolAdd();
+
+    }
+    
     public class WindowSystemPools : MonoBehaviour {
 
         internal HashSet<int> registeredPrefabs = new HashSet<int>();
@@ -153,6 +165,13 @@ namespace UnityEngine.UI.Windows.Modules {
                 if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
                 this.instanceOnSceneToPrefab.Add(instance, key);
                 fromPool = true;
+                
+                if (instance is IOnPoolGet onPoolPull) {
+                
+                    onPoolPull.OnPoolGet();
+                
+                }
+
                 return (T)instance;
 
             } else {
@@ -170,6 +189,12 @@ namespace UnityEngine.UI.Windows.Modules {
         public void Despawn<T>(T instance, System.Action<T> onDestroy = null) where T : Component {
 
             if (this.instanceOnSceneToPrefab.TryGetValue(instance, out var prefabKey) == true) {
+
+                if (instance is IOnPoolAdd onPoolPush) {
+                
+                    onPoolPush.OnPoolAdd();
+                
+                }
 
                 this.instanceOnSceneToPrefab.Remove(instance);
 

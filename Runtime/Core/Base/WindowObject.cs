@@ -73,7 +73,7 @@ namespace UnityEngine.UI.Windows {
     
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
-    public abstract class WindowObject : MonoBehaviour, ISearchComponentByTypeSingleEditor {
+    public abstract class WindowObject : MonoBehaviour, IOnPoolGet, IOnPoolAdd, ISearchComponentByTypeSingleEditor {
 
         [System.Serializable]
         public struct RenderItem {
@@ -231,6 +231,21 @@ namespace UnityEngine.UI.Windows {
             
         }
         #endif
+
+        void IOnPoolGet.OnPoolGet() {
+            
+            this.OnPoolGet();
+            
+        }
+
+        void IOnPoolAdd.OnPoolAdd() {
+            
+            this.OnPoolAdd();
+            
+        }
+        
+        public virtual void OnPoolGet() {}
+        public virtual void OnPoolAdd() {}
 
         public void SetTransformAs(RectTransform rectTransform) {
 
@@ -816,6 +831,22 @@ namespace UnityEngine.UI.Windows {
 
             WindowObjectAnimation.SetResetState(this);
 
+        }
+
+        public void SendEvent<T>(T data) {
+            
+            this.OnEvent(data);
+
+            for (int i = 0; i < this.subObjects.Count; ++i) {
+
+                this.subObjects[i].SendEvent(data);
+
+            }
+            
+        }
+
+        public virtual void OnEvent<T>(T data) {
+            
         }
 
         public void DoSendFocusLost() {

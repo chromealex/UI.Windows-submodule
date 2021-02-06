@@ -18,6 +18,14 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public override void OnPoolAdd() {
+            
+            base.OnPoolAdd();
+            
+	        this.RemoveAllCallbacks();
+
+        }
+
         public void SetCallback(System.Action callback) {
 
 	        this.callback = callback;

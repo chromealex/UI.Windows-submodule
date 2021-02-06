@@ -47,9 +47,9 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public override void OnInit() {
+        internal override void OnInitInternal() {
 
-            base.OnInit();
+            base.OnInitInternal();
 
             if (this.autoToggle == true) {
 
@@ -59,17 +59,23 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public override void OnDeInit() {
-
+        internal override void OnDeInitInternal() {
+            
             this.button.onClick.RemoveListener(this.Toggle);
 
-            base.OnDeInit();
+            base.OnDeInitInternal();
 
         }
 
-        public override void OnShowBegin() {
+        public override void OnPoolAdd() {
+            
+            base.OnPoolAdd();
 
-            base.OnShowBegin();
+        }
+
+        internal override void OnShowBeginInternal() {
+
+            base.OnShowBeginInternal();
 
             this.SetCheckedState(this.isChecked);
 
@@ -113,17 +119,23 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         public void SetGroup(ICheckboxGroup group) {
+            
             this.group = group;
+            
         }
 
         private void UpdateCheckState() {
 
             if (this.checkedContainer != null) {
+                
                 this.checkedContainer.ShowHide(this.isChecked == true);
+                
             }
 
             if (this.uncheckedContainer != null) {
+                
                 this.uncheckedContainer.ShowHide(this.isChecked == false);
+                
             }
 
         }

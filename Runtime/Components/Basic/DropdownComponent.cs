@@ -75,13 +75,21 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public override void OnDeInit() {
+        internal override void OnDeInitInternal() {
             
-            base.OnDeInit();
-            
+            base.OnDeInitInternal();
+
             WindowSystem.onPointerUp -= this.OnPointerUp;
             this.RemoveCallbacks();
+
+        }
+
+        public override void OnPoolAdd() {
             
+            base.OnPoolAdd();
+
+            this.RemoveCallbacks();
+
         }
 
         private void OnPointerUp() {

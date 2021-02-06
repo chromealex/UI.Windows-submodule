@@ -142,6 +142,20 @@ namespace UnityEngine.UI.Windows.Components {
             
             base.OnDeInit();
 
+            this.ResetInstance();
+
+        }
+        
+        public override void OnPoolAdd() {
+            
+            base.OnPoolAdd();
+
+            this.ResetInstance();
+
+        }
+
+        private void ResetInstance() {
+            
             this.onElementsChangedCallback = null;
             this.onLayoutChangedCallback = null;
             
@@ -154,9 +168,9 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
             this.loadedAssets.Clear();
-            
+
         }
-        
+
         private void OnPointerUp() {
             
             var eventData = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current);

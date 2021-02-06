@@ -25,13 +25,27 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public override void OnDeInit() {
+        internal override void OnDeInitInternal() {
             
-            base.OnDeInit();
+            base.OnDeInitInternal();
+            
+            this.ResetInstance();
+
+        }
+
+        public override void OnPoolAdd() {
+            
+            base.OnPoolAdd();
+
+            this.RemoveCallbacks();
+
+        }
+
+        private void ResetInstance() {
             
             this.slider.onValueChanged.RemoveAllListeners();
             this.RemoveCallbacks();
-            
+
         }
 
         public float GetValue() {

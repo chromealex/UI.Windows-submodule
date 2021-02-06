@@ -47,23 +47,37 @@ namespace UnityEngine.UI.Windows.Components {
         private System.Action callback;
         private System.Action<ButtonComponent> callbackWithInstance;
 
-        public override void OnInit() {
+        internal override void OnInitInternal() {
             
             this.button.onClick.AddListener(this.DoClick);
             
-            base.OnInit();
+            base.OnInitInternal();
             
         }
 
-        public override void OnDeInit() {
+        public override void OnPoolAdd() {
             
-            base.OnDeInit();
+            base.OnPoolAdd();
+            
+            this.RemoveCallbacks();
+            
+        }
+
+        internal override void OnDeInitInternal() {
+            
+            base.OnDeInitInternal();
+            
+            this.ResetInstance();
+            
+        }
+
+        private void ResetInstance() {
             
             this.button.onClick.RemoveAllListeners();
             this.RemoveCallbacks();
             
         }
-
+        
         public void SetInteractable(bool state) {
 
             this.button.interactable = state;

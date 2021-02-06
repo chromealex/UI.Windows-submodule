@@ -61,6 +61,18 @@ namespace UnityEngine.UI.Windows {
                 }
 
             }
+
+            public void OnPoolAdd() {
+                
+                if (this.modules == null) return;
+
+                for (int i = 0; i < this.modules.Length; ++i) {
+                    
+                    if (this.modules[i] != null) this.modules[i].OnPoolAdd();
+                    
+                }
+
+            }
             
             public void OnInit() {
 
@@ -152,49 +164,57 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public override void OnInit() {
+        public override void OnPoolAdd() {
             
-            base.OnInit();
+            base.OnPoolAdd();
+
+            this.componentModules.OnPoolAdd();
+
+        }
+
+        internal override void OnInitInternal() {
+            
+            base.OnInitInternal();
             
             this.componentModules.OnInit();
             
         }
 
-        public override void OnDeInit() {
+        internal override void OnDeInitInternal() {
             
-            base.OnDeInit();
+            base.OnDeInitInternal();
             
             this.componentModules.OnDeInit();
 
         }
 
-        public override void OnShowBegin() {
+        internal override void OnShowBeginInternal() {
             
-            base.OnShowBegin();
+            base.OnShowBeginInternal();
             
             this.componentModules.OnShowBegin();
 
         }
 
-        public override void OnHideBegin() {
+        internal override void OnHideBeginInternal() {
             
-            base.OnHideBegin();
+            base.OnHideBeginInternal();
             
             this.componentModules.OnHideBegin();
 
         }
 
-        public override void OnShowEnd() {
+        internal override void OnShowEndInternal() {
             
-            base.OnShowEnd();
+            base.OnShowEndInternal();
             
             this.componentModules.OnShowEnd();
 
         }
 
-        public override void OnHideEnd() {
+        internal override void OnHideEndInternal() {
             
-            base.OnHideEnd();
+            base.OnHideEndInternal();
             
             this.componentModules.OnHideEnd();
 
@@ -246,6 +266,10 @@ namespace UnityEngine.UI.Windows {
         }
 
         public virtual void OnLayoutChanged() {
+            
+        }
+
+        public virtual void OnPoolAdd() {
             
         }
         

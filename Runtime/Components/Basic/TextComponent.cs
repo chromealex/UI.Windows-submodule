@@ -238,9 +238,21 @@ namespace UnityEngine.UI.Windows.Components {
             daysString = @"d\d\ ",
         };
 
-        public override void OnDeInit() {
+        internal override void OnDeInitInternal() {
             
-            base.OnDeInit();
+            base.OnDeInitInternal();
+            
+            this.ResetInstance();
+
+        }
+
+        public override void OnPoolAdd() {
+            
+            base.OnPoolAdd();
+
+        }
+
+        private void ResetInstance() {
             
             this.lastValueData = default;
             this.lastText = null;

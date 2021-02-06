@@ -29,16 +29,30 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public override void OnDeInit() {
+        internal override void OnDeInitInternal() {
             
-            base.OnDeInit();
+            base.OnDeInitInternal();
+
+            this.ResetInstance();
+
+        }
+
+        public override void OnPoolAdd() {
+            
+            base.OnPoolAdd();
+
+            this.RemoveCallbacks();
+
+        }
+
+        private void ResetInstance() {
             
             this.inputField.onValueChanged.RemoveListener(this.OnValueChanged);
             this.inputField.onEndEdit.RemoveListener(this.OnEndEdit);
             this.inputField.onValidateInput -= this.OnValidateChar;
             
             this.RemoveCallbacks();
-            
+
         }
 
         public void Clear() {

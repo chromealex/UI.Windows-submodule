@@ -5,13 +5,37 @@ namespace UnityEngine.UI.Windows.Components.DragAndDropModules {
 
 	public class DropComponentModule : WindowComponentModule, IDropHandler {
 
-		public Action<PointerEventData> OnDropEvent;
+		private Action<PointerEventData> callback;
+
+		public void SetCallback(System.Action<PointerEventData> callback) {
+
+			this.callback = callback;
+
+		}
+
+		public void AddCallback(System.Action<PointerEventData> callback) {
+
+			this.callback += callback;
+
+		}
+
+		public void RemoveCallback(System.Action<PointerEventData> callback) {
+
+			this.callback -= callback;
+
+		}
+
+		public void RemoveAllCallbacks() {
+
+			this.callback = null;
+
+		}
 
 		public void OnDrop(PointerEventData eventData) {
 
 			if (eventData.pointerDrag != null) {
 
-				OnDropEvent?.Invoke(eventData);
+				callback?.Invoke(eventData);
 
 			}
 

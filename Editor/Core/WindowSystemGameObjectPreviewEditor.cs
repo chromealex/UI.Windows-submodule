@@ -77,7 +77,7 @@ namespace UnityEditor.UI.Windows {
             return WindowSystemGameObjectPreviewEditor.editor != null && WindowSystemGameObjectPreviewEditor.editor.HasPreviewGUI();
 
         }
-
+        
         public override void OnInteractivePreviewGUI(Rect r, GUIStyle background) {
             
             if (WindowSystemGameObjectPreviewEditor.editor != null) WindowSystemGameObjectPreviewEditor.editor.OnInteractivePreviewGUI(r, background);

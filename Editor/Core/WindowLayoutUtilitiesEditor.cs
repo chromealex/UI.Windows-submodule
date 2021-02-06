@@ -25,6 +25,7 @@ namespace UnityEditor.UI.Windows {
 
         public static void DrawComponent(Rect rect, WindowComponent component, int customKey) {
 
+            /*
             var key = UnityEngine.UI.Windows.Utilities.UIWSMath.GetKey(component.GetHashCode(), customKey);
 
             if (Event.current.type == EventType.MouseUp ||
@@ -159,16 +160,17 @@ namespace UnityEditor.UI.Windows {
 
                     }
 
-                    EditorApplication.delayCall += () => {
+                    //EditorApplication.delayCall += () => {
 
                         GameObject.DestroyImmediate(camera);
                         GameObject.DestroyImmediate(canvas);
 
-                    };
+                    //};
 
                 };
 
             }
+            */
 
         }
         
@@ -470,10 +472,10 @@ namespace UnityEditor.UI.Windows {
                     if (scaleFactor > 0f) {
 
                         sizeDelta = new Vector2(screenSize.x / scaleFactor, screenSize.y / scaleFactor);
-                        windowLayout.rectTransform.sizeDelta = sizeDelta;
+                        //windowLayout.rectTransform.sizeDelta = sizeDelta;
                         windowLayout.rectTransform.pivot = new Vector2(0.5f, 0.5f);
                         windowLayout.rectTransform.localScale = Vector3.one;
-                        resolution = windowLayout.rectTransform.sizeDelta;
+                        resolution = sizeDelta; //windowLayout.rectTransform.sizeDelta;
 
                     }
 

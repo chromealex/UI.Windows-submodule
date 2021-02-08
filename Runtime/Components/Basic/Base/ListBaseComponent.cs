@@ -22,6 +22,7 @@ namespace UnityEngine.UI.Windows.Components {
         private HashSet<Object> loadedAssets = new HashSet<Object>();
         private System.Action onElementsChangedCallback;
         private System.Action onLayoutChangedCallback;
+        private bool layoutHasChanged;
 
         [SerializeField]
         internal ListRectTransformChangedInternal listRectTransformChangedInternal;
@@ -113,7 +114,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         protected virtual void OnLayoutChanged() {
 
-            this.componentModules.OnLayoutChanged();
+            this.layoutHasChanged = true;
             if (this.onLayoutChangedCallback != null) this.onLayoutChangedCallback.Invoke();
 
         }
@@ -151,6 +152,17 @@ namespace UnityEngine.UI.Windows.Components {
             base.OnPoolAdd();
 
             this.ResetInstance();
+
+        }
+
+        public virtual void LateUpdate() {
+
+            if (this.layoutHasChanged == true) {
+
+                this.layoutHasChanged = false;
+                this.componentModules.OnLayoutChanged();
+
+            }
 
         }
 

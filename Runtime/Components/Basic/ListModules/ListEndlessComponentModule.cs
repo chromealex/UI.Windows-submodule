@@ -222,6 +222,11 @@ namespace UnityEngine.UI.Windows {
             if (this.scrollRect == null) {
 
                 this.scrollRect = this.GetComponentInChildren<ScrollRect>(true);
+
+            }
+
+            if (this.scrollRect != null) {
+
                 this.scrollRect.vertical = (this.direction == Direction.Vertical);
                 this.scrollRect.horizontal = (this.direction == Direction.Horizontal);
 
@@ -398,12 +403,12 @@ namespace UnityEngine.UI.Windows {
             var contentSize = accumulatedSize;
             var scrollRect = this.scrollRect.transform as RectTransform;
             var contentRect = this.scrollRect.content;
-            var viewSize = (this.direction == Direction.Vertical ? scrollRect.rect.height + this.createOffset : scrollRect.rect.width);
+            var viewSize = (this.direction == Direction.Vertical ? scrollRect.rect.height + this.createOffset : scrollRect.rect.width + this.createOffset);
             this.contentSize = contentSize;
             
             contentRect.sizeDelta = (this.direction == Direction.Vertical ? new Vector2(0f, accumulatedSize) : new Vector2(accumulatedSize, 0f));
             
-            var posOffset = (this.direction == Direction.Vertical ? this.scrollRect.normalizedPosition.y : this.scrollRect.normalizedPosition.x);
+            var posOffset = (this.direction == Direction.Vertical ? this.scrollRect.normalizedPosition.y : 1f - this.scrollRect.normalizedPosition.x);
             var offInv = 1f - posOffset;
             var offset = offInv * contentSize - offInv * viewSize;
             

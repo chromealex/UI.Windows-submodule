@@ -750,12 +750,16 @@ namespace UnityEngine.UI.Windows.Utilities {
             internal object tag;
             internal float delay;
 
+            internal int loops;
+            internal bool reflect;
+
             internal System.Action<T> onComplete;
             internal System.Action onCompleteParameterless;
             internal System.Action<T, float> onUpdate;
             internal System.Action onCancel;
 
             internal float timer;
+            internal float direction;
 
             private EaseFunction easeFunction;
 
@@ -771,7 +775,7 @@ namespace UnityEngine.UI.Windows.Utilities {
                 this.delay -= dt;
                 if (this.delay <= 0f) {
 
-                    this.timer += dt / this.duration;
+                    this.timer += (dt / this.duration) * this.direction;
 
                     try {
 
@@ -779,9 +783,34 @@ namespace UnityEngine.UI.Windows.Utilities {
 
                         if (this.timer >= 1f) {
 
+	                        if (this.reflect == true) {
+
+		                        this.direction = -1f;
+		                        return false;
+	                        
+	                        }
+
                             if (this.onComplete != null) this.onComplete.Invoke(this.obj);
                             if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
                             return true;
+
+                        } else if (this.timer <= 0f) {
+
+	                        --this.loops;
+	                        if (this.loops == 0) {
+		                        
+		                        if (this.onComplete != null) this.onComplete.Invoke(this.obj);
+		                        if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
+		                        return true;
+
+	                        }
+
+	                        if (this.reflect == true) {
+
+		                        this.direction = 1f;
+		                        return false;
+	                        
+	                        }
 
                         }
 
@@ -819,6 +848,27 @@ namespace UnityEngine.UI.Windows.Utilities {
             bool ITween.HasTag(object tag) {
 
                 return this.tag == tag;
+
+            }
+
+            public Tween<T> Loop(int loops = -1) {
+				
+	            this.loops = loops;
+	            return this;
+
+            }
+
+            public Tween<T> SetValue(float timer) {
+				
+	            this.timer = timer;
+	            return this;
+
+            }
+
+            public Tween<T> Reflect() {
+				
+	            this.reflect = true;
+	            return this;
 
             }
 
@@ -882,6 +932,7 @@ namespace UnityEngine.UI.Windows.Utilities {
             tween.duration = duration;
             tween.from = from;
             tween.to = to;
+            tween.direction = 1f;
 
             this.tweens.Add(tween);
 

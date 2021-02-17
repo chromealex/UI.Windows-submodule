@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI.Windows {
 
@@ -9,10 +10,14 @@ namespace UnityEngine.UI.Windows {
         public float pressTime = 2f;
         public UnityEngine.UI.Windows.Components.ProgressComponent progressComponent;
 
+        [Header("Use long press via callback, not by overriding RaiseClick()")]
+        public bool callbackMode;
+
         private float pressTimer;
         private bool isPressed;
+        private System.Action callback;
 
-        public override void ValidateEditor() {
+		public override void ValidateEditor() {
 
             base.ValidateEditor();
 
@@ -24,29 +29,83 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public override void OnInit() {
+		public override void OnHideBegin() {
+
+			base.OnHideBegin();
+
+			this.isPressed = false;
+		}
+
+		public override void OnDeInit() {
+
+			base.OnDeInit();
+
+			this.RemoveAllCallbacks();
+
+		}
+
+		public void SetCallback(System.Action callback) {
+
+			this.callback = callback;
+
+		}
+
+		public void AddCallback(System.Action callback) {
+
+			this.callback += callback;
+
+		}
+
+		public void RemoveCallback(System.Action callback) {
+
+			this.callback -= callback;
+
+		}
+
+		public void RemoveAllCallbacks() {
+
+			this.callback = null;
+
+		}
+
+		public override void OnInit() {
             
             base.OnInit();
-            
-            this.buttonComponent.button.onClick.RemoveAllListeners();
-            
-        }
+
+            if (this.callbackMode == false) {
+
+	            this.buttonComponent.button.onClick.RemoveAllListeners();
+
+            }
+
+		}
 
         public void LateUpdate() {
 
-            if (this.isPressed == true && this.progressComponent != null) {
+	        if (this.isPressed == false) return;
 
-                var dt = Time.realtimeSinceStartup - this.pressTimer;
+	        var dt = Time.realtimeSinceStartup - this.pressTimer;
+
+			if (this.progressComponent != null) {
+
                 this.progressComponent.SetNormalizedValue(dt / this.pressTime);
                 
             }
-            
-        }
 
-        public void OnPointerDown(UnityEngine.EventSystems.PointerEventData eventData) {
+            if (this.callbackMode == true && dt > this.pressTime) {
+
+	            this.callback?.Invoke();
+	            this.isPressed = false;
+
+            }
+
+		}
+
+		public void OnPointerDown(UnityEngine.EventSystems.PointerEventData eventData) {
 
             this.isPressed = true;
             this.pressTimer = Time.realtimeSinceStartup;
+
             if (this.progressComponent != null) {
                 
                 this.progressComponent.Show();
@@ -59,8 +118,10 @@ namespace UnityEngine.UI.Windows {
         public void OnPointerUp(UnityEngine.EventSystems.PointerEventData eventData) {
 
             this.isPressed = false;
+
             if (this.progressComponent != null) this.progressComponent.Hide();
-            
+            if (this.callbackMode == true) return;
+
             if (Time.realtimeSinceStartup - this.pressTimer >= this.pressTime) {
 
                 this.buttonComponent.RaiseClick();

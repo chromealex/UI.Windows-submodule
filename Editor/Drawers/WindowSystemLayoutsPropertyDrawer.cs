@@ -249,6 +249,7 @@ namespace UnityEditor.UI.Windows {
                             if (GUI.Button(buttonRect, "Refresh") == true) {
                                 
                                 (componentsProp.serializedObject.targetObject as WindowObject).ValidateEditor();
+                                EditorHelpers.SetDirtyAndValidate(property);
                                 
                             }
                 

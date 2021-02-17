@@ -564,6 +564,12 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             for (int j = 0; j < windowLayout.layoutElements.Length; ++j) {
 
                 var layoutElement = windowLayout.layoutElements[j];
+                if (layoutElement == null) {
+                    
+                    UnityEngine.Debug.LogError($"Layout Element is null at index {j} on window layout {windowLayout}", windowLayout);
+                    continue;
+
+                }
                 if (layoutElement.hideInScreen == true) {
                 
                     layoutItem.Remove(layoutElement.tagId, windowLayout);

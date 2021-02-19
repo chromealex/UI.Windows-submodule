@@ -214,10 +214,11 @@ namespace UnityEngine.UI.Windows.Components {
 
                 var sprite = resources.New<Sprite, SpriteConstructor>(this, new SpriteConstructor(tex2d, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f)));
                 image.sprite = sprite;
+                image.preserveAspect = this.preserveAspect;
 
             }
 
-        }
+		}
 
         public override void ValidateEditor() {
             

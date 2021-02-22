@@ -620,6 +620,8 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                 var windowLayout = layoutItem.windowLayout;
                 if (windowLayout != null) {
 
+                    windowLayout.ValidateEditor();
+
                     { // Validate components list
 
                         for (int c = 0; c < layoutItem.components.Length; ++c) {

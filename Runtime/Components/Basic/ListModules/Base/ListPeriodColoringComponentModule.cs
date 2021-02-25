@@ -14,33 +14,22 @@ namespace UnityEngine.UI.Windows {
 
 			base.OnShowBegin();
 
-			if(period == 0) return;
+			if (this.period == 0) return;
 
-			var counter = 1;
+			var toggle = false;
+			var targetColor = this.firstColor;
+			for (int i = 0; i < this.listComponent.items.Count; i++) {
 
-			for (int i = 0; i < listComponent.items.Count; i++) {
-
-				var imageObject = listComponent.items[i].transform.Find(this.background.name);
-
-				if (counter <= this.period) {
-
-					imageObject.GetComponent<ImageComponent>().SetColor(this.firstColor);
-
+				if (i % this.period == 0) {
+					
+					toggle = !toggle;
+					targetColor = (toggle == true ? this.secondColor : this.firstColor);
+					
 				}
-				else {
-
-					imageObject.GetComponent<ImageComponent>().SetColor(this.secondColor);
-
-				}
-
-				counter++;
-
-				if (counter > this.period * 2) {
-
-					counter = 1;
-
-				}
-
+				
+				var imageObject = this.listComponent.items[i].transform.Find(this.background.name);
+				imageObject.GetComponent<ImageComponent>().SetColor(targetColor);
+				
 			}
 
 		}

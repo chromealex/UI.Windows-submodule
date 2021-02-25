@@ -23,6 +23,15 @@ namespace UnityEngine.UI.Windows.Modules {
 
             }
 
+            public override void Recycle() {
+
+                this.anchorPosition = default;
+                this.rotation = default;
+                this.scale = default;
+                PoolClass<RectState>.Recycle(this);
+                
+            }
+
         }
 
         [Space(10f)] public RectTransform rectTransform;
@@ -80,6 +89,18 @@ namespace UnityEngine.UI.Windows.Modules {
             this.rectTransform.localScale = toState.scale;
 
             this.currentState.CopyFrom(state);
+
+        }
+
+        public override State CreateState() {
+            
+            return PoolClass<RectState>.Spawn();
+            
+        }
+
+        public override State GetCurrentState() {
+
+            return this.currentState;
 
         }
 

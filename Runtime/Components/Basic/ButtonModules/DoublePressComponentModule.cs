@@ -5,10 +5,23 @@ namespace UnityEngine.UI.Windows {
     public class DoublePressComponentModule : ButtonComponentModule, IPointerDownHandler {
 
         public float pressTime = 1f;
+        public bool overrideSingleClick;
 
         private bool isPressed;
         private float pressTimer;
         private System.Action callback;
+
+        public override void OnInit() {
+            
+            base.OnInit();
+
+            if (this.overrideSingleClick == true) {
+                
+                this.buttonComponent.button.onClick.RemoveAllListeners();
+
+            }
+            
+        }
 
         public override void OnDeInit() {
 	        
@@ -52,7 +65,7 @@ namespace UnityEngine.UI.Windows {
 
         public void LateUpdate() {
 
-            if (this.isPressed && Time.realtimeSinceStartup - this.pressTimer > this.pressTime) {
+            if (this.isPressed == true && Time.realtimeSinceStartup - this.pressTimer > this.pressTime) {
                 
                 this.isPressed = false;
                 
@@ -70,7 +83,13 @@ namespace UnityEngine.UI.Windows {
             } else {
             
                 if (Time.realtimeSinceStartup - this.pressTimer <= this.pressTime) {
-                    
+
+                    if (this.overrideSingleClick == true) {
+
+                        this.buttonComponent.RaiseClick();
+
+                    }
+
                     if (this.callback != null) this.callback.Invoke();
                     this.isPressed = false;
                     

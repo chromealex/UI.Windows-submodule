@@ -8,6 +8,7 @@ namespace UnityEngine.UI.Windows.Modules {
     
     public enum AnimationState {
 
+        Current,
         Reset,
         Show,
         Hide,
@@ -16,8 +17,8 @@ namespace UnityEngine.UI.Windows.Modules {
 
     public abstract class AnimationParameters : MonoBehaviour {
 
-        public float durationShow = 1f;
-        public float durationHide = 1f;
+        public float durationShow = 0.3f;
+        public float durationHide = 0.3f;
         public float delayShow = 0f;
         public float delayHide = 0f;
         public Tweener.EaseFunction easeShow = Tweener.EaseFunction.Linear;
@@ -26,6 +27,7 @@ namespace UnityEngine.UI.Windows.Modules {
         public abstract class State {
 
             public abstract void CopyFrom(State other);
+            public abstract void Recycle();
 
         }
 
@@ -73,25 +75,49 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public abstract void ApplyState(State state);
 
-        public State GetState(AnimationState state) {
+        public State GetState(AnimationState state, bool clone = false) {
 
-            switch (state) {
+            State copy = null;
+            if (clone == true) {
 
-                case AnimationState.Reset:
-                    return this.GetResetState();
-
-                case AnimationState.Show:
-                    return this.GetInState();
-
-                case AnimationState.Hide:
-                    return this.GetOutState();
+                copy = this.CreateState();
 
             }
 
-            return default;
+            State result = null;
+            switch (state) {
+
+                case AnimationState.Current:
+                    result = this.GetCurrentState();
+                    break;
+
+                case AnimationState.Reset:
+                    result = this.GetResetState();
+                    break;
+
+                case AnimationState.Show:
+                    result = this.GetInState();
+                    break;
+
+                case AnimationState.Hide:
+                    result = this.GetOutState();
+                    break;
+
+            }
+
+            if (clone == true) {
+                
+                copy.CopyFrom(result);
+                result = copy;
+
+            }
+
+            return result;
 
         }
 
+        public abstract State CreateState();
+        public abstract State GetCurrentState();
         public abstract State GetResetState();
         public abstract State GetInState();
         public abstract State GetOutState();

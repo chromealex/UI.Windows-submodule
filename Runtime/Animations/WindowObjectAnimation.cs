@@ -66,12 +66,15 @@ namespace UnityEngine.UI.Windows.Modules {
             }
 
             if (parameters.data.immediately == true) {
-
+                
+                var tweener = WindowSystem.GetTweener();
+                
                 for (int i = 0; i < animationParameters.Length; ++i) {
 
                     var anim = animationParameters[i];
                     if (anim != null) {
 
+                        tweener.Stop(anim);
                         anim.ApplyState(anim.GetState(animationState));
 
                     }
@@ -99,7 +102,11 @@ namespace UnityEngine.UI.Windows.Modules {
                     AnimationParameters.State fromState = null;
                     if (state.transitionParameters.data.resetAnimation == true) {
 
-                        fromState = anim.GetState(AnimationState.Reset);
+                        fromState = anim.GetState(AnimationState.Reset, true);
+
+                    } else {
+
+                        fromState = anim.GetState(AnimationState.Current, true);
 
                     }
 
@@ -120,9 +127,14 @@ namespace UnityEngine.UI.Windows.Modules {
                            .Delay(anim.GetDelay(state.animationState))
                            .Tag(anim)
                            .Ease(ease)
-                           .OnUpdate((obj, value) => { obj.animationParameters.ApplyState(obj.animationParameters.LerpState(obj.fromState, obj.toState, value)); })
-                           .OnComplete((obj) => {
+                           .OnUpdate((obj, value) => {
                                
+                               obj.animationParameters.ApplyState(obj.animationParameters.LerpState(obj.fromState, obj.toState, value));
+                               
+                           })
+                           .OnComplete((obj) => {
+
+                               obj.fromState.Recycle();
                                obj.onComplete.Invoke();
                                
                            });

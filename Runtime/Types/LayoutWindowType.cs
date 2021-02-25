@@ -62,7 +62,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
             for (int i = 0; i < this.components.Length; ++i) {
 
-                if (this.components[i].tag == localTagId) {
+                if (this.components[i].localTag == localTagId) {
 
                     return true;
 
@@ -74,12 +74,41 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
+        public WindowLayoutElement GetLayoutElement(int localTagId) {
+
+            int globalTag = -1;
+            for (int i = 0; i < this.components.Length; ++i) {
+
+                var comp = this.components[i];
+                if (comp.localTag == localTagId) {
+
+                    globalTag = comp.tag;
+                    break;
+
+                }
+
+            }
+
+            for (int i = 0; i < this.windowLayoutInstance.layoutElements.Length; ++i) {
+
+                if (this.windowLayoutInstance.layoutElements[i].tagId == globalTag) {
+
+                    return this.windowLayoutInstance.layoutElements[i];
+
+                }
+                
+            }
+
+            return null;
+
+        }
+
         public bool GetLayoutComponent<T>(out T component, int localTagId) where T : WindowComponent {
 
             for (int i = 0; i < this.components.Length; ++i) {
 
                 var comp = this.components[i];
-                if (comp.tag == localTagId) {
+                if (comp.localTag == localTagId) {
 
                     component = comp.componentInstance as T;
                     return true;
@@ -419,6 +448,13 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
             var currentItem = this.layouts.GetActive();
             return currentItem.GetLayoutComponent(out component, localTagId);
+
+        }
+
+        public WindowLayoutElement GetLayoutElement(int localTagId) {
+
+            var currentItem = this.layouts.GetActive();
+            return currentItem.GetLayoutElement(localTagId);
 
         }
 

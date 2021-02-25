@@ -750,13 +750,14 @@ namespace UnityEngine.UI.Windows.Utilities {
             internal object tag;
             internal float delay;
 
-            internal int loops;
+            internal int loops = 1;
             internal bool reflect;
 
             internal System.Action<T> onComplete;
             internal System.Action onCompleteParameterless;
             internal System.Action<T, float> onUpdate;
-            internal System.Action onCancel;
+            internal System.Action<T> onCancel;
+            internal System.Action onCancelParameterless;
 
             internal float timer;
             internal float direction;
@@ -789,10 +790,17 @@ namespace UnityEngine.UI.Windows.Utilities {
 		                        return false;
 	                        
 	                        }
+	                        
+	                        --this.loops;
+	                        if (this.loops == 0) {
 
-                            if (this.onComplete != null) this.onComplete.Invoke(this.obj);
-                            if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
-                            return true;
+		                        if (this.onComplete != null) this.onComplete.Invoke(this.obj);
+		                        if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
+		                        return true;
+
+	                        }
+	                        
+	                        return false;
 
                         } else if (this.timer <= 0f) {
 
@@ -811,6 +819,8 @@ namespace UnityEngine.UI.Windows.Utilities {
 		                        return false;
 	                        
 	                        }
+
+	                        return false;
 
                         }
 
@@ -836,12 +846,17 @@ namespace UnityEngine.UI.Windows.Utilities {
 
                 if (this.timer < 1f) {
 
-                    if (this.onCancel != null) this.onCancel.Invoke();
-
+	                if (this.onCancel != null) this.onCancel.Invoke(this.obj);
+	                if (this.onCancelParameterless != null) this.onCancelParameterless.Invoke();
+	                if (this.onComplete != null) this.onComplete.Invoke(this.obj);
+	                if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
+	                
                 }
 
                 this.delay = 0f;
-                this.timer = 1f;
+                this.timer = this.direction;
+                this.reflect = false;
+                this.loops = 1;
 
             }
 
@@ -851,7 +866,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             }
 
-            public Tween<T> Loop(int loops = -1) {
+            public Tween<T> Loop(int loops = 1) {
 				
 	            this.loops = loops;
 	            return this;
@@ -907,9 +922,16 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             }
 
+            public Tween<T> OnCancel(System.Action<T> onResult) {
+
+	            this.onCancel = onResult;
+	            return this;
+
+            }
+
             public Tween<T> OnCancel(System.Action onResult) {
 
-                this.onCancel = onResult;
+                this.onCancelParameterless = onResult;
                 return this;
 
             }

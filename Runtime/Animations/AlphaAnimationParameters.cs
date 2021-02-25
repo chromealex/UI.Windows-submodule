@@ -19,6 +19,13 @@ namespace UnityEngine.UI.Windows.Modules {
 
             }
 
+            public override void Recycle() {
+
+                this.alpha = default;
+                PoolClass<AlphaState>.Recycle(this);
+                
+            }
+
         }
 
         [Space(10f)] public CanvasGroup canvasGroup;
@@ -58,6 +65,18 @@ namespace UnityEngine.UI.Windows.Modules {
             this.canvasGroup.alpha = toState.alpha;
 
             this.currentState.CopyFrom(state);
+
+        }
+
+        public override State CreateState() {
+            
+            return PoolClass<AlphaState>.Spawn();
+            
+        }
+
+        public override State GetCurrentState() {
+
+            return this.currentState;
 
         }
 

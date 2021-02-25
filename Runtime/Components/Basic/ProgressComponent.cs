@@ -16,6 +16,7 @@ namespace UnityEngine.UI.Windows.Components {
         
         private System.Action<float> callback;
         private System.Action<ProgressComponent, float> callbackWithInstance;
+        private bool ignoreCallbacks;
 
         public override void OnInit() {
             
@@ -66,21 +67,27 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public void SetNormalizedValue(float value) {
-
-            this.slider.normalizedValue = value;
-
-        }
-
         public void SetMaxValue(float value) {
 
             this.slider.maxValue = value;
 
         }
 
-        public void SetValue(float value) {
+        public void SetNormalizedValue(float value, bool ignoreCallbacks = false) {
 
-            this.slider.value = value;
+            var prev = this.ignoreCallbacks;
+            this.ignoreCallbacks = ignoreCallbacks;
+            if (Mathf.Abs(value - this.slider.normalizedValue) > Mathf.Epsilon) this.slider.normalizedValue = value;
+            this.ignoreCallbacks = prev;
+
+        }
+
+        public void SetValue(float value, bool ignoreCallbacks = false) {
+
+            var prev = this.ignoreCallbacks;
+            this.ignoreCallbacks = ignoreCallbacks;
+            if (Mathf.Abs(value - this.slider.value) > Mathf.Epsilon) this.slider.value = value;
+            this.ignoreCallbacks = prev;
 
         }
 
@@ -97,6 +104,8 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         private void OnValueChanged(float value) {
+            
+            if (this.ignoreCallbacks == true) return;
             
             if (this.callback != null) this.callback.Invoke(value);
             if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this, value);

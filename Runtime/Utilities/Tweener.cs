@@ -848,8 +848,8 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 	                if (this.onCancel != null) this.onCancel.Invoke(this.obj);
 	                if (this.onCancelParameterless != null) this.onCancelParameterless.Invoke();
-	                if (this.onComplete != null) this.onComplete.Invoke(this.obj);
-	                if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
+	                //if (this.onComplete != null) this.onComplete.Invoke(this.obj);
+	                //if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
 	                
                 }
 

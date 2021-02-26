@@ -633,6 +633,9 @@ namespace UnityEngine.UI.Windows {
 
             public void Dispose() {
 
+                this.internalCall = default;
+                this.animationComplete = default;
+                this.hierarchyComplete = default;
                 this.instance = null;
                 this.parameters = default;
                 PoolClass<ShowHideClosureParametersClass>.Recycle(this);

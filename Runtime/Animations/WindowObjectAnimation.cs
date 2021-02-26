@@ -86,11 +86,12 @@ namespace UnityEngine.UI.Windows.Modules {
 
             }
 
-            var animationGroupInfo = new AnimationGroupInfo<T>();
-            animationGroupInfo.transitionParameters = parameters;
-            animationGroupInfo.animationState = animationState;
-            animationGroupInfo.closureParameters = closureParameters;
-            animationGroupInfo.onComplete = onComplete;
+            var animationGroupInfo = new AnimationGroupInfo<T> {
+                transitionParameters = parameters,
+                animationState = animationState,
+                closureParameters = closureParameters,
+                onComplete = onComplete,
+            };
             UnityEngine.UI.Windows.Utilities.Coroutines.CallInSequence((x) => {
                 
                 x.onComplete.Invoke(x.closureParameters);
@@ -134,6 +135,12 @@ namespace UnityEngine.UI.Windows.Modules {
                            })
                            .OnComplete((obj) => {
 
+                               obj.fromState.Recycle();
+                               obj.onComplete.Invoke();
+                               
+                           })
+                           .OnCancel((obj) => {
+                               
                                obj.fromState.Recycle();
                                obj.onComplete.Invoke();
                                

@@ -20,6 +20,8 @@ namespace UnityEngine.UI.Windows.Components.DragAndDropModules {
 		private Action<PointerEventData> onBeginDragCallback;
 		private Action<PointerEventData> onEndDragCallback;
 
+		private float scaleFactor = 1;
+
 		public void SetDragCallback(System.Action<PointerEventData> callback) {
 
 			this.onDragCallback = callback;
@@ -100,6 +102,8 @@ namespace UnityEngine.UI.Windows.Components.DragAndDropModules {
 
 		public void OnBeginDrag(PointerEventData eventData) {
 
+			var canvas = GetParentCanvasTransform();
+			this.scaleFactor = canvas.gameObject.GetComponent<Canvas>().scaleFactor;
 			this.dragObject = Instantiate(dragObjectPrefab, GetParentCanvasTransform());
 			this.dragObject.GetComponent<ImageComponent>().SetImage(icon.sprite);
 
@@ -129,7 +133,7 @@ namespace UnityEngine.UI.Windows.Components.DragAndDropModules {
 
 		public void OnDrag(PointerEventData eventData) {
 
-			this.rectTransform.anchoredPosition += eventData.delta;
+			this.rectTransform.anchoredPosition += eventData.delta / this.scaleFactor;
 			onDragCallback?.Invoke(eventData);
 
 		}

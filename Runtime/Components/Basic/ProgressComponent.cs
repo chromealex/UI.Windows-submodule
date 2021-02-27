@@ -93,7 +93,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         public void SetInteractable(bool state) {
 
-            this.slider.interactable = state;
+            if (this.slider.interactable != state) this.slider.interactable = state;
 
         }
 

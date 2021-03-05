@@ -625,6 +625,15 @@ namespace UnityEngine.UI.Windows {
             
             for (int i = 0; i < this.subObjects.Count; ++i) {
                 
+                if (this.subObjects[i] == null) {
+                    
+                    Debug.LogError($"Null subObject encountered on window [{ source.name}], object [{this.name}], index [{i}] (previous subObject is [{(i > 0 ? this.subObjects[i - 1].name : "")}], next subObject is [{(i < this.subObjects.Count - 1 ? this.subObjects[i + 1].name : "")}])");
+                    this.subObjects.RemoveAt(i);
+                    --i;
+                    continue;
+                    
+                }
+                
                 this.subObjects[i].Setup(source);
                 
             }

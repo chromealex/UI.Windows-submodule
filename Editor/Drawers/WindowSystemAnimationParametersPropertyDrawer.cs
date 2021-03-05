@@ -30,6 +30,12 @@ namespace UnityEditor.UI.Windows {
                     GUI.Label(rect, label);
                     
                 };
+                this.list.onAddCallback = (list) => {
+
+                    items.arraySize = items.arraySize + 1;
+                    items.GetArrayElementAtIndex(items.arraySize - 1).objectReferenceValue = null;
+
+                };
                 this.list.drawElementCallback = (rect, index, active, focused) => {
                     
                     EditorGUI.PropertyField(rect, items.GetArrayElementAtIndex(index), label, true);

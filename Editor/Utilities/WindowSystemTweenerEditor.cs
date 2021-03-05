@@ -29,7 +29,7 @@ namespace UnityEditor.UI.Windows {
 
                     var data = (Tweener.ITweenInternal)tween;
                     EditorGUILayout.ObjectField("Tag", data.GetTag() as Object, typeof(Object), allowSceneObjects: true);
-                    if (data.GetDelay() > 0f) EditorGUILayout.LabelField("Delay", data.GetDelay().ToString("mm:ss"));
+                    if (data.GetDelay() > 0f) EditorGUILayout.LabelField("Delay", System.TimeSpan.FromSeconds(data.GetDelay()).ToString(@"mm\:ss"));
                     EditorGUILayout.Slider(new GUIContent("Timer"), data.GetTimer(), 0f, 1f);
 
                 });

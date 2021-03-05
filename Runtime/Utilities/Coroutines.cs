@@ -15,6 +15,24 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
+        public static void NextFrame(System.Action callback) {
+	        
+	        Coroutines.instance.StartCoroutine(Coroutines.WaitFrames_INTERNAL(callback, 1));
+	        
+        }
+
+        private static IEnumerator WaitFrames_INTERNAL(System.Action callback, int frames) {
+
+	        while (frames > 0) {
+		        
+		        yield return null;
+		        --frames;
+
+	        }
+	        callback.Invoke();
+
+        }
+        
         public static void Wait(System.Func<bool> waitFor, System.Action callback) {
 	        
 	        Coroutines.instance.StartCoroutine(Coroutines.Waiter_INTERNAL(waitFor, callback));

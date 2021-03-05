@@ -729,11 +729,11 @@ namespace UnityEngine.UI.Windows {
                 
             }
             
+            instance.SetState(ObjectState.Shown);
+
             instance.OnShowEndInternal();
             instance.OnShowEnd();
             WindowSystem.RaiseEvent(instance, WindowEvent.OnShowEnd);
-
-            instance.SetState(ObjectState.Shown);
 
             parameters.RaiseCallback();
 
@@ -755,12 +755,12 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
+            instance.SetState(ObjectState.Hidden);            
+            instance.SetInvisible();
+
             instance.OnHideEndInternal();
             instance.OnHideEnd();
             WindowSystem.RaiseEvent(instance, WindowEvent.OnHideEnd);
-
-            instance.SetState(ObjectState.Hidden);
-            instance.SetInvisible();
 
             parameters.RaiseCallback();
 

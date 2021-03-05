@@ -727,6 +727,7 @@ namespace UnityEngine.UI.Windows.Utilities {
             bool Update(float dt);
             bool HasTag(object tag);
             void Stop();
+            void Complete();
 
         }
 
@@ -794,8 +795,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 	                        --this.loops;
 	                        if (this.loops == 0) {
 
-		                        if (this.onComplete != null) this.onComplete.Invoke(this.obj);
-		                        if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
 		                        return true;
 
 	                        }
@@ -807,8 +806,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 	                        --this.loops;
 	                        if (this.loops == 0) {
 		                        
-		                        if (this.onComplete != null) this.onComplete.Invoke(this.obj);
-		                        if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
 		                        return true;
 
 	                        }
@@ -842,14 +839,24 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             }
 
+            void ITween.Complete() {
+
+	            if (this.onComplete != null) this.onComplete.Invoke(this.obj);
+	            if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
+
+	            this.delay = 0f;
+	            this.timer = this.direction;
+	            this.reflect = false;
+	            this.loops = 1;
+
+            }
+
             void ITween.Stop() {
 
                 if (this.timer < 1f) {
 
 	                if (this.onCancel != null) this.onCancel.Invoke(this.obj);
 	                if (this.onCancelParameterless != null) this.onCancelParameterless.Invoke();
-	                //if (this.onComplete != null) this.onComplete.Invoke(this.obj);
-	                //if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
 	                
                 }
 
@@ -977,18 +984,29 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
+        private List<ITween> completeList = new List<ITween>();
         public void Update() {
             
             var dt = Time.deltaTime;
-            for (int i = this.tweens.Count - 1; i >= 0; --i) {
+            this.completeList.Clear();
+            for (int cnt = this.tweens.Count, i = cnt - 1; i >= 0; --i) {
 
                 if (this.tweens[i].Update(dt) == true) {
 
+	                var tween = this.tweens[i];
+	                this.completeList.Add(tween);
                     this.tweens.RemoveAt(i);
-
+                    
                 }
 
             }
+
+            for (int i = 0, cnt = this.completeList.Count; i < cnt; ++i) {
+            
+	            this.completeList[i].Complete();
+	            
+            }
+            this.completeList.Clear();
 
         }
 

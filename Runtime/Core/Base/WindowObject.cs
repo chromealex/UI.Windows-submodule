@@ -462,7 +462,7 @@ namespace UnityEngine.UI.Windows {
         /// <summary>
         /// Just turn off all canvases
         /// </summary>
-        public void TurnOffRender() {
+        public virtual void TurnOffRender() {
 
             if (this.hasObjectCanvas == true) {
 
@@ -481,7 +481,7 @@ namespace UnityEngine.UI.Windows {
         /// <summary>
         /// Just turn on all canvases
         /// </summary>
-        public void TurnOnRender() {
+        public virtual void TurnOnRender() {
 
             if (this.hasObjectCanvas == true) {
 

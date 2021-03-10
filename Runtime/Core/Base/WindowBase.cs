@@ -184,6 +184,22 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public override void TurnOffRender() {
+            
+            base.TurnOffRender();
+            
+            this.workCamera.enabled = false;
+            
+        }
+
+        public override void TurnOnRender() {
+            
+            base.TurnOffRender();
+            
+            this.workCamera.enabled = true;
+            
+        }
+
         internal void ApplyDepth() {
 
             var depth = WindowSystem.GetNextDepth(this.preferences.layer);

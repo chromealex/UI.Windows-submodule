@@ -524,10 +524,10 @@ namespace UnityEngine.UI.Windows {
 
             var settings = WindowSystem.GetSettings();
             var layerInfo = settings.GetLayerInfo(layer.value);
-            var step = (layerInfo.maxDepth - layerInfo.minDepth) / settings.windowsPerLayer;
 
             if (WindowSystem.instance.topWindowsByLayer.TryGetValue(layer.value, out var instance) == true) {
 
+                var step = (layerInfo.maxDepth - layerInfo.minDepth) / settings.windowsPerLayer;
                 return instance.GetDepth() + step;
 
             }
@@ -1172,24 +1172,24 @@ namespace UnityEngine.UI.Windows {
 
             GameObject.DontDestroyOnLoad(instance.gameObject);
 
-            instance.LoadAsync(() => {
-            
-                { // Setup for each instance
+            { // Setup for each instance
 
-                    instance.Setup(instance);
-                    this.TryAddTopWindow(instance.preferences.layer, instance);
-                    if (this.windowsCountByLayer.TryGetValue(instance.preferences.layer.value, out var count) == true) {
+                instance.Setup(instance);
+                this.TryAddTopWindow(instance.preferences.layer, instance);
+                if (this.windowsCountByLayer.TryGetValue(instance.preferences.layer.value, out var count) == true) {
 
-                        this.windowsCountByLayer[instance.preferences.layer.value] = count + 1;
+                    this.windowsCountByLayer[instance.preferences.layer.value] = count + 1;
 
-                    } else {
+                } else {
 
-                        this.windowsCountByLayer.Add(instance.preferences.layer.value, 1);
-
-                    }
+                    this.windowsCountByLayer.Add(instance.preferences.layer.value, 1);
 
                 }
 
+            }
+
+            instance.LoadAsync(() => {
+            
                 instance.DoInit();
 
                 if (onInitialized != null) {

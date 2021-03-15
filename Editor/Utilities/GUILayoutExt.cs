@@ -936,6 +936,28 @@ namespace UnityEditor.UI.Windows {
 
         }
 
+        public static bool DrawDropdown(Rect position, GUIContent content, FocusType focusType, UnityEngine.Object selectButton = null) {
+
+	        if (selectButton != null) {
+
+		        var selectButtonWidth = 80f;
+		        var space = 4f;
+		        var rect = new Rect(position.x, position.y, position.width - selectButtonWidth - space, position.height);
+		        var result = EditorGUI.DropdownButton(rect, content, focusType);
+		        if (GUI.Button(new Rect(position.x + rect.width + space, position.y, selectButtonWidth, position.height), "Select") == true) {
+
+			        Selection.activeObject = selectButton;
+
+		        }
+				
+		        return result;
+				
+	        }
+			
+	        return EditorGUI.DropdownButton(position, content, focusType);
+
+        }
+
     }
 
     public class PopupWindowAnim : EditorWindow {

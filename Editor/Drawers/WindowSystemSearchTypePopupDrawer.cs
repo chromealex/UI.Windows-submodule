@@ -19,7 +19,7 @@ namespace UnityEditor.UI.Windows {
             EditorGUI.LabelField(position, label);
             position.x += EditorGUIUtility.labelWidth;
             position.width -= EditorGUIUtility.labelWidth;
-            if (EditorGUI.DropdownButton(position, new GUIContent(target.objectReferenceValue != null ? EditorHelpers.StringToCaption(target.objectReferenceValue.name) : attr.noneOption), FocusType.Passive) == true) {
+            if (GUILayoutExt.DrawDropdown(position, new GUIContent(target.objectReferenceValue != null ? EditorHelpers.StringToCaption(target.objectReferenceValue.name) : attr.noneOption), FocusType.Passive, target.objectReferenceValue) == true) {
 
                 var rect = position;
                 var vector = GUIUtility.GUIToScreenPoint(new Vector2(rect.x, rect.y));
@@ -109,7 +109,7 @@ namespace UnityEditor.UI.Windows {
             EditorGUI.LabelField(position, label);
             position.x += EditorGUIUtility.labelWidth;
             position.width -= EditorGUIUtility.labelWidth;
-            if (EditorGUI.DropdownButton(position, new GUIContent(target.objectReferenceValue != null ? displayName : attr.noneOption), FocusType.Passive) == true) {
+            if (GUILayoutExt.DrawDropdown(position, new GUIContent(target.objectReferenceValue != null ? displayName : attr.noneOption), FocusType.Passive, target.objectReferenceValue) == true) {
 
                 var rect = position;
                 var vector = GUIUtility.GUIToScreenPoint(new Vector2(rect.x, rect.y));

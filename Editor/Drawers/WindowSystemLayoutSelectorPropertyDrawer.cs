@@ -39,10 +39,19 @@ namespace UnityEditor.UI.Windows {
             if (string.IsNullOrEmpty(pth) == true) return;
             
             var assetPath = System.IO.Path.GetDirectoryName(pth);
-            assetPath = assetPath.Replace("/Screens", "/Layouts");
+            var screensMarker = "Screens";
+            if (assetPath.EndsWith(screensMarker) == true) {
+
+                assetPath = assetPath.Remove(assetPath.Length - screensMarker.Length);
+                assetPath += "Layouts";
+
+            }
             attr.filterDir = assetPath;
             
             var target = property;
+            var so = property.serializedObject;
+            var targetObject = so.targetObject;
+            var targetPath = target.propertyPath;
             EditorGUI.LabelField(position, label);
             position.x += EditorGUIUtility.labelWidth;
             position.width -= EditorGUIUtility.labelWidth;
@@ -67,12 +76,15 @@ namespace UnityEditor.UI.Windows {
                         var newPath = AssetDatabase.GenerateUniqueAssetPath(assetPath + "/" + allObjects[idx].name + ".prefab");
                         AssetDatabase.CopyAsset(p, newPath);
                         AssetDatabase.ImportAsset(newPath, ImportAssetOptions.ForceUpdate);
+                        AssetDatabase.ForceReserializeAssets(new [] { newPath }, ForceReserializeAssetsOptions.ReserializeAssetsAndMetadata);
                         var newGo = AssetDatabase.LoadAssetAtPath<GameObject>(newPath);
                         Object.DestroyImmediate(newGo.GetComponent<TemplateMarker>(), true);
+                        AssetDatabase.ForceReserializeAssets(new [] { newPath }, ForceReserializeAssetsOptions.ReserializeAssetsAndMetadata);
                         
-                        property.serializedObject.Update();
-                        target.objectReferenceValue = newGo.GetComponent<WindowLayout>();
-                        property.serializedObject.ApplyModifiedProperties();
+                        so = new SerializedObject(targetObject);
+                        so.Update();
+                        so.FindProperty(targetPath).objectReferenceValue = newGo.GetComponent<WindowLayout>();
+                        so.ApplyModifiedProperties();
 
                     }, order: -1);
 
@@ -82,9 +94,10 @@ namespace UnityEditor.UI.Windows {
 
                     popup.Item(attr.noneOption, null, searchable: false, action: (item) => {
 
-                        property.serializedObject.Update();
-                        target.objectReferenceValue = null;
-                        property.serializedObject.ApplyModifiedProperties();
+                        so = new SerializedObject(targetObject);
+                        so.Update();
+                        so.FindProperty(targetPath).objectReferenceValue = null;
+                        so.ApplyModifiedProperties();
 
                     }, order: -1);
 
@@ -98,9 +111,10 @@ namespace UnityEditor.UI.Windows {
                     
                     popup.Item(EditorHelpers.StringToCaption(asset.name), () => {
                         
-                        property.serializedObject.Update();
-                        target.objectReferenceValue = asset.GetComponent<WindowLayout>();
-                        property.serializedObject.ApplyModifiedProperties();
+                        so = new SerializedObject(targetObject);
+                        so.Update();
+                        so.FindProperty(targetPath).objectReferenceValue = asset.GetComponent<WindowLayout>();
+                        so.ApplyModifiedProperties();
                         
                     });
 

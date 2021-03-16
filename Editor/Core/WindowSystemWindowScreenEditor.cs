@@ -131,6 +131,8 @@ namespace UnityEditor.UI.Windows {
             if (this.target is UnityEngine.UI.Windows.WindowTypes.LayoutWindowType layoutWindowType) {
 
                 var windowLayout = layoutWindowType.layouts.GetActive().windowLayout;
+                if (windowLayout == null) return;
+                
                 WindowLayoutUtilities.DrawLayout(this.selectedIndexAspect, this.selectedIndexInner, this.selectedType, (type, idx, inner) => {
                     
                     this.selectedType = type;

@@ -67,6 +67,12 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        public void SetWholeNumbers(bool state) {
+
+            this.slider.wholeNumbers = state;
+
+        }
+
         public void SetMaxValue(float value) {
 
             this.slider.maxValue = value;

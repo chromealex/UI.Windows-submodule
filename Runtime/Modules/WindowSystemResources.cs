@@ -58,6 +58,16 @@ namespace UnityEngine.UI.Windows {
             
         }
 
+        public bool IsEquals(in Resource other) {
+
+            return this.type == other.type &&
+                   this.objectType == other.objectType &&
+                   this.guid == other.guid &&
+                   this.subObjectName == other.subObjectName &&
+                   this.directRef == other.directRef;
+
+        }
+        
         public bool IsEmpty() {
 
             return this.directRef == null && string.IsNullOrEmpty(this.guid) == true;
@@ -309,22 +319,30 @@ namespace UnityEngine.UI.Windows.Modules {
 
                         //Debug.Log("Loading: " + resource.guid);
                         var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(resource.guid);
-                        System.Action cancellationTask = () => { UnityEngine.AddressableAssets.Addressables.Release(op); };
+                        System.Action cancellationTask = () => { if (op.IsValid() == true) UnityEngine.AddressableAssets.Addressables.Release(op); };
                         this.LoadBegin(handler, cancellationTask);
                         while (op.IsDone == false) yield return null;
 
-                        if (op.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded) {
+                        if (op.IsValid() == false) {
+                            
+                            //this.CompleteTask(handler, resource, default);
+                            
+                        } else {
 
-                            var asset = op.Result;
-                            if (asset == null) {
+                            if (op.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded) {
 
-                                this.CompleteTask(handler, resource, default);
+                                var asset = op.Result;
+                                if (asset == null) {
 
-                            } else {
+                                    this.CompleteTask(handler, resource, default);
 
-                                this.AddObject(handler, asset, resource);
+                                } else {
 
-                                this.CompleteTask(handler, resource, asset.GetComponent<T>());
+                                    this.AddObject(handler, asset, resource);
+
+                                    this.CompleteTask(handler, resource, asset.GetComponent<T>());
+
+                                }
 
                             }
 
@@ -345,28 +363,36 @@ namespace UnityEngine.UI.Windows.Modules {
                             
                         }
                         
-                        System.Action token = () => { UnityEngine.AddressableAssets.Addressables.Release(op); };
-                        this.LoadBegin(handler, token);
+                        System.Action cancellationTask = () => { if (op.IsValid() == true) UnityEngine.AddressableAssets.Addressables.Release(op); };
+                        this.LoadBegin(handler, cancellationTask);
                         while (op.IsDone == false) yield return null;
 
-                        if (op.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded) {
+                        if (op.IsValid() == false) {
+                            
+                            //this.CompleteTask(handler, resource, default);
+                            
+                        } else {
+                            
+                            if (op.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded) {
 
-                            var asset = op.Result;
-                            if (asset == null) {
+                                var asset = op.Result;
+                                if (asset == null) {
 
-                                this.CompleteTask(handler, resource, default);
+                                    this.CompleteTask(handler, resource, default);
 
-                            } else {
+                                } else {
 
-                                this.AddObject(handler, asset, resource);
+                                    this.AddObject(handler, asset, resource);
 
-                                this.CompleteTask(handler, resource, asset);
+                                    this.CompleteTask(handler, resource, asset);
+
+                                }
 
                             }
 
                         }
                         
-                        this.LoadEnd(handler, token);
+                        this.LoadEnd(handler, cancellationTask);
 
                     }
 

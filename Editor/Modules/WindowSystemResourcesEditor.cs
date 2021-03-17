@@ -35,7 +35,7 @@ namespace UnityEditor.UI.Windows {
                 foreach (var item in allObjects) {
 
                     //EditorGUILayout.ObjectField("Handler", item.Key as Object, typeof(Object), allowSceneObjects: true);
-                    EditorGUILayout.LabelField("Handler", item.Key.ToString());
+                    EditorGUILayout.LabelField("Handler", item.Key.ToString() + " (Loaded " + item.Value.Count.ToString() + ")");
 
                     ++EditorGUI.indentLevel;
                     foreach (var resItem in item.Value) {

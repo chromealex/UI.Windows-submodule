@@ -17,6 +17,7 @@ namespace UnityEngine.UI.Windows.Components {
         private Object currentLoaded;
 
         public bool preserveAspect;
+        public bool useSpriteMesh;
 
         public UnloadResourceEventType autoUnloadResourcesOnEvent;
 
@@ -143,37 +144,53 @@ namespace UnityEngine.UI.Windows.Components {
             public ImageComponent component;
 
         }
-        
+
+        private bool isLoading;
+        private Resource prevResourceLoad;
         public void SetImage(Resource resource) {
 
-            var resources = WindowSystem.GetResources();
-            resources.StopLoadAll(this);
-            resources.Delete(this, ref this.currentLoaded);
-            var data = new SetImageClosure() {
-                component = this,
-            };
-            switch (resource.objectType) {
+            if (this.prevResourceLoad.IsEquals(resource) == false) {
+
+                this.prevResourceLoad = resource;
                 
-                case Resource.ObjectType.Sprite:
-                    Coroutines.Run(resources.LoadAsync<Sprite, SetImageClosure>(this, data, resource, (asset, closure) => {
-                        
-                        closure.component.currentLoaded = asset;
-                        closure.component.SetImage(asset);
-                        
-                    }));
-                    break;
+                var resources = WindowSystem.GetResources();
+                if (this.isLoading == true) {
 
-                case Resource.ObjectType.Texture:
-                    Coroutines.Run(resources.LoadAsync<Texture, SetImageClosure>(this, data, resource, (asset, closure) => {
-                        
-                        closure.component.currentLoaded = asset;
-                        closure.component.SetImage(asset);
+                    resources.StopLoadAll(this);
+                    resources.Delete(this, ref this.currentLoaded);
 
-                    }));
-                    break;
+                }
+
+                var data = new SetImageClosure() {
+                    component = this,
+                };
+                this.isLoading = true;
+                switch (resource.objectType) {
+
+                    case Resource.ObjectType.Sprite:
+                        Coroutines.Run(resources.LoadAsync<Sprite, SetImageClosure>(this, data, resource, (asset, closure) => {
+
+                            closure.component.currentLoaded = asset;
+                            closure.component.SetImage(asset);
+                            closure.component.isLoading = false;
+
+                        }));
+                        break;
+
+                    case Resource.ObjectType.Texture:
+                        Coroutines.Run(resources.LoadAsync<Texture, SetImageClosure>(this, data, resource, (asset, closure) => {
+
+                            closure.component.currentLoaded = asset;
+                            closure.component.SetImage(asset);
+                            closure.component.isLoading = false;
+
+                        }));
+                        break;
+
+                }
 
             }
-            
+
         }
 
         public void SetImage(Sprite sprite) {
@@ -184,6 +201,7 @@ namespace UnityEngine.UI.Windows.Components {
 
                 image.sprite = sprite;
                 image.preserveAspect = this.preserveAspect;
+                image.useSpriteMesh = this.useSpriteMesh;
 
             } else if (this.graphics is UnityEngine.UI.RawImage rawImage) {
 
@@ -215,6 +233,7 @@ namespace UnityEngine.UI.Windows.Components {
                 var sprite = resources.New<Sprite, SpriteConstructor>(this, new SpriteConstructor(tex2d, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f)));
                 image.sprite = sprite;
                 image.preserveAspect = this.preserveAspect;
+                image.useSpriteMesh = this.useSpriteMesh;
 
             }
 

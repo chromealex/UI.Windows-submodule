@@ -305,7 +305,7 @@ namespace UnityEngine.UI.Windows.Components {
 
             public bool Equals(ValueData other) {
                 
-                return this.isCreated = other.isCreated &&
+                return this.isCreated == other.isCreated &&
                        this.sourceValue == other.sourceValue &&
                        this.timeValueResult == other.timeValueResult &&
                        this.timeShortestVariant == other.timeShortestVariant &&

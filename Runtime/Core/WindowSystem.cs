@@ -217,7 +217,7 @@ namespace UnityEngine.UI.Windows {
         public RuntimePlatform emulateRuntimePlatform;
 
         public WindowSystemBreadcrumbs breadcrumbs;
-        public WindowSystemAudio audio;
+        new public WindowSystemAudio audio;
         public WindowSystemEvents events;
         public WindowSystemSettings settings;
         public WindowSystemResources resources;

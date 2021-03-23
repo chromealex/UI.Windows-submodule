@@ -217,6 +217,7 @@ namespace UnityEngine.UI.Windows {
         public RuntimePlatform emulateRuntimePlatform;
 
         public WindowSystemBreadcrumbs breadcrumbs;
+        public WindowSystemAudio audio;
         public WindowSystemEvents events;
         public WindowSystemSettings settings;
         public WindowSystemResources resources;
@@ -590,6 +591,12 @@ namespace UnityEngine.UI.Windows {
         public static WindowSystemBreadcrumbs GetBreadcrumbs() {
 
             return WindowSystem.instance.breadcrumbs;
+
+        }
+
+        public static WindowSystemAudio GetAudio() {
+
+            return WindowSystem.instance.audio;
 
         }
 

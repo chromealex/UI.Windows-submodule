@@ -13,6 +13,7 @@ namespace UnityEditor.UI.Windows {
     [CanEditMultipleObjects]
     public class WindowSystemEditor : Editor {
 
+        public SerializedProperty audio;
         public SerializedProperty breadcrumbs;
         public SerializedProperty events;
         public SerializedProperty resources;
@@ -64,6 +65,7 @@ namespace UnityEditor.UI.Windows {
             this.settings = this.serializedObject.FindProperty("settings");
 
             { // Modules
+                this.audio = this.serializedObject.FindProperty("audio");
                 this.breadcrumbs = this.serializedObject.FindProperty("breadcrumbs");
                 this.events = this.serializedObject.FindProperty("events");
                 this.resources = this.serializedObject.FindProperty("resources");
@@ -113,6 +115,7 @@ namespace UnityEditor.UI.Windows {
                     EditorGUILayout.PropertyField(this.resources);
                     EditorGUILayout.PropertyField(this.pools);
                     EditorGUILayout.PropertyField(this.tweener);
+                    EditorGUILayout.PropertyField(this.audio);
                     
                 }),
                 new GUITab("Windows", () => {

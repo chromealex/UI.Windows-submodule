@@ -28,8 +28,6 @@ namespace UnityEngine.UI.Windows {
 
             WindowSystem.GetAudio().Play(this.clip);
             
-            this.buttonComponent.RaiseClick();
-            
         }
 
     }

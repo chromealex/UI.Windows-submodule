@@ -41,9 +41,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        [SerializeField][HideInInspector]
-        private ScrollRect scrollRect;
-        
         [RequiredReference]
         public Button button;
         
@@ -84,6 +81,7 @@ namespace UnityEngine.UI.Windows.Components {
         public void SetInteractable(bool state) {
 
             this.button.interactable = state;
+            this.componentModules.OnInteractableChanged(state);
 
         }
         
@@ -171,7 +169,6 @@ namespace UnityEngine.UI.Windows.Components {
             
             base.ValidateEditor();
 
-            this.scrollRect = this.GetComponentInParent<ScrollRect>();
             if (this.button == null) this.button = this.GetComponent<Button>();
 
         }

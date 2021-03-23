@@ -14,6 +14,12 @@ namespace UnityEngine.UI.Windows {
             
         }
 
+        public void Play(AudioClip[] clips) {
+            
+            this.audioSource.PlayOneShot(clips[Random.Range(0, clips.Length)]);
+            
+        }
+
     }
 
 }

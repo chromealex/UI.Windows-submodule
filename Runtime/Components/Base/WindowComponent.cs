@@ -50,6 +50,18 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
+            public void OnInteractableChanged(bool state) {
+                
+                if (this.modules == null) return;
+
+                for (int i = 0; i < this.modules.Length; ++i) {
+                    
+                    if (this.modules[i] != null) this.modules[i].OnInteractableChanged(state);
+                    
+                }
+
+            }
+            
             public void OnLayoutChanged() {
                 
                 if (this.modules == null) return;
@@ -262,6 +274,10 @@ namespace UnityEngine.UI.Windows {
         }
         
         public virtual void ValidateEditor() {
+            
+        }
+
+        public virtual void OnInteractableChanged(bool state) {
             
         }
 

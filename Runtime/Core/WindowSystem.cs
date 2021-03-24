@@ -401,6 +401,16 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public static void SendEvent<T>(T data) {
+
+            foreach (var item in WindowSystem.instance.currentWindows) {
+                
+                item.instance.SendEvent<T>(data);
+                
+            }
+            
+        }
+
         internal static void SendFullCoverageOnShowEnd(WindowBase window) {
 
             if (window.preferences.fullCoverage == true) WindowSystem.instance.TurnRenderBeneath(window, false);

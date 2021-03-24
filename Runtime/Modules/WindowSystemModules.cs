@@ -27,7 +27,17 @@ namespace UnityEngine.UI.Windows.Modules {
         }
 
         public WindowModuleInfo[] modules;
+        
+        internal void SendEvent<T>(T data) {
+            
+            for (int i = 0; i < this.modules.Length; ++i) {
 
+                this.modules[i].moduleInstance.SendEvent(data);
+
+            }
+            
+        }
+        
         public void LoadAsync(WindowBase window, System.Action onComplete) {
 
             Coroutines.Run(this.InitModules(window, onComplete));

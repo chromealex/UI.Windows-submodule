@@ -842,7 +842,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public void SendEvent<T>(T data) {
+        protected internal virtual void SendEvent<T>(T data) {
             
             this.OnEvent(data);
 

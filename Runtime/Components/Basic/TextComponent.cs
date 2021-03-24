@@ -407,7 +407,7 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         private string lastText;
-        public void SetText(string text) {
+        public virtual void SetText(string text) {
 
             if (this.lastText == text) return;
             this.lastText = text;

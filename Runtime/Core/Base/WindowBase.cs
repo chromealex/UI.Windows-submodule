@@ -35,6 +35,14 @@ namespace UnityEngine.UI.Windows {
         
         public virtual void OnEmptyPass() {}
 
+        protected internal override void SendEvent<T>(T data) {
+            
+            base.SendEvent(data);
+
+            this.modules.SendEvent<T>(data);
+
+        }
+
         public WindowSystem.WindowItem GetBreadcrumbPrevious() {
 
             return this.breadcrumb.GetPreviousWindow(this);

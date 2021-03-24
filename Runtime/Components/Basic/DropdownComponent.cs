@@ -306,6 +306,8 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         public void Select(int index) {
+
+            if (index < 0) return;
             
             this.SelectLabel(index);
             this.SetSelectedIndex(index);
@@ -381,6 +383,7 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.list != null) {
 
                 this.scrollRect = this.list.GetComponent<ScrollRect>();
+                if (this.scrollRect == null) return;
 
                 this.drivenRectTransformTracker = new DrivenRectTransformTracker();
                 this.drivenRectTransformTracker.Add(this, this.list.rectTransform, DrivenTransformProperties.Anchors | DrivenTransformProperties.Pivot | DrivenTransformProperties.AnchoredPosition);

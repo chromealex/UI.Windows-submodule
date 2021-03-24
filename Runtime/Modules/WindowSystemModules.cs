@@ -34,6 +34,18 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
+        public T Get<T>() where T : WindowModule {
+
+            for (int i = 0; i < this.modules.Length; ++i) {
+
+                if (this.modules[i].moduleInstance is T module) return module;
+
+            }
+
+            return null;
+
+        }
+        
         private struct LoadingClosure {
 
             public WindowBase window;

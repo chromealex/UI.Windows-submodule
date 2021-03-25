@@ -250,6 +250,18 @@ namespace UnityEngine.UI.Windows {
             }
         }
 
+        public static T FindOpened<T>() where T : WindowBase {
+
+            foreach (var item in WindowSystem.instance.currentWindows) {
+
+                if (item.instance is T win) return win;
+
+            }
+
+            return default;
+
+        }
+        
         public static bool HasInstance() {
 
             return WindowSystem.instance != null;

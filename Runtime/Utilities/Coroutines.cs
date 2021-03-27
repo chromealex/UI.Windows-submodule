@@ -33,6 +33,19 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
         
+        public static void WaitTime(float time, System.Action callback) {
+	        
+	        Coroutines.instance.StartCoroutine(Coroutines.TimeWaiter_INTERNAL(time, callback));
+	        
+        }
+
+        private static IEnumerator TimeWaiter_INTERNAL(float time, System.Action callback) {
+
+	        yield return new WaitForSecondsRealtime(time);
+	        callback.Invoke();
+
+        }
+
         public static void Wait(System.Func<bool> waitFor, System.Action callback) {
 	        
 	        Coroutines.instance.StartCoroutine(Coroutines.Waiter_INTERNAL(waitFor, callback));

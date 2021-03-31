@@ -238,7 +238,7 @@ namespace UnityEngine.UI.Windows {
             
             for (int i = 0; i < this.subObjects.Count; ++i) {
                 
-                this.subObjects[i].OnPoolGet();
+                ((IOnPoolGet)this.subObjects[i]).OnPoolGet();
                 
             }
 
@@ -250,7 +250,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
                 
-                this.subObjects[i].OnPoolAdd();
+                ((IOnPoolAdd)this.subObjects[i]).OnPoolAdd();
                 
             }
             

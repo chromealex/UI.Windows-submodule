@@ -236,11 +236,23 @@ namespace UnityEngine.UI.Windows {
             
             this.OnPoolGet();
             
+            for (int i = 0; i < this.subObjects.Count; ++i) {
+                
+                this.subObjects[i].OnPoolGet();
+                
+            }
+
         }
 
         void IOnPoolAdd.OnPoolAdd() {
             
             this.OnPoolAdd();
+
+            for (int i = 0; i < this.subObjects.Count; ++i) {
+                
+                this.subObjects[i].OnPoolAdd();
+                
+            }
             
         }
         

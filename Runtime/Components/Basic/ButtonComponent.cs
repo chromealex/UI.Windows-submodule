@@ -115,9 +115,13 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
 
-            if (this.callback != null) this.callback.Invoke();
-            if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this);
-            
+            if (WindowSystem.InteractWith(this) == true) {
+
+                if (this.callback != null) this.callback.Invoke();
+                if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this);
+
+            }
+
         }
         
         public void SetCallback(System.Action callback) {

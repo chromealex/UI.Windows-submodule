@@ -283,6 +283,26 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public virtual T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowComponent {
+
+            if (this is T instance) {
+
+                if (filter == null || filter.Invoke(instance) == true) return instance;
+
+            }
+
+            for (int i = 0; i < this.subObjects.Count; ++i) {
+
+                var obj = this.subObjects[i];
+                var comp = obj.FindComponent<T>(filter);
+                if (comp != null) return comp;
+
+            }
+            
+            return null;
+            
+        }
+
         [ContextMenu("Validate")]
         public virtual void ValidateEditor() {
             

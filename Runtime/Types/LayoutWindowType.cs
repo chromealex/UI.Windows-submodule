@@ -38,6 +38,12 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         internal WindowLayout windowLayoutInstance;
         private int localTag;
 
+        public T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowComponent {
+
+            return this.windowLayoutInstance.FindComponent<T>(filter);
+            
+        }
+
         public int GetCanvasOrder() {
 
             if (this.windowLayoutInstance == null) return 0;

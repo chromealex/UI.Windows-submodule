@@ -28,6 +28,19 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public WindowModuleInfo[] modules;
         
+        public T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowComponent {
+
+            for (int i = 0; i < this.modules.Length; ++i) {
+
+                var comp = this.modules[i].moduleInstance.FindComponent(filter);
+                if (comp != null) return comp;
+
+            }
+
+            return null;
+
+        }
+        
         internal void SendEvent<T>(T data) {
             
             for (int i = 0; i < this.modules.Length; ++i) {

@@ -135,7 +135,7 @@ namespace UnityEditor.UI.Windows {
 
                 }
 
-                var allTypes = searchType.Assembly.GetTypes();
+                var allTypes = System.AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes()).ToArray();//searchType.Assembly.GetTypes();
                 foreach (var type in allTypes) {
 
                     if (type.IsSubclassOf(searchType) == true) {

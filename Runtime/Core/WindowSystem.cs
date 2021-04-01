@@ -232,6 +232,11 @@ namespace UnityEngine.UI.Windows {
         private WindowBase consoleWindowInstance;
         
         private int nextWindowId;
+
+        private System.Action waitInteractableOnComplete;
+        private UnityEngine.UI.Windows.Components.IInteractable waitInteractable;
+        private UnityEngine.UI.Windows.Components.IInteractable[] waitInteractables;
+        private bool lockInteractables;
         
         private static WindowSystem _instance;
 
@@ -255,6 +260,18 @@ namespace UnityEngine.UI.Windows {
             foreach (var item in WindowSystem.instance.currentWindows) {
 
                 if (item.instance is T win) return win;
+
+            }
+
+            return default;
+
+        }
+
+        public static T GetFocused<T>() where T : WindowBase {
+            
+            foreach (var item in WindowSystem.instance.currentWindows) {
+
+                if (item.instance is T win && win.focusState == FocusState.Focused) return win;
 
             }
 
@@ -298,6 +315,113 @@ namespace UnityEngine.UI.Windows {
         }
 
         private Vector2 pointerScreenPosition;
+
+        public static T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowComponent {
+
+            foreach (var window in WindowSystem.instance.currentWindows) {
+
+                if (window.instance == null) continue;
+                
+                var component = window.instance.FindComponent(filter);
+                if (component != null) return component;
+
+            }
+
+            return null;
+
+        }
+
+        public static void LockAllIntractables() {
+
+            WindowSystem.instance.lockInteractables = true;
+
+        }
+
+        public static void WaitIntractable(System.Action onComplete, UnityEngine.UI.Windows.Components.IInteractable interactable) {
+
+            WindowSystem.instance.waitInteractableOnComplete = onComplete;
+            WindowSystem.instance.waitInteractable = interactable;
+            WindowSystem.instance.waitInteractables = null;
+            WindowSystem.instance.lockInteractables = false;
+
+        }
+
+        public static void WaitIntractable(System.Action onComplete, params UnityEngine.UI.Windows.Components.IInteractable[] interactables) {
+
+            WindowSystem.instance.waitInteractableOnComplete = onComplete;
+            WindowSystem.instance.waitInteractable = null;
+            WindowSystem.instance.waitInteractables = interactables;
+            WindowSystem.instance.lockInteractables = false;
+
+        }
+
+        public static void CancelWaitIntractables() {
+
+            WindowSystem.instance.waitInteractable = null;
+            WindowSystem.instance.waitInteractables = null;
+            WindowSystem.instance.waitInteractableOnComplete = null;
+            WindowSystem.instance.lockInteractables = false;
+
+        }
+
+        public static bool CanInteractWith(UnityEngine.UI.Windows.Components.IInteractable interactable) {
+
+            if (WindowSystem.instance.lockInteractables == true) return false;
+            
+            if (WindowSystem.instance.waitInteractables == null) {
+
+                if (WindowSystem.instance.waitInteractable == null) return true;
+
+                return WindowSystem.instance.waitInteractable == interactable;
+
+            } else {
+
+                for (int i = 0; i < WindowSystem.instance.waitInteractables.Length; ++i) {
+
+                    var interactableItem = WindowSystem.instance.waitInteractables[i];
+                    if (interactableItem == interactable) return true;
+
+                }
+                
+                return false;
+                
+            }
+            
+        }
+
+        public static bool InteractWith(UnityEngine.UI.Windows.Components.IInteractable interactable) {
+            
+            if (WindowSystem.instance.lockInteractables == true) return false;
+
+            if (WindowSystem.instance.waitInteractables == null) {
+
+                if (WindowSystem.instance.waitInteractable == null ||
+                    WindowSystem.instance.waitInteractable == interactable) {
+                    
+                    WindowSystem.instance.waitInteractableOnComplete?.Invoke();
+                    return true;
+
+                }
+
+            } else {
+
+                for (int i = 0; i < WindowSystem.instance.waitInteractables.Length; ++i) {
+
+                    var interactableItem = WindowSystem.instance.waitInteractables[i];
+                    if (interactableItem == interactable) {
+
+                        WindowSystem.instance.waitInteractableOnComplete?.Invoke();
+                        return true;
+
+                    }
+
+                }
+                
+            }
+            
+            return false;
+                
+        }
 
         public static Vector2 GetPointerPosition() {
 

@@ -73,7 +73,7 @@ namespace UnityEngine.UI.Windows {
             this.canvas.sortingOrder = order;
 
         }
-
+        
         public int GetCanvasOrder() {
 
             return this.order;

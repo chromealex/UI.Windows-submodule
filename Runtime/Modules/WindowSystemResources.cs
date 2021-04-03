@@ -558,7 +558,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                     if (item.GetHashCode() == resItem.GetHashCode()) {
 
-                        Debug.Log("Attempt to unload object " + obj + " (handler: " + handler + "), type: " + item.resourceSource.type);
+                        //Debug.Log("Attempt to unload object " + obj + " (handler: " + handler + "), type: " + item.resourceSource.type);
                         switch (item.resourceSource.type) {
 
                             case Resource.Type.Manual: {

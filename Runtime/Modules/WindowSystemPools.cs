@@ -155,28 +155,30 @@ namespace UnityEngine.UI.Windows.Modules {
             if (this.registeredPrefabs.Contains(key) == false) {
 
                 fromPool = false;
-                return Object.Instantiate(prefab, root);
-
-            }
-
-            if (this.prefabToPooledInstances.TryGetValue(key, out var stack) == true && stack.Count > 0) {
-
-                var instance = stack.Pop();
-                UIWSUtils.SetParent(instance.transform, root);
-                if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
-                this.instanceOnSceneToPrefab.Add(instance, key);
-                fromPool = true;
-                
-                result = (T)instance;
+                result = Object.Instantiate(prefab, root);
 
             } else {
 
-                var instance = Object.Instantiate(prefab, root);
-                if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
-                this.instanceOnSceneToPrefab.Add(instance, key);
-                fromPool = false;
-                
-                result = instance;
+                if (this.prefabToPooledInstances.TryGetValue(key, out var stack) == true && stack.Count > 0) {
+
+                    var instance = stack.Pop();
+                    UIWSUtils.SetParent(instance.transform, root);
+                    if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
+                    this.instanceOnSceneToPrefab.Add(instance, key);
+                    fromPool = true;
+
+                    result = (T)instance;
+
+                } else {
+
+                    var instance = Object.Instantiate(prefab, root);
+                    if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
+                    this.instanceOnSceneToPrefab.Add(instance, key);
+                    fromPool = false;
+
+                    result = instance;
+
+                }
 
             }
 

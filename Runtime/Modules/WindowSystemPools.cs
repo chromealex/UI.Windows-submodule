@@ -150,6 +150,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public T Spawn<T>(T prefab, Transform root, out bool fromPool) where T : Component {
 
+            T result = null;
             var key = prefab.GetHashCode();
             if (this.registeredPrefabs.Contains(key) == false) {
 
@@ -166,13 +167,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 this.instanceOnSceneToPrefab.Add(instance, key);
                 fromPool = true;
                 
-                if (instance is IOnPoolGet onPoolPull) {
-                
-                    onPoolPull.OnPoolGet();
-                
-                }
-
-                return (T)instance;
+                result = (T)instance;
 
             } else {
 
@@ -180,21 +175,30 @@ namespace UnityEngine.UI.Windows.Modules {
                 if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
                 this.instanceOnSceneToPrefab.Add(instance, key);
                 fromPool = false;
-                return instance;
+                
+                result = instance;
 
             }
+
+            if (result is IOnPoolGet onPoolPull) {
+                
+                onPoolPull.OnPoolGet();
+                
+            }
+
+            return result;
 
         }
 
         public void Despawn<T>(T instance, System.Action<T> onDestroy = null) where T : Component {
 
-            if (this.instanceOnSceneToPrefab.TryGetValue(instance, out var prefabKey) == true) {
+            if (instance is IOnPoolAdd onPoolPush) {
+                
+                onPoolPush.OnPoolAdd();
+                
+            }
 
-                if (instance is IOnPoolAdd onPoolPush) {
-                
-                    onPoolPush.OnPoolAdd();
-                
-                }
+            if (this.instanceOnSceneToPrefab.TryGetValue(instance, out var prefabKey) == true) {
 
                 this.instanceOnSceneToPrefab.Remove(instance);
 

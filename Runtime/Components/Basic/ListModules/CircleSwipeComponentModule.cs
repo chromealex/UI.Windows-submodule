@@ -2,8 +2,7 @@
 using System.Collections;
 using UnityEngine.EventSystems;
 
-namespace UnityEngine.UI.Windows
-{
+namespace UnityEngine.UI.Windows {
 
 	[ComponentModuleDisplayName("Circle swipe")]
 	public class CircleSwipeComponentModule : ListComponentModule {
@@ -36,6 +35,7 @@ namespace UnityEngine.UI.Windows
 
 			var timer = 0f;
 			var originRotation = this.container.localRotation;
+
 			var targetRotation = Quaternion.Euler(originRotation.eulerAngles.x, originRotation.eulerAngles.y, this.currentItemIndex * this.rotationAngle);
 
 			while (timer < 1f)
@@ -52,6 +52,8 @@ namespace UnityEngine.UI.Windows
 
 		public override void OnDragBegin(PointerEventData data) {
 
+			if (this.isActiveAndEnabled == false) return;
+
 			if (this.smoothLerpCoroutine != null)
 				StopCoroutine(this.smoothLerpCoroutine);
 
@@ -59,9 +61,17 @@ namespace UnityEngine.UI.Windows
 
 		public override void OnDragEnd(PointerEventData data) {
 
-			var sector = Mathf.Round(this.container.localRotation.eulerAngles.z / this.rotationAngle);
-			this.currentItemIndex = (int) sector;
+			if(this.isActiveAndEnabled == false) return;
 
+			var sector = Mathf.Round(this.container.localRotation.eulerAngles.z / this.rotationAngle);
+
+			if (sector >= 360 / this.rotationAngle) {
+
+				sector = 0;
+
+			}
+
+			this.currentItemIndex = (int) sector;
 			this.smoothLerpCoroutine = StartCoroutine(SmoothLerp());
 		}
 

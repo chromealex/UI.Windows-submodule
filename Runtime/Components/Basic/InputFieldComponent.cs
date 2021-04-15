@@ -33,20 +33,6 @@ namespace UnityEngine.UI.Windows.Components {
             
             base.OnDeInitInternal();
 
-            this.ResetInstance();
-
-        }
-
-        public override void OnPoolAdd() {
-            
-            base.OnPoolAdd();
-
-            this.RemoveCallbacks();
-
-        }
-
-        private void ResetInstance() {
-            
             this.inputField.onValueChanged.RemoveListener(this.OnValueChanged);
             this.inputField.onEndEdit.RemoveListener(this.OnEndEdit);
             this.inputField.onValidateInput -= this.OnValidateChar;

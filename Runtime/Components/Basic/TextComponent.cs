@@ -246,12 +246,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public override void OnPoolAdd() {
-            
-            base.OnPoolAdd();
-
-        }
-
         private void ResetInstance() {
             
             this.lastValueData = default;

@@ -55,14 +55,6 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public override void OnPoolAdd() {
-            
-            base.OnPoolAdd();
-            
-            this.RemoveCallbacks();
-            
-        }
-
         internal override void OnDeInitInternal() {
             
             base.OnDeInitInternal();

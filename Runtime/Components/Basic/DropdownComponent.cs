@@ -64,9 +64,9 @@ namespace UnityEngine.UI.Windows.Components {
 
         private DrivenRectTransformTracker drivenRectTransformTracker;
         
-        public override void OnInit() {
+        internal override void OnInitInternal() {
             
-            base.OnInit();
+            base.OnInitInternal();
 
             this.list.SetOnLayoutChangedCallback(this.OnElementsChanged);
             this.list.SetOnElementsCallback(this.OnElementsChanged);
@@ -80,14 +80,6 @@ namespace UnityEngine.UI.Windows.Components {
             base.OnDeInitInternal();
 
             WindowSystem.onPointerUp -= this.OnPointerUp;
-            this.RemoveCallbacks();
-
-        }
-
-        public override void OnPoolAdd() {
-            
-            base.OnPoolAdd();
-
             this.RemoveCallbacks();
 
         }

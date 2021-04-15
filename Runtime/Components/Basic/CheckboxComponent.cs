@@ -67,12 +67,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public override void OnPoolAdd() {
-            
-            base.OnPoolAdd();
-
-        }
-
         internal override void OnShowBeginInternal() {
 
             base.OnShowBeginInternal();

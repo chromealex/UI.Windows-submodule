@@ -19,9 +19,9 @@ namespace UnityEngine.UI.Windows.Components {
         private System.Action<string> callbackOnChanged;
         private System.Func<string, int, char, char> callbackValidateChar;
 
-        public override void OnInit() {
+        internal override void OnInitInternal() {
             
-            base.OnInit();
+            base.OnInitInternal();
             
             this.inputField.onValueChanged.AddListener(this.OnValueChanged);
             this.inputField.onEndEdit.AddListener(this.OnEndEdit);

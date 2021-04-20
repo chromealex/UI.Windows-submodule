@@ -100,7 +100,9 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         private void UnloadCurrentResources() {
-            
+
+            this.prevResourceLoad = default;
+
             var resources = WindowSystem.GetResources();
 
             if (this.graphics is UnityEngine.UI.Image image) {

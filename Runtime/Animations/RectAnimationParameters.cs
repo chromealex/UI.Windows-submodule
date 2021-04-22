@@ -7,6 +7,15 @@ namespace UnityEngine.UI.Windows.Modules {
     [RequireComponent(typeof(RectTransform))]
     public class RectAnimationParameters : AnimationParameters {
 
+        [System.Flags]
+        public enum AnimationParameter : int {
+
+            Position = 0x1,
+            Rotation = 0x2,
+            Scale = 0x4,
+
+        }
+
         [System.Serializable]
         public class RectState : State {
 
@@ -35,6 +44,7 @@ namespace UnityEngine.UI.Windows.Modules {
         }
 
         [Space(10f)] public RectTransform rectTransform;
+        public AnimationParameter parameters = (AnimationParameter)(-1);
         public RectState resetState = new RectState() {
             anchorPosition = new Vector2(0f, -100f),
             rotation = Vector3.zero,
@@ -73,9 +83,9 @@ namespace UnityEngine.UI.Windows.Modules {
 
             }
             
-            this.currentState.anchorPosition = Vector2.Lerp(fromState.anchorPosition, toState.anchorPosition, value);
-            this.currentState.rotation = Vector3.Slerp(fromState.rotation, toState.rotation, value);
-            this.currentState.scale = Vector3.Lerp(fromState.scale, toState.scale, value);
+            if ((this.parameters & AnimationParameter.Position) != 0) this.currentState.anchorPosition = Vector2.Lerp(fromState.anchorPosition, toState.anchorPosition, value);
+            if ((this.parameters & AnimationParameter.Rotation) != 0) this.currentState.rotation = Vector3.Slerp(fromState.rotation, toState.rotation, value);
+            if ((this.parameters & AnimationParameter.Scale) != 0) this.currentState.scale = Vector3.Lerp(fromState.scale, toState.scale, value);
 
             return this.currentState;
 
@@ -84,9 +94,9 @@ namespace UnityEngine.UI.Windows.Modules {
         public override void ApplyState(State state) {
 
             var toState = (RectState)state;
-            this.rectTransform.anchoredPosition = toState.anchorPosition;
-            this.rectTransform.rotation = Quaternion.Euler(toState.rotation);
-            this.rectTransform.localScale = toState.scale;
+            if ((this.parameters & AnimationParameter.Position) != 0) this.rectTransform.anchoredPosition = toState.anchorPosition;
+            if ((this.parameters & AnimationParameter.Rotation) != 0) this.rectTransform.rotation = Quaternion.Euler(toState.rotation);
+            if ((this.parameters & AnimationParameter.Scale) != 0) this.rectTransform.localScale = toState.scale;
 
             this.currentState.CopyFrom(state);
 

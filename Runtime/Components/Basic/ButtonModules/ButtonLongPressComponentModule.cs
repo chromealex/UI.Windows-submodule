@@ -103,7 +103,9 @@ namespace UnityEngine.UI.Windows {
 
 		public void OnPointerDown(UnityEngine.EventSystems.PointerEventData eventData) {
 
-            this.isPressed = true;
+            if (this.isActiveAndEnabled == false) return;
+
+			this.isPressed = true;
             this.pressTimer = Time.realtimeSinceStartup;
 
             if (this.progressComponent != null) {

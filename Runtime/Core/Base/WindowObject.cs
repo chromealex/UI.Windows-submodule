@@ -639,6 +639,24 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public void SetSortingOrderDelta(int value) {
+            
+            if (this.hasObjectCanvas == true) {
+                
+                var windowCanvas = this.window.GetCanvas();
+                if (windowCanvas != null) {
+                    
+                    this.objectCanvas.overrideSorting = true;
+                    this.objectCanvas.sortingOrder = windowCanvas.sortingOrder + value;
+                    this.objectCanvas.sortingLayerName = windowCanvas.sortingLayerName;
+                    this.objectCanvas.sortingLayerID = windowCanvas.sortingLayerID;
+                    
+                }
+
+            }
+            
+        }
+
         internal virtual void Setup(WindowBase source) {
 
             if (this.hasObjectCanvas == true) {

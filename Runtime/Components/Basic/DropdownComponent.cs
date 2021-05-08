@@ -89,7 +89,8 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.autoCloseOnOutClick == false) return;
             
             var position = WindowSystem.GetPointerPosition();
-            if (RectTransformUtility.RectangleContainsScreenPoint(this.label.rectTransform, position, this.GetWindow().workCamera) == false) {
+            if (RectTransformUtility.RectangleContainsScreenPoint(this.label.rectTransform, position, this.GetWindow().workCamera) == false &&
+                RectTransformUtility.RectangleContainsScreenPoint(this.list.rectTransform, position, this.GetWindow().workCamera) == false) {
 
                 this.HideDropdown();
 
@@ -185,7 +186,8 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         public void ShowDropdown() {
-            
+
+            this.list.SetSortingOrderDelta(1);
             this.list.Show();
 
         }

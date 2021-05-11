@@ -94,6 +94,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         public void SetText(string text) {
 
+            if (text == null) text = string.Empty;
             this.inputField.text = text;
 
         }

@@ -205,6 +205,7 @@ namespace UnityEngine.UI.Windows {
         }
 
         public static System.Action onPointerUp;
+        public static System.Action onPointerDown;
         
         [Tooltip("Automatically show `Root Screen` on Start.")]
         public bool showRootOnStart;
@@ -478,6 +479,15 @@ namespace UnityEngine.UI.Windows {
                 
             }
             #elif ENABLE_LEGACY_INPUT_MANAGER
+            if (UnityEngine.Input.GetMouseButtonDown(0) == true ||
+                UnityEngine.Input.GetMouseButtonDown(1) == true ||
+                UnityEngine.Input.GetMouseButtonDown(2) == true) {
+                
+                this.pointerScreenPosition = Input.mousePosition;
+                if (WindowSystem.onPointerDown != null) WindowSystem.onPointerDown.Invoke();
+                
+            }
+            
             if (UnityEngine.Input.GetMouseButtonUp(0) == true ||
                 UnityEngine.Input.GetMouseButtonUp(1) == true ||
                 UnityEngine.Input.GetMouseButtonUp(2) == true) {

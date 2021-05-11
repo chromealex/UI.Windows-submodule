@@ -212,7 +212,7 @@ namespace UnityEngine.UI.Windows.Components {
             
             base.ValidateEditor();
 
-            this.inputField = this.GetComponent<InputField>();
+            if (this.inputField == null) this.inputField = this.GetComponent<InputField>();
 
         }
 

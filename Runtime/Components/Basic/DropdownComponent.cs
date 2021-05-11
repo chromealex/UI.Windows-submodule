@@ -72,6 +72,7 @@ namespace UnityEngine.UI.Windows.Components {
             this.list.SetOnElementsCallback(this.OnElementsChanged);
             this.label.SetCallback(this.DoToggleDropdown);
             WindowSystem.onPointerUp += this.OnPointerUp;
+            WindowSystem.onPointerDown += this.OnPointerDown;
 
         }
 
@@ -80,18 +81,36 @@ namespace UnityEngine.UI.Windows.Components {
             base.OnDeInitInternal();
 
             WindowSystem.onPointerUp -= this.OnPointerUp;
+            WindowSystem.onPointerDown -= this.OnPointerDown;
             this.RemoveCallbacks();
 
         }
 
-        private void OnPointerUp() {
-
+        private void OnPointerDown() {
+            
             if (this.autoCloseOnOutClick == false) return;
             
             var position = WindowSystem.GetPointerPosition();
             if (RectTransformUtility.RectangleContainsScreenPoint(this.label.rectTransform, position, this.GetWindow().workCamera) == false &&
                 RectTransformUtility.RectangleContainsScreenPoint(this.list.rectTransform, position, this.GetWindow().workCamera) == false) {
 
+                this.pointerDownInside = true;
+
+            } else {
+                
+                this.pointerDownInside = false;
+                
+            }
+
+        }
+
+        private bool pointerDownInside;
+        private void OnPointerUp() {
+
+            if (this.autoCloseOnOutClick == false) return;
+            
+            if (this.pointerDownInside == false) {
+                
                 this.HideDropdown();
 
             }
@@ -121,29 +140,61 @@ namespace UnityEngine.UI.Windows.Components {
             var delta = rect.sizeDelta;
             {
                 var contentWidth = contentRect.sizeDelta.x;
-                if (this.minMaxSizeX.x >= 0f && contentWidth < this.minMaxSizeX.x) {
+                if (this.minMaxSizeX.x >= 0f) {
 
-                    delta.x = this.minMaxSizeX.x;
+                    if (contentWidth < this.minMaxSizeX.x) {
+
+                        delta.x = this.minMaxSizeX.x;
+
+                    } else {
+                        
+                        delta.x = contentWidth;
+                        
+                    }
 
                 }
 
                 if (this.minMaxSizeX.y >= 0f && contentWidth > this.minMaxSizeX.y) {
 
-                    delta.x = this.minMaxSizeX.y;
+                    if (contentWidth > this.minMaxSizeX.y) {
+
+                        delta.x = this.minMaxSizeX.y;
+
+                    } else {
+                        
+                        delta.x = contentWidth;
+                        
+                    }
 
                 }
             }
             {
                 var contentHeight = contentRect.sizeDelta.y;
-                if (this.minMaxSizeY.x >= 0f && contentHeight < this.minMaxSizeY.x) {
+                if (this.minMaxSizeY.x >= 0f) {
 
-                    delta.y = this.minMaxSizeY.x;
+                    if (contentHeight < this.minMaxSizeY.x) {
+
+                        delta.y = this.minMaxSizeY.x;
+
+                    } else {
+                        
+                        delta.y = contentHeight;
+                        
+                    }
 
                 }
 
-                if (this.minMaxSizeY.y >= 0f && contentHeight > this.minMaxSizeY.y) {
+                if (this.minMaxSizeY.y >= 0f) {
 
-                    delta.y = this.minMaxSizeY.y;
+                    if (contentHeight > this.minMaxSizeY.y) {
+
+                        delta.y = this.minMaxSizeY.y;
+
+                    } else {
+                        
+                        delta.y = contentHeight;
+                        
+                    }
 
                 }
             }

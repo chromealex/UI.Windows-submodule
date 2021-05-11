@@ -94,12 +94,12 @@ namespace UnityEngine.UI.Windows.Components {
             if (RectTransformUtility.RectangleContainsScreenPoint(this.label.rectTransform, position, this.GetWindow().workCamera) == false &&
                 RectTransformUtility.RectangleContainsScreenPoint(this.list.rectTransform, position, this.GetWindow().workCamera) == false) {
 
-                this.pointerDownInside = true;
+                this.pointerDownInside = false;
 
             } else {
                 
-                this.pointerDownInside = false;
-                
+                this.pointerDownInside = true;
+
             }
 
         }
@@ -111,8 +111,14 @@ namespace UnityEngine.UI.Windows.Components {
             
             if (this.pointerDownInside == false) {
                 
-                this.HideDropdown();
+                var position = WindowSystem.GetPointerPosition();
+                if (RectTransformUtility.RectangleContainsScreenPoint(this.label.rectTransform, position, this.GetWindow().workCamera) == false &&
+                    RectTransformUtility.RectangleContainsScreenPoint(this.list.rectTransform, position, this.GetWindow().workCamera) == false) {
 
+                    this.HideDropdown();
+
+                }
+                
             }
 
         }

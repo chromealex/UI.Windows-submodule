@@ -175,51 +175,10 @@ namespace UnityEditor.UI.Windows {
             
             GUILayout.Space(10f);
 
-            EditorGUILayout.PropertyField(this.useSafeZone);
-            if (this.useSafeZone.boolValue == true) {
-                
-                GUILayoutExt.Box(6f, 2f, () => {
-                    
-                    EditorGUILayout.PropertyField(this.safeZone);
-                    if (this.safeZone.objectReferenceValue == null && this.targets.Length == 1) {
-
-                        GUILayoutExt.Box(2f, 2f, () => {
-                            
-                            GUILayout.BeginHorizontal();
-                            GUILayout.FlexibleSpace();
-                            if (GUILayout.Button("Generate", GUILayout.Width(80f), GUILayout.Height(30f)) == true) {
-
-                                var obj = (Component)this.target;
-                                if (PrefabUtility.IsPartOfAnyPrefab(obj) == true) {
-
-                                    var path = AssetDatabase.GetAssetPath(obj.gameObject);
-                                    using (var edit = new EditPrefabAssetScope(path)) {
-
-                                        EditorHelpers.AddSafeZone(edit.prefabRoot.transform);
-                                
-                                    }
-                            
-                                } else {
-
-                                    var root = obj.gameObject;
-                                    EditorHelpers.AddSafeZone(root.transform);
-                            
-                                }
-                        
-                            }
-                            GUILayout.FlexibleSpace();
-                            GUILayout.EndHorizontal();
-                            
-                        }, GUIStyle.none);
-                        
-                    }
-
-                });
-                
-            }
+            if (this.targets.Length == 1) GUILayoutExt.DrawSafeAreaFields(this.target, this.useSafeZone, this.safeZone);
             
             GUILayout.Space(10f);
-        
+
             var iter = this.serializedObject.GetIterator();
             iter.NextVisible(true);
             do {

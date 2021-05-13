@@ -26,6 +26,9 @@ namespace UnityEditor.UI.Windows {
 
         private SerializedProperty defaultOrder;
 
+        private SerializedProperty useSafeZone;
+        private SerializedProperty safeZone;
+
         private int selectedTab {
             get {
                 return EditorPrefs.GetInt("UnityEditor.UI.Windows.WindowModule.TabIndex");
@@ -76,6 +79,9 @@ namespace UnityEditor.UI.Windows {
             
             this.defaultOrder = this.serializedObject.FindProperty("defaultOrder");
         
+            this.useSafeZone = this.serializedObject.FindProperty("useSafeZone");
+            this.safeZone = this.serializedObject.FindProperty("safeZone");
+
             EditorHelpers.SetFirstSibling(this.targets);
 
         }
@@ -135,7 +141,11 @@ namespace UnityEditor.UI.Windows {
             this.tabScrollPosition = scroll;
             
             GUILayout.Space(10f);
-        
+            
+            if (this.targets.Length == 1) GUILayoutExt.DrawSafeAreaFields(this.target, this.useSafeZone, this.safeZone);
+            
+            GUILayout.Space(10f);
+            
             var iter = this.serializedObject.GetIterator();
             iter.NextVisible(true);
             do {

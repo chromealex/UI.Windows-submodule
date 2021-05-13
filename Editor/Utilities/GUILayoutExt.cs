@@ -74,6 +74,53 @@ namespace UnityEditor.UI.Windows {
 		    
 	    }
 
+	    public static void DrawSafeAreaFields(UnityEngine.Object target, SerializedProperty useSafeZone, SerializedProperty safeZone) {
+		    
+		    EditorGUILayout.PropertyField(useSafeZone);
+		    if (useSafeZone.boolValue == true) {
+                
+			    GUILayoutExt.Box(6f, 2f, () => {
+                    
+				    EditorGUILayout.PropertyField(safeZone);
+				    if (safeZone.objectReferenceValue == null) {
+
+					    GUILayoutExt.Box(2f, 2f, () => {
+                            
+						    GUILayout.BeginHorizontal();
+						    GUILayout.FlexibleSpace();
+						    if (GUILayout.Button("Generate", GUILayout.Width(80f), GUILayout.Height(30f)) == true) {
+
+							    var obj = (Component)target;
+							    if (PrefabUtility.IsPartOfAnyPrefab(obj) == true) {
+
+								    var path = AssetDatabase.GetAssetPath(obj.gameObject);
+								    using (var edit = new EditPrefabAssetScope(path)) {
+
+									    EditorHelpers.AddSafeZone(edit.prefabRoot.transform);
+                                
+								    }
+                            
+							    } else {
+
+								    var root = obj.gameObject;
+								    EditorHelpers.AddSafeZone(root.transform);
+                            
+							    }
+                        
+						    }
+						    GUILayout.FlexibleSpace();
+						    GUILayout.EndHorizontal();
+                            
+					    }, GUIStyle.none);
+                        
+				    }
+
+			    });
+                
+		    }
+            
+	    }
+
 	    public static string GetPropertyToString(SerializedProperty property) {
 
 		    if (property.hasMultipleDifferentValues == true) {

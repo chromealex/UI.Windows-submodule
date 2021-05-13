@@ -125,7 +125,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     var tweener = WindowSystem.GetTweener();
                     tweener.Stop(anim);
                     tweener.Add(animationInfo, anim.GetDuration(state.animationState), 0f, 1f)
-                           .Delay(state.transitionParameters.data.delay > 0f ? state.transitionParameters.data.delay : anim.GetDelay(state.animationState))
+                           .Delay(state.transitionParameters.data.replaceDelay == true ? state.transitionParameters.data.delay : anim.GetDelay(state.animationState))
                            .Tag(anim)
                            .Ease(ease)
                            .OnUpdate((obj, value) => {

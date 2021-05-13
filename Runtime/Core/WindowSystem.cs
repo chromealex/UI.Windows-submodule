@@ -108,6 +108,7 @@ namespace UnityEngine.UI.Windows {
 
         internal bool resetAnimation;
         internal bool immediately;
+        internal float delay;
 
         internal System.Action callback;
 
@@ -151,6 +152,14 @@ namespace UnityEngine.UI.Windows {
 
             var instance = this;
             instance.data.immediately = state;
+            return instance;
+
+        }
+
+        public TransitionParameters ReplaceDelay(float value) {
+
+            var instance = this;
+            instance.data.delay = value;
             return instance;
 
         }

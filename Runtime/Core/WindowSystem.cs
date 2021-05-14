@@ -921,6 +921,8 @@ namespace UnityEngine.UI.Windows {
                 return;
                 
             }
+
+            WindowObjectAnimation.SetState(instance, AnimationState.Show);
             
             var innerParameters = parameters.ReplaceCallback(null);
             for (int i = 0; i < instance.subObjects.Count; ++i) {
@@ -947,6 +949,8 @@ namespace UnityEngine.UI.Windows {
                 return;
                 
             }
+            
+            WindowObjectAnimation.SetState(instance, AnimationState.Hide);
 
             var innerParameters = parameters.ReplaceCallback(null);
             for (int i = 0; i < instance.subObjects.Count; ++i) {

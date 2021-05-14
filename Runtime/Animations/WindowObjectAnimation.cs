@@ -61,6 +61,24 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
 
+        public static void SetState(WindowObject instance, AnimationState state) {
+            
+            if (instance.animationParameters.items == null) return;
+
+            for (int i = 0; i < instance.animationParameters.items.Length; ++i) {
+
+                var anim = instance.animationParameters.items[i];
+                if (anim != null) {
+                    
+                    var stateData = anim.GetState(state);
+                    anim.ApplyState(stateData);
+
+                }
+
+            }
+            
+        }
+
         public static void Show<T>(T closureParameters, WindowObject instance, TransitionParameters parameters, System.Action<T> onComplete) {
 
             WindowObjectAnimation.Play(closureParameters, AnimationState.Show, instance.animationParameters.items, parameters, onComplete);

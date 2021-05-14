@@ -620,6 +620,8 @@ namespace UnityEngine.UI.Windows {
 
         public void SetInvisible() {
 
+            if (this == null || this.gameObject == null) return;
+            
             this.isActiveSelf = false;
 
             var renderBehaviourOnHidden = RenderBehaviour.Nothing; 

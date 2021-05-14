@@ -53,7 +53,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 var anim = instance.animationParameters.items[i];
                 if (anim != null) {
                     
-                    tweener.Stop(anim, ignoreEvents: true);
+                    tweener.Stop(anim, ignoreEvents: false);
 
                 }
 

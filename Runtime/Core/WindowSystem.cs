@@ -1126,7 +1126,16 @@ namespace UnityEngine.UI.Windows {
 
                 var instance = currentList[i].instance;
                 if ((predicate == null || predicate.Invoke(instance) == true) && WindowSystem.CanBeDestroy(DontDestroy.OnHideAll, instance.preferences.dontDestroy) == true) {
+
+                    if (instance.GetState() == ObjectState.Hiding ||
+                        instance.GetState() == ObjectState.Hidden) {
+                        
+                        instanceParameters.RaiseCallback();
+                        continue;
+                        
+                    }
                     
+                    instance.BreakStateHierarchy();
                     instance.Hide(instanceParameters);
                     
                 }

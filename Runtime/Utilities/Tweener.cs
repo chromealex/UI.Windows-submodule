@@ -726,7 +726,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             bool Update(float dt);
             bool HasTag(object tag);
-            void Stop();
+            void Stop(bool ignoreEvents = false);
             void Complete();
 
         }
@@ -851,9 +851,9 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             }
 
-            void ITween.Stop() {
+            void ITween.Stop(bool ignoreEvents) {
 
-                if (this.timer < 1f) {
+                if (ignoreEvents == false && this.timer < 1f) {
 
 	                if (this.onCancel != null) this.onCancel.Invoke(this.obj);
 	                if (this.onCancelParameterless != null) this.onCancelParameterless.Invoke();
@@ -969,13 +969,13 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-        public void Stop(object tag) {
+        public void Stop(object tag, bool ignoreEvents = false) {
 
             for (int i = this.tweens.Count - 1; i >= 0; --i) {
 
                 if (this.tweens[i].HasTag(tag) == true) {
 
-                    this.tweens[i].Stop();
+                    this.tweens[i].Stop(ignoreEvents);
                     this.tweens.RemoveAt(i);
 
                 }

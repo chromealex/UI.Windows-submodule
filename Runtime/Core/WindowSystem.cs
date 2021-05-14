@@ -108,8 +108,12 @@ namespace UnityEngine.UI.Windows {
 
         internal bool resetAnimation;
         internal bool immediately;
+        
         internal bool replaceDelay;
         internal float delay;
+
+        internal bool replaceAffectChilds;
+        internal bool affectChilds;
 
         internal System.Action callback;
 
@@ -138,6 +142,15 @@ namespace UnityEngine.UI.Windows {
 
             if (this.contextCallback != null) this.contextCallback.Invoke(this.internalData.context, new TransitionParameters() { data = this.internalData.data });
             if (this.data.callback != null) this.data.callback.Invoke();
+
+        }
+
+        public TransitionParameters ReplaceAffectChilds(bool state) {
+
+            var instance = this;
+            instance.data.replaceAffectChilds = true;
+            instance.data.affectChilds = state;
+            return instance;
 
         }
 
@@ -837,7 +850,7 @@ namespace UnityEngine.UI.Windows {
                 if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
                 instance.SetVisible();
                 instance.SetResetState();
-                
+
                 var closure = PoolClass<ShowHideClosureParametersClass>.Spawn();
                 closure.animationComplete = false;
                 closure.hierarchyComplete = false;
@@ -845,31 +858,44 @@ namespace UnityEngine.UI.Windows {
                 closure.parameters = parameters;
                 closure.internalCall = internalCall;
 
-                Coroutines.CallInSequence((p) => {
+                if (closure.parameters.data.replaceAffectChilds == false ||
+                    closure.parameters.data.affectChilds == true) {
 
-                    p.hierarchyComplete = true;
-                    if (p.animationComplete == true) {
+                    instance.BreakStateHierarchy();
+                    
+                    Coroutines.CallInSequence((p) => {
 
-                        var pars = p.parameters;
-                        p.Dispose();
-                        pars.RaiseCallback();
+                        p.hierarchyComplete = true;
+                        if (p.animationComplete == true) {
 
-                    }
+                            var pars = p.parameters;
+                            p.Dispose();
+                            pars.RaiseCallback();
 
-                }, closure, instance.subObjects, (obj, cb, p) => {
+                        }
 
-                    if (p.internalCall == true) {
-                       
-                        obj.ShowInternal(p.parameters.ReplaceCallback(cb));
- 
-                    } else {
+                    }, closure, instance.subObjects, (obj, cb, p) => {
 
-                        obj.Show(p.parameters.ReplaceCallback(cb));
+                        if (p.internalCall == true) {
 
-                    }
+                            obj.ShowInternal(p.parameters.ReplaceCallback(cb));
 
-                });
-                
+                        } else {
+
+                            obj.Show(p.parameters.ReplaceCallback(cb));
+
+                        }
+
+                    });
+
+                } else {
+                    
+                    instance.BreakState();
+                    
+                    closure.hierarchyComplete = true;
+                    
+                }
+
                 WindowObjectAnimation.Show(closure, instance, parameters, (cParams) => {
                     
                     cParams.animationComplete = true;
@@ -968,26 +994,46 @@ namespace UnityEngine.UI.Windows {
                 closure.hierarchyComplete = false;
                 closure.instance = instance;
                 closure.parameters = parameters;
-                
+
+                if (parameters.data.replaceAffectChilds == false ||
+                    parameters.data.affectChilds == true) {
+
+                    instance.BreakStateHierarchy();
+                    
+                } else {
+                    
+                    instance.BreakState();
+
+                }
+
                 WindowObjectAnimation.Hide(closure, instance, parameters, (cParams) => {
                     
-                    Coroutines.CallInSequence((p) => {
+                    if (cParams.parameters.data.replaceAffectChilds == false ||
+                        cParams.parameters.data.affectChilds == true) {
 
-                        p.hierarchyComplete = true;
-                    
-                        if (p.animationComplete == true) {
+                        Coroutines.CallInSequence((p) => {
 
-                            var pars = p.parameters;
-                            p.Dispose();
-                            pars.RaiseCallback();
+                            p.hierarchyComplete = true;
+                        
+                            if (p.animationComplete == true) {
 
-                        }
+                                var pars = p.parameters;
+                                p.Dispose();
+                                pars.RaiseCallback();
 
-                    }, cParams, cParams.instance.subObjects, (obj, cb, p) => {
-                    
-                        obj.Hide(p.parameters.ReplaceCallback(cb));
-                    
-                    });
+                            }
+
+                        }, cParams, cParams.instance.subObjects, (obj, cb, p) => {
+                        
+                            obj.Hide(p.parameters.ReplaceCallback(cb));
+                        
+                        });
+                        
+                    } else {
+                        
+                        cParams.hierarchyComplete = true;
+                        
+                    }
 
                     cParams.animationComplete = true;
                     if (cParams.hierarchyComplete == true) {

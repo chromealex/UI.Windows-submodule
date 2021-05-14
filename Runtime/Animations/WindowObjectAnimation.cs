@@ -43,6 +43,24 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
 
+        public static void BreakState(WindowObject instance) {
+            
+            if (instance.animationParameters.items == null) return;
+
+            var tweener = WindowSystem.GetTweener();
+            for (int i = 0; i < instance.animationParameters.items.Length; ++i) {
+
+                var anim = instance.animationParameters.items[i];
+                if (anim != null) {
+                    
+                    tweener.Stop(anim, ignoreEvents: true);
+
+                }
+
+            }
+            
+        }
+
         public static void Show<T>(T closureParameters, WindowObject instance, TransitionParameters parameters, System.Action<T> onComplete) {
 
             WindowObjectAnimation.Play(closureParameters, AnimationState.Show, instance.animationParameters.items, parameters, onComplete);

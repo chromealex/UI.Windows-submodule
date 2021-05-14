@@ -283,6 +283,23 @@ namespace UnityEngine.UI.Windows {
             
         }
 
+        public virtual void BreakState() {
+            
+            WindowObjectAnimation.BreakState(this);
+            
+        }
+
+        public virtual void BreakStateHierarchy() {
+            
+            this.BreakState();
+            for (int i = 0; i < this.subObjects.Count; ++i) {
+                
+                this.subObjects[i].BreakState();
+                
+            }
+            
+        }
+
         public bool IsVisible() {
 
             return this.IsVisibleSelf() == true && (this.rootObject != null ? this.rootObject.IsVisible() == true : true);
@@ -998,10 +1015,10 @@ namespace UnityEngine.UI.Windows {
 
         internal void ShowInternal(TransitionParameters parameters = default) {
             
-            if (this.hiddenByDefault == true /*&& this.window.GetState() == ObjectState.Showing*/) {
+            if (this.hiddenByDefault == true || this.internalManualShow == true) {
 
                 if (this.internalManualShow == false) {
-                    
+
                     this.Hide(TransitionParameters.Default.ReplaceImmediately(true));
                     this.SetInvisible();
                     

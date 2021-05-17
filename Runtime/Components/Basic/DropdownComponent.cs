@@ -338,11 +338,17 @@ namespace UnityEngine.UI.Windows.Components {
             var textComponent = this.list.GetItem<GenericComponent>(index).Get<TextComponent>();
             if (textComponent != null) {
 
-                var targetText = this.label.Get<TextComponent>();
-                targetText.SetText(textComponent.GetText());
+                this.SetLabelText(textComponent.GetText());
 
             }
             
+        }
+
+        public void SetLabelText(string text) {
+            
+            var targetText = this.label.Get<TextComponent>();
+            targetText.SetText(text);
+
         }
 
         private void TrySetCallbackToInteractable<T>(T instance, int index, System.Action<T> callback) where T : WindowComponent {

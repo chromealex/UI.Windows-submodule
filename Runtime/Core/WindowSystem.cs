@@ -389,6 +389,26 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public static void RaiseAndCancelWaitIntractables() {
+
+            if (WindowSystem.instance.waitInteractable != null && WindowSystem.InteractWith(WindowSystem.instance.waitInteractable) == true) {
+                
+            }
+            
+            if (WindowSystem.instance.waitInteractables != null) {
+
+                foreach (var item in WindowSystem.instance.waitInteractables) {
+
+                    WindowSystem.InteractWith(item);
+
+                }
+                
+            }
+            
+            WindowSystem.CancelWaitIntractables();
+
+        }
+
         public static bool CanInteractWith(UnityEngine.UI.Windows.Components.IInteractable interactable) {
 
             if (WindowSystem.instance.lockInteractables == true) return false;

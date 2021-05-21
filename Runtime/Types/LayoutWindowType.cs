@@ -53,6 +53,14 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         public Canvas GetCanvas() {
 
+            #if UNITY_EDITOR
+            if (Application.isPlaying == false) {
+                
+                return this.windowLayout.GetCanvas();
+                
+            }
+            #endif
+            
             if (this.windowLayoutInstance == null) return null;
             return this.windowLayoutInstance.GetCanvas();
 

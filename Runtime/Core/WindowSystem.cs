@@ -483,6 +483,11 @@ namespace UnityEngine.UI.Windows {
                     WindowSystem.Show<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(x => {
 
                         this.consoleWindowInstance = x;
+                        WindowSystem.GetEvents().RegisterOnce(x, WindowEvent.OnHideBegin, () => {
+                            
+                            this.consoleWindowInstance = null;
+                            
+                        });
                         x.OnEmptyPass();
 
                     });

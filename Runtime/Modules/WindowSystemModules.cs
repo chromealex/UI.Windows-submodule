@@ -6,7 +6,21 @@ namespace UnityEngine.UI.Windows.Modules {
 
     public abstract class WindowModule : WindowLayout {
 
-        public int defaultOrder;
+        [System.Serializable]
+        public class Parameters {
+
+            public int defaultOrder;
+
+            public virtual void Apply(WindowModule instance) {
+
+                instance.SetCanvasOrder(instance.GetWindow().GetCanvasOrder() + this.defaultOrder);
+
+            }
+
+        }
+
+        [SerializeReference]
+        public Parameters parameters;
 
     }
 
@@ -19,7 +33,8 @@ namespace UnityEngine.UI.Windows.Modules {
             public WindowSystemTargets targets;
             [ResourceType(typeof(WindowModule))]
             public Resource module;
-            public int order;
+            [SerializeReference]
+            public WindowModule.Parameters parameters;
 
             [System.NonSerialized]
             internal WindowModule moduleInstance;
@@ -72,7 +87,7 @@ namespace UnityEngine.UI.Windows.Modules {
         private struct LoadingClosure {
 
             public WindowBase window;
-            public int order;
+            public WindowModule.Parameters parameters;
             public WindowModules windowModules;
             public int index;
 
@@ -89,19 +104,19 @@ namespace UnityEngine.UI.Windows.Modules {
                 if (moduleInfo.targets.IsValid(targetData) == false) continue;
                 if (moduleInfo.moduleInstance != null) continue;
 
-                var order = moduleInfo.order;
+                var parameters = moduleInfo.parameters;
                 var data = new LoadingClosure() {
                     windowModules = this,
                     index = i,
-                    order = order,
+                    parameters = parameters,
                     window = window,
                 };
                 yield return resources.LoadAsync<WindowModule, LoadingClosure>(window, data, moduleInfo.module, (asset, closure) => {
 
                     var instance = WindowSystem.GetPools().Spawn(asset, closure.window.transform);
                     instance.Setup(closure.window);
-                    instance.SetCanvasOrder(closure.window.GetCanvasOrder() + closure.order);
-
+                    closure.parameters.Apply(instance);
+                    
                     var layoutPreferences = closure.window.GetCurrentLayoutPreferences();
                     if (layoutPreferences != null && instance.canvasScaler != null) layoutPreferences.Apply(instance.canvasScaler);
 

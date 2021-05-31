@@ -69,35 +69,74 @@ namespace UnityEditor.UI.Windows {
 
             var moduleItems = this.modules.FindPropertyRelative("modules");
             this.listModules = new UnityEditorInternal.ReorderableList(this.serializedObject, moduleItems, false, false, true, true);
-            const float elementHeight = 64f;
             this.listModules.headerHeight = 1f;
-            this.listModules.elementHeight = elementHeight;
+            this.listModules.elementHeightCallback += (index) => {
+                
+                var item = moduleItems.GetArrayElementAtIndex(index);
+                var h = 0f;
+                h += EditorGUI.GetPropertyHeight(item.FindPropertyRelative("targets"));
+                h += 2f;
+                h += EditorGUI.GetPropertyHeight(item.FindPropertyRelative("module"));
+                h += 2f;
+                h += 20f;
+                var parameters = item.FindPropertyRelative("parameters");
+                var p = parameters.Copy();
+                if (p.CountInProperty() > 0) {
+                    parameters.NextVisible(true);
+                    h += EditorGUI.GetPropertyHeight(parameters, true);
+                    h += 2f;
+                }
+                return h;
+                
+            };
             this.listModules.drawElementCallback += (rect, index, active, focus) => {
                 
                 var item = moduleItems.GetArrayElementAtIndex(index);
-                var prevValue = item.FindPropertyRelative("module").FindPropertyRelative("guid");
+                var prevValue = item.FindPropertyRelative("module").FindPropertyRelative("guid").stringValue;
                 rect.y += 2f;
                 rect.height = 18f;
                 EditorGUI.BeginChangeCheck();
-                GUILayoutExt.DrawProperty(rect, item, 20f);
-                GUILayoutExt.DrawRect(new Rect(rect.x, rect.y + elementHeight - 3f, rect.width, 1f), new Color(1f, 1f, 1f, 0.1f));
+                //GUILayoutExt.DrawProperty(rect, item, 20f);
+                EditorGUI.PropertyField(rect, item.FindPropertyRelative("targets"));
+                rect.y += EditorGUI.GetPropertyHeight(item.FindPropertyRelative("targets"), true);
+                rect.y += 2f;
+                EditorGUI.PropertyField(rect, item.FindPropertyRelative("module"));
+                rect.y += EditorGUI.GetPropertyHeight(item.FindPropertyRelative("module"), true);
+                rect.y += 2f;
+                EditorGUI.LabelField(rect, "Parameters", EditorStyles.centeredGreyMiniLabel);
+                rect.y += 20f;
+                var parameters = item.FindPropertyRelative("parameters");
+                if (string.IsNullOrEmpty(parameters.managedReferenceFullTypename) == true) {
+                    
+                    parameters.managedReferenceValue = new WindowModule.Parameters();
+                    
+                }
+                var p = parameters.Copy();
+                if (p.CountInProperty() > 0) {
+                    var px = parameters.Copy();
+                    px.NextVisible(true);
+                    var h = EditorGUI.GetPropertyHeight(px, true);
+                    EditorGUI.PropertyField(rect, px, true);
+                    rect.y += h;
+                    rect.y += 2f;
+                }
+
+                GUILayoutExt.DrawRect(new Rect(rect.x, rect.y, rect.width, 1f), new Color(1f, 1f, 1f, 0.1f));
                 if (EditorGUI.EndChangeCheck() == true) {
 
-                    var newValue = item.FindPropertyRelative("module").FindPropertyRelative("guid");
-                    if (prevValue != newValue && string.IsNullOrEmpty(newValue.stringValue) == false) {
+                    var newValue = item.FindPropertyRelative("module").FindPropertyRelative("guid").stringValue;
+                    if (prevValue != newValue && string.IsNullOrEmpty(newValue) == false) {
 
-                        var guid = newValue.stringValue;
+                        var guid = newValue;
                         var assetPath = AssetDatabase.GUIDToAssetPath(guid);
-                        var obj = AssetDatabase.LoadAssetAtPath<WindowModule>(assetPath);
-                        
-                        var module = obj;
-                        item.FindPropertyRelative("order").intValue = module.defaultOrder;
+                        var module = AssetDatabase.LoadAssetAtPath<WindowModule>(assetPath);
+                        var sourceParameters = module.parameters;
+                        parameters.managedReferenceValue = sourceParameters;
 
                     }
                     
                 }
-                //EditorGUI.PropertyField(rect, item);
-
+                
             };
 
             EditorHelpers.SetFirstSibling(this.targets);

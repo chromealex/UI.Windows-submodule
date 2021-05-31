@@ -24,7 +24,7 @@ namespace UnityEditor.UI.Windows {
         private SerializedProperty autoRegisterSubObjects;
         private SerializedProperty hiddenByDefault;
 
-        private SerializedProperty defaultOrder;
+        private SerializedProperty parameters;
 
         private SerializedProperty useSafeZone;
         private SerializedProperty safeZone;
@@ -77,12 +77,40 @@ namespace UnityEditor.UI.Windows {
             this.autoRegisterSubObjects = this.serializedObject.FindProperty("autoRegisterSubObjects");
             this.hiddenByDefault = this.serializedObject.FindProperty("hiddenByDefault");
             
-            this.defaultOrder = this.serializedObject.FindProperty("defaultOrder");
+            this.parameters = this.serializedObject.FindProperty("parameters");
+            this.ValidateParameters();
         
             this.useSafeZone = this.serializedObject.FindProperty("useSafeZone");
             this.safeZone = this.serializedObject.FindProperty("safeZone");
 
             EditorHelpers.SetFirstSibling(this.targets);
+
+        }
+
+        private void ValidateParameters() {
+            
+            if (string.IsNullOrEmpty(this.parameters.managedReferenceFullTypename) == true) {
+                
+                this.parameters.managedReferenceValue = new WindowModule.Parameters();
+                
+            }
+            
+        }
+
+        private void DrawParameters() {
+
+            this.ValidateParameters();
+            
+            var p = this.parameters.Copy();
+            if (p.CountInProperty() > 0) {
+
+                GUILayoutExt.DrawHeader("Module Options (Default)");
+
+                var px = this.parameters.Copy();
+                px.NextVisible(true);
+                EditorGUILayout.PropertyField(px, true);
+
+            }
 
         }
 
@@ -112,8 +140,7 @@ namespace UnityEditor.UI.Windows {
                     GUILayoutExt.DrawHeader("Performance Options");
                     EditorGUILayout.PropertyField(this.createPool);
                     
-                    GUILayoutExt.DrawHeader("Module Options");
-                    EditorGUILayout.PropertyField(this.defaultOrder);
+                    this.DrawParameters();
 
                 }),
                 new GUITab("Advanced", () => {
@@ -133,8 +160,7 @@ namespace UnityEditor.UI.Windows {
                     GUILayoutExt.DrawHeader("Performance Options");
                     EditorGUILayout.PropertyField(this.createPool);
 
-                    GUILayoutExt.DrawHeader("Module Options");
-                    EditorGUILayout.PropertyField(this.defaultOrder);
+                    this.DrawParameters();
 
                 })
                 );

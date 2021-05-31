@@ -115,7 +115,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                     var instance = WindowSystem.GetPools().Spawn(asset, closure.window.transform);
                     instance.Setup(closure.window);
-                    closure.parameters.Apply(instance);
+                    if (closure.parameters != null) closure.parameters.Apply(instance);
                     
                     var layoutPreferences = closure.window.GetCurrentLayoutPreferences();
                     if (layoutPreferences != null && instance.canvasScaler != null) layoutPreferences.Apply(instance.canvasScaler);

@@ -399,7 +399,8 @@ namespace UnityEngine.UI.Windows {
 
                 foreach (var item in WindowSystem.instance.waitInteractables) {
 
-                    WindowSystem.InteractWith(item);
+                    var comp = (item as WindowComponent);
+                    if (comp != null && comp.GetState() == ObjectState.Shown) WindowSystem.InteractWith(item);
 
                 }
                 

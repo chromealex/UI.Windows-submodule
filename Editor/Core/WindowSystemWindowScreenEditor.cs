@@ -80,12 +80,21 @@ namespace UnityEditor.UI.Windows {
                 h += 2f;
                 h += 20f;
                 var parameters = item.FindPropertyRelative("parameters");
-                var p = parameters.Copy();
-                if (p.CountInProperty() > 0) {
-                    parameters.NextVisible(true);
-                    h += EditorGUI.GetPropertyHeight(parameters, true);
-                    h += 2f;
+                if (parameters.hasVisibleChildren == true) {
+
+                    var px = parameters.Copy();
+                    px.NextVisible(true);
+                    var depth = px.depth;
+                    while (px.depth >= depth) {
+
+                        h += EditorGUI.GetPropertyHeight(px, true);
+                        if (px.NextVisible(false) == false) break;
+
+                    }
+                    h += 4f;
+
                 }
+                h += 4f;
                 return h;
                 
             };
@@ -105,23 +114,49 @@ namespace UnityEditor.UI.Windows {
                 rect.y += 2f;
                 EditorGUI.LabelField(rect, "Parameters", EditorStyles.centeredGreyMiniLabel);
                 rect.y += 20f;
+
                 var parameters = item.FindPropertyRelative("parameters");
-                if (string.IsNullOrEmpty(parameters.managedReferenceFullTypename) == true) {
+                {
+                    if (string.IsNullOrEmpty(parameters.managedReferenceFullTypename) == true) {
+
+                        parameters.managedReferenceValue = new WindowModule.Parameters();
+
+                    }
+
+                    if (parameters.hasVisibleChildren == true) {
+
+                        var px = parameters.Copy();
+                        px.NextVisible(true);
+                        var depth = px.depth;
+                        while (px.depth >= depth) {
+
+                            var h = EditorGUI.GetPropertyHeight(px, true);
+                            EditorGUI.PropertyField(rect, px, true);
+                            rect.y += h;
+                            rect.y += 2f;
+                            if (px.NextVisible(false) == false) break;
+
+                        }
+
+                    }
                     
-                    parameters.managedReferenceValue = new WindowModule.Parameters();
+                    rect.y += 4f;
+
+                    /*
+                    var p = parameters.Copy();
+                    if (p.CountInProperty() > 0) {
+                        var px = parameters.Copy();
+                        px.NextVisible(true);
+                        var h = EditorGUI.GetPropertyHeight(px, true);
+                        EditorGUI.PropertyField(rect, px, true);
+                        rect.y += h;
+                        rect.y += 2f;
+                    }*/
                     
-                }
-                var p = parameters.Copy();
-                if (p.CountInProperty() > 0) {
-                    var px = parameters.Copy();
-                    px.NextVisible(true);
-                    var h = EditorGUI.GetPropertyHeight(px, true);
-                    EditorGUI.PropertyField(rect, px, true);
-                    rect.y += h;
-                    rect.y += 2f;
                 }
 
-                GUILayoutExt.DrawRect(new Rect(rect.x, rect.y, rect.width, 1f), new Color(1f, 1f, 1f, 0.1f));
+                GUILayoutExt.DrawRect(new Rect(rect.x, rect.y - 3f, rect.width, 1f), new Color(1f, 1f, 1f, 0.1f));
+                rect.y += 4f;
                 if (EditorGUI.EndChangeCheck() == true) {
 
                     var newValue = item.FindPropertyRelative("module").FindPropertyRelative("guid").stringValue;

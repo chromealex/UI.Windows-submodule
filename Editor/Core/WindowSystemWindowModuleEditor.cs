@@ -102,13 +102,19 @@ namespace UnityEditor.UI.Windows {
             this.ValidateParameters();
             
             var p = this.parameters.Copy();
-            if (p.CountInProperty() > 0) {
+            if (p.hasVisibleChildren == true) {
 
                 GUILayoutExt.DrawHeader("Module Options (Default)");
 
                 var px = this.parameters.Copy();
                 px.NextVisible(true);
-                EditorGUILayout.PropertyField(px, true);
+                var depth = px.depth;
+                while (px.depth >= depth) {
+                    
+                    EditorGUILayout.PropertyField(px, true);
+                    if (px.NextVisible(false) == false) break;
+                    
+                }
 
             }
 

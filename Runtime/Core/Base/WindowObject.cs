@@ -1048,10 +1048,18 @@ namespace UnityEngine.UI.Windows {
         public void Show(TransitionParameters parameters = default) {
 
             if (this.objectState <= ObjectState.Initializing) {
-                
-                Debug.LogWarning("Object is out of state: " + this, this);
-                return;
-                
+
+                if (this.objectState == ObjectState.NotInitialized) {
+                    
+                    this.DoInit();
+                    
+                } else {
+
+                    Debug.LogWarning("Object is out of state: " + this, this);
+                    return;
+
+                }
+
             }
 
             this.internalManualShow = true;

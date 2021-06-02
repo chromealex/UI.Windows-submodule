@@ -676,6 +676,12 @@ namespace UnityEngine.UI.Windows {
             
         }
 
+        public void Setup(WindowComponent component) {
+
+            this.Setup(component.GetWindow());
+
+        }
+
         internal virtual void Setup(WindowBase source) {
 
             if (this.hasObjectCanvas == true) {

@@ -795,6 +795,12 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        public static void AOT() {
+            
+            new ListEndlessComponentModule().SetItems<ButtonComponent, ClosureParameters>(0, default, null, default, null);
+
+        }
+
         public void LateUpdate() {
 
             if (this.GetState() != ObjectState.Shown) return;

@@ -477,27 +477,45 @@ namespace UnityEngine.UI.Windows {
         
         public void Update() {
 
-            if (Input.GetKeyDown(KeyCode.BackQuote) == true) {
+            if (Input.GetKeyDown(KeyCode.BackQuote) == true ||
+                Input.touchCount >= 3) {
 
-                if (this.consoleWindowInstance == null) {
+                var isActive = true;
+                var checkTouch = Input.touchCount >= 3;
+                if (checkTouch == true) {
 
-                    WindowSystem.Show<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(x => {
+                    isActive = false;
+                    if (this.consoleWindowInstance == null) {
+                        
+                        isActive = (Input.touchCount == 5 && Input.GetTouch(Input.touchCount - 1).phase == TouchPhase.Began);
+                        
+                    } else {
+                        
+                        isActive = (Input.touchCount == 3 && Input.GetTouch(Input.touchCount - 1).phase == TouchPhase.Began);
+                        
+                    }
 
-                        this.consoleWindowInstance = x;
-                        WindowSystem.GetEvents().RegisterOnce(x, WindowEvent.OnHideBegin, () => {
-                            
-                            this.consoleWindowInstance = null;
-                            
+                }
+
+                if (isActive == true) {
+
+                    if (this.consoleWindowInstance == null) {
+
+                        WindowSystem.Show<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(x => {
+
+                            this.consoleWindowInstance = x;
+                            WindowSystem.GetEvents().RegisterOnce(x, WindowEvent.OnHideBegin, () => { this.consoleWindowInstance = null; });
+                            x.OnEmptyPass();
+
                         });
-                        x.OnEmptyPass();
 
-                    });
+                    } else {
 
-                } else {
-                    
-                    this.consoleWindowInstance.Hide();
-                    this.consoleWindowInstance = null;
-                    
+                        this.consoleWindowInstance.Hide();
+                        this.consoleWindowInstance = null;
+
+                    }
+
                 }
 
             }

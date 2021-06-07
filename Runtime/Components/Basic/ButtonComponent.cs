@@ -102,12 +102,12 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.GetState() != ObjectState.Showing &&
                 this.GetState() != ObjectState.Shown) {
 
-                Debug.LogWarning("Couldn't send click because component is in `" + this.GetWindow().GetState().ToString() + "` state.", this);
+                Debug.LogWarning("Couldn't send click because component is in `" + this.GetState().ToString() + "` state.", this);
                 return false;
 
             }
 
-            return WindowSystem.InteractWith(this);
+            return WindowSystem.CanInteractWith(this);
 
         }
         
@@ -121,6 +121,8 @@ namespace UnityEngine.UI.Windows.Components {
             }
 
             if (this.CanClick() == true) {
+
+                WindowSystem.InteractWith(this);
 
                 if (this.callback != null) this.callback.Invoke();
                 if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this);

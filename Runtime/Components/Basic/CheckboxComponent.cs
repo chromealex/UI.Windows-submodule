@@ -92,6 +92,8 @@ namespace UnityEngine.UI.Windows.Components {
 
             if (this.CanClick() == false) return;
             
+            WindowSystem.InteractWith(this);
+
             var stateChanged = this.isChecked != state;
             this.isChecked = state;
             if (checkGroup == true && this.group != null) {

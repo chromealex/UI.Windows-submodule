@@ -823,10 +823,14 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             }
 
-            if (this.inputField.IsFocused() == false) {
-                
-                this.inputField.SetFocus();
-                
+            if (Application.isMobilePlatform == false) {
+
+                if (this.inputField.IsFocused() == false) {
+
+                    this.inputField.SetFocus();
+
+                }
+
             }
 
             this.fastLinks.SetItems<ButtonComponent, ClosureFastLinksParameters>(this.fastLinkItems.Count, (button, parameters) => {

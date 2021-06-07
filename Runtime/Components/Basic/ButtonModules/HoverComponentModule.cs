@@ -15,6 +15,7 @@ namespace UnityEngine.UI.Windows {
 
             if (this.content != null) {
 
+                this.content.hiddenByDefault = true;
                 this.content.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry() {
                     holder = this.windowComponent,
                     hiddenByDefault = true, hiddenByDefaultDescription = "Value is hold by HoverComponentModule",

@@ -83,6 +83,8 @@ namespace UnityEngine.UI.Windows.Components {
 
         public void SetCheckedState(bool state, bool call = true, bool checkGroup = true) {
 
+            if (this.CanClick() == false) return;
+            
             var stateChanged = this.isChecked != state;
             this.isChecked = state;
             if (checkGroup == true && this.group != null) {

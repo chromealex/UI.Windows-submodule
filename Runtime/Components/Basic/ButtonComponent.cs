@@ -88,14 +88,14 @@ namespace UnityEngine.UI.Windows.Components {
             this.DoClick();
             
         }
-        
-        protected virtual void DoClick() {
 
+        public bool CanClick() {
+            
             if (this.GetWindow().GetState() != ObjectState.Showing &&
                 this.GetWindow().GetState() != ObjectState.Shown) {
 
                 Debug.LogWarning("Couldn't send click because window is in `" + this.GetWindow().GetState().ToString() + "` state.", this);
-                return;
+                return false;
 
             }
 
@@ -103,18 +103,24 @@ namespace UnityEngine.UI.Windows.Components {
                 this.GetState() != ObjectState.Shown) {
 
                 Debug.LogWarning("Couldn't send click because component is in `" + this.GetWindow().GetState().ToString() + "` state.", this);
-                return;
+                return false;
 
             }
 
             if (this.callback == null &&
                 this.callbackWithInstance == null) {
                 
-                return;
+                return false;
                 
             }
 
-            if (WindowSystem.InteractWith(this) == true) {
+            return WindowSystem.InteractWith(this);
+
+        }
+        
+        protected virtual void DoClick() {
+
+            if (this.CanClick() == true) {
 
                 if (this.callback != null) this.callback.Invoke();
                 if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this);

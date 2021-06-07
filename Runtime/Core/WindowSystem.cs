@@ -861,12 +861,14 @@ namespace UnityEngine.UI.Windows {
             public bool internalCall;
             public bool animationComplete;
             public bool hierarchyComplete;
+            public bool baseComplete;
 
             public void Dispose() {
 
                 this.internalCall = default;
                 this.animationComplete = default;
                 this.hierarchyComplete = default;
+                this.baseComplete = default;
                 this.instance = null;
                 this.parameters = default;
                 PoolClass<ShowHideClosureParametersClass>.Recycle(this);
@@ -883,15 +885,25 @@ namespace UnityEngine.UI.Windows {
                 return;
                 
             }
+
             instance.SetState(ObjectState.Showing);
 
+            if (instance is WindowBase) {
+
+                instance.OnShowBeginInternal();
+                instance.OnShowBegin();
+                WindowSystem.RaiseEvent(instance, WindowEvent.OnShowBegin);
+
+            }
+
+            var closure = PoolClass<ShowHideClosureParametersClass>.Spawn();
             {
 
                 if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
                 instance.SetVisible();
                 instance.SetResetState();
 
-                var closure = PoolClass<ShowHideClosureParametersClass>.Spawn();
+                closure.baseComplete = false;
                 closure.animationComplete = false;
                 closure.hierarchyComplete = false;
                 closure.instance = instance;
@@ -906,7 +918,7 @@ namespace UnityEngine.UI.Windows {
                     Coroutines.CallInSequence((p) => {
 
                         p.hierarchyComplete = true;
-                        if (p.animationComplete == true) {
+                        if (p.animationComplete == true && p.baseComplete == true) {
 
                             var pars = p.parameters;
                             p.Dispose();
@@ -939,7 +951,7 @@ namespace UnityEngine.UI.Windows {
                 WindowObjectAnimation.Show(closure, instance, parameters, (cParams) => {
                     
                     cParams.animationComplete = true;
-                    if (cParams.hierarchyComplete == true) {
+                    if (cParams.hierarchyComplete == true && cParams.baseComplete == true) {
                         
                         var pars = cParams.parameters;
                         cParams.Dispose();
@@ -951,9 +963,21 @@ namespace UnityEngine.UI.Windows {
 
             }
 
-            instance.OnShowBeginInternal();
-            instance.OnShowBegin();
-            WindowSystem.RaiseEvent(instance, WindowEvent.OnShowBegin);
+            if ((instance is WindowBase) == false) {
+
+                instance.OnShowBeginInternal();
+                instance.OnShowBegin();
+                WindowSystem.RaiseEvent(instance, WindowEvent.OnShowBegin);
+
+            }
+
+            closure.baseComplete = true;
+            if (closure.animationComplete == true && closure.hierarchyComplete == true) {
+                
+                closure.Dispose();
+                parameters.RaiseCallback();
+                
+            }
 
         }
 

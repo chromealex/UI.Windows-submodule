@@ -107,18 +107,18 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
 
-            if (this.callback == null &&
-                this.callbackWithInstance == null) {
-                
-                return false;
-                
-            }
-
             return WindowSystem.InteractWith(this);
 
         }
         
         protected virtual void DoClick() {
+
+            if (this.callback == null &&
+                this.callbackWithInstance == null) {
+                
+                return;
+                
+            }
 
             if (this.CanClick() == true) {
 

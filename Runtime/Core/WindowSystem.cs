@@ -885,10 +885,6 @@ namespace UnityEngine.UI.Windows {
             }
             instance.SetState(ObjectState.Showing);
 
-            instance.OnShowBeginInternal();
-            instance.OnShowBegin();
-            WindowSystem.RaiseEvent(instance, WindowEvent.OnShowBegin);
-
             {
 
                 if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
@@ -954,6 +950,10 @@ namespace UnityEngine.UI.Windows {
                 });
 
             }
+
+            instance.OnShowBeginInternal();
+            instance.OnShowBegin();
+            WindowSystem.RaiseEvent(instance, WindowEvent.OnShowBegin);
 
         }
 

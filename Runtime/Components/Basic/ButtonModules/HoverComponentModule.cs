@@ -25,6 +25,28 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public override void OnInit() {
+            
+            base.OnInit();
+
+            WindowSystem.onPointerUp += this.OnPointerUp;
+
+        }
+
+        public override void OnDeInit() {
+            
+            WindowSystem.onPointerUp -= this.OnPointerUp;
+            
+            base.OnDeInit();
+            
+        }
+
+        private void OnPointerUp() {
+            
+            if (this.content != null) this.content.Hide();
+
+        }
+
         public void OnPointerEnter(UnityEngine.EventSystems.PointerEventData eventData) {
 
             if (this.content != null) this.content.Show();

@@ -888,7 +888,7 @@ namespace UnityEngine.UI.Windows {
 
             instance.SetState(ObjectState.Showing);
 
-            if (instance is WindowBase) {
+            {
 
                 instance.OnShowBeginInternal();
                 instance.OnShowBegin();
@@ -960,14 +960,6 @@ namespace UnityEngine.UI.Windows {
                     }
                     
                 });
-
-            }
-
-            if ((instance is WindowBase) == false) {
-
-                instance.OnShowBeginInternal();
-                instance.OnShowBegin();
-                WindowSystem.RaiseEvent(instance, WindowEvent.OnShowBegin);
 
             }
 

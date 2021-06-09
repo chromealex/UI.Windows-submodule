@@ -53,7 +53,7 @@ namespace UnityEngine.UI.Windows.Components {
 
             if (this.autoToggle == true) {
 
-                this.button.onClick.AddListener(this.Toggle);
+                this.button.onClick.AddListener(this.ToggleInternal);
 
             }
 
@@ -61,7 +61,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         internal override void OnDeInitInternal() {
             
-            this.button.onClick.RemoveListener(this.Toggle);
+            this.button.onClick.RemoveAllListeners();
 
             base.OnDeInitInternal();
 
@@ -81,11 +81,23 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public void SetCheckedState(bool state, bool call = true, bool checkGroup = true) {
+        internal void ToggleInternal() {
+
+            this.SetCheckedStateInternal(!this.isChecked);
+
+        }
+
+        internal void SetCheckedStateInternal(bool state, bool call = true, bool checkGroup = true) {
 
             if (this.CanClick() == false) return;
-            
+
             WindowSystem.InteractWith(this);
+            
+            this.SetCheckedState(state, call, checkGroup);
+            
+        }
+
+        public void SetCheckedState(bool state, bool call = true, bool checkGroup = true) {
 
             var stateChanged = this.isChecked != state;
             this.isChecked = state;

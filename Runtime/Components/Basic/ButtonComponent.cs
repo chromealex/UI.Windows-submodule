@@ -49,7 +49,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         internal override void OnInitInternal() {
             
-            this.button.onClick.AddListener(this.DoClick);
+            this.button.onClick.AddListener(this.DoClickInternal);
             
             base.OnInitInternal();
             
@@ -111,8 +111,8 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
         
-        protected virtual void DoClick() {
-
+        internal void DoClickInternal() {
+            
             if (this.callback == null &&
                 this.callbackWithInstance == null) {
                 
@@ -123,11 +123,17 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.CanClick() == true) {
 
                 WindowSystem.InteractWith(this);
-
-                if (this.callback != null) this.callback.Invoke();
-                if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this);
+                
+                this.DoClick();
 
             }
+
+        }
+
+        protected virtual void DoClick() {
+
+            if (this.callback != null) this.callback.Invoke();
+            if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this);
 
         }
         

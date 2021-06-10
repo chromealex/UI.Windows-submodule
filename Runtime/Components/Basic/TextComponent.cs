@@ -251,6 +251,15 @@ namespace UnityEngine.UI.Windows.Components {
             this.lastValueData = default;
             this.lastText = null;
 
+            #if UNITY_LOCALIZATION_SUPPORT
+
+            if (this.lastLocalizationKey != null) {
+                this.lastLocalizationKey.StringChanged -= this.OnLocalizationStringChanged;
+                this.lastLocalizationKey = null;
+            }
+
+            #endif
+
         }
 
         public void SetColor(Color color) {
@@ -388,17 +397,48 @@ namespace UnityEngine.UI.Windows.Components {
                 return textGraphic.text;
 
             }
-            #if TEXTMESHPRO_SUPPORT
+#if TEXTMESHPRO_SUPPORT
             else if (this.graphics is TMPro.TMP_Text textGraphicTmp) {
                 
                 return textGraphicTmp.text;
 
             }
-            #endif
+#endif
 
             return null;
 
         }
+
+        #if UNITY_LOCALIZATION_SUPPORT
+
+        private UnityEngine.Localization.LocalizedString lastLocalizationKey;
+        private bool avoidLocalizationUnsubscribe;
+
+        public virtual void SetText(UnityEngine.Localization.LocalizedString key, params object[] args) {
+
+            if (this.lastLocalizationKey != key || args.Length > 0) {
+
+                if (this.lastLocalizationKey != null) {
+                    this.lastLocalizationKey.StringChanged -= this.OnLocalizationStringChanged;
+                }
+
+                this.lastLocalizationKey = key;
+                this.lastLocalizationKey.Arguments = args;
+                this.lastLocalizationKey.StringChanged += this.OnLocalizationStringChanged;
+
+            } 
+        
+        }
+
+        private void OnLocalizationStringChanged(string text) {
+
+            this.avoidLocalizationUnsubscribe = true;
+            this.SetText(text);
+            this.avoidLocalizationUnsubscribe = false;
+
+        }
+
+        #endif
 
         private string lastText;
         public virtual void SetText(string text) {
@@ -406,19 +446,28 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.lastText == text) return;
             this.lastText = text;
             this.lastValueData = default;
-            
+
+            #if UNITY_LOCALIZATION_SUPPORT
+
+            if (this.avoidLocalizationUnsubscribe == false && this.lastLocalizationKey != null) {
+                this.lastLocalizationKey.StringChanged -= this.OnLocalizationStringChanged;
+                this.lastLocalizationKey = null;
+            }
+
+            #endif
+
             if (this.graphics is UnityEngine.UI.Text textGraphic) {
 
                 textGraphic.text = text;
 
             }
-            #if TEXTMESHPRO_SUPPORT
+#if TEXTMESHPRO_SUPPORT
             else if (this.graphics is TMPro.TMP_Text textGraphicTmp) {
 
                 textGraphicTmp.text = text;
 
             }
-            #endif
+#endif
 
         }
 

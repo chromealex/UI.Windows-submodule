@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("UI.Windows.Editor")]
 

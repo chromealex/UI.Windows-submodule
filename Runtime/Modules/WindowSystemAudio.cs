@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace UnityEngine.UI.Windows {
+﻿namespace UnityEngine.UI.Windows {
 
     public class WindowSystemAudio : MonoBehaviour {
 
@@ -19,6 +15,34 @@ namespace UnityEngine.UI.Windows {
             this.audioSource.PlayOneShot(clips[Random.Range(0, clips.Length)]);
             
         }
+
+    }
+
+    [System.Serializable]
+    public struct ComponentAudio {
+
+        public WindowEvent onPlay;
+        public WindowEvent onStop;
+        
+        #if FMOD_SUPPORT
+        public FMOD.Studio.EventDescription eventDescription;
+        
+        private FMOD.Studio.EventInstance instance;
+        
+        private void Play() {
+
+            if (this.eventDescription.isValid() == false) return;
+            this.eventDescription.createInstance(out this.instance);
+            this.instance.start();
+
+        }
+
+        private void Stop() {
+
+            this.instance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+
+        }
+        #endif
 
     }
 

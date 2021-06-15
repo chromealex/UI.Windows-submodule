@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace UnityEngine.UI.Windows {
+﻿namespace UnityEngine.UI.Windows {
 
     using Modules;
     
@@ -29,7 +25,7 @@ namespace UnityEngine.UI.Windows {
 
         private float currentDepth;
         private float currentZDepth;
-
+        
         public virtual void OnParametersPass() {
         }
         

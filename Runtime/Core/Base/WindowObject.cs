@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace UnityEngine.UI.Windows {
 
@@ -157,6 +156,8 @@ namespace UnityEngine.UI.Windows {
         public WindowObject rootObject;
         public List<WindowObject> subObjects = new List<WindowObject>();
 
+        public ComponentAudio componentAudio;
+        
         internal bool internalManualShow;
         internal bool internalManualHide;
         

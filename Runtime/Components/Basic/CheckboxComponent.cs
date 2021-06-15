@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
-
-namespace UnityEngine.UI.Windows.Components {
+﻿namespace UnityEngine.UI.Windows.Components {
 
     public interface ICheckboxGroup {
 

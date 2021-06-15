@@ -156,7 +156,7 @@ namespace UnityEngine.UI.Windows {
         public WindowObject rootObject;
         public List<WindowObject> subObjects = new List<WindowObject>();
 
-        public ComponentAudio componentAudio;
+        public ComponentAudio audioEvents;
         
         internal bool internalManualShow;
         internal bool internalManualHide;
@@ -964,6 +964,8 @@ namespace UnityEngine.UI.Windows {
 
             if (this.objectState < ObjectState.Initializing) {
 
+                this.audioEvents.Initialize(this);
+                
                 this.SetState(ObjectState.Initializing);
 
                 this.OnInitInternal();
@@ -1001,8 +1003,10 @@ namespace UnityEngine.UI.Windows {
             WindowSystem.RaiseEvent(this, WindowEvent.OnDeInitialize);
             this.OnDeInit();
             this.OnDeInitInternal();
-
+            
             this.SetState(ObjectState.DeInitialized);
+
+            this.audioEvents.DeInitialize(this);
 
             WindowSystem.ClearEvents(this);
 

@@ -27,6 +27,8 @@ namespace UnityEditor.UI.Windows {
         private SerializedProperty objectCanvas;
         private SerializedProperty canvasSortingOrderDelta;
 
+        private SerializedProperty audioEvents;
+
         private UnityEditorInternal.ReorderableList listModules;
 
         private int selectedTab {
@@ -80,6 +82,8 @@ namespace UnityEditor.UI.Windows {
             
             this.objectCanvas = this.serializedObject.FindProperty("objectCanvas");
             this.canvasSortingOrderDelta = this.serializedObject.FindProperty("canvasSortingOrderDelta");
+            
+            this.audioEvents = this.serializedObject.FindProperty("audioEvents");
 
             if (this.listModules == null) {
                 
@@ -324,6 +328,20 @@ namespace UnityEditor.UI.Windows {
                 this.listModules == null ? GUITab.none : new GUITab("Modules (" + this.listModules.count + ")", () => {
                     
                     this.listModules.DoLayoutList();
+
+                }),
+                new GUITab("Audio", () => {
+                    
+                    GUILayoutExt.DrawHeader("Events");
+                    var enterChildren = true;
+                    var prop = this.audioEvents.Copy();
+                    var depth = prop.depth + 1;
+                    while (prop.NextVisible(enterChildren) == true && prop.depth >= depth) {
+                    
+                        EditorGUILayout.PropertyField(prop, true);
+                        enterChildren = false;
+
+                    }
 
                 })
                 );

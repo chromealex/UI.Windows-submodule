@@ -20,6 +20,8 @@ namespace UnityEditor.UI.Windows {
         private SerializedProperty modules;
         private SerializedProperty layouts;
         
+        private SerializedProperty audioEvents;
+
         private int selectedTab {
             get {
                 return EditorPrefs.GetInt("UnityEditor.UI.Windows.WindowBase.TabIndex");
@@ -66,6 +68,8 @@ namespace UnityEditor.UI.Windows {
             this.preferences = this.serializedObject.FindProperty("preferences");
             this.modules = this.serializedObject.FindProperty("modules");
             this.layouts = this.serializedObject.FindProperty("layouts");
+
+            this.audioEvents = this.serializedObject.FindProperty("audioEvents");
 
             var moduleItems = this.modules.FindPropertyRelative("modules");
             this.listModules = new UnityEditorInternal.ReorderableList(this.serializedObject, moduleItems, false, false, true, true);
@@ -253,6 +257,20 @@ namespace UnityEditor.UI.Windows {
                     
                     EditorGUILayout.PropertyField(this.layouts);
 
+                }),
+                new GUITab("Audio", () => {
+                    
+                    GUILayoutExt.DrawHeader("Events");
+                    var enterChildren = true;
+                    var prop = this.audioEvents.Copy();
+                    var depth = prop.depth + 1;
+                    while (prop.NextVisible(enterChildren) == true && prop.depth >= depth) {
+                    
+                        EditorGUILayout.PropertyField(prop, true);
+                        enterChildren = false;
+
+                    }
+                    
                 })
                 );
             this.tabScrollPosition = scroll;

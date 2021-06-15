@@ -21,27 +21,82 @@
     [System.Serializable]
     public struct ComponentAudio {
 
-        public WindowEvent onPlay;
-        public WindowEvent onStop;
+        public WindowEvent play;
+        public WindowEvent stop;
+
+        private System.Action onPlayCallback;
+        private System.Action onStopCallback;
+
+        public void Initialize(WindowObject handler) {
+
+            if (this.play == WindowEvent.None && this.stop == WindowEvent.None) return;
+
+            this.onPlayCallback = this.DoPlay;
+            this.onStopCallback = this.DoStop;
+            
+            var events = WindowSystem.GetEvents();
+            events.Register(handler, this.play, this.onPlayCallback);
+            events.Register(handler, this.stop, this.onStopCallback);
+
+        }
+
+        public void DeInitialize(WindowObject handler) {
+            
+            if (this.play == WindowEvent.None && this.stop == WindowEvent.None) return;
+
+            var events = WindowSystem.GetEvents();
+            events.UnRegister(handler, this.play, this.onPlayCallback);
+            events.UnRegister(handler, this.stop, this.onStopCallback);
+
+            this.onPlayCallback = null;
+            this.onStopCallback = null;
+
+        }
+
+        public void DoPlay() {
+            
+            #if FMOD_SUPPORT
+            this.FMODPlay();
+            #else
+            var audio = WindowSystem.GetAudio();
+            audio.Play(this.clip);
+            #endif
+
+        }
+
+        public void DoStop() {
+            
+            #if FMOD_SUPPORT
+            this.FMODStop();
+            #else
+            var audio = WindowSystem.GetAudio();
+            audio.Play(this.clip);
+            #endif
+
+        }
         
         #if FMOD_SUPPORT
-        public FMOD.Studio.EventDescription eventDescription;
-        
+        [FMODUnity.EventRefAttribute]
+        public string audioEvent;
         private FMOD.Studio.EventInstance instance;
         
-        private void Play() {
+        private void FMODPlay() {
 
-            if (this.eventDescription.isValid() == false) return;
-            this.eventDescription.createInstance(out this.instance);
+            var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
+            if (eventDescription.isValid() == false) return;
+            eventDescription.createInstance(out this.instance);
+            
             this.instance.start();
 
         }
 
-        private void Stop() {
+        private void FMODStop() {
 
             this.instance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 
         }
+        #else
+        public AudioClip clip;
         #endif
 
     }

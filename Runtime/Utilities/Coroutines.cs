@@ -58,9 +58,21 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
         
-        public static void Run(IEnumerator coroutine) {
+        public static Coroutine Run(IEnumerator coroutine) {
 
-	        Coroutines.instance.StartCoroutine(coroutine);
+	        return Coroutines.instance.StartCoroutine(coroutine);
+
+        }
+
+        public static void Cancel(IEnumerator coroutine) {
+
+	        Coroutines.instance.StopCoroutine(coroutine);
+
+        }
+
+        public static void Cancel(Coroutine coroutine) {
+
+	        Coroutines.instance.StopCoroutine(coroutine);
 
         }
 

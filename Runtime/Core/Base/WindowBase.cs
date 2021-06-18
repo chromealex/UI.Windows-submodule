@@ -198,7 +198,7 @@
 
         public override void TurnOnRender() {
             
-            base.TurnOffRender();
+            base.TurnOnRender();
             
             this.workCamera.enabled = true;
             

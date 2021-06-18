@@ -261,11 +261,15 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         private void OnEditEnd(string text) {
 
+            #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+            this.ApplyCommand(text);
+            #else
             if (Input.GetKeyDown(KeyCode.KeypadEnter) == true || Input.GetKeyDown(KeyCode.Return)) {
 
                 this.ApplyCommand(text);
 
             }
+            #endif
 
         }
 

@@ -165,7 +165,7 @@ namespace UnityEngine.UI.Windows.Components {
             
             base.ValidateEditor();
 
-            this.slider = this.GetComponent<Slider>();
+			if (this.slider == null) this.slider = this.GetComponent<Slider>();
 
         }
 

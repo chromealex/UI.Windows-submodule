@@ -71,10 +71,8 @@ namespace UnityEngine.UI.Windows.Components {
                 if (UnityEditor.PrefabUtility.IsPartOfPrefabAsset(editorObj) == false) {
 
                     editorObj.allowRegisterInRoot = false;
-                    editorObj.AddEditorParametersRegistry(new EditorParametersRegistry() {
-                        holder = this,
-                        allowRegisterInRoot = true,
-                        allowRegisterInRootDescription = "Hold by ListComponent"
+                    editorObj.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
+                        holdAllowRegisterInRoot = true,
                     });
 
                     editorObj.gameObject.SetActive(false);

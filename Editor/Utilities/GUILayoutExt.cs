@@ -518,12 +518,17 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        public static void PropertyField(SerializedProperty property, System.Func<UnityEngine.UI.Windows.WindowObject.EditorParametersRegistry, string> regCheck = null) {
+        public static void PropertyField(SerializedProperty property, System.Func<UnityEngine.UI.Windows.WindowObject.EditorParametersRegistry, bool> regCheck = null) {
 
 	        var hasAnyReg = false;
 	        var description = string.Empty;
+	        var holders = new System.Collections.Generic.List<string>();
+	        var holdersObjs = new System.Collections.Generic.List<Component>();
 	        if (regCheck != null) {
 
+		        description = $"Value is hold by "; //{string.Join(", ", holders)}";
+
+		        holders.Add(description);
 		        foreach (var target in property.serializedObject.targetObjects) {
 
 			        if (target is UnityEngine.UI.Windows.WindowObject windowObject) {
@@ -532,14 +537,12 @@ namespace UnityEditor.UI.Windows {
 
 					        foreach (var reg in windowObject.registry) {
 
-						        var descr = regCheck.Invoke(reg);
-						        if (string.IsNullOrEmpty(descr) == false) {
-
-							        hasAnyReg = true;
-							        description = descr;
-							        break;
-
-						        }
+						        if (reg.GetHolder() == null) continue;
+						        if (regCheck.Invoke(reg) == false) continue;
+						        
+						        holders.Add(reg.GetHolderName());
+						        holdersObjs.Add(reg.GetHolder());
+						        hasAnyReg = true;
 
 					        }
 
@@ -559,8 +562,52 @@ namespace UnityEditor.UI.Windows {
 		        
 		        EditorGUI.BeginDisabledGroup(true);
 		        EditorGUILayout.PropertyField(property);
-		        EditorGUILayout.HelpBox(new GUIContent(description), wide: true);
 		        EditorGUI.EndDisabledGroup();
+		        
+		        GUILayoutExt.Box(4f, 2f, () => {
+
+			        var rect = new Rect(0f, 0f, EditorGUIUtility.currentViewWidth, 1000f);
+			        var style = new GUIStyle(EditorStyles.miniLabel);
+			        style.normal.textColor = new Color(0x00 / 255f, 0x98 / 255f, 0xDA / 255f, 1f);
+			        style.onNormal.textColor = style.active.textColor = style.onActive.textColor = style.hover.textColor = style.onHover.textColor = style.focused.textColor = style.onFocused.textColor = new Color(0x00 / 255f, 0xAA / 255f, 0xDA / 255f, 1f);
+			        var buttonRects = EditorGUIUtility.GetFlowLayoutedRects(rect, style, 1f, 1f, holders);
+			        
+			        GUILayout.BeginHorizontal();
+			        GUILayout.EndHorizontal();
+			        var areaRect = GUILayoutUtility.GetLastRect();
+			        for (int i = 0; i < buttonRects.Count; ++i) areaRect.height = Mathf.Max(0f, buttonRects[i].yMax);
+			        
+			        GUILayoutUtility.GetRect(areaRect.width, areaRect.height);
+			        GUI.BeginGroup(areaRect);
+			        {
+				        for (int i = 0; i < buttonRects.Count; ++i) {
+
+					        if (i == 0) {
+						        
+						        GUI.Label(buttonRects[i], holders[i], EditorStyles.miniLabel);
+						        
+					        } else {
+
+						        var position = buttonRects[i];
+
+						        Handles.BeginGUI();
+						        Handles.color = style.normal.textColor;
+						        Handles.DrawLine(new Vector3(position.xMin, position.yMax), new Vector3(position.xMax, position.yMax));
+						        Handles.color = Color.white;
+						        Handles.EndGUI();
+						        if (GUI.Button(position, holders[i], style) == true) {
+							        
+							        EditorGUIUtility.PingObject(holdersObjs[i - 1]);
+							        
+						        }
+
+					        }
+
+				        }
+			        }
+			        GUI.EndGroup();
+			        
+		        }, EditorStyles.helpBox);
 		        
 	        }
 

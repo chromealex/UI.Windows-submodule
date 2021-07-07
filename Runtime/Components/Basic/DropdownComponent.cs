@@ -446,10 +446,8 @@ namespace UnityEngine.UI.Windows.Components {
                 if (this.minMaxSizeY.x >= 0f || this.minMaxSizeY.y >= 0f) this.drivenRectTransformTracker.Add(this, this.list.rectTransform, DrivenTransformProperties.SizeDeltaY);
 
                 this.list.hiddenByDefault = true;
-                this.list.AddEditorParametersRegistry(new EditorParametersRegistry() {
-                    holder = this,
-                    hiddenByDefault = true,
-                    hiddenByDefaultDescription = "Value is hold by DropdownComponent"
+                this.list.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
+                    holdHiddenByDefault = true,
                 });
                 
                 this.CalculateAnchorsAndPivot();

@@ -172,19 +172,46 @@ namespace UnityEngine.UI.Windows {
         [System.Serializable]
         public struct EditorParametersRegistry {
 
-            public WindowObject holder;
+            [SerializeField]
+            private WindowObject holder;
+            [SerializeField]
+            private WindowComponentModule moduleHolder;
             
-            public bool hiddenByDefault;
-            public string hiddenByDefaultDescription;
+            public bool holdHiddenByDefault;
+            public bool holdAllowRegisterInRoot;
 
-            public bool allowRegisterInRoot;
-            public string allowRegisterInRootDescription;
+            public WindowObject GetHolder() => this.holder;
+
+            public string GetHolderName() {
+                if (this.moduleHolder != null) return this.moduleHolder.name;
+                return this.holder.name;
+            }
+
+            public EditorParametersRegistry(WindowObject holder) {
+
+                this.holder = holder;
+                this.moduleHolder = null;
+                
+                this.holdHiddenByDefault = default;
+                this.holdAllowRegisterInRoot = default;
+
+            }
+
+            public EditorParametersRegistry(WindowComponentModule holder) {
+
+                this.holder = holder.windowComponent;
+                this.moduleHolder = holder;
+                
+                this.holdHiddenByDefault = default;
+                this.holdAllowRegisterInRoot = default;
+
+            }
 
             public bool IsEquals(EditorParametersRegistry other) {
 
                 return this.holder == other.holder &&
-                       this.hiddenByDefault == other.hiddenByDefault &&
-                       this.allowRegisterInRoot == other.allowRegisterInRoot;
+                       this.holdHiddenByDefault == other.holdHiddenByDefault &&
+                       this.holdAllowRegisterInRoot == other.holdAllowRegisterInRoot;
 
             }
             
@@ -202,6 +229,32 @@ namespace UnityEngine.UI.Windows {
 
             }
 
+        }
+
+        private void ValidateRegistry() {
+            
+            if (this.registry != null && this.registry.Count > 0) {
+
+                var holders = new List<WindowObject>();
+                foreach (var reg in this.registry) {
+
+                    if (reg.GetHolder() != null) {
+                        
+                        holders.Add(reg.GetHolder());
+                        
+                    }
+                    
+                }
+                
+                this.registry.Clear();
+                foreach (var holder in holders) {
+                    
+                    if (holder != this) holder.ValidateEditor();
+                    
+                }
+                
+            }
+            
         }
 
         #if UNITY_EDITOR
@@ -338,43 +391,13 @@ namespace UnityEngine.UI.Windows {
             
             this.rectTransform = this.GetComponent<RectTransform>();
 
-            this.ValidateEditor(updateParentObjects: true);
+            this.ValidateEditor(updateParentObjects: false, updateChildObjects: false);
             
         }
 
-        public void ValidateEditor(bool updateParentObjects) {
+        public void ValidateEditor(bool updateParentObjects, bool updateChildObjects = false) {
 
-            if (updateParentObjects == true) {
-
-                var topObjects = this.GetComponentsInParent<WindowObject>(true);
-                foreach (var obj in topObjects) {
-
-                    if (obj != this) obj.ValidateEditor();
-
-                }
-
-            }
-
-            if (this.registry != null) {
-
-                var holders = new List<WindowObject>();
-                foreach (var reg in this.registry) {
-
-                    if (reg.holder != null) {
-                        
-                        holders.Add(reg.holder);
-                        
-                    }
-                    
-                }
-                this.registry.Clear();
-                foreach (var holder in holders) {
-                    
-                    if (holder != this) holder.ValidateEditor(updateParentObjects: false);
-                    
-                }
-                
-            }
+            this.ValidateRegistry();
             
             this.isObjectRoot = (this.transform.parent == null);
             this.objectCanvas = this.GetComponent<Canvas>();
@@ -454,6 +477,28 @@ namespace UnityEngine.UI.Windows {
                     return x != this && c == this;
 
                 }).ToList();
+
+            }
+
+            if (updateChildObjects == true) {
+
+                var childObjects = this.GetComponentsInChildren<WindowObject>(true);
+                foreach (var obj in childObjects) {
+
+                    if (obj != this) obj.ValidateEditor(updateParentObjects: false, updateChildObjects: false);
+
+                }
+
+            }
+
+            if (updateParentObjects == true) {
+
+                var topObjects = this.GetComponentsInParent<WindowObject>(true);
+                foreach (var obj in topObjects) {
+
+                    if (obj != this) obj.ValidateEditor(updateParentObjects: false, updateChildObjects: false);
+
+                }
 
             }
 

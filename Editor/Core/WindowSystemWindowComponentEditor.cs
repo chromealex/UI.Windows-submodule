@@ -293,7 +293,7 @@ namespace UnityEditor.UI.Windows {
                 new GUITab("Basic", () => {
                     
                     GUILayoutExt.DrawHeader("Main");
-                    GUILayoutExt.PropertyField(this.hiddenByDefault, (reg) => reg.hiddenByDefault == true ? reg.hiddenByDefaultDescription : string.Empty);
+                    GUILayoutExt.PropertyField(this.hiddenByDefault, (reg) => reg.holdHiddenByDefault);
                     EditorGUILayout.PropertyField(this.subObjects);
                     
                     GUILayoutExt.DrawHeader("Animations");
@@ -314,9 +314,9 @@ namespace UnityEditor.UI.Windows {
                     EditorGUILayout.PropertyField(this.animationParameters);
 
                     GUILayoutExt.DrawHeader("Graph");
-                    GUILayoutExt.PropertyField(this.allowRegisterInRoot, (reg) => reg.allowRegisterInRoot == true ? reg.allowRegisterInRootDescription : string.Empty);
+                    GUILayoutExt.PropertyField(this.allowRegisterInRoot, (reg) => reg.holdAllowRegisterInRoot);
                     EditorGUILayout.PropertyField(this.autoRegisterSubObjects);
-                    GUILayoutExt.PropertyField(this.hiddenByDefault, (reg) => reg.hiddenByDefault == true ? reg.hiddenByDefaultDescription : string.Empty);
+                    GUILayoutExt.PropertyField(this.hiddenByDefault, (reg) => reg.holdHiddenByDefault);
                     EditorGUILayout.PropertyField(this.subObjects);
 
                     GUILayoutExt.DrawHeader("Performance Options");

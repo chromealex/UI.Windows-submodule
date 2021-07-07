@@ -21,64 +21,52 @@
 
             if (this.fadeBottom != null) {
 
-                this.fadeBottom.ValidateEditor(updateParentObjects: false);
                 this.fadeBottom.hiddenByDefault = true;
                 this.fadeBottom.allowRegisterInRoot = false;
-                this.fadeBottom.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry() {
-                    holder = this.windowComponent,
-                    hiddenByDefault = true, hiddenByDefaultDescription = "Value is hold by ListScrollableComponentModule"
+                this.fadeBottom.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                    holdHiddenByDefault = true,
                 });
-                this.fadeBottom.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry() {
-                    holder = this.windowComponent,
-                    allowRegisterInRoot = true, allowRegisterInRootDescription = "Value is hold by ListScrollableComponentModule"
+                this.fadeBottom.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                    holdAllowRegisterInRoot = true,
                 });
 
             }
             
             if (this.fadeTop != null) {
                 
-                this.fadeTop.ValidateEditor(updateParentObjects: false);
                 this.fadeTop.hiddenByDefault = true;
                 this.fadeTop.allowRegisterInRoot = false;
-                this.fadeTop.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry() {
-                    holder = this.windowComponent,
-                    hiddenByDefault = true, hiddenByDefaultDescription = "Value is hold by ListScrollableComponentModule"
+                this.fadeTop.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                    holdHiddenByDefault = true,
                 });
-                this.fadeTop.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry() {
-                    holder = this.windowComponent,
-                    allowRegisterInRoot = true, allowRegisterInRootDescription = "Value is hold by ListScrollableComponentModule"
+                this.fadeTop.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                    holdAllowRegisterInRoot = true,
                 });
                 
             }
 
             if (this.fadeRight != null) {
                 
-                this.fadeRight.ValidateEditor(updateParentObjects: false);
                 this.fadeRight.hiddenByDefault = true;
                 this.fadeRight.allowRegisterInRoot = false;
-                this.fadeRight.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry() {
-                    holder = this.windowComponent,
-                    hiddenByDefault = true, hiddenByDefaultDescription = "Value is hold by ListScrollableComponentModule"
+                this.fadeRight.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                    holdHiddenByDefault = true,
                 });
-                this.fadeRight.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry() {
-                    holder = this.windowComponent,
-                    allowRegisterInRoot = true, allowRegisterInRootDescription = "Value is hold by ListScrollableComponentModule"
+                this.fadeRight.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                    holdAllowRegisterInRoot = true,
                 });
                 
             }
 
             if (this.fadeLeft != null) {
                 
-                this.fadeLeft.ValidateEditor(updateParentObjects: false);
                 this.fadeLeft.hiddenByDefault = true;
                 this.fadeLeft.allowRegisterInRoot = false;
-                this.fadeLeft.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry() {
-                    holder = this.windowComponent,
-                    hiddenByDefault = true, hiddenByDefaultDescription = "Value is hold by ListScrollableComponentModule"
+                this.fadeLeft.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                    holdHiddenByDefault = true,
                 });
-                this.fadeLeft.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry() {
-                    holder = this.windowComponent,
-                    allowRegisterInRoot = true, allowRegisterInRootDescription = "Value is hold by ListScrollableComponentModule"
+                this.fadeLeft.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                    holdAllowRegisterInRoot = true,
                 });
                 
             }

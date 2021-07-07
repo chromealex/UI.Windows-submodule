@@ -25,8 +25,8 @@
             if (this.checkedContainer != null) {
 
                 this.checkedContainer.hiddenByDefault = true;
-                this.checkedContainer.AddEditorParametersRegistry(new EditorParametersRegistry() {
-                    holder = this, hiddenByDefault = true, hiddenByDefaultDescription = "Value is hold by CheckboxButtonComponent"
+                this.checkedContainer.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
+                    holdHiddenByDefault = true,
                 });
 
             }
@@ -34,8 +34,8 @@
             if (this.uncheckedContainer != null) {
 
                 this.uncheckedContainer.hiddenByDefault = true;
-                this.uncheckedContainer.AddEditorParametersRegistry(new EditorParametersRegistry() {
-                    holder = this, hiddenByDefault = true, hiddenByDefaultDescription = "Value is hold by CheckboxButtonComponent"
+                this.uncheckedContainer.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
+                    holdHiddenByDefault = true,
                 });
 
             }

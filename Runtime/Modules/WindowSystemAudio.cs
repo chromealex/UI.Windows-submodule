@@ -107,7 +107,7 @@
         public bool stopOthersOnPlay;
         public FMODParameter[] parameters;
 
-        private FMOD.Studio.EventInstance GetInstance(FMOD.Studio.EventDescription eventDescription) {
+        private static FMOD.Studio.EventInstance GetInstance(string audioEvent, FMOD.Studio.EventDescription eventDescription, bool stopOthersOnPlay = false) {
             
             if (eventDescription.getInstanceCount(out var count) == FMOD.RESULT.OK) {
 
@@ -119,7 +119,7 @@
 
                             if (item.isValid() == true) {
                             
-                                if (this.stopOthersOnPlay == true) {
+                                if (stopOthersOnPlay == true) {
 
                                     item.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 
@@ -129,7 +129,7 @@
 
                                     if (descr.getPath(out var path) == FMOD.RESULT.OK) {
 
-                                        if (path == this.audioEvent) {
+                                        if (path == audioEvent) {
 
                                             return item;
 
@@ -152,6 +152,29 @@
             return default;
 
         }
+
+        public void SetParameterOnce(string name, float value) {
+            
+            if (string.IsNullOrEmpty(this.audioEvent) == true) return;
+
+            var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
+            if (eventDescription.isValid() == false) return;
+
+            {
+                var instance = FMODAudioComponent.GetInstance(this.audioEvent, eventDescription, this.stopOthersOnPlay);
+                instance.setParameterByName(name, value);
+            }
+
+            var audioEvent = this.audioEvent;
+            var stopOthersOnPlay = this.stopOthersOnPlay;
+            UnityEngine.UI.Windows.Utilities.Coroutines.WaitTime(1f, () => {
+                
+                var instance = FMODAudioComponent.GetInstance(audioEvent, eventDescription, stopOthersOnPlay);
+                instance.setParameterByName(name, 0f);
+
+            });
+
+        }
         
         public void SetParameter(string name, float value) {
             
@@ -160,7 +183,7 @@
             var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
             if (eventDescription.isValid() == false) return;
 
-            var instance = this.GetInstance(eventDescription);
+            var instance = FMODAudioComponent.GetInstance(this.audioEvent, eventDescription, this.stopOthersOnPlay);
             instance.setParameterByName(name, value);
             
         }
@@ -173,7 +196,7 @@
             if (eventDescription.isValid() == false) return;
 
             var setPlay = false;
-            var instance = this.GetInstance(eventDescription);
+            var instance = FMODAudioComponent.GetInstance(this.audioEvent, eventDescription, this.stopOthersOnPlay);
             if (instance.isValid() == false) {
                 
                 setPlay = true;
@@ -196,7 +219,7 @@
             var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
             if (eventDescription.isValid() == false) return;
 
-            var instance = this.GetInstance(eventDescription);
+            var instance = FMODAudioComponent.GetInstance(this.audioEvent, eventDescription, this.stopOthersOnPlay);
             foreach (var p in this.parameters) {
                 instance.setParameterByName(p.name, 0f);
             }
@@ -210,7 +233,7 @@
             var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
             if (eventDescription.isValid() == false) return;
 
-            var instance = this.GetInstance(eventDescription);
+            var instance = FMODAudioComponent.GetInstance(this.audioEvent, eventDescription, this.stopOthersOnPlay);
             instance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
             instance.release();
 

@@ -435,7 +435,7 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.label == null) this.label = this.GetComponentInChildren<ButtonComponent>(true);
             if (this.list == null) this.list = this.GetComponentInChildren<ListComponent>(true);
 
-            if (this.list != null) {
+            if (this.list != null && this.list.rectTransform != null) {
 
                 this.scrollRect = this.list.GetComponent<ScrollRect>();
                 if (this.scrollRect == null) return;

@@ -106,6 +106,8 @@
         public string audioEvent;
         public bool stopOthersOnPlay;
         public FMODParameter[] parameters;
+        public bool autoStopOnceParameters;
+        public float autoStopDuration;
 
         private static FMOD.Studio.EventInstance GetInstance(string audioEvent, FMOD.Studio.EventDescription eventDescription, bool stopOthersOnPlay = false) {
             
@@ -160,19 +162,26 @@
             var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
             if (eventDescription.isValid() == false) return;
 
+            Debug.Log("SetParameterOnce: " + name + ", value: " + value + " (" + this.audioEvent + ")");
+
             {
                 var instance = FMODAudioComponent.GetInstance(this.audioEvent, eventDescription, this.stopOthersOnPlay);
                 instance.setParameterByName(name, value);
             }
 
-            var audioEvent = this.audioEvent;
-            var stopOthersOnPlay = this.stopOthersOnPlay;
-            UnityEngine.UI.Windows.Utilities.Coroutines.WaitTime(1f, () => {
-                
-                var instance = FMODAudioComponent.GetInstance(audioEvent, eventDescription, stopOthersOnPlay);
-                instance.setParameterByName(name, 0f);
+            if (this.autoStopOnceParameters == true) {
 
-            });
+                var audioEvent = this.audioEvent;
+                var stopOthersOnPlay = this.stopOthersOnPlay;
+                UnityEngine.UI.Windows.Utilities.Coroutines.WaitTime(this.autoStopDuration, () => {
+                    
+                    var instance = FMODAudioComponent.GetInstance(audioEvent, eventDescription, stopOthersOnPlay);
+                    Debug.Log("SetParameterOnce: " + name + ", value: " + 0f + " (" + audioEvent + ")");
+                    instance.setParameterByName(name, 0f);
+    
+                });
+
+            }
 
         }
         
@@ -182,6 +191,8 @@
 
             var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
             if (eventDescription.isValid() == false) return;
+
+            Debug.Log("SetParameter: " + name + ", value: " + value + " (" + this.audioEvent + ")");
 
             var instance = FMODAudioComponent.GetInstance(this.audioEvent, eventDescription, this.stopOthersOnPlay);
             instance.setParameterByName(name, value);

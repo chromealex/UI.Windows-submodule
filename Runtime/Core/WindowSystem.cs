@@ -335,6 +335,8 @@ namespace UnityEngine.UI.Windows {
 
             if (this.showRootOnStart == true) WindowSystem.ShowRoot();
 
+            this.InitializeConsole();
+
         }
 
         private Vector2 pointerScreenPosition;
@@ -471,6 +473,23 @@ namespace UnityEngine.UI.Windows {
 
             return WindowSystem.instance.pointerScreenPosition;
 
+        }
+
+        private void InitializeConsole() {
+            
+            WindowSystem.Show<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(x => {
+
+                this.consoleWindowInstance = x;
+                WindowSystem.GetEvents().RegisterOnce(x, WindowEvent.OnShowEnd, () => {
+                    
+                    this.consoleWindowInstance.Hide();
+                    this.consoleWindowInstance = null;
+                    
+                });
+                x.OnEmptyPass();
+
+            });
+            
         }
         
         public void Update() {

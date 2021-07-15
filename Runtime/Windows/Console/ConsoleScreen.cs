@@ -125,7 +125,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         private readonly List<FastLink> fastLinkItems = new List<FastLink>();
         private readonly List<CommandItem> commands = new List<CommandItem>();
         private readonly List<IConsoleModule> moduleItems = new List<IConsoleModule>();
-        private readonly List<DrawItem> drawItems = new List<DrawItem>();
+        private List<DrawItem> drawItems = new List<DrawItem>();
         private char openCloseChar;
         private int currentIndex;
 

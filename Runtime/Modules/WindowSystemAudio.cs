@@ -162,7 +162,7 @@
             var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
             if (eventDescription.isValid() == false) return;
 
-            Debug.Log("SetParameterOnce: " + name + ", value: " + value + " (" + this.audioEvent + ")");
+            //Debug.Log("SetParameterOnce: " + name + ", value: " + value + " (" + this.audioEvent + ")");
 
             {
                 var instance = FMODAudioComponent.GetInstance(this.audioEvent, eventDescription, this.stopOthersOnPlay);
@@ -176,7 +176,7 @@
                 UnityEngine.UI.Windows.Utilities.Coroutines.WaitTime(this.autoStopDuration, () => {
                     
                     var instance = FMODAudioComponent.GetInstance(audioEvent, eventDescription, stopOthersOnPlay);
-                    Debug.Log("SetParameterOnce: " + name + ", value: " + 0f + " (" + audioEvent + ")");
+                    //Debug.Log("SetParameterOnce: " + name + ", value: " + 0f + " (" + audioEvent + ")");
                     instance.setParameterByName(name, 0f);
     
                 });
@@ -192,7 +192,7 @@
             var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
             if (eventDescription.isValid() == false) return;
 
-            Debug.Log("SetParameter: " + name + ", value: " + value + " (" + this.audioEvent + ")");
+            //Debug.Log("SetParameter: " + name + ", value: " + value + " (" + this.audioEvent + ")");
 
             var instance = FMODAudioComponent.GetInstance(this.audioEvent, eventDescription, this.stopOthersOnPlay);
             instance.setParameterByName(name, value);
@@ -219,7 +219,12 @@
                 instance.setParameterByName(p.name, p.value);
             }
 
-            if (setPlay == true) instance.start();
+            if (setPlay == true) {
+                
+                instance.start();
+                if (eventDescription.isOneshot(out var isOneShot) == FMOD.RESULT.OK && isOneShot == true) instance.release();
+                
+            }
 
         }
 

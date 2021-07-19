@@ -18,6 +18,8 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public void Raise(WindowObject instance, WindowEvent windowEvent) {
 
+            if (windowEvent == WindowEvent.None) return;
+
             var key = UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent);
             {
                 if (this.cache.TryGetValue(key, out var actions) == true) {
@@ -70,6 +72,8 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public void RegisterOnce(WindowObject instance, WindowEvent windowEvent, System.Action callback) {
 
+            if (windowEvent == WindowEvent.None) return;
+
             var key = UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent);
             if (this.cacheOnce.TryGetValue(key, out var actions) == true) {
 
@@ -85,6 +89,8 @@ namespace UnityEngine.UI.Windows.Modules {
         }
 
         public void Register(WindowObject instance, WindowEvent windowEvent, System.Action callback) {
+
+            if (windowEvent == WindowEvent.None) return;
 
             var key = UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent);
             if (this.cache.TryGetValue(key, out var actions) == true) {
@@ -102,6 +108,8 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public void UnRegister(WindowObject instance, WindowEvent windowEvent, System.Action callback) {
 
+            if (windowEvent == WindowEvent.None) return;
+
             var key = UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent);
             if (this.cache.TryGetValue(key, out var actions) == true) {
 
@@ -113,6 +121,8 @@ namespace UnityEngine.UI.Windows.Modules {
         }
 
         public void UnRegister(WindowObject instance, WindowEvent windowEvent) {
+
+            if (windowEvent == WindowEvent.None) return;
 
             var key = UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent);
             if (this.cache.ContainsKey(key) == true) {

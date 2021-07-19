@@ -24,6 +24,12 @@
         public WindowEvent play;
         public WindowEvent stop;
 
+        #if FMOD_SUPPORT
+        public FMODAudioComponent fmodAudioComponent;
+        #else
+        public AudioClip clip;
+        #endif
+
         private System.Action onPlayCallback;
         private System.Action onStopCallback;
         
@@ -82,12 +88,6 @@
             #endif
 
         }
-
-        #if FMOD_SUPPORT
-        public FMODAudioComponent fmodAudioComponent;
-        #else
-        public AudioClip clip;
-        #endif
 
     }
 

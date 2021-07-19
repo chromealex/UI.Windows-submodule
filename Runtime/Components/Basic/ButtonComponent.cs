@@ -38,7 +38,7 @@ namespace UnityEngine.UI.Windows.Components {
            return this.componentModules.modules;
 
         }
-
+        
         [RequiredReference]
         public Button button;
         

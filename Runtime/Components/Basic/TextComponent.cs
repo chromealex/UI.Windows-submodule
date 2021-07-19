@@ -161,7 +161,7 @@ namespace UnityEngine.UI.Windows.Components {
                         str = ts.minutesString + ts.secondsString;
                         break;
                     case TimeResult.TimeHM:
-                        str = ts.hoursString + ts.minutesString;
+                        str = ts.hoursString + ts.minutesStringEnd;
                         break;
                     case TimeResult.TimeHMS:
                         str = ts.hoursString + ts.minutesString + ts.secondsString;
@@ -192,6 +192,7 @@ namespace UnityEngine.UI.Windows.Components {
             public string millisecondsString;
             public string secondsString;
             public string minutesString;
+            public string minutesStringEnd;
             public string hoursString;
             public string daysString;
 
@@ -235,6 +236,7 @@ namespace UnityEngine.UI.Windows.Components {
             millisecondsString = @"",
             secondsString = @"ss",
             minutesString = @"mm\:",
+            minutesStringEnd = @"mm",
             hoursString = @"hh\:",
             daysString = @"d\d\ ",
         };

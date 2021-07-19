@@ -32,6 +32,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         None = 0,
         TimeMS,
+        TimeHM,
         TimeHMS,
         TimeDHMS,
         TimeMSmi,
@@ -104,7 +105,7 @@ namespace UnityEngine.UI.Windows.Components {
                         break;
 
                     case TimeResult.TimeHMSmi:
-                        if (this.timeSpan.TotalDays >= 1d) goto case TimeResult.TimeHMSmi;
+                        if (this.timeSpan.TotalDays >= 1d) goto case TimeResult.TimeDHMSmi;
                         break;
 
                     case TimeResult.TimeDHMSmi: {
@@ -158,6 +159,9 @@ namespace UnityEngine.UI.Windows.Components {
                 switch (this.result) {
                     case TimeResult.TimeMS:
                         str = ts.minutesString + ts.secondsString;
+                        break;
+                    case TimeResult.TimeHM:
+                        str = ts.hoursString + ts.minutesString;
                         break;
                     case TimeResult.TimeHMS:
                         str = ts.hoursString + ts.minutesString + ts.secondsString;

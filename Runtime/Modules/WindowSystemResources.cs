@@ -297,7 +297,15 @@ namespace UnityEngine.UI.Windows.Modules {
 
                 case Resource.Type.Direct: {
 
-                    if (resource.directRef is T direct) {
+                    if (resource.directRef is GameObject go && typeof(T).IsAssignableFrom(typeof(Component))) {
+
+                        var direct = go.GetComponent<T>();
+                        this.AddObject(handler, direct, resource);
+
+                        this.CompleteTask(handler, resource, direct);
+                        yield break;
+
+                    } else if (resource.directRef is T direct) {
 
                         this.AddObject(handler, direct, resource);
 

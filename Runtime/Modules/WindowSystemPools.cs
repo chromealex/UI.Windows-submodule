@@ -160,12 +160,20 @@ namespace UnityEngine.UI.Windows.Modules {
                 if (this.prefabToPooledInstances.TryGetValue(key, out var stack) == true && stack.Count > 0) {
 
                     var instance = stack.Pop();
-                    UIWSUtils.SetParent(instance.transform, root);
-                    if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
-                    this.instanceOnSceneToPrefab.Add(instance, key);
-                    fromPool = true;
+                    if (instance == null) {
 
-                    result = (T)instance;
+                        return this.Spawn(prefab, root, out fromPool);
+
+                    } else {
+
+                        UIWSUtils.SetParent(instance.transform, root);
+                        if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
+                        this.instanceOnSceneToPrefab.Add(instance, key);
+                        fromPool = true;
+
+                        result = (T)instance;
+
+                    }
 
                 } else {
 

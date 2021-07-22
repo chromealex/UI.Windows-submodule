@@ -55,7 +55,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
     }
 
-    [Help("Test module")][Alias("T")]
+    /*[Help("Test module")][Alias("T")]
     public class Test : ConsoleModule {
 
         [Help("Prints help bool")]
@@ -86,7 +86,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
-    }
+    }*/
 
     public class ConsoleScreen : LayoutWindowType, IDataSource {
 
@@ -235,7 +235,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                         this.fastLinkItems.Add(new FastLink() {
                             run = method.GetParameters().Length == 0,
-                            cmd = module.GetType().Name.ToLower() + " " + method.Name.ToLower(),
+                            cmd = $"{module.GetType().Name.ToLower()} {method.Name.ToLower()}",
                             caption = caption
                         });
 
@@ -479,6 +479,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             this.AddLine(this.GetHelpString(string.Empty, module.GetType()).Trim());
             this.AddLine("Module methods:");
             this.AddHR();
+            var count = 0;
             var methods = module.GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
             foreach (var method in methods) {
                 
@@ -486,7 +487,14 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                 var str = this.GetMethodCallString(method);
                 this.AddLine(this.GetSpace(4) + str);
+                ++count;
 
+            }
+
+            if (count == 0) {
+                
+                this.AddLine($"No suitable methods found for module `{module.GetType().Name}`");
+                
             }
             this.AddHR();
 
@@ -495,9 +503,9 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         private string GetMethodCallString(System.Reflection.MethodInfo methodInfo) {
 
             var pars = methodInfo.GetParameters();
-            var parameters = pars.Select(x => this.TypeToString(x.ParameterType) + " " + x.Name).ToArray();
+            var parameters = pars.Select(x => $"{this.TypeToString(x.ParameterType)} {x.Name}").ToArray();
             var parsStr = string.Join(", ", parameters);
-            return "<color=#3af>" + methodInfo.Name.ToLower() + "</color>(" + parsStr + ")" + this.GetHelpString(this.GetSpace(4) + methodInfo.Name.ToLower() + "(" + parsStr + ")", methodInfo);
+            return $"<color=#3af>{methodInfo.Name.ToLower()}</color>({parsStr}){this.GetHelpString($"{this.GetSpace(4)}{methodInfo.Name.ToLower()}({parsStr})", methodInfo)}";
             
         }
 
@@ -507,7 +515,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             this.AddHR();
             foreach (var module in modules) {
                 
-                this.AddLine(this.GetSpace(4) + "<color=#3af>" + module.GetType().Name.ToLower() + "</color>" + this.GetHelpString(this.GetSpace(4) + module.GetType().Name.ToLower(), module.GetType()));
+                this.AddLine($"{this.GetSpace(4)}<color=#3af>{module.GetType().Name.ToLower()}</color>{this.GetHelpString(this.GetSpace(4) + module.GetType().Name.ToLower(), module.GetType())}");
                 
             }
             this.AddHR();
@@ -516,12 +524,12 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         public void PrintHelp(string moduleName, List<System.Reflection.MethodInfo> methods) {
             
-            this.AddLine("Module " + moduleName);
+            this.AddLine($"Module {moduleName}");
             this.AddLine("Methods:");
             this.AddHR();
             foreach (var methodInfo in methods) {
                 
-                this.AddLine(this.GetSpace(4) + "<color=#3af>" + methodInfo.Name.ToLower() + "</color>" + this.GetHelpString(this.GetSpace(4) + methodInfo.Name.ToLower(), methodInfo));
+                this.AddLine($"{this.GetSpace(4)}<color=#3af>{methodInfo.Name.ToLower()}</color>{this.GetHelpString(this.GetSpace(4) + methodInfo.Name.ToLower(), methodInfo)}");
                 
             }
             this.AddHR();
@@ -536,14 +544,14 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             var attrs = type.GetCustomAttributes(typeof(HelpAttribute), false);
             if (attrs.Length > 0) {
 
-                str += this.GetSpace(4) + "<color=#999>" + ((HelpAttribute)attrs[0]).text + "</color>";
+                str += $"{this.GetSpace(4)}<color=#999>{((HelpAttribute)attrs[0]).text}</color>";
 
             }
 
             var attrsAlias = type.GetCustomAttributes(typeof(AliasAttribute), false);
             if (attrsAlias.Length > 0) {
 
-                str += "\n" + this.GetSpace(length + 4) + "Alias: <color=#3af>" + ((AliasAttribute)attrsAlias[0]).text + "</color>";
+                str += $"\n{this.GetSpace(length + 4)}Alias: <color=#3af>{((AliasAttribute)attrsAlias[0]).text}</color>";
 
             }
 
@@ -699,7 +707,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                     if (modules.Count == 1) {
                         
                         // Auto complete
-                        this.ReplaceInput(first + " ");
+                        this.ReplaceInput($"{first} ");
                         
                     } else {
                         
@@ -722,7 +730,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 if (methods.Count == 1) {
                         
                     // Auto complete
-                    this.ReplaceInput(moduleName + " " + first + " ");
+                    this.ReplaceInput($"{moduleName} {first} ");
                         
                 } else {
                         
@@ -848,7 +856,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                     } else {
                         
-                        this.ReplaceInput(item.cmd + " ");
+                        this.ReplaceInput($"{item.cmd} ");
                         
                     }
                     

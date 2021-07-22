@@ -54,6 +54,7 @@ MonoBehaviour:
   rectTransform: {fileID: 1960064754754543746}
   hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
+  canvasSortingOrderDelta: 0
   canvasRenderers: []
   isActiveSelf: 0
   createPool: 1
@@ -69,6 +70,15 @@ MonoBehaviour:
   isObjectRoot: 1
   rootObject: {fileID: 0}
   subObjects: []
+  audioEvents:
+    play: 0
+    stop: 0
+    fmodAudioComponent:
+      audioEvent: 
+      stopOthersOnPlay: 0
+      parameters: []
+      autoStopOnceParameters: 0
+      autoStopDuration: 0
   registry: []
   preferences:
     layer:
@@ -133,6 +143,8 @@ MonoBehaviour:
           directRef: {fileID: 1068094537600266531, guid: b525f1dcb523b4a6290e5518b5cbb118,
             type: 3}
   autoConnectLogs: 1
+  references:
+    version: 1
 --- !u!20 &2012446584845969934
 Camera:
   m_ObjectHideFlags: 0

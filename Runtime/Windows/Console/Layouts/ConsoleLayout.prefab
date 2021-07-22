@@ -58,6 +58,7 @@ MonoBehaviour:
   rectTransform: {fileID: 1817090086723872307}
   hasObjectCanvas: 1
   objectCanvas: {fileID: 3002262861325224963}
+  canvasSortingOrderDelta: 0
   canvasRenderers: []
   isActiveSelf: 0
   createPool: 1
@@ -70,19 +71,28 @@ MonoBehaviour:
   hiddenByDefault: 0
   debugStateLog:
     items: []
-  isObjectRoot: 0
+  isObjectRoot: 1
   rootObject: {fileID: 0}
   subObjects:
   - {fileID: 5470113545036599192}
+  audioEvents:
+    play: 0
+    stop: 0
+    fmodAudioComponent:
+      audioEvent: 
+      stopOthersOnPlay: 0
+      parameters: []
+      autoStopOnceParameters: 0
+      autoStopDuration: 0
   registry: []
   canvas: {fileID: 3002262861325224963}
   canvasScaler: {fileID: 4562398388743874407}
   isRootLayout: 1
   layoutElements:
   - {fileID: 5470113545036599192}
+  - {fileID: 1900920675354936357}
   - {fileID: 1542688171465374743}
   - {fileID: 3255332376146199288}
-  - {fileID: 1900920675354936357}
   useSafeZone: 0
   safeZone: {fileID: 0}
 --- !u!223 &3002262861325224963
@@ -121,7 +131,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 1200, y: 600}
+  m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -211,6 +221,7 @@ MonoBehaviour:
   rectTransform: {fileID: 429486139829606391}
   hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
+  canvasSortingOrderDelta: 0
   canvasRenderers: []
   isActiveSelf: 0
   createPool: 0
@@ -226,6 +237,15 @@ MonoBehaviour:
   isObjectRoot: 0
   rootObject: {fileID: 5470113545036599192}
   subObjects: []
+  audioEvents:
+    play: 0
+    stop: 0
+    fmodAudioComponent:
+      audioEvent: 
+      stopOthersOnPlay: 0
+      parameters: []
+      autoStopOnceParameters: 0
+      autoStopDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 3255332376146199288}
@@ -310,6 +330,7 @@ MonoBehaviour:
   rectTransform: {fileID: 2866234394359952048}
   hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
+  canvasSortingOrderDelta: 0
   canvasRenderers:
   - canvasRenderer: {fileID: 6814757248635304782}
     graphics: {fileID: 4709774183522539103}
@@ -328,6 +349,15 @@ MonoBehaviour:
   isObjectRoot: 0
   rootObject: {fileID: 5470113545036599192}
   subObjects: []
+  audioEvents:
+    play: 0
+    stop: 0
+    fmodAudioComponent:
+      audioEvent: 
+      stopOthersOnPlay: 0
+      parameters: []
+      autoStopOnceParameters: 0
+      autoStopDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 1542688171465374743}
@@ -460,10 +490,8 @@ MonoBehaviour:
   rectTransform: {fileID: 247913598922117896}
   hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
-  canvasRenderers:
-  - canvasRenderer: {fileID: 0}
-    graphics: {fileID: 0}
-    rectMask: {fileID: 0}
+  canvasSortingOrderDelta: 0
+  canvasRenderers: []
   isActiveSelf: 0
   createPool: 0
   animationParameters:
@@ -478,6 +506,15 @@ MonoBehaviour:
   isObjectRoot: 0
   rootObject: {fileID: 5470113545036599192}
   subObjects: []
+  audioEvents:
+    play: 0
+    stop: 0
+    fmodAudioComponent:
+      audioEvent: 
+      stopOthersOnPlay: 0
+      parameters: []
+      autoStopOnceParameters: 0
+      autoStopDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 1900920675354936357}
@@ -571,6 +608,7 @@ MonoBehaviour:
   rectTransform: {fileID: 84540096282021974}
   hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
+  canvasSortingOrderDelta: 0
   canvasRenderers:
   - canvasRenderer: {fileID: 655753805049513386}
     graphics: {fileID: 4474234672382369725}
@@ -589,9 +627,18 @@ MonoBehaviour:
   isObjectRoot: 0
   rootObject: {fileID: 9075030843538608721}
   subObjects:
+  - {fileID: 1900920675354936357}
   - {fileID: 1542688171465374743}
   - {fileID: 3255332376146199288}
-  - {fileID: 1900920675354936357}
+  audioEvents:
+    play: 0
+    stop: 0
+    fmodAudioComponent:
+      audioEvent: 
+      stopOthersOnPlay: 0
+      parameters: []
+      autoStopOnceParameters: 0
+      autoStopDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 5470113545036599192}

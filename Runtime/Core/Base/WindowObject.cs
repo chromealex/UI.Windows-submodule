@@ -292,6 +292,7 @@ namespace UnityEngine.UI.Windows {
             
             for (int i = 0; i < this.subObjects.Count; ++i) {
                 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 ((IOnPoolGet)this.subObjects[i]).OnPoolGet();
                 
             }
@@ -304,6 +305,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
                 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 ((IOnPoolAdd)this.subObjects[i]).OnPoolAdd();
                 
             }
@@ -348,6 +350,7 @@ namespace UnityEngine.UI.Windows {
             this.BreakState();
             for (int i = 0; i < this.subObjects.Count; ++i) {
                 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].BreakState();
                 
             }
@@ -376,6 +379,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 var obj = this.subObjects[i];
                 var comp = obj.FindComponent<T>(filter);
                 if (comp != null) return comp;
@@ -510,6 +514,7 @@ namespace UnityEngine.UI.Windows {
 
                 for (int i = this.subObjects.Count - 1; i >= 0; --i) {
 
+                    if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                     this.subObjects[i].PushToPool();
 
                 }
@@ -567,6 +572,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].TurnOffRender();
 
             }
@@ -586,6 +592,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].TurnOnRender();
 
             }
@@ -604,6 +611,7 @@ namespace UnityEngine.UI.Windows {
             
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].SetVisible();
 
             }
@@ -658,6 +666,7 @@ namespace UnityEngine.UI.Windows {
             
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].SetVisible();
 
             }
@@ -745,16 +754,8 @@ namespace UnityEngine.UI.Windows {
             }
             
             for (int i = 0; i < this.subObjects.Count; ++i) {
-                
-                if (this.subObjects[i] == null) {
-                    
-                    Debug.LogError($"Null subObject encountered on window [{ source.name}], object [{this.name}], index [{i}] (previous subObject is [{(i > 0 ? this.subObjects[i - 1].name : "")}], next subObject is [{(i < this.subObjects.Count - 1 ? this.subObjects[i + 1].name : "")}])");
-                    this.subObjects.RemoveAt(i);
-                    --i;
-                    continue;
-                    
-                }
-                
+
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].Setup(source);
                 
             }
@@ -767,6 +768,21 @@ namespace UnityEngine.UI.Windows {
 
             this.windowId = source.windowId;
             this.window = source;
+
+        }
+
+        private bool CheckSubObject(List<WindowObject> subObjects, ref int index) {
+            
+            if (this.subObjects[index] == null) {
+                    
+                Debug.LogError($"Null subObject encountered on window [{this.window.name}], object [{this.name}], index [{index}] (previous subObject is [{(index > 0 ? this.subObjects[index - 1].name : "")}], next subObject is [{(index < this.subObjects.Count - 1 ? this.subObjects[index + 1].name : "")}])");
+                this.subObjects.RemoveAt(index);
+                --index;
+                return false;
+                    
+            }
+            
+            return true;
 
         }
 
@@ -969,6 +985,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].SendEvent(data);
 
             }
@@ -986,6 +1003,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].DoSendFocusLost();
 
             }
@@ -999,6 +1017,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].DoSendFocusTook();
 
             }
@@ -1023,6 +1042,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].DoInit();
 
             }
@@ -1041,6 +1061,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].DoDeInit();
 
             }

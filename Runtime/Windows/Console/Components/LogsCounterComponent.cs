@@ -20,11 +20,11 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             this.logsInfo.Get<TextComponent>().SetValue(consoleScreen.GetCounter(LogType.Log));
             
             this.logsWarning.SetCheckedState(consoleScreen.HasLogFilterType(LogType.Warning), false);
-            this.logsWarning.SetCallback(state => consoleScreen.SetLogFilterType(LogType.Log, state));
+            this.logsWarning.SetCallback(state => consoleScreen.SetLogFilterType(LogType.Warning, state));
             this.logsWarning.Get<TextComponent>().SetValue(consoleScreen.GetCounter(LogType.Warning));
             
             this.logsError.SetCheckedState(consoleScreen.HasLogFilterType(LogType.Error), false);
-            this.logsError.SetCallback(state => consoleScreen.SetLogFilterType(LogType.Log, state));
+            this.logsError.SetCallback(state => consoleScreen.SetLogFilterType(LogType.Error, state));
             this.logsError.Get<TextComponent>().SetValue(consoleScreen.GetCounter(LogType.Error) + consoleScreen.GetCounter(LogType.Exception));
 
         }

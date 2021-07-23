@@ -126,16 +126,20 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         private readonly List<FastLink> fastLinkItems = new List<FastLink>();
         private readonly List<CommandItem> commands = new List<CommandItem>();
         private readonly List<IConsoleModule> moduleItems = new List<IConsoleModule>();
-        private List<DrawItem> drawItemsInfo = new List<DrawItem>();
-        private List<DrawItem> drawItemsWarning = new List<DrawItem>();
-        private List<DrawItem> drawItemsError = new List<DrawItem>();
-        private Dictionary<LogType, int> logsCounter = new Dictionary<LogType, int>();
+        private System.Collections.Concurrent.ConcurrentQueue<DrawItem> drawItems = new System.Collections.Concurrent.ConcurrentQueue<DrawItem>();
+        private System.Collections.Concurrent.ConcurrentDictionary<LogType, int> logsCounter = new System.Collections.Concurrent.ConcurrentDictionary<LogType, int>();
         private int logsFilter;
         private char openCloseChar;
         private int currentIndex;
 
         public bool autoConnectLogs = true;
         private string helpInitPrint;
+
+        private int _isDirty;
+        public bool isDirty {
+            get => System.Threading.Interlocked.Exchange(ref this._isDirty, 0) == 1;
+            set => System.Threading.Interlocked.Exchange(ref this._isDirty, value == true ? 1 : 0);
+        }
         
         public void OnParametersPass(char openCloseChar) {
 
@@ -163,16 +167,20 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             this.CollectModules();
 
-            if (this.autoConnectLogs == true) {
-
-                Application.logMessageReceived += this.OnAddLog;
-
-            }
-
             this.helpInitPrint = this.GetInitHelp();
             this.SetLogFilterType(LogType.Log, true);
             this.SetLogFilterType(LogType.Warning, true);
             this.SetLogFilterType(LogType.Error, true);
+
+            if (this.autoConnectLogs == true) {
+
+                Application.logMessageReceived += this.OnAddLog;
+                Application.logMessageReceivedThreaded += this.OnAddLogThreaded;
+
+                if (string.IsNullOrEmpty(this.helpInitPrint) == false) this.AddLine(this.helpInitPrint);
+                this.helpInitPrint = string.Empty;
+
+            }
 
         }
 
@@ -192,6 +200,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             base.OnDeInit();
             
             Application.logMessageReceived -= this.OnAddLog;
+            Application.logMessageReceivedThreaded -= this.OnAddLogThreaded;
             
         }
 
@@ -256,9 +265,9 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
         }
 
-        private void OnAddLog(string condition, string trace, LogType type) {
+        private void OnAddLog(string text, string trace, LogType type) {
 
-            if (Application.isPlaying == false) return;
+            if (this.logsCounter == null) return;
             
             if (this.logsCounter.TryGetValue(type, out var count) == true) {
 
@@ -266,14 +275,20 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             } else {
 
-                this.logsCounter.Add(type, 1);
+                this.logsCounter.TryAdd(type, 1);
 
             }
-            
-            this.logsCounterComponent.SetInfo();
 
-            this.AddLine(condition, type);
+            this.AddLine(text, type);
             if (type == LogType.Exception) this.AddLine(trace);
+
+            this.isDirty = true;
+
+        }
+
+        private void OnAddLogThreaded(string text, string trace, LogType type) {
+
+            this.OnAddLog($"[Thread {System.Threading.Thread.CurrentThread.Name}] {text}", trace, type);
 
         }
 
@@ -388,26 +403,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         
         public void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false) {
 
-            List<DrawItem> list;
-            switch (logType) {
-                case LogType.Log:
-                    list = this.drawItemsInfo;
-                    break;
-                case LogType.Warning:
-                    list = this.drawItemsWarning;
-                    break;
-                case LogType.Assert:
-                case LogType.Exception:
-                case LogType.Error:
-                    list = this.drawItemsError;
-                    break;
-                    
-                default:
-                    return;
-                    
-            }
-            
-            list.Add(new DrawItem() {
+            this.drawItems.Enqueue(new DrawItem() {
                 line = text,
                 logType = logType,
                 isCommand = isCommand,
@@ -903,59 +899,20 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         private int GetDrawItemsCount() {
 
-            var count = 0;
-            if (this.HasLogFilterType(LogType.Log) == true) {
-
-                count += this.drawItemsInfo.Count;
-
-            }
-            
-            if (this.HasLogFilterType(LogType.Warning) == true) {
-                
-                count += this.drawItemsWarning.Count;
-                
-            }
-            
-            if (this.HasLogFilterType(LogType.Error) == true) {
-                
-                count += this.drawItemsError.Count;
-
-            }
-
-            return count;
+            return this.drawItems.Count(x => x.isCommand == true || this.HasLogFilterType(x.logType) == true);
 
         }
 
         private DrawItem GetDrawItem(int index) {
 
-            if (this.HasLogFilterType(LogType.Log) == true) {
+            var k = 0;
+            foreach (var item in this.drawItems) {
 
-                if (index < this.drawItemsInfo.Count) {
-                    
-                    return this.drawItemsInfo[index];
-                    
-                }
+                if (item.isCommand == true || this.HasLogFilterType(item.logType) == true) {
 
-            }
-            
-            if (this.HasLogFilterType(LogType.Warning) == true) {
-                
-                index -= this.drawItemsInfo.Count;
-                if (index < this.drawItemsWarning.Count) {
-                    
-                    return this.drawItemsWarning[index];
-                    
-                }
-                
-            }
-            
-            if (this.HasLogFilterType(LogType.Error) == true) {
-                
-                index -= this.drawItemsWarning.Count;
-                if (index < this.drawItemsError.Count) {
-                    
-                    return this.drawItemsError[index];
-                    
+                    if (k == index) return item;
+                    ++k;
+
                 }
 
             }
@@ -1016,7 +973,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 button.Show();
 
             }, new ClosureFastLinksParameters() {
-                data = this.fastLinkItems
+                data = this.fastLinkItems,
             });
             
             this.list.SetDataSource(this);
@@ -1035,6 +992,13 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             }, new ClosureParameters() {
                 data = this,
             });
+
+            if (this.isDirty == true) {
+
+                this.logsCounterComponent.SetInfo();
+                this.isDirty = false;
+
+            }
 
         }
 

@@ -236,9 +236,9 @@
         }
         #endif
 
-        public virtual void LoadAsync(System.Action onComplete) {
+        public virtual void LoadAsync(InitialParameters initialParameters, System.Action onComplete) {
 
-            this.modules.LoadAsync(this, onComplete);
+            this.modules.LoadAsync(initialParameters, this, onComplete);
 
         }
 

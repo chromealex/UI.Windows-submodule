@@ -535,12 +535,12 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
-        public override void LoadAsync(System.Action onComplete) {
+        public override void LoadAsync(InitialParameters initialParameters, System.Action onComplete) {
 
             this.layouts.SetActive();
 
             var currentItem = this.layouts.GetActive();
-            currentItem.LoadAsync(this, () => { base.LoadAsync(onComplete); });
+            currentItem.LoadAsync(this, () => { base.LoadAsync(initialParameters, onComplete); });
 
         }
 

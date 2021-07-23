@@ -775,7 +775,7 @@ namespace UnityEngine.UI.Windows {
             
             if (this.subObjects[index] == null) {
                     
-                Debug.LogError($"Null subObject encountered on window [{this.window.name}], object [{this.name}], index [{index}] (previous subObject is [{(index > 0 ? this.subObjects[index - 1].name : "")}], next subObject is [{(index < this.subObjects.Count - 1 ? this.subObjects[index + 1].name : "")}])");
+                Debug.LogError($"Null subObject encountered on window [{(this.window == null ? "Null" : this.window.name)}], object [{this.name}], index [{index}] (previous subObject is [{(index > 0 ? this.subObjects[index - 1].name : "")}], next subObject is [{(index < this.subObjects.Count - 1 ? this.subObjects[index + 1].name : "")}])");
                 this.subObjects.RemoveAt(index);
                 --index;
                 return false;

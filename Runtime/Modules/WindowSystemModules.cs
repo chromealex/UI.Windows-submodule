@@ -66,7 +66,7 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
         
-        public void LoadAsync(WindowBase window, System.Action onComplete) {
+        public void LoadAsync(InitialParameters initialParameters, WindowBase window, System.Action onComplete) {
 
             Coroutines.Run(this.InitModules(window, onComplete));
 

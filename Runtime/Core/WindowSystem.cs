@@ -99,6 +99,8 @@ namespace UnityEngine.UI.Windows {
         public bool overrideSingleInstance;
         public bool singleInstance;
 
+        public bool showSync;
+
     }
 
     [System.Serializable]
@@ -1220,7 +1222,30 @@ namespace UnityEngine.UI.Windows {
             }
 
         }
-        
+
+        /// <summary>
+        /// Initializing window in sync mode.
+        /// Just returns instance immediately, but still stay in async mode for layout because of Addressable assets.
+        /// </summary>
+        /// <param name="initialParameters"></param>
+        /// <param name="onInitialized"></param>
+        /// <param name="transitionParameters"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static T ShowSync<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+
+            T instance = default;
+            initialParameters.showSync = true;
+            WindowSystem.instance.Show_INTERNAL<T>(initialParameters, (w) => {
+                
+                instance = w;
+                onInitialized?.Invoke(w);
+                
+            }, transitionParameters);
+            return instance;
+
+        }
+
         public static void Show<T>(System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
 
             WindowSystem.instance.Show_INTERNAL(new InitialParameters(), onInitialized, transitionParameters);
@@ -1469,7 +1494,7 @@ namespace UnityEngine.UI.Windows {
 
             var item = new WindowItem() {
                 prefab = source,
-                instance = instance
+                instance = instance,
             };
 
             if (instance.preferences.addInHistory == true) {
@@ -1498,9 +1523,7 @@ namespace UnityEngine.UI.Windows {
 
             }
 
-            instance.LoadAsync(() => {
-            
-                instance.DoInit();
+            if (initialParameters.showSync == true) {
 
                 if (onInitialized != null) {
                     
@@ -1512,6 +1535,25 @@ namespace UnityEngine.UI.Windows {
                     
                 }
 
+            }
+
+            instance.LoadAsync(initialParameters, () => {
+            
+                if (initialParameters.showSync == false) {
+
+                    if (onInitialized != null) {
+
+                        onInitialized.Invoke((T)instance);
+
+                    } else {
+
+                        instance.OnEmptyPass();
+
+                    }
+
+                }
+
+                instance.DoInit();
                 instance.ShowInternal(transitionParameters);
 
             });

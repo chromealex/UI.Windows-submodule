@@ -798,6 +798,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                     color = Color.yellow;
                     break;
 
+                case LogType.Assert:
+                case LogType.Exception:
                 case LogType.Error:
                     color = Color.red;
                     break;

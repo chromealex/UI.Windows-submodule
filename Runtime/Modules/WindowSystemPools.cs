@@ -188,7 +188,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
             }
 
-            if (result is IOnPoolGet onPoolPull) {
+            if (fromPool == true && result is IOnPoolGet onPoolPull) {
                 
                 onPoolPull.OnPoolGet();
                 

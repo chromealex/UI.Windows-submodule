@@ -788,7 +788,9 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             var text = (button.Get<TextComponent>().graphics as Text);
             var gen = text.GetGenerationSettings(size);
             var textGen = text.cachedTextGenerator;
-            return textGen.GetPreferredHeight(this.drawItems[index].line, gen) + layoutGroupPadding.top + layoutGroupPadding.bottom;
+            var canvas = this.GetWindow().GetCanvas();
+            var scaleFactor = canvas.scaleFactor;
+            return (textGen.GetPreferredHeight(this.drawItems[index].line, gen) + layoutGroupPadding.top + layoutGroupPadding.bottom) / scaleFactor;
             
         }
         

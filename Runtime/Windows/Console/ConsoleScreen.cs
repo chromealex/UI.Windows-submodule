@@ -121,11 +121,13 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         private ListComponent list;
         private ListComponent fastLinks;
         private InputFieldComponent inputField;
+        private LogsCounterComponent logsCounterComponent;
         
         private readonly List<FastLink> fastLinkItems = new List<FastLink>();
         private readonly List<CommandItem> commands = new List<CommandItem>();
         private readonly List<IConsoleModule> moduleItems = new List<IConsoleModule>();
         private List<DrawItem> drawItems = new List<DrawItem>();
+        private Dictionary<LogType, int> logsCounter = new Dictionary<LogType, int>();
         private char openCloseChar;
         private int currentIndex;
 
@@ -151,6 +153,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             this.GetLayoutComponent(out this.list);
             this.GetLayoutComponent(out this.fastLinks);
             this.GetLayoutComponent(out this.inputField);
+            this.GetLayoutComponent(out this.logsCounterComponent);
             
             this.inputField.SetCallbackValidateChar(this.OnChar);
             this.inputField.SetCallbackEditEnd(this.OnEditEnd);
@@ -173,6 +176,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             if (string.IsNullOrEmpty(this.helpInitPrint) == false) this.AddLine(this.helpInitPrint);
             this.helpInitPrint = string.Empty;
+            
+            this.logsCounterComponent.SetInfo();
 
         }
 
@@ -211,8 +216,32 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
-        private void OnAddLog(string condition, string trace, LogType type) {
+        public int GetCounter(LogType logType) {
+
+            if (this.logsCounter.TryGetValue(logType, out var count) == true) {
+
+                return count;
+
+            }
             
+            return 0;
+            
+        }
+
+        private void OnAddLog(string condition, string trace, LogType type) {
+
+            if (this.logsCounter.TryGetValue(type, out var count) == true) {
+
+                this.logsCounter[type] = count + 1;
+
+            } else {
+
+                this.logsCounter.Add(type, 1);
+
+            }
+            
+            this.logsCounterComponent.SetInfo();
+
             this.AddLine(condition, type);
             if (type == LogType.Exception) this.AddLine(trace);
 

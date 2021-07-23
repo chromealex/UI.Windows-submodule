@@ -230,6 +230,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         private void OnAddLog(string condition, string trace, LogType type) {
 
+            if (Application.isPlaying == false) return;
+            
             if (this.logsCounter.TryGetValue(type, out var count) == true) {
 
                 this.logsCounter[type] = count + 1;

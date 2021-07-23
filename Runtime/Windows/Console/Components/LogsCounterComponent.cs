@@ -7,17 +7,25 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
     public class LogsCounterComponent : WindowComponent {
 
-        public TextComponent logsInfo;
-        public TextComponent logsWarning;
-        public TextComponent logsError;
+        public CheckboxComponent logsInfo;
+        public CheckboxComponent logsWarning;
+        public CheckboxComponent logsError;
 
         public void SetInfo() {
 
             var consoleScreen = this.GetWindow<ConsoleScreen>();
             
-            this.logsInfo.SetValue(consoleScreen.GetCounter(LogType.Log));
-            this.logsWarning.SetValue(consoleScreen.GetCounter(LogType.Warning));
-            this.logsError.SetValue(consoleScreen.GetCounter(LogType.Error) + consoleScreen.GetCounter(LogType.Exception));
+            this.logsInfo.SetCheckedState(consoleScreen.HasLogFilterType(LogType.Log), false);
+            this.logsInfo.SetCallback(state => consoleScreen.SetLogFilterType(LogType.Log, state));
+            this.logsInfo.Get<TextComponent>().SetValue(consoleScreen.GetCounter(LogType.Log));
+            
+            this.logsWarning.SetCheckedState(consoleScreen.HasLogFilterType(LogType.Warning), false);
+            this.logsWarning.SetCallback(state => consoleScreen.SetLogFilterType(LogType.Log, state));
+            this.logsWarning.Get<TextComponent>().SetValue(consoleScreen.GetCounter(LogType.Warning));
+            
+            this.logsError.SetCheckedState(consoleScreen.HasLogFilterType(LogType.Error), false);
+            this.logsError.SetCallback(state => consoleScreen.SetLogFilterType(LogType.Log, state));
+            this.logsError.Get<TextComponent>().SetValue(consoleScreen.GetCounter(LogType.Error) + consoleScreen.GetCounter(LogType.Exception));
 
         }
 

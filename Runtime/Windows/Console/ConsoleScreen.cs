@@ -126,8 +126,11 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         private readonly List<FastLink> fastLinkItems = new List<FastLink>();
         private readonly List<CommandItem> commands = new List<CommandItem>();
         private readonly List<IConsoleModule> moduleItems = new List<IConsoleModule>();
-        private List<DrawItem> drawItems = new List<DrawItem>();
+        private List<DrawItem> drawItemsInfo = new List<DrawItem>();
+        private List<DrawItem> drawItemsWarning = new List<DrawItem>();
+        private List<DrawItem> drawItemsError = new List<DrawItem>();
         private Dictionary<LogType, int> logsCounter = new Dictionary<LogType, int>();
+        private int logsFilter;
         private char openCloseChar;
         private int currentIndex;
 
@@ -167,6 +170,9 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             }
 
             this.helpInitPrint = this.GetInitHelp();
+            this.SetLogFilterType(LogType.Log, true);
+            this.SetLogFilterType(LogType.Warning, true);
+            this.SetLogFilterType(LogType.Error, true);
 
         }
 
@@ -214,6 +220,28 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             }
 
+        }
+
+        public bool HasLogFilterType(LogType logType) {
+
+            var mask = 1 << (int)(logType + 1);
+            if ((this.logsFilter & mask) != 0) return true;
+            
+            return false;
+            
+        }
+
+        public void SetLogFilterType(LogType logType, bool state) {
+            
+            var mask = 1 << (int)(logType + 1);
+            if (state == true) {
+                this.logsFilter |= mask;
+            } else {
+                this.logsFilter &= ~mask;
+            }
+            
+            this.logsCounterComponent.SetInfo();
+            
         }
 
         public int GetCounter(LogType logType) {
@@ -276,6 +304,12 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 
             }
             
+        }
+
+        public void ScrollDown() {
+
+            this.list.GetComponent<ScrollRect>().verticalNormalizedPosition = 1f;
+
         }
 
         public void ClearInput() {
@@ -353,8 +387,27 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         }
         
         public void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false) {
+
+            List<DrawItem> list;
+            switch (logType) {
+                case LogType.Log:
+                    list = this.drawItemsInfo;
+                    break;
+                case LogType.Warning:
+                    list = this.drawItemsWarning;
+                    break;
+                case LogType.Assert:
+                case LogType.Exception:
+                case LogType.Error:
+                    list = this.drawItemsError;
+                    break;
+                    
+                default:
+                    return;
+                    
+            }
             
-            this.drawItems.Add(new DrawItem() {
+            list.Add(new DrawItem() {
                 line = text,
                 logType = logType,
                 isCommand = isCommand,
@@ -788,6 +841,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             this.RunCommand(item);
 
             this.ClearInput();
+            this.ScrollDown();
 
         }
 
@@ -823,14 +877,14 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             var textGen = text.cachedTextGenerator;
             var canvas = this.GetWindow().GetCanvas();
             var scaleFactor = canvas.scaleFactor;
-            return (textGen.GetPreferredHeight(this.drawItems[index].line, gen) + layoutGroupPadding.top + layoutGroupPadding.bottom) / scaleFactor;
+            return (textGen.GetPreferredHeight(this.GetDrawItem(index).line, gen) + layoutGroupPadding.top + layoutGroupPadding.bottom) / scaleFactor;
             
         }
         
         private struct ClosureParameters : IListClosureParameters {
 
             public int index { get; set; }
-            public List<DrawItem> data;
+            public ConsoleScreen data;
 
         }
 
@@ -844,6 +898,69 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         public static void AOT() {
             
             new ListEndlessComponentModule().SetItems<ButtonComponent, ClosureParameters>(0, default, null, default, null);
+
+        }
+
+        private int GetDrawItemsCount() {
+
+            var count = 0;
+            if (this.HasLogFilterType(LogType.Log) == true) {
+
+                count += this.drawItemsInfo.Count;
+
+            }
+            
+            if (this.HasLogFilterType(LogType.Warning) == true) {
+                
+                count += this.drawItemsWarning.Count;
+                
+            }
+            
+            if (this.HasLogFilterType(LogType.Error) == true) {
+                
+                count += this.drawItemsError.Count;
+
+            }
+
+            return count;
+
+        }
+
+        private DrawItem GetDrawItem(int index) {
+
+            if (this.HasLogFilterType(LogType.Log) == true) {
+
+                if (index < this.drawItemsInfo.Count) {
+                    
+                    return this.drawItemsInfo[index];
+                    
+                }
+
+            }
+            
+            if (this.HasLogFilterType(LogType.Warning) == true) {
+                
+                index -= this.drawItemsInfo.Count;
+                if (index < this.drawItemsWarning.Count) {
+                    
+                    return this.drawItemsWarning[index];
+                    
+                }
+                
+            }
+            
+            if (this.HasLogFilterType(LogType.Error) == true) {
+                
+                index -= this.drawItemsWarning.Count;
+                if (index < this.drawItemsError.Count) {
+                    
+                    return this.drawItemsError[index];
+                    
+                }
+
+            }
+            
+            return default;
 
         }
 
@@ -903,9 +1020,9 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             });
             
             this.list.SetDataSource(this);
-            this.list.SetItems<ButtonComponent, ClosureParameters>(this.drawItems.Count, (component, parameters) => {
+            this.list.SetItems<ButtonComponent, ClosureParameters>(this.GetDrawItemsCount(), (component, parameters) => {
 
-                var item = parameters.data[parameters.index];
+                var item = parameters.data.GetDrawItem(parameters.index);
                 var text = component.Get<TextComponent>();
                 text.SetText(item.isCommand == true ? "<color=#777><b>></b></color> " : string.Empty, item.line);
                 text.SetColor(item.isCommand == true ? new Color(0.15f, 0.6f, 1f) : ConsoleScreen.GetColorByLogType(item.logType));
@@ -916,7 +1033,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 component.Show();
                 
             }, new ClosureParameters() {
-                data = this.drawItems
+                data = this,
             });
 
         }

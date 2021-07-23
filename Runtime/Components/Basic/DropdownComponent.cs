@@ -84,6 +84,28 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        public override void OnPoolGet() {
+            
+            base.OnPoolGet();
+            
+            this.list.SetOnLayoutChangedCallback(this.OnElementsChanged);
+            this.list.SetOnElementsCallback(this.OnElementsChanged);
+            this.label.SetCallback(this.DoToggleDropdown);
+            WindowSystem.onPointerUp += this.OnPointerUp;
+            WindowSystem.onPointerDown += this.OnPointerDown;
+
+        }
+
+        public override void OnPoolAdd() {
+            
+            base.OnPoolAdd();
+            
+            WindowSystem.onPointerUp -= this.OnPointerUp;
+            WindowSystem.onPointerDown -= this.OnPointerDown;
+            this.RemoveCallbacks();
+
+        }
+
         private void OnPointerDown() {
             
             if (this.autoCloseOnOutClick == false) return;

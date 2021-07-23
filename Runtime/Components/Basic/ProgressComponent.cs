@@ -16,9 +16,9 @@ namespace UnityEngine.UI.Windows.Components {
         private System.Action<ProgressComponent, float> callbackWithInstance;
         private bool ignoreCallbacks;
 
-        public override void OnInit() {
+        internal override void OnInitInternal() {
             
-            base.OnInit();
+            base.OnInitInternal();
             
             this.slider.onValueChanged.AddListener(this.OnValueChanged);
             
@@ -29,6 +29,14 @@ namespace UnityEngine.UI.Windows.Components {
             base.OnDeInitInternal();
             
             this.ResetInstance();
+
+        }
+
+        public override void OnPoolGet() {
+            
+            base.OnPoolGet();
+            
+            this.slider.onValueChanged.AddListener(this.OnValueChanged);
 
         }
 

@@ -64,6 +64,27 @@
 
         }
 
+        public override void OnPoolGet() {
+            
+            base.OnPoolGet();
+            
+            if (this.autoToggle == true) {
+
+                this.button.onClick.AddListener(this.ToggleInternal);
+
+            }
+
+        }
+
+        public override void OnPoolAdd() {
+            
+            base.OnPoolAdd();
+            
+            this.button.onClick.RemoveAllListeners();
+            this.RemoveCallbacks();
+            
+        }
+
         internal override void OnShowBeginInternal() {
 
             base.OnShowBeginInternal();

@@ -1070,12 +1070,14 @@ namespace UnityEngine.UI.Windows {
             WindowSystem.RaiseEvent(this, WindowEvent.OnDeInitialize);
             this.OnDeInit();
             this.OnDeInitInternal();
+
+            this.audioEvents.DeInitialize(this);
             
             this.SetState(ObjectState.DeInitialized);
 
-            this.audioEvents.DeInitialize(this);
-
             WindowSystem.ClearEvents(this);
+            
+            this.SetState(ObjectState.NotInitialized);
 
         }
 

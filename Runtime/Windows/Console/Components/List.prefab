@@ -116,8 +116,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -20, y: -20}
+  m_AnchoredPosition: {x: -5, y: 0}
+  m_SizeDelta: {x: -30, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5590231133715331329
 MonoBehaviour:
@@ -136,6 +136,7 @@ MonoBehaviour:
   rectTransform: {fileID: 1750014369206174538}
   hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
+  canvasSortingOrderDelta: 0
   canvasRenderers:
   - canvasRenderer: {fileID: 2402274904969464598}
     graphics: {fileID: 1893507800012569619}
@@ -160,6 +161,15 @@ MonoBehaviour:
   isObjectRoot: 0
   rootObject: {fileID: 0}
   subObjects: []
+  audioEvents:
+    play: 0
+    stop: 0
+    fmodAudioComponent:
+      audioEvent: 
+      stopOthersOnPlay: 0
+      parameters: []
+      autoStopOnceParameters: 0
+      autoStopDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 5590231133715331329}
@@ -296,7 +306,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 10, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &8965330028684586660
@@ -443,6 +453,7 @@ MonoBehaviour:
   rectTransform: {fileID: 2599583898763147004}
   hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
+  canvasSortingOrderDelta: 0
   canvasRenderers:
   - canvasRenderer: {fileID: 6829510560483908229}
     graphics: {fileID: 3783671350493353326}
@@ -462,12 +473,20 @@ MonoBehaviour:
   rootObject: {fileID: 5590231133715331329}
   subObjects:
   - {fileID: 8576729277486409703}
+  audioEvents:
+    play: 0
+    stop: 0
+    fmodAudioComponent:
+      audioEvent: 
+      stopOthersOnPlay: 0
+      parameters: []
+      autoStopOnceParameters: 0
+      autoStopDuration: 0
   registry:
   - holder: {fileID: 5590231133715331329}
-    hiddenByDefault: 0
-    hiddenByDefaultDescription: 
-    allowRegisterInRoot: 1
-    allowRegisterInRootDescription: Hold by ListComponent
+    moduleHolder: {fileID: 0}
+    holdHiddenByDefault: 0
+    holdAllowRegisterInRoot: 0
   componentModules:
     windowComponent: {fileID: 8199301820935925453}
     modules: []
@@ -636,6 +655,7 @@ MonoBehaviour:
   rectTransform: {fileID: 7578415457343084326}
   hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
+  canvasSortingOrderDelta: 0
   canvasRenderers:
   - canvasRenderer: {fileID: 3016808032470598225}
     graphics: {fileID: 4070916238433496631}
@@ -654,6 +674,15 @@ MonoBehaviour:
   isObjectRoot: 0
   rootObject: {fileID: 8199301820935925453}
   subObjects: []
+  audioEvents:
+    play: 0
+    stop: 0
+    fmodAudioComponent:
+      audioEvent: 
+      stopOthersOnPlay: 0
+      parameters: []
+      autoStopOnceParameters: 0
+      autoStopDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 8576729277486409703}
@@ -735,7 +764,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: -0.00015258789}
+  m_AnchoredPosition: {x: 0, y: -0.00012207031}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4165838444229778871

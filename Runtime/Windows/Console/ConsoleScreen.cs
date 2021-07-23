@@ -43,14 +43,25 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
     }
 
+    public enum FastLinkType {
+
+        Default = 0,
+        Notice,
+        Warning,
+        Alarm,
+
+    }
+    
     public class FastLinkAttribute : System.Attribute {
 
         public string text;
+        public FastLinkType style;
 
-        public FastLinkAttribute(string text) {
+        public FastLinkAttribute(string richText, FastLinkType style = FastLinkType.Default) {
             
-            this.text = text;
-            
+            this.text = richText;
+            this.style = style;
+
         }
 
     }
@@ -95,6 +106,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             public string cmd;
             public bool run;
             public string caption;
+            public FastLinkType style;
 
         }
 
@@ -134,6 +146,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         public bool autoConnectLogs = true;
         private string helpInitPrint;
+        private System.Threading.Thread unityThread;
 
         private int _isDirty;
         public bool isDirty {
@@ -172,9 +185,10 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             this.SetLogFilterType(LogType.Warning, true);
             this.SetLogFilterType(LogType.Error, true);
 
+            this.unityThread = System.Threading.Thread.CurrentThread;
+
             if (this.autoConnectLogs == true) {
 
-                Application.logMessageReceived += this.OnAddLog;
                 Application.logMessageReceivedThreaded += this.OnAddLogThreaded;
 
                 if (string.IsNullOrEmpty(this.helpInitPrint) == false) this.AddLine(this.helpInitPrint);
@@ -199,7 +213,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
             base.OnDeInit();
             
-            Application.logMessageReceived -= this.OnAddLog;
             Application.logMessageReceivedThreaded -= this.OnAddLogThreaded;
             
         }
@@ -265,7 +278,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
         }
 
-        private void OnAddLog(string text, string trace, LogType type) {
+        private void AddLog(string text, LogType type = LogType.Log, string trace = null) {
 
             if (this.logsCounter == null) return;
             
@@ -280,7 +293,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             }
 
             this.AddLine(text, type);
-            if (type == LogType.Exception) this.AddLine(trace);
+            if (type == LogType.Exception && string.IsNullOrEmpty(trace) == false) this.AddLine(trace);
 
             this.isDirty = true;
 
@@ -288,7 +301,15 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         private void OnAddLogThreaded(string text, string trace, LogType type) {
 
-            this.OnAddLog($"[Thread {System.Threading.Thread.CurrentThread.Name}] {text}", trace, type);
+            if (System.Threading.Thread.CurrentThread != this.unityThread) {
+
+                this.AddLog($"<color=#bb0>[Thread {System.Threading.Thread.CurrentThread.Name}]</color> {text}", type, trace);
+
+            } else {
+                
+                this.AddLog(text, type, trace);
+
+            }
 
         }
 
@@ -305,12 +326,13 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                     if (this.IsValidMethod(method) == false) continue;
 
-                    if (this.GetFastLink(method, out var caption) == true) {
+                    if (this.GetFastLink(method, out var caption, out var style) == true) {
 
                         this.fastLinkItems.Add(new FastLink() {
-                            run = method.GetParameters().Length == 0,
+                            run = method.GetParameters().Length == 0 && style < FastLinkType.Alarm,
                             cmd = $"{module.GetType().Name.ToLower()} {method.Name.ToLower()}",
-                            caption = caption
+                            caption = caption,
+                            style = style,
                         });
 
                     }
@@ -323,7 +345,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         public void ScrollDown() {
 
-            this.list.GetComponent<ScrollRect>().verticalNormalizedPosition = 1f;
+            this.list.GetComponent<ScrollRect>().verticalNormalizedPosition = 0f;
 
         }
 
@@ -411,13 +433,16 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
         }
 
-        private bool GetFastLink(System.Reflection.ICustomAttributeProvider methodInfo, out string text) {
+        private bool GetFastLink(System.Reflection.ICustomAttributeProvider methodInfo, out string text, out FastLinkType style) {
             
             text = string.Empty;
+            style = FastLinkType.Default;
             
             var aliasAttrs = methodInfo.GetCustomAttributes(typeof(FastLinkAttribute), false);
             if (aliasAttrs.Length == 0) return false;
-            text = (aliasAttrs[0] as FastLinkAttribute)?.text.ToLower();
+            var attr = (aliasAttrs[0] as FastLinkAttribute);
+            text = attr.text.ToLower();
+            style = attr.style;
             return true;
             
         }
@@ -474,7 +499,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                             } catch (System.Exception ex) {
                                 
-                                this.AddLine(ex.Message, LogType.Error);
+                                this.AddLog(ex.Message, LogType.Error);
                                 
                             }
 
@@ -490,12 +515,12 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                     if (methodFound == null) {
                         
-                        this.AddLine($"Module `{command.moduleName}` has no method `{methodName}`.", LogType.Warning);
+                        this.AddLog($"Module `{command.moduleName}` has no method `{methodName}`.", LogType.Warning);
 
                     } else {
 
-                        this.AddLine($"Module `{command.moduleName}` has no method `{methodName}` with parameters length = {command.argsCount} (Required length {methodFound.GetParameters().Length})", LogType.Warning);
-                        this.AddLine(this.GetMethodCallString(methodFound));
+                        this.AddLog($"Module `{command.moduleName}` has no method `{methodName}` with parameters length = {command.argsCount} (Required length {methodFound.GetParameters().Length})", LogType.Warning);
+                        this.AddLog(this.GetMethodCallString(methodFound), LogType.Log);
 
                     }
 
@@ -503,7 +528,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             } else {
                 
-                this.AddLine($"Module `{command.moduleName}` not found", LogType.Warning);
+                this.AddLog($"Module `{command.moduleName}` not found", LogType.Warning);
 
             }
             
@@ -556,8 +581,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         public void PrintHelp(IConsoleModule module) {
             
-            this.AddLine(this.GetHelpString(string.Empty, module.GetType()).Trim());
-            this.AddLine("Module methods:");
+            this.AddLog(this.GetHelpString(string.Empty, module.GetType()).Trim(), LogType.Log);
+            this.AddLog("Module methods:", LogType.Log);
             this.AddHR();
             var count = 0;
             var methods = module.GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
@@ -566,14 +591,14 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 if (this.IsValidMethod(method) == false) continue;
 
                 var str = this.GetMethodCallString(method);
-                this.AddLine(this.GetSpace(4) + str);
+                this.AddLog(this.GetSpace(4) + str, LogType.Log);
                 ++count;
 
             }
 
             if (count == 0) {
                 
-                this.AddLine($"No suitable methods found for module `{module.GetType().Name}`");
+                this.AddLog($"No suitable methods found for module `{module.GetType().Name}`", LogType.Log);
                 
             }
             this.AddHR();
@@ -591,11 +616,11 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         public void PrintHelp(List<IConsoleModule> modules) {
             
-            this.AddLine("Modules:");
+            this.AddLog("Modules:");
             this.AddHR();
             foreach (var module in modules) {
                 
-                this.AddLine($"{this.GetSpace(4)}<color=#3af>{module.GetType().Name.ToLower()}</color>{this.GetHelpString(this.GetSpace(4) + module.GetType().Name.ToLower(), module.GetType())}");
+                this.AddLog($"{this.GetSpace(4)}<color=#3af>{module.GetType().Name.ToLower()}</color>{this.GetHelpString(this.GetSpace(4) + module.GetType().Name.ToLower(), module.GetType())}");
                 
             }
             this.AddHR();
@@ -604,12 +629,12 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         public void PrintHelp(string moduleName, List<System.Reflection.MethodInfo> methods) {
             
-            this.AddLine($"Module {moduleName}");
-            this.AddLine("Methods:");
+            this.AddLog($"Module {moduleName}");
+            this.AddLog("Methods:");
             this.AddHR();
             foreach (var methodInfo in methods) {
                 
-                this.AddLine($"{this.GetSpace(4)}<color=#3af>{methodInfo.Name.ToLower()}</color>{this.GetHelpString(this.GetSpace(4) + methodInfo.Name.ToLower(), methodInfo)}");
+                this.AddLog($"{this.GetSpace(4)}<color=#3af>{methodInfo.Name.ToLower()}</color>{this.GetHelpString(this.GetSpace(4) + methodInfo.Name.ToLower(), methodInfo)}");
                 
             }
             this.AddHR();
@@ -841,6 +866,29 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        public static Color GetColorByFastLinkStyle(FastLinkType style) {
+
+            var color = Color.white;
+            switch (style) {
+                
+                case FastLinkType.Notice:
+                    color = new Color(0.15f, 0.6f, 1f);
+                    break;
+
+                case FastLinkType.Warning:
+                    color = new Color(1f, 0.8f, 0.4f);
+                    break;
+
+                case FastLinkType.Alarm:
+                    color = new Color(1f, 0.15f, 0.4f);
+                    break;
+
+            }
+
+            return color;
+
+        }
+
         public static Color GetColorByLogType(LogType logType) {
 
             var color = Color.white;
@@ -957,6 +1005,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                 var item = parameters.data[parameters.index];
                 button.Get<TextComponent>().SetText(item.caption);
+                button.Get<ImageComponent>().SetColor(ConsoleScreen.GetColorByFastLinkStyle(item.style));
                 button.SetCallback(() => {
 
                     if (item.run == true) {

@@ -402,7 +402,8 @@ namespace UnityEngine.UI.Windows {
         public void ValidateEditor(bool updateParentObjects, bool updateChildObjects = false) {
 
             this.ValidateRegistry();
-            
+
+            this.objectState = ObjectState.NotInitialized;
             this.isObjectRoot = (this.transform.parent == null);
             this.objectCanvas = this.GetComponent<Canvas>();
             this.hasObjectCanvas = (this.objectCanvas != null);

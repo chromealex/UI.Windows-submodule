@@ -32,22 +32,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public override void OnPoolGet() {
-            
-            base.OnPoolGet();
-            
-            this.slider.onValueChanged.AddListener(this.OnValueChanged);
-
-        }
-
-        public override void OnPoolAdd() {
-            
-            base.OnPoolAdd();
-
-            this.RemoveCallbacks();
-
-        }
-
         private void ResetInstance() {
             
             this.slider.onValueChanged.RemoveAllListeners();

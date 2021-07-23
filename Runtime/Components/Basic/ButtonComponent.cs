@@ -61,22 +61,6 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public override void OnPoolGet() {
-            
-            base.OnPoolGet();
-            
-            this.button.onClick.AddListener(this.DoClickInternal);
-
-        }
-
-        public override void OnPoolAdd() {
-            
-            base.OnPoolAdd();
-            
-            this.ResetInstance();
-            
-        }
-
         private void ResetInstance() {
             
             this.button.onClick.RemoveAllListeners();

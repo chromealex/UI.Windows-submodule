@@ -18,13 +18,13 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public void Raise(WindowObject instance, WindowEvent windowEvent) {
 
-            if (windowEvent == WindowEvent.None) return;
+            if (windowEvent == WindowEvent.None || instance == null) return;
 
             var key = UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent);
             {
                 if (this.cache.TryGetValue(key, out var actions) == true) {
 
-                    actions.Invoke();
+                    actions?.Invoke();
 
                 }
             }
@@ -32,7 +32,7 @@ namespace UnityEngine.UI.Windows.Modules {
             {
                 if (this.cacheOnce.TryGetValue(key, out var actions) == true) {
 
-                    actions.Invoke();
+                    actions?.Invoke();
                     this.cacheOnce.Remove(key);
 
                 }

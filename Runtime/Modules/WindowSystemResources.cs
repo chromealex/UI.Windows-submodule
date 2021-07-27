@@ -53,7 +53,7 @@ namespace UnityEngine.UI.Windows {
 
         public override int GetHashCode() {
             
-            return (int)this.type ^ (int)this.objectType ^ this.guid.GetHashCode() ^ (this.directRef != null ? this.directRef.GetHashCode() : 0);
+            return (int)this.type ^ (int)this.objectType ^ (this.guid != null ? this.guid.GetHashCode() : 0) ^ (this.directRef != null ? this.directRef.GetHashCode() : 0);
             
         }
 

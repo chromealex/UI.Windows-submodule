@@ -255,6 +255,13 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         public void SetLogFilterType(LogType logType, bool state) {
             
+            if (logType == LogType.Error) {
+
+                this.SetLogFilterType(LogType.Assert, state);
+                this.SetLogFilterType(LogType.Exception, state);
+
+            }
+
             var mask = 1 << (int)(logType + 1);
             if (state == true) {
                 this.logsFilter |= mask;
@@ -293,7 +300,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             }
 
             this.AddLine(text, type);
-            if (type == LogType.Exception && string.IsNullOrEmpty(trace) == false) this.AddLine(trace);
+            if (type == LogType.Exception && string.IsNullOrEmpty(trace) == false) this.AddLine(trace, type);
 
             this.isDirty = true;
 

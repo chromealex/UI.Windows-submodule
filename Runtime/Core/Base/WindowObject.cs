@@ -1067,6 +1067,9 @@ namespace UnityEngine.UI.Windows {
 
             }
 
+            var resources = WindowSystem.GetResources();
+            resources.DeleteAll(this);
+
             WindowSystem.RaiseEvent(this, WindowEvent.OnDeInitialize);
             this.OnDeInit();
             this.OnDeInitInternal();

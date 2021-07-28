@@ -24,6 +24,37 @@ namespace UnityEngine.UI.Windows.Modules {
         internal Dictionary<int, Stack<Component>> prefabToPooledInstances = new Dictionary<int, Stack<Component>>();
         internal Dictionary<Component, int> instanceOnSceneToPrefab = new Dictionary<Component, int>();
 
+        public void Clean() {
+            
+            this.CleanUpNullInstances();
+            
+            this.registeredPrefabs.Clear();
+            foreach (var kv in this.instanceOnSceneToPrefab) {
+
+                if (this.registeredPrefabs.Contains(kv.Value) == false) this.registeredPrefabs.Add(kv.Value);
+
+            }
+
+            foreach (var kv in this.prefabToPooledInstances) {
+                
+                foreach (var component in kv.Value) {
+
+                    if (component != null) {
+                        
+                        if (component is WindowObject wo) {
+                            wo.DoDeInit();
+                        }
+                        GameObject.DestroyImmediate(component.gameObject);
+                        
+                    }
+                    
+                }
+                
+            }
+            this.prefabToPooledInstances.Clear();
+            
+        }
+
         public void CreatePool<T>(T prefab) where T : Component {
 
             var key = prefab.GetHashCode();

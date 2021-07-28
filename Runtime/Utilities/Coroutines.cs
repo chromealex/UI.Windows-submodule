@@ -90,7 +90,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         public static void Cancel(Coroutine coroutine) {
 
-	        Coroutines.instance?.StopCoroutine(coroutine);
+	        if (Coroutines.instance != null && coroutine != null) Coroutines.instance.StopCoroutine(coroutine);
 
         }
 

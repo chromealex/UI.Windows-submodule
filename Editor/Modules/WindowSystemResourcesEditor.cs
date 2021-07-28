@@ -34,17 +34,31 @@ namespace UnityEditor.UI.Windows {
                 GUILayout.Label("Resources: " + target.GetAllocatedCount());
                 foreach (var item in allObjects) {
 
-                    //EditorGUILayout.ObjectField("Handler", item.Key as Object, typeof(Object), allowSceneObjects: true);
+                    //EditorGUILayout.ObjectField("Handler", item.Value as Object, typeof(Object), allowSceneObjects: true);
                     EditorGUILayout.LabelField("Handler", item.Key.ToString() + " (Loaded " + item.Value.Count.ToString() + ")");
 
                     ++EditorGUI.indentLevel;
                     foreach (var resItem in item.Value) {
 
-                        EditorGUILayout.LabelField(resItem.resourceId.ToString());
-                        if (resItem.resource is Object) {
+                        EditorGUILayout.LabelField("Resource ID:", resItem.resourceId.ToString());
+                        if (resItem.handler != null) {
+                            
+                            if (resItem.handler is Object handler) {
+
+                                EditorGUILayout.ObjectField("Handler:", handler, typeof(Object), allowSceneObjects: true);
+
+                            } else {
+
+                                EditorGUILayout.LabelField("Handler:", resItem.handler.ToString());
+
+                            }
+                            
+                        }
+
+                        if (resItem.resource is Object obj) {
                          
-                            EditorGUILayout.ObjectField((Object)resItem.resource, typeof(Object), allowSceneObjects: true);
-   
+                            EditorGUILayout.ObjectField(obj, typeof(Object), allowSceneObjects: true);
+                            
                         } else {
 
                             EditorGUILayout.LabelField(resItem.resource.ToString());

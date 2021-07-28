@@ -143,14 +143,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
         
-        public override void OnPoolAdd() {
-            
-            base.OnPoolAdd();
-
-            this.ResetInstance();
-
-        }
-
         public virtual void LateUpdate() {
 
             if (this.layoutHasChanged == true) {

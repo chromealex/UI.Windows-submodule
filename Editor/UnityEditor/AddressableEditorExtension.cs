@@ -61,7 +61,7 @@ public static class AddressableEditorExtension
     /// </summary>
     /// <param name="o">>object to recive addressable asset entry</param>
     /// <returns>addressable asset entry</returns>
-    public static UnityEditor.AddressableAssets.Settings.AddressableAssetEntry GetAddressableAssetEntry(Object o)
+    public static UnityEditor.AddressableAssets.Settings.AddressableAssetEntry GetAddressableAssetEntry(Object o, bool createNew = true)
     {
         UnityEditor.AddressableAssets.Settings.AddressableAssetSettings aaSettings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
  
@@ -69,7 +69,7 @@ public static class AddressableEditorExtension
         string guid = string.Empty;
         long localID = 0;
         string path;
- 
+        
         bool foundAsset = AssetDatabase.TryGetGUIDAndLocalFileIdentifier(o, out guid, out localID);
         path = AssetDatabase.GUIDToAssetPath(guid);
  
@@ -84,6 +84,16 @@ public static class AddressableEditorExtension
         if (entry != null)
         {
             return entry;
+        }
+
+        if (createNew == true) {
+
+            var group = aaSettings.DefaultGroup;
+            if (group != null) {
+                entry = aaSettings.CreateOrMoveEntry(guid, group);
+                return entry;
+            }
+
         }
  
         return null;

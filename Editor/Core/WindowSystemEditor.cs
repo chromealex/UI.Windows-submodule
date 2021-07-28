@@ -156,6 +156,106 @@ namespace UnityEditor.UI.Windows {
                     GUILayout.FlexibleSpace();
                     GUILayout.EndHorizontal();
 
+                    GUILayout.Space(10f);
+                    GUILayout.BeginHorizontal();
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button("Make Addressables", GUILayout.Width(200f), GUILayout.Height(30f)) == true) {
+
+                        try {
+
+                            for (int i = 0; i < this.registeredPrefabs.arraySize; ++i) {
+
+                                var element = this.registeredPrefabs.GetArrayElementAtIndex(i);
+                                var window = element.objectReferenceValue as WindowBase;
+                                if (window != null) {
+
+                                    EditorUtility.DisplayProgressBar("Updating Addressables", window.ToString(), i / (float)this.registeredPrefabs.arraySize);
+
+                                    var path = AssetDatabase.GetAssetPath(window);
+                                    var dir = System.IO.Path.GetDirectoryName(path);
+                                    dir = dir.Replace("/Screens", "/Components");
+                                    var components = AssetDatabase.FindAssets("t:GameObject", new string[] { dir });
+                                    foreach (var guid in components) {
+
+                                        var p = AssetDatabase.GUIDToAssetPath(guid);
+                                        var componentGo = AssetDatabase.LoadAssetAtPath<GameObject>(p);
+                                        var component = componentGo.GetComponent<WindowComponent>();
+                                        if (component != null) {
+
+                                            componentGo.SetAddressableID(p);
+                                            EditorUtility.SetDirty(componentGo);
+
+                                        }
+
+                                    }
+
+                                }
+
+                                if (window is UnityEngine.UI.Windows.WindowTypes.LayoutWindowType layoutWindowType) {
+
+                                    EditorHelpers.UpdateLayoutWindow(layoutWindowType);
+                                    EditorUtility.SetDirty(layoutWindowType);
+
+                                }
+
+                            }
+
+                        } catch (System.Exception ex) {
+                            Debug.LogException(ex);
+                        }
+
+                        EditorUtility.ClearProgressBar();
+                        
+                    }
+                    GUILayout.FlexibleSpace();
+                    GUILayout.EndHorizontal();
+                    GUILayout.Label("Make all component in all registered screens as Addressables", EditorStyles.centeredGreyMiniLabel);
+
+                    GUILayout.Space(10f);
+                    GUILayout.BeginHorizontal();
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button("Validate Resources", GUILayout.Width(200f), GUILayout.Height(30f)) == true) {
+
+                        try {
+                            
+                            var gos = AssetDatabase.FindAssets("t:GameObject");
+                            var i = 0;
+                            foreach (var guid in gos) {
+
+                                var path = AssetDatabase.GUIDToAssetPath(guid);
+                                var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                                EditorUtility.DisplayProgressBar("Validating Resources", path, i / (float)gos.Length);
+
+                                {
+                                    var allComponents = go.GetComponentsInChildren<WindowObject>(true);
+                                    foreach (var component in allComponents) {
+
+                                        EditorHelpers.FindType(component, typeof(Resource), (res) => {
+
+                                            var r = (Resource)res;
+                                            WindowSystemResourcesResourcePropertyDrawer.Validate(ref r);
+                                            return r;
+
+                                        });
+
+                                    }
+                                }
+
+                                ++i;
+
+                            }
+
+                        } catch (System.Exception ex) {
+                            Debug.LogException(ex);
+                        }
+
+                        EditorUtility.ClearProgressBar();
+
+                    }
+                    GUILayout.FlexibleSpace();
+                    GUILayout.EndHorizontal();
+                    GUILayout.Label("Find and Validate all Resource objects.", EditorStyles.centeredGreyMiniLabel);
+
                 })
                 );
             this.tabScrollPosition = scroll;

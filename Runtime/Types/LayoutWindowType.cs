@@ -263,11 +263,12 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                             instance = this,
                         };
                         ++this.loadingCount;
-                        yield return resources.LoadAsync<WindowComponent, LoadingClosure>(windowInstance, data, layoutComponent.component, (asset, closure) => {
+                        Coroutines.Run(resources.LoadAsync<WindowComponent, LoadingClosure>(windowInstance, data, layoutComponent.component, (asset, closure) => {
 
                             if (asset == null) {
 
                                 Debug.LogWarning("Component is null while component resource is not empty. Skipped.");
+                                --closure.instance.loadingCount;
                                 return;
 
                             }
@@ -281,14 +282,22 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                             instance.DoLoadScreenAsync(() => { --closure.instance.loadingCount; });
                             
-                        });
+                        }));
 
                     }
 
                 }
 
-                while (this.loadingCount > 0) yield return null;
+            }
 
+            while (this.loadingCount > 0) yield return null;
+
+            for (int i = 0; i < arr.Length; ++i) {
+
+                var layoutComponent = arr[i];
+                if (layoutComponent.windowLayout != windowLayout) continue;
+
+                var layoutElement = windowLayoutInstance.GetLayoutElementByTagId(layoutComponent.tag);
                 if (layoutElement.innerLayout != null) {
 
                     if (used.Contains(layoutElement.innerLayout) == false) {
@@ -675,9 +684,10 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                         for (int c = 0; c < layoutItem.components.Length; ++c) {
 
-                            var com = layoutItem.components[c];
+                            ref var com = ref layoutItem.components[c];
+                            var comLock = com;
                             if ((windowLayout != com.windowLayout || windowLayout.HasLayoutElementByTagId(com.tag) == false) && windowLayout.layoutElements.Any(x => {
-                                return x.innerLayout == com.windowLayout && x.innerLayout.HasLayoutElementByTagId(com.tag);
+                                return x.innerLayout == comLock.windowLayout && x.innerLayout.HasLayoutElementByTagId(comLock.tag);
                             }) == false) {
 
                                 var list = layoutItem.components.ToList();

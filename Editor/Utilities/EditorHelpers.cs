@@ -24,6 +24,93 @@ namespace UnityEditor.UI.Windows {
 
     public class EditorHelpers {
 
+        public static void FindType(object root, System.Type searchType, System.Func<object, object> del, HashSet<object> visited = null) {
+            
+            if (root == null) return;
+            if (visited == null) visited = new HashSet<object>();
+
+            if (visited.Contains(root) == true) return;
+            visited.Add(root);
+
+            var fields = root.GetType().GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+            foreach (var field in fields) {
+
+                if (field.FieldType.IsPrimitive == true) continue;
+                if (field.FieldType.IsPointer == true) continue;
+                if (typeof(Component).IsAssignableFrom(field.FieldType) == true) continue;
+                
+                if (field.FieldType == searchType) {
+
+                    var obj = field.GetValue(root);
+                    field.SetValue(root, del.Invoke(obj));
+
+                } else if (field.FieldType.IsArray == true) {
+                    
+                    var arr = (System.Array)field.GetValue(root);
+                    if (arr != null) {
+                        for (int i = 0; i < arr.Length; ++i) {
+                            var r = arr.GetValue(i);
+                            if (r != null) {
+                                if (r.GetType() == searchType) {
+                                    arr.SetValue(del.Invoke(r), i);
+                                } else {
+                                    EditorHelpers.FindType(r, searchType, del, visited);
+                                    arr.SetValue(r, i);
+                                }
+                            }
+                        }
+                    }
+
+                } else {
+                    
+                    var obj = field.GetValue(root);
+                    EditorHelpers.FindType(obj, searchType, del, visited);
+                    field.SetValue(root, obj);
+                    
+                }
+
+            }
+
+        }
+
+        public static void UpdateLayoutWindow(UnityEngine.UI.Windows.WindowTypes.LayoutWindowType layoutWindowType) {
+        
+            var itemsLayout = layoutWindowType.layouts.items;
+            if (itemsLayout != null) {
+
+                for (int j = 0; j < itemsLayout.Length; ++j) {
+
+                    ref var layoutItem = ref itemsLayout[j];
+                    if (layoutItem == null) {
+                        layoutItem = new UnityEngine.UI.Windows.WindowTypes.LayoutItem();
+                    }
+
+                    layoutItem.Validate();
+
+                    var windowLayoutType = layoutItem.windowLayout;
+                    if (windowLayoutType != null) {
+
+                        windowLayoutType.ValidateEditor();
+
+                        { // Validate components list
+
+                            for (int c = 0; c < layoutItem.components.Length; ++c) {
+
+                                ref var com = ref layoutItem.components[c];
+                                WindowSystemResourcesResourcePropertyDrawer.Validate(ref com.component);
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
         public static void AddSafeZone(Transform root) {
             
             var safeGo = new GameObject("SafeZone", typeof(UnityEngine.UI.Windows.WindowLayoutSafeZone));

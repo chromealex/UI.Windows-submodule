@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace UnityEngine.UI.Windows {
 
@@ -102,6 +103,7 @@ namespace UnityEngine.UI.Windows {
                 var go = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(path);
                 if (go == null) return default;
                 
+                if (type == typeof(Object)) type = typeof(Component);
                 return go.GetComponent(type);
 
             } else if (objectType == ObjectType.Sprite) {

@@ -68,79 +68,8 @@ namespace UnityEditor.UI.Windows {
                     result.resource.subObjectName = (newObj != null && AssetDatabase.IsSubAsset(newObj) == true ? AssetDatabase.LoadAllAssetsAtPath(assetPath).FirstOrDefault(x => x.name == newObj.name).name : string.Empty);
                 }
                 
-                if (newObj != null) {
+                WindowSystemResourcesResourcePropertyDrawer.Validate(ref result.resource);
                 
-                    // Apply objectType
-                    var val = 0;
-                    switch (newObj) {
-                    
-                        case GameObject objType:
-                            val = (int)Resource.ObjectType.GameObject;
-                            break;
-
-                        case Component objType:
-                            val = (int)Resource.ObjectType.Component;
-                            break;
-
-                        case ScriptableObject objType:
-                            val = (int)Resource.ObjectType.ScriptableObject;
-                            break;
-
-                        case Sprite objType:
-                            val = (int)Resource.ObjectType.Sprite;
-                            break;
-
-                        case Texture objType:
-                            val = (int)Resource.ObjectType.Texture;
-                            break;
-                    
-                        default:
-                            val = (int)Resource.ObjectType.Unknown;
-                            break;
-
-                    }
-                    result.resource.objectType = (Resource.ObjectType)val;
-
-                }
-                
-                if (newObj == null) {
-
-                    result.resource.type = Resource.Type.Manual;
-                    result.resource.directRef = null;
-
-                } else {
-
-                    if (UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(result.resource.guid) != null) {
-
-                        //if (loadType.enumValueIndex != (int)Resource.Type.Addressables)
-                        {
-
-                            // addressables
-                            {
-                                result.resource.type = Resource.Type.Addressables; //AssetDatabase.AssetPathToGUID(assetPath);
-                                result.resource.directRef = null;
-                                newObj.SetAddressableID(result.resource.guid);
-                            }
-
-                        }
-
-                    } else {
-
-                        //if (loadType.enumValueIndex != (int)Resource.Type.Direct)
-                        {
-
-                            // direct
-                            {
-                                result.resource.type = Resource.Type.Direct;
-                                result.resource.directRef = newObj;
-                            }
-
-                        }
-
-                    }
-
-                }
-
             }
 
             var tooltip = "This object will be stored through GUID link.";
@@ -218,6 +147,86 @@ namespace UnityEditor.UI.Windows {
             GUI.Label(rect, label, style);
             GUI.color = c;
 
+        }
+
+        public static void Validate(ref Resource resource) {
+            
+            var newObj = Resource.GetEditorRef(resource.guid, resource.subObjectName, typeof(Object), resource.objectType, resource.directRef);
+
+            if (newObj != null) {
+
+                // Apply objectType
+                var val = 0;
+                switch (newObj) {
+
+                    case GameObject objType:
+                        val = (int)Resource.ObjectType.GameObject;
+                        break;
+
+                    case Component objType:
+                        val = (int)Resource.ObjectType.Component;
+                        break;
+
+                    case ScriptableObject objType:
+                        val = (int)Resource.ObjectType.ScriptableObject;
+                        break;
+
+                    case Sprite objType:
+                        val = (int)Resource.ObjectType.Sprite;
+                        break;
+
+                    case Texture objType:
+                        val = (int)Resource.ObjectType.Texture;
+                        break;
+
+                    default:
+                        val = (int)Resource.ObjectType.Unknown;
+                        break;
+
+                }
+
+                resource.objectType = (Resource.ObjectType)val;
+
+            }
+
+            if (newObj == null) {
+
+                resource.type = Resource.Type.Manual;
+                resource.directRef = null;
+
+            } else {
+
+                if (UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(resource.guid) != null) {
+
+                    //if (loadType.enumValueIndex != (int)Resource.Type.Addressables)
+                    {
+
+                        // addressables
+                        {
+                            resource.type = Resource.Type.Addressables; //AssetDatabase.AssetPathToGUID(assetPath);
+                            resource.directRef = null;
+                            newObj.SetAddressableID(resource.guid);
+                        }
+
+                    }
+
+                } else {
+
+                    //if (loadType.enumValueIndex != (int)Resource.Type.Direct)
+                    {
+
+                        // direct
+                        {
+                            resource.type = Resource.Type.Direct;
+                            resource.directRef = newObj;
+                        }
+
+                    }
+
+                }
+
+            }
+            
         }
 
     }

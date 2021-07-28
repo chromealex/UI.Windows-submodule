@@ -93,6 +93,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
         
+        private int loadingCount;
         private IEnumerator InitModules(WindowBase window, System.Action onComplete) {
 
             var resources = WindowSystem.GetResources();
@@ -111,11 +112,13 @@ namespace UnityEngine.UI.Windows.Modules {
                     parameters = parameters,
                     window = window,
                 };
-                yield return resources.LoadAsync<WindowModule, LoadingClosure>(window, data, moduleInfo.module, (asset, closure) => {
+                ++this.loadingCount;
+                Coroutines.Run(resources.LoadAsync<WindowModule, LoadingClosure>(window, data, moduleInfo.module, (asset, closure) => {
 
                     var instance = WindowSystem.GetPools().Spawn(asset, closure.window.transform);
                     instance.Setup(closure.window);
                     if (closure.parameters != null) closure.parameters.Apply(instance);
+                    instance.SetResetState();
                     
                     var layoutPreferences = closure.window.GetCurrentLayoutPreferences();
                     if (layoutPreferences != null && instance.canvasScaler != null) layoutPreferences.Apply(instance.canvasScaler);
@@ -123,10 +126,13 @@ namespace UnityEngine.UI.Windows.Modules {
                     closure.window.RegisterSubObject(instance);
 
                     closure.windowModules.modules[closure.index].moduleInstance = instance;
+                    --closure.windowModules.loadingCount;
 
-                });
+                }));
 
             }
+
+            while (this.loadingCount > 0) yield return null;
 
             onComplete.Invoke();
 

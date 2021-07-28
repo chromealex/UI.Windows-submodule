@@ -247,7 +247,13 @@ namespace UnityEditor.UI.Windows {
                             buttonRect.x = rect.width - width + 40f;
                             buttonRect.width = width;
                             if (GUI.Button(buttonRect, "Refresh") == true) {
-                                
+
+                                if (componentsProp.serializedObject.targetObject is LayoutWindowType layoutWindowType) {
+
+                                    EditorHelpers.UpdateLayoutWindow(layoutWindowType);
+                                    
+                                }
+
                                 (componentsProp.serializedObject.targetObject as WindowObject).ValidateEditor();
                                 EditorHelpers.SetDirtyAndValidate(property);
                                 

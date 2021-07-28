@@ -230,10 +230,15 @@ namespace UnityEditor.UI.Windows {
                                     var allComponents = go.GetComponentsInChildren<WindowObject>(true);
                                     foreach (var component in allComponents) {
 
-                                        EditorHelpers.FindType(component, typeof(Resource), (res) => {
+                                        EditorHelpers.FindType(component, typeof(Resource), (fieldInfo, res) => {
 
+                                            System.Type resType = null;
+                                            var resTypeAttrs = fieldInfo.GetCustomAttributes(typeof(ResourceTypeAttribute), true);
+                                            if (resTypeAttrs.Length > 0) {
+                                                resType = ((ResourceTypeAttribute)resTypeAttrs[0]).type;
+                                            }
                                             var r = (Resource)res;
-                                            WindowSystemResourcesResourcePropertyDrawer.Validate(ref r);
+                                            WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
                                             return r;
 
                                         });

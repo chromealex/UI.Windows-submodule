@@ -66,9 +66,10 @@ namespace UnityEditor.UI.Windows {
                     var assetPath = AssetDatabase.GetAssetPath(newObj);
                     result.resource.guid = AssetDatabase.AssetPathToGUID(assetPath);
                     result.resource.subObjectName = (newObj != null && AssetDatabase.IsSubAsset(newObj) == true ? AssetDatabase.LoadAllAssetsAtPath(assetPath).FirstOrDefault(x => x.name == newObj.name).name : string.Empty);
+                    result.resource.directRef = null;
                 }
                 
-                WindowSystemResourcesResourcePropertyDrawer.Validate(ref result.resource);
+                WindowSystemResourcesResourcePropertyDrawer.Validate(ref result.resource, type);
                 
             }
 
@@ -149,9 +150,10 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        public static void Validate(ref Resource resource) {
+        public static void Validate(ref Resource resource, System.Type type = null) {
             
-            var newObj = Resource.GetEditorRef(resource.guid, resource.subObjectName, typeof(Object), resource.objectType, resource.directRef);
+            if (type == null) type = typeof(Object);
+            var newObj = Resource.GetEditorRef(resource.guid, resource.subObjectName, type, resource.objectType, resource.directRef);
 
             if (newObj != null) {
 

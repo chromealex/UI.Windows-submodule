@@ -24,7 +24,7 @@ namespace UnityEditor.UI.Windows {
 
     public class EditorHelpers {
 
-        public static void FindType(object root, System.Type searchType, System.Func<object, object> del, HashSet<object> visited = null) {
+        public static void FindType(object root, System.Type searchType, System.Func<FieldInfo, object, object> del, HashSet<object> visited = null) {
             
             if (root == null) return;
             if (visited == null) visited = new HashSet<object>();
@@ -42,7 +42,7 @@ namespace UnityEditor.UI.Windows {
                 if (field.FieldType == searchType) {
 
                     var obj = field.GetValue(root);
-                    field.SetValue(root, del.Invoke(obj));
+                    field.SetValue(root, del.Invoke(field, obj));
 
                 } else if (field.FieldType.IsArray == true) {
                     
@@ -52,7 +52,7 @@ namespace UnityEditor.UI.Windows {
                             var r = arr.GetValue(i);
                             if (r != null) {
                                 if (r.GetType() == searchType) {
-                                    arr.SetValue(del.Invoke(r), i);
+                                    arr.SetValue(del.Invoke(field, r), i);
                                 } else {
                                     EditorHelpers.FindType(r, searchType, del, visited);
                                     arr.SetValue(r, i);
@@ -97,7 +97,7 @@ namespace UnityEditor.UI.Windows {
                             for (int c = 0; c < layoutItem.components.Length; ++c) {
 
                                 ref var com = ref layoutItem.components[c];
-                                WindowSystemResourcesResourcePropertyDrawer.Validate(ref com.component);
+                                WindowSystemResourcesResourcePropertyDrawer.Validate(ref com.component, typeof(UnityEngine.UI.Windows.WindowComponent));
 
                             }
 

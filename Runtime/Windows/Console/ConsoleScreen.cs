@@ -177,6 +177,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
             this.inputField.SetCallbackValidateChar(this.OnChar);
             this.inputField.SetCallbackEditEnd(this.OnEditEnd);
+            this.inputField.Get<ButtonComponent>().SetCallback(this.EndEdit);
 
             this.CollectModules();
 
@@ -365,6 +366,13 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         public void ReplaceInput(string str) {
             
             this.inputField.SetText(str);
+            
+        }
+
+        private void EndEdit() {
+            
+            this.ApplyCommand(this.inputField.GetText());
+            this.inputField.Get<ButtonComponent>().SetInteractable(false);
             
         }
 
@@ -1007,6 +1015,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 }
 
             }
+
+            this.inputField.Get<ButtonComponent>().SetInteractable(this.inputField.GetText().Length > 0);
 
             this.fastLinks.SetItems<ButtonComponent, ClosureFastLinksParameters>(this.fastLinkItems.Count, (button, parameters) => {
 

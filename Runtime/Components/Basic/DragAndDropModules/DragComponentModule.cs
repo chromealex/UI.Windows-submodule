@@ -76,19 +76,19 @@ namespace UnityEngine.UI.Windows.Components.DragAndDropModules {
 
 		}
 
-		public void RemoveAllDragCallbacks(System.Action<PointerEventData> callback) {
+		public void RemoveAllDragCallbacks() {
 
 			this.onDragCallback = null;
 
 		}
 
-		public void RemoveAllBeginDragCallbacks(System.Action<PointerEventData> callback) {
+		public void RemoveAllBeginDragCallbacks() {
 
 			this.onBeginDragCallback = null;
 
 		}
 
-		public void RemoveAllEndDragCallbacks(System.Action<PointerEventData> callback) {
+		public void RemoveAllEndDragCallbacks() {
 
 			this.onEndDragCallback = null;
 

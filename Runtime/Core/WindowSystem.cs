@@ -262,6 +262,7 @@ namespace UnityEngine.UI.Windows {
         private UnityEngine.UI.Windows.Components.IInteractable waitInteractable;
         private UnityEngine.UI.Windows.Components.IInteractable[] waitInteractables;
         private bool lockInteractables;
+        private System.Action<UnityEngine.UI.Windows.Components.IInteractable> callbackOnAnyInteractable;
         
         private static WindowSystem _instance;
 
@@ -358,9 +359,15 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static void LockAllIntractables() {
+        public static void LockAllInteractables() {
 
             WindowSystem.instance.lockInteractables = true;
+
+        }
+
+        public static void SetCallbackOnAnyInteractable(System.Action<UnityEngine.UI.Windows.Components.IInteractable> callback) {
+
+            WindowSystem.instance.callbackOnAnyInteractable = callback;
 
         }
 
@@ -438,6 +445,8 @@ namespace UnityEngine.UI.Windows {
         }
 
         public static bool InteractWith(UnityEngine.UI.Windows.Components.IInteractable interactable) {
+            
+            WindowSystem.instance.callbackOnAnyInteractable?.Invoke(interactable);
             
             if (WindowSystem.instance.lockInteractables == true) return false;
 

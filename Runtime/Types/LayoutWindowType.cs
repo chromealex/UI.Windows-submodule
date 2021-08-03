@@ -182,13 +182,13 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
-        public void LoadAsync(LayoutWindowType windowInstance, System.Action onComplete) {
+        public void LoadAsync(InitialParameters initialParameters, LayoutWindowType windowInstance, System.Action onComplete) {
 
             windowInstance.Setup(windowInstance);
             
             var used = new HashSet<WindowLayout>();
             var layoutItem = this;
-            Coroutines.Run(layoutItem.InitLayoutInstance(windowInstance, windowInstance, layoutItem.windowLayout, used, onComplete));
+            Coroutines.Run(layoutItem.InitLayoutInstance(initialParameters, windowInstance, windowInstance, layoutItem.windowLayout, used, onComplete));
 
         }
 
@@ -205,11 +205,12 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             public WindowLayout windowLayoutInstance;
             public LayoutComponentItem[] layoutComponentItems;
             public LayoutItem instance;
+            public InitialParameters initialParameters;
 
         }
 
         private int loadingCount;
-        private IEnumerator InitLayoutInstance(LayoutWindowType windowInstance, WindowObject root, WindowLayout windowLayout, HashSet<WindowLayout> used, System.Action onComplete, bool isInner = false) {
+        private IEnumerator InitLayoutInstance(InitialParameters initialParameters, LayoutWindowType windowInstance, WindowObject root, WindowLayout windowLayout, HashSet<WindowLayout> used, System.Action onComplete, bool isInner = false) {
 
             if (((ILayoutInstance)root).windowLayoutInstance != null) {
                 
@@ -261,9 +262,10 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                             windowLayoutInstance = windowLayoutInstance,
                             layoutComponentItems = arr,
                             instance = this,
+                            initialParameters = initialParameters,
                         };
                         ++this.loadingCount;
-                        Coroutines.Run(resources.LoadAsync<WindowComponent, LoadingClosure>(windowInstance, data, layoutComponent.component, (asset, closure) => {
+                        Coroutines.Run(resources.LoadAsync<WindowComponent, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, windowInstance, data, layoutComponent.component, (asset, closure) => {
 
                             if (asset == null) {
 
@@ -280,7 +282,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                             closure.windowLayoutInstance.SetLoadedComponent(item.tag, instance);
                             item.componentInstance = instance;
 
-                            instance.DoLoadScreenAsync(() => { --closure.instance.loadingCount; });
+                            instance.DoLoadScreenAsync(closure.initialParameters, () => { --closure.instance.loadingCount; });
                             
                         }));
 
@@ -302,7 +304,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                     if (used.Contains(layoutElement.innerLayout) == false) {
 
-                        yield return this.InitLayoutInstance(windowInstance, layoutElement, layoutElement.innerLayout, used, null, isInner: true);
+                        yield return this.InitLayoutInstance(initialParameters, windowInstance, layoutElement, layoutElement.innerLayout, used, null, isInner: true);
 
                     } else {
 
@@ -549,7 +551,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             this.layouts.SetActive();
 
             var currentItem = this.layouts.GetActive();
-            currentItem.LoadAsync(this, () => { base.LoadAsync(initialParameters, onComplete); });
+            currentItem.LoadAsync(initialParameters, this, () => { base.LoadAsync(initialParameters, onComplete); });
 
         }
 

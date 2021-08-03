@@ -538,17 +538,17 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        internal void DoLoadScreenAsync(System.Action onComplete) {
+        internal void DoLoadScreenAsync(InitialParameters initialParameters, System.Action onComplete) {
             
-            Utilities.Coroutines.CallInSequence(() => {
+            Utilities.Coroutines.CallInSequence((closure) => {
                 
-                this.OnLoadScreenAsync(onComplete);
+                this.OnLoadScreenAsync(closure, onComplete);
 
-            }, this.subObjects, (x, cb) => x.OnLoadScreenAsync(cb));
+            }, initialParameters, this.subObjects, (x, cb, closure) => x.OnLoadScreenAsync(closure, cb));
             
         }
         
-        protected virtual void OnLoadScreenAsync(System.Action onComplete) {
+        protected virtual void OnLoadScreenAsync(InitialParameters initialParameters, System.Action onComplete) {
             
             if (onComplete != null) onComplete.Invoke();
             
@@ -1200,9 +1200,9 @@ namespace UnityEngine.UI.Windows {
             
         }
         
-        public void LoadAsync<T>(Resource resource, System.Action<T> onComplete = null) where T : WindowObject {
+        public void LoadAsync<T>(Resource resource, System.Action<T> onComplete = null, bool async = true) where T : WindowObject {
             
-            Coroutines.Run(this.LoadAsync_YIELD(resource, onComplete));
+            Coroutines.Run(this.LoadAsync_YIELD(resource, onComplete, async));
             
         }
 
@@ -1213,14 +1213,14 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private IEnumerator LoadAsync_YIELD<T>(Resource resource, System.Action<T> onComplete = null) where T : WindowObject {
+        private IEnumerator LoadAsync_YIELD<T>(Resource resource, System.Action<T> onComplete = null, bool async = true) where T : WindowObject {
             
             var resources = WindowSystem.GetResources();
             var data = new LoadAsyncClosure<T>() {
                 component = this,
                 onComplete = onComplete,
             };
-            yield return resources.LoadAsync<T, LoadAsyncClosure<T>>(this.GetWindow(), data, resource, (asset, closure) => {
+            yield return resources.LoadAsync<T, LoadAsyncClosure<T>>(new WindowSystemResources.LoadParameters() { async = async },this.GetWindow(), data, resource, (asset, closure) => {
 
                 if (asset != null) {
 

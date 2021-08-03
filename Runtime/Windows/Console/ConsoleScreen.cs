@@ -214,6 +214,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
             base.OnDeInit();
             
+            Debug.Log("DO DEINIT");
             Application.logMessageReceivedThreaded -= this.OnAddLogThreaded;
             
         }

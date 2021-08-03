@@ -218,6 +218,7 @@ namespace UnityEngine.UI.Windows {
 
     }
 
+    [DefaultExecutionOrder(-1000)]
     public class WindowSystem : MonoBehaviour {
 
         [System.Serializable]
@@ -313,12 +314,21 @@ namespace UnityEngine.UI.Windows {
         
         public void Awake() {
 
-            WindowSystem._instance = this;
-            GameObject.DontDestroyOnLoad(this.gameObject);
+            this.Run();
 
         }
 
-        public void Start() {
+        public void OnEnable() {
+            
+            this.Run();
+            
+        }
+
+        private void Run() {
+        
+            if (WindowSystem._instance != null) return;
+            WindowSystem._instance = this;
+            GameObject.DontDestroyOnLoad(this.gameObject);
 
             this.events.Initialize();
             this.breadcrumbs.Initialize();
@@ -336,9 +346,13 @@ namespace UnityEngine.UI.Windows {
 
             }
 
-            if (this.showRootOnStart == true) WindowSystem.ShowRoot();
+        }
+
+        public void Start() {
 
             this.InitializeConsole();
+
+            if (this.showRootOnStart == true) WindowSystem.ShowRoot();
 
         }
 
@@ -487,20 +501,11 @@ namespace UnityEngine.UI.Windows {
         }
 
         private void InitializeConsole() {
-            
-            WindowSystem.Show<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(x => {
 
-                this.consoleWindowInstance = x;
-                WindowSystem.GetEvents().RegisterOnce(x, WindowEvent.OnShowEnd, () => {
-                    
-                    this.consoleWindowInstance.Hide();
-                    this.consoleWindowInstance = null;
-                    
-                });
-                x.OnEmptyPass();
+            this.consoleWindowInstance = WindowSystem.ShowSync<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(transitionParameters: TransitionParameters.Default.ReplaceImmediately(true));
+            this.consoleWindowInstance.Hide(TransitionParameters.Default.ReplaceImmediately(true));
+            this.consoleWindowInstance = null;
 
-            });
-            
         }
         
         public void Update() {
@@ -1231,7 +1236,7 @@ namespace UnityEngine.UI.Windows {
             }
 
         }
-
+        
         /// <summary>
         /// Initializing window in sync mode.
         /// Just returns instance immediately, but still stay in async mode for layout because of Addressable assets.
@@ -1252,6 +1257,12 @@ namespace UnityEngine.UI.Windows {
                 
             }, transitionParameters);
             return instance;
+
+        }
+
+        public static T ShowSync<T>(System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+
+            return WindowSystem.ShowSync(default, onInitialized, transitionParameters);
 
         }
 

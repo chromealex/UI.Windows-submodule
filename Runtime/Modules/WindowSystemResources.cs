@@ -265,6 +265,24 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public struct DefaultClosureData { }
 
+        public class ClosureResult<T> {
+
+            public T result;
+            
+        }
+
+        public struct LoadParameters {
+
+            public bool async;
+
+        }
+
+        public IEnumerator LoadAsync<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+            
+            yield return this.Load_INTERNAL(loadParameters, handler, closure, resource, onComplete);
+            
+        }
+
         public IEnumerator LoadAsync<T>(object handler, Resource resource, System.Action<T, DefaultClosureData> onComplete) where T : class {
 
             yield return this.LoadAsync<T, DefaultClosureData>(handler, new DefaultClosureData(), resource, onComplete);
@@ -272,6 +290,28 @@ namespace UnityEngine.UI.Windows.Modules {
         }
 
         public IEnumerator LoadAsync<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+            
+            yield return this.Load_INTERNAL(new LoadParameters() { async = true }, handler, closure, resource, onComplete);
+            
+        }
+
+        public T Load<T>(object handler, Resource resource) where T : class {
+            
+            var closure = PoolClass<ClosureResult<T>>.Spawn();
+            var op = this.Load_INTERNAL<T, ClosureResult<T>>(new LoadParameters() { async = true }, handler, closure, resource, (asset, c) => {
+
+                c.result = asset;
+
+            });
+            while (op.MoveNext() == true) { }
+
+            var result = closure.result;
+            PoolClass<ClosureResult<T>>.Recycle(ref closure);
+            return result;
+
+        }
+
+        private IEnumerator Load_INTERNAL<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
 
             if (this.RequestLoad(handler, closure, resource, onComplete) == true) {
                 
@@ -325,6 +365,7 @@ namespace UnityEngine.UI.Windows.Modules {
                         var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(resource.guid);
                         System.Action cancellationTask = () => { if (op.IsValid() == true) UnityEngine.AddressableAssets.Addressables.Release(op); };
                         this.LoadBegin(handler, cancellationTask);
+                        if (loadParameters.async == false) op.WaitForCompletion();
                         while (op.IsDone == false) yield return null;
 
                         if (op.IsValid() == false) {
@@ -369,6 +410,7 @@ namespace UnityEngine.UI.Windows.Modules {
                         
                         System.Action cancellationTask = () => { if (op.IsValid() == true) UnityEngine.AddressableAssets.Addressables.Release(op); };
                         this.LoadBegin(handler, cancellationTask);
+                        if (loadParameters.async == false) op.WaitForCompletion();
                         while (op.IsDone == false) yield return null;
 
                         if (op.IsValid() == false) {

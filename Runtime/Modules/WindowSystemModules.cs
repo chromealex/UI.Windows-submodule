@@ -68,7 +68,7 @@ namespace UnityEngine.UI.Windows.Modules {
         
         public void LoadAsync(InitialParameters initialParameters, WindowBase window, System.Action onComplete) {
 
-            Coroutines.Run(this.InitModules(window, onComplete));
+            Coroutines.Run(this.InitModules(initialParameters, window, onComplete));
 
         }
 
@@ -94,7 +94,7 @@ namespace UnityEngine.UI.Windows.Modules {
         }
         
         private int loadingCount;
-        private IEnumerator InitModules(WindowBase window, System.Action onComplete) {
+        private IEnumerator InitModules(InitialParameters initialParameters, WindowBase window, System.Action onComplete) {
 
             var resources = WindowSystem.GetResources();
             var targetData = WindowSystem.GetTargetData();
@@ -113,7 +113,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     window = window,
                 };
                 ++this.loadingCount;
-                Coroutines.Run(resources.LoadAsync<WindowModule, LoadingClosure>(window, data, moduleInfo.module, (asset, closure) => {
+                Coroutines.Run(resources.LoadAsync<WindowModule, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, window, data, moduleInfo.module, (asset, closure) => {
 
                     var instance = WindowSystem.GetPools().Spawn(asset, closure.window.transform);
                     instance.Setup(closure.window);

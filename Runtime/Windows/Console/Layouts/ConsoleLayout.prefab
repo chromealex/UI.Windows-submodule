@@ -467,6 +467,9 @@ MonoBehaviour:
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers:
+  - canvasRenderer: {fileID: 0}
+    graphics: {fileID: 0}
+    rectMask: {fileID: 81586647326895468}
   - canvasRenderer: {fileID: 6814757248635304782}
     graphics: {fileID: 4709774183522539103}
     rectMask: {fileID: 0}

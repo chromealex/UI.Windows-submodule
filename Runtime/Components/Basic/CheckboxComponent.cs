@@ -99,13 +99,15 @@
             var stateChanged = this.isChecked != state;
             this.isChecked = state;
             if (checkGroup == true && this.group != null) {
-                if (state == false && this.group.CanBeUnchecked(this) == false) {
-                    this.isChecked = true;
-                    state = true;
-                    stateChanged = true;
-                }
-
-                if (this.isChecked == true) {
+                if (state == false) {
+                    if (this.group.CanBeUnchecked(this) == false) {
+                        this.isChecked = true;
+                        state = true;
+                        if (stateChanged == true) {
+                            stateChanged = false;
+                        }
+                    }
+                } else {
                     this.group.OnChecked(this);
                 }
             }

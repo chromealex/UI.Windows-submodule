@@ -769,7 +769,7 @@ namespace UnityEngine.UI.Windows.Utilities {
             float ITweenInternal.GetTo() { return this.to; }
             object ITweenInternal.GetTag() { return this.tag; }
             
-            public bool Update(float dt) {
+            bool ITween.Update(float dt) {
 
                 this.delay -= dt;
                 if (this.delay <= 0f) {

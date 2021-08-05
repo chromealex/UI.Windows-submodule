@@ -360,11 +360,33 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        private void TrySelectCheckboxButton(int index) {
+
+            var checkbox = this.list.GetItem<CheckboxComponent>(index);
+            if (checkbox != null) {
+
+                this.list.ForEach<CheckboxComponent>((item, data) => {
+
+                    if (data.index != index) {
+                        
+                        item.SetCheckedState(false, false);
+                        
+                    }
+                    
+                });
+                
+                checkbox.SetCheckedState(true, false);
+                
+            }
+
+        }
+
         public void Select(int index) {
 
             if (index < 0) return;
             
             this.SelectLabel(index);
+            this.TrySelectCheckboxButton(index);
             this.SetSelectedIndex(index);
             
         }

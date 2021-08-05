@@ -50,6 +50,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         Notice,
         Warning,
         Alarm,
+        Directory,
 
     }
     
@@ -57,11 +58,15 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         public string text;
         public FastLinkType style;
+        public string validationMethod;
+        public string visibilityMethod;
 
-        public FastLinkAttribute(string richText, FastLinkType style = FastLinkType.Default) {
+        public FastLinkAttribute(string richText, FastLinkType style = FastLinkType.Default, string validationMethod = null, string visibilityMethod = null) {
             
             this.text = richText;
             this.style = style;
+            this.validationMethod = validationMethod;
+            this.visibilityMethod = visibilityMethod;
 
         }
 
@@ -102,11 +107,21 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
     public class ConsoleScreen : LayoutWindowType, IDataSource {
 
-        public struct FastLink {
+        public class FastLinkDirectory {
+
+            public int id;
+            public int parentId;
+
+        }
+
+        public class FastLink : FastLinkDirectory {
 
             public string cmd;
             public bool run;
             public string caption;
+            public IConsoleModule module;
+            public System.Reflection.MethodInfo validationMethodInfo;
+            public System.Reflection.MethodInfo visibilityMethodInfo;
             public FastLinkType style;
 
         }
@@ -324,7 +339,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         }
 
         public void CollectModules() {
-            
+
+            var globalId = 0;
             var types = System.AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes().Where(y => y.IsAbstract == false && y.GetInterfaces().Contains(typeof(IConsoleModule)) == true)).ToArray();
             foreach (var type in types) {
 
@@ -336,20 +352,58 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                     if (this.IsValidMethod(method) == false) continue;
 
-                    if (this.GetFastLink(method, out var caption, out var style) == true) {
+                    if (this.GetFastLink(module, method, out var caption, out var style, out var validationMethod, out var visibilityMethod) == true) {
 
-                        this.fastLinkItems.Add(new FastLink() {
-                            run = method.GetParameters().Length == 0 && style < FastLinkType.Alarm,
-                            cmd = $"{module.GetType().Name.ToLower()} {method.Name.ToLower()}",
-                            caption = caption,
-                            style = style,
-                        });
+                        var path = caption.Split('/');
+                        var parentId = -1;
+                        for (var i = 0; i < path.Length; ++i) {
 
+                            caption = path[i];
+                            var item = this.fastLinkItems.FirstOrDefault(x => x.style == FastLinkType.Directory && x.caption == caption);
+                            if (item != null) {
+                                
+                                // The same directory found - skip current
+                                parentId = item.id;
+                                continue;
+                                
+                            }
+                            
+                            var id = ++globalId;
+                            if (i == path.Length - 1) {
+                                
+                                this.fastLinkItems.Add(new FastLink() {
+                                    id = id,
+                                    parentId = parentId,
+                                    run = method.GetParameters().Length == 0 && style < FastLinkType.Alarm,
+                                    cmd = $"{module.GetType().Name.ToLower()} {method.Name.ToLower()}",
+                                    caption = caption,
+                                    module = module,
+                                    validationMethodInfo = validationMethod,
+                                    visibilityMethodInfo = visibilityMethod,
+                                    style = style,
+                                });
+                                
+                            } else {
+
+                                this.fastLinkItems.Add(new FastLink() {
+                                    id = id,
+                                    parentId = parentId,
+                                    caption = caption,
+                                    style = FastLinkType.Directory,
+                                });
+                                parentId = id;
+
+                            }
+
+                        }
+                        
                     }
 
                 }
                 
             }
+            
+            this.fastLinkItems.Sort(new CaptionComparer());
             
         }
 
@@ -450,14 +504,18 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
         }
 
-        private bool GetFastLink(System.Reflection.ICustomAttributeProvider methodInfo, out string text, out FastLinkType style) {
+        private bool GetFastLink(IConsoleModule module, System.Reflection.ICustomAttributeProvider methodInfo, out string text, out FastLinkType style, out System.Reflection.MethodInfo validationMethodInfo, out System.Reflection.MethodInfo visibilityMethodInfo) {
             
             text = string.Empty;
             style = FastLinkType.Default;
+            validationMethodInfo = null;
+            visibilityMethodInfo = null;
             
             var aliasAttrs = methodInfo.GetCustomAttributes(typeof(FastLinkAttribute), false);
             if (aliasAttrs.Length == 0) return false;
             var attr = (aliasAttrs[0] as FastLinkAttribute);
+            if (string.IsNullOrEmpty(attr.validationMethod) == false) validationMethodInfo = module.GetType().GetMethod(attr.validationMethod, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+            if (string.IsNullOrEmpty(attr.visibilityMethod) == false) visibilityMethodInfo = module.GetType().GetMethod(attr.visibilityMethod, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
             text = attr.text.ToLower();
             style = attr.style;
             return true;
@@ -900,6 +958,10 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                     color = new Color(1f, 0.15f, 0.4f);
                     break;
 
+                case FastLinkType.Directory:
+                    color = new Color(0f, 0f, 0f, 0f);
+                    break;
+
             }
 
             return color;
@@ -953,6 +1015,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             public int index { get; set; }
             public List<FastLink> data;
+            public ConsoleScreen screen;
 
         }
 
@@ -986,6 +1049,62 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        private void GetFastLinks(int parentId, List<FastLink> results) {
+
+            results.Clear();
+            if (parentId >= 0) {
+                
+                // Add [DIR UP] link
+                results.Add(new FastLink() {
+                    id = this.prevDirectoryId,
+                    style = FastLinkType.Directory,
+                    caption = "[DIR UP]",
+                });
+                
+            }
+            
+            for (int i = 0; i < this.fastLinkItems.Count; ++i) {
+                
+                var item = this.fastLinkItems[i];
+                if (item.parentId == parentId) {
+                    
+                    results.Add(item);
+                    
+                }
+                
+            }
+            
+        }
+
+        private bool ValidateFastLink(FastLink link) {
+
+            if (link.validationMethodInfo != null) {
+
+                var result = (bool)link.validationMethodInfo.Invoke(link.module, null);
+                return result;
+
+            }
+            
+            return true;
+
+        }
+
+        private bool ValidateFastLinkVisibility(FastLink link) {
+
+            if (link.visibilityMethodInfo != null) {
+
+                var result = (bool)link.visibilityMethodInfo.Invoke(link.module, null);
+                return result;
+
+            }
+            
+            return true;
+
+        }
+
+        private List<FastLink> fastLinkCache = new List<FastLink>();
+        private int currentDirectoryId = -1;
+        private int prevDirectoryId = -1;
         public void LateUpdate() {
 
             if (this.GetState() != ObjectState.Shown) return;
@@ -1020,28 +1139,49 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             this.inputField.Get<ButtonComponent>().SetInteractable(this.inputField.GetText().Length > 0);
 
-            this.fastLinks.SetItems<ButtonComponent, ClosureFastLinksParameters>(this.fastLinkItems.Count, (button, parameters) => {
+            this.GetFastLinks(this.currentDirectoryId, this.fastLinkCache);
+            this.fastLinks.SetItems<FastLinkButtonComponent, ClosureFastLinksParameters>(this.fastLinkCache.Count, (button, parameters) => {
 
                 var item = parameters.data[parameters.index];
-                button.Get<TextComponent>().SetText(item.caption);
-                button.Get<ImageComponent>().SetColor(ConsoleScreen.GetColorByFastLinkStyle(item.style));
-                button.SetCallback(() => {
-
-                    if (item.run == true) {
-
-                        this.ApplyCommand(item.cmd);
-
-                    } else {
-                        
-                        this.ReplaceInput($"{item.cmd} ");
-                        
-                    }
+                button.SetInfo(item);
+                
+                if (item.style == FastLinkType.Directory) {
                     
-                });
-                button.Show();
+                    button.SetInteractable(true);
 
+                    // Draw directory
+                    button.SetCallback(() => {
+
+                        parameters.screen.prevDirectoryId = parameters.screen.currentDirectoryId;
+                        parameters.screen.currentDirectoryId = item.id;
+
+                    });
+                    button.Show();
+                    
+                } else {
+                    
+                    button.SetInteractable(parameters.screen.ValidateFastLink(item));
+
+                    button.SetCallback(() => {
+
+                        if (item.run == true) {
+
+                            parameters.screen.ApplyCommand(item.cmd);
+
+                        } else {
+                        
+                            parameters.screen.ReplaceInput($"{item.cmd} ");
+                        
+                        }
+                    
+                    });
+                    button.ShowHide(parameters.screen.ValidateFastLinkVisibility(item));
+
+                }
+                
             }, new ClosureFastLinksParameters() {
-                data = this.fastLinkItems,
+                data = this.fastLinkCache,
+                screen = this,
             });
             
             this.list.SetDataSource(this);
@@ -1071,5 +1211,30 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         }
 
     }
-    
+
+    public class CaptionComparer : IComparer<ConsoleScreen.FastLink> {
+
+        public int Compare(ConsoleScreen.FastLink x, ConsoleScreen.FastLink y) {
+            
+            if (Object.ReferenceEquals(x, y)) {
+                return 0;
+            }
+
+            if (Object.ReferenceEquals(null, y)) {
+                return 1;
+            }
+
+            if (Object.ReferenceEquals(null, x)) {
+                return -1;
+            }
+
+            if (x.style < y.style) return 1;
+            if (x.style > y.style) return -1;
+            
+            return string.Compare(x.caption, y.caption, System.StringComparison.InvariantCultureIgnoreCase);
+            
+        }
+
+    }
+
 }

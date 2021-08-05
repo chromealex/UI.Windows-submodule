@@ -947,7 +947,7 @@ namespace UnityEngine.UI.Windows.Utilities {
             public Tween<T> OnUpdate(System.Action<T, float> onResult) {
 
                 this.onUpdate = onResult;
-                this.tweener.Step(this, Time.deltaTime);
+                //this.tweener.Step(this, Time.deltaTime);
                 return this;
 
             }

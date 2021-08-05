@@ -741,6 +741,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         public class Tween<T> : ITween, ITweenInternal {
 
+	        internal Tweener tweener;
             internal T obj;
             internal float duration;
             internal float from;
@@ -870,6 +871,8 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             }
 
+            public float GetDirection() => this.direction;
+
             public Tween<T> Loop(int loops = 1) {
 				
 	            this.loops = loops;
@@ -877,9 +880,10 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             }
 
-            public Tween<T> SetValue(float timer) {
+            public Tween<T> SetValue(float timer, float direction) {
 				
 	            this.timer = timer;
+	            this.direction = direction;
 	            return this;
 
             }
@@ -943,6 +947,7 @@ namespace UnityEngine.UI.Windows.Utilities {
             public Tween<T> OnUpdate(System.Action<T, float> onResult) {
 
                 this.onUpdate = onResult;
+                this.tweener.Step(this, Time.deltaTime);
                 return this;
 
             }
@@ -954,6 +959,7 @@ namespace UnityEngine.UI.Windows.Utilities {
         public Tween<T> Add<T>(T obj, float duration, float from, float to) {
 
             var tween = new Tweener.Tween<T>();
+            tween.tweener = this;
             tween.obj = obj;
             tween.duration = duration;
             tween.from = from;
@@ -978,6 +984,20 @@ namespace UnityEngine.UI.Windows.Utilities {
                 }
 
             }
+
+        }
+
+        private bool Step(ITween tween, float dt) {
+	        
+	        if (tween.Update(dt) == true) {
+
+		        this.completeList.Add(tween);
+		        this.tweens.Remove(tween);
+		        return true;
+                    
+	        }
+
+	        return false;
 
         }
 

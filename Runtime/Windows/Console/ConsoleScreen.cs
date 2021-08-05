@@ -11,6 +11,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         public ConsoleScreen screen;
         
+        [Help("Prints available methods for this module")]
         public void Help() {
 
             this.screen.PrintHelp(this);

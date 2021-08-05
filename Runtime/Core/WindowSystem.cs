@@ -617,16 +617,12 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public void OnValidate() {
+        public static List<WindowItem> GetCurrentOpened() {
 
-            /*foreach (var item in this.registeredPrefabs) {
-
-                item.windowId = item.identifier;//.GetType().GetHashCode();
-
-            }*/
+            return WindowSystem.instance.currentWindows;
 
         }
-
+        
         public static RuntimePlatform GetCurrentRuntimePlatform() {
 
             if (WindowSystem.instance.emulatePlatform == true) {

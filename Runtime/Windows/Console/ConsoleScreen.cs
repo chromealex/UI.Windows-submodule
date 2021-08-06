@@ -959,6 +959,28 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        public static Color GetScrollbarColorByLogType(LogType logType) {
+
+            var color = Color.white;
+            switch (logType) {
+                
+                case LogType.Warning:
+                    color = Color.yellow;
+                    break;
+
+                case LogType.Assert:
+                case LogType.Exception:
+                case LogType.Error:
+                    color = Color.red;
+                    break;
+
+            }
+            color.a = 0.3f;
+            
+            return color;
+
+        }
+
         float IDataSource.GetSize(int index) {
 
             var button = (this.list.source.directRef as ButtonComponent);
@@ -977,6 +999,14 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         private struct ClosureParameters : IListClosureParameters {
 
             public int index { get; set; }
+            public ConsoleScreen data;
+
+        }
+
+        private struct ClosureParametersScrollbar : IListClosureParameters {
+
+            public int index { get; set; }
+            public ListEndlessComponentModule.Item lastItem;
             public ConsoleScreen data;
 
         }
@@ -1106,9 +1136,17 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
-        private List<FastLink> fastLinkCache = new List<FastLink>();
+        public struct ScrollbarItem {
+
+            public LogType logType;
+            public ListEndlessComponentModule.Item item;
+
+        }
+
+        private readonly List<FastLink> fastLinkCache = new List<FastLink>();
         private int currentDirectoryId = -1;
         private int prevDirectoryId = -1;
+        private readonly List<ScrollbarItem> scrollbarItems = new List<ScrollbarItem>();
         public void LateUpdate() {
 
             if (this.GetState() != ObjectState.Shown) return;
@@ -1188,7 +1226,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 data = this.fastLinkCache,
                 screen = this,
             });
-            
+
             this.list.SetDataSource(this);
             this.list.SetItems<ButtonComponent, ClosureParameters>(this.GetDrawItemsCount(), (component, parameters) => {
 
@@ -1197,7 +1235,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 text.SetText(item.isCommand == true ? "<color=#777><b>></b></color> " : string.Empty, item.line);
                 text.SetColor(item.isCommand == true ? new Color(0.15f, 0.6f, 1f) : ConsoleScreen.GetColorByLogType(item.logType));
                 component.SetCallback(() => {
-                    this.ReplaceInput(item.line);
+                    parameters.data.ReplaceInput(item.line);
                 });
                 component.SetInteractable(item.isCommand);
                 component.Show();
@@ -1210,6 +1248,73 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                 this.logsCounterComponent.SetInfo();
                 this.isDirty = false;
+
+                {
+                    var module = this.list.GetModule<ListEndlessComponentModule>();
+                    this.scrollbarItems.Clear();
+                    var i = 0;
+                    var prevLog = LogType.Log;
+                    var prevRectItem = new ListEndlessComponentModule.Item();
+                    foreach (var item in this.drawItems) {
+
+                        if (this.HasLogFilterType(item.logType) == true) {
+
+                            if (i < this.drawItems.Count - 1 && item.logType != LogType.Log && item.logType != prevLog) {
+
+                                prevLog = item.logType;
+                                prevRectItem = module.GetItemByIndex(i);
+
+                            } else if ((i == this.drawItems.Count - 1 && item.logType != LogType.Log) || (item.logType == LogType.Log && item.logType != prevLog)) {
+
+                                if (i == this.drawItems.Count - 1) {
+
+                                    if (prevLog == LogType.Log) {
+
+                                        prevRectItem = module.GetItemByIndex(i);
+                                        prevRectItem.accumulatedSize -= prevRectItem.size;
+                                        prevLog = item.logType;
+
+                                    }
+
+                                }
+                                
+                                var rectItem = module.GetItemByIndex(i);
+                                prevRectItem.size = rectItem.accumulatedSize - prevRectItem.accumulatedSize;
+                                this.scrollbarItems.Add(new ScrollbarItem() {
+                                    logType = prevLog,
+                                    item = prevRectItem,
+                                });
+                                
+                                prevRectItem = rectItem;
+                                prevLog = item.logType;
+                                
+                            }
+                            
+                            ++i;
+
+                        }
+                        
+                    }
+
+                    var lastItem = new ListEndlessComponentModule.Item() {
+                        accumulatedSize = 10f,
+                    };
+                    if (this.scrollbarItems.Count > 0 && i > 1) {
+
+                        lastItem = module.GetItemByIndex(i - 1);
+
+                    }
+
+                    var scrollbarList = this.list.Get<ListComponent>();
+                    scrollbarList.SetItems<LogScrollbarRectComponent, ClosureParametersScrollbar>(this.scrollbarItems.Count, (item, data) => {
+                        
+                        item.SetInfo(data.data.scrollbarItems[data.index], data.lastItem.accumulatedSize);
+                        
+                    }, new ClosureParametersScrollbar() {
+                        data = this,
+                        lastItem = lastItem,
+                    });
+                }
 
             }
 

@@ -67,6 +67,9 @@ namespace UnityEditor.UI.Windows {
                     result.resource.guid = AssetDatabase.AssetPathToGUID(assetPath);
                     result.resource.subObjectName = (newObj != null && AssetDatabase.IsSubAsset(newObj) == true ? AssetDatabase.LoadAllAssetsAtPath(assetPath).FirstOrDefault(x => x.name == newObj.name).name : string.Empty);
                     result.resource.directRef = null;
+                    if (string.IsNullOrEmpty(assetPath) == true) {
+                        result.resource.directRef = newObj;
+                    }
                 }
                 
                 WindowSystemResourcesResourcePropertyDrawer.Validate(ref result.resource, type);

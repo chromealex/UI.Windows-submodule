@@ -386,6 +386,12 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public Item GetItemByIndex(int index) {
+            
+            return this.items[index];
+            
+        }
+
         public void CalculateBounds() {
 
             var accumulatedSize = 0f;

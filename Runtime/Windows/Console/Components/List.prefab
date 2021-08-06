@@ -134,7 +134,7 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 1750014369206174538}
-  hasObjectCanvas: 1
+  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers:

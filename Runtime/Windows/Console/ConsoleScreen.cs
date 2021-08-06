@@ -20,6 +20,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
     }
 
+    [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Method)]
     public class HelpAttribute : System.Attribute {
 
         public string text;
@@ -32,6 +33,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
     }
 
+    [System.AttributeUsageAttribute(System.AttributeTargets.Class)]
     public class AliasAttribute : System.Attribute {
 
         public string text;
@@ -54,6 +56,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
     }
     
+    [System.AttributeUsageAttribute(System.AttributeTargets.Method)]
     public class FastLinkAttribute : System.Attribute {
 
         public string text;
@@ -71,39 +74,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         }
 
     }
-
-    /*[Help("Test module")][Alias("T")]
-    public class Test : ConsoleModule {
-
-        [Help("Prints help bool")]
-        public void Z(bool a) {
-
-            Debug.Log("Z: " + a);
-
-        }
-
-        [Help("Prints help string")][Alias("A")][FastLink("T HELP1")]
-        public void Help1() {
-
-            Debug.Log("Help");
-
-        }
-
-        [Help("Prints help string with a")][FastLink("T HELP2")]
-        public void Help2(int a) {
-
-            Debug.Log("Help2: " + a);
-
-        }
-
-        [Help("Prints help string with a and b")]
-        public void Help3(int a, float b) {
-
-            Debug.Log("Help3: " + a + " :: " + b);
-
-        }
-
-    }*/
 
     public class ConsoleScreen : LayoutWindowType, IDataSource {
 

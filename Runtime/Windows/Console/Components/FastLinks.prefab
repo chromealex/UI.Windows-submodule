@@ -1260,7 +1260,7 @@ GameObject:
   - component: {fileID: 1720341191342947234}
   - component: {fileID: 4925631495145721570}
   m_Layer: 5
-  m_Name: Breadcrump
+  m_Name: Breadcrumbs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

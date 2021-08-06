@@ -134,7 +134,7 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 1750014369206174538}
-  hasObjectCanvas: 0
+  hasObjectCanvas: 1
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers:
@@ -158,7 +158,7 @@ MonoBehaviour:
   hiddenByDefault: 0
   debugStateLog:
     items: []
-  isObjectRoot: 0
+  isObjectRoot: 1
   rootObject: {fileID: 0}
   subObjects: []
   audioEvents:
@@ -175,6 +175,7 @@ MonoBehaviour:
     windowComponent: {fileID: 5590231133715331329}
     modules:
     - {fileID: 3200967013095831660}
+  components: []
   source:
     type: 1
     objectType: 2
@@ -329,7 +330,7 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 0.20392157}
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 0.49803922}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 0.45490196}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.49019608}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 0.48235294}
@@ -482,11 +483,7 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
-  registry:
-  - holder: {fileID: 5590231133715331329}
-    moduleHolder: {fileID: 0}
-    holdHiddenByDefault: 0
-    holdAllowRegisterInRoot: 1
+  registry: []
   componentModules:
     windowComponent: {fileID: 8199301820935925453}
     modules: []
@@ -764,8 +761,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: -0.00012207031}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 3, y: -0.00012207031}
+  m_SizeDelta: {x: -6, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4165838444229778871
 CanvasRenderer:
@@ -788,7 +785,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0.7176471, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

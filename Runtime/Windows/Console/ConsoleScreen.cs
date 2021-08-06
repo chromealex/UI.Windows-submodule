@@ -1072,6 +1072,40 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        public string GetDirectoryPath(int dirId) {
+
+            var str = new System.Text.StringBuilder();
+            while (dirId >= 0) {
+
+                var found = false;
+                for (int i = 0; i < this.fastLinkItems.Count; ++i) {
+
+                    var cache = this.fastLinkItems[i];
+                    if (cache.id == dirId) {
+
+                        found = true;
+                        dirId = cache.parentId;
+                        str.Insert(0, '/');
+                        str.Insert(0, cache.caption);
+                        break;
+                        
+                    }
+
+                }
+
+                if (found == false) {
+                    
+                    break;
+                    
+                }
+                
+            }
+            str.Insert(0, '/');
+
+            return str.ToString();
+
+        }
+
         private List<FastLink> fastLinkCache = new List<FastLink>();
         private int currentDirectoryId = -1;
         private int prevDirectoryId = -1;
@@ -1110,6 +1144,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             this.inputField.Get<ButtonComponent>().SetInteractable(this.inputField.GetText().Length > 0);
 
             this.GetFastLinks(this.currentDirectoryId, this.fastLinkCache);
+            this.fastLinks.Get<TextComponent>().SetText(this.GetDirectoryPath(this.currentDirectoryId));
             this.fastLinks.SetItems<FastLinkButtonComponent, ClosureFastLinksParameters>(this.fastLinkCache.Count, (button, parameters) => {
 
                 var item = parameters.data[parameters.index];

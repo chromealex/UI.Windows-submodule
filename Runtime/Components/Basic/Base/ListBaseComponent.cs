@@ -10,7 +10,7 @@ namespace UnityEngine.UI.Windows.Components {
 
     }
 
-    public abstract class ListBaseComponent : WindowComponent, ILayoutSelfController, UnityEngine.EventSystems.IBeginDragHandler, UnityEngine.EventSystems.IDragHandler, UnityEngine.EventSystems.IEndDragHandler {
+    public abstract class ListBaseComponent : GenericComponent, ILayoutSelfController, UnityEngine.EventSystems.IBeginDragHandler, UnityEngine.EventSystems.IDragHandler, UnityEngine.EventSystems.IEndDragHandler {
 
         [UnityEngine.UI.Windows.Modules.ResourceTypeAttribute(typeof(WindowComponent), RequiredType.Warning)]
         public Resource source;

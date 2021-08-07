@@ -258,6 +258,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             }
             
             this.logsCounterComponent.SetInfo();
+            this.isDirty = true;
             
         }
 

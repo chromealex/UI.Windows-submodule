@@ -68,7 +68,7 @@ namespace UnityEditor.UI.Windows {
                     caption = $"Resources ({target.GetAllocatedCount()})",
                     onDraw = () => {
                         
-                        if (tasks.Count == 0) {
+                        if (allObjects.Count == 0) {
 
                             GUILayout.Space(10f);
                             GUILayout.Label("There are no loaded resources yet.", EditorStyles.centeredGreyMiniLabel);

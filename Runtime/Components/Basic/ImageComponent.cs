@@ -19,10 +19,10 @@ namespace UnityEngine.UI.Windows.Components {
 
         public UnloadResourceEventType autoUnloadResourcesOnEvent;
 
-        private struct Texture2DConstructor : IResourceConstructor<Texture2D> {
+        private readonly struct Texture2DConstructor : IResourceConstructor<Texture2D> {
 
-            public int x;
-            public int y;
+            private readonly int x;
+            private readonly int y;
 
             public Texture2DConstructor(int x, int y) {
 
@@ -36,14 +36,21 @@ namespace UnityEngine.UI.Windows.Components {
                 return new Texture2D(this.x, this.y);
 
             }
+            
+            public void Deconstruct(ref Texture2D obj) {
+
+                Object.DestroyImmediate(obj);
+                obj = null;
+
+            }
 
         }
 
-        private struct SpriteConstructor : IResourceConstructor<Sprite> {
+        private readonly struct SpriteConstructor : IResourceConstructor<Sprite> {
 
-            public Texture2D tex2d;
-            public Rect rect;
-            public Vector2 pivot;
+            private readonly Texture2D tex2d;
+            private readonly Rect rect;
+            private readonly Vector2 pivot;
 
             public SpriteConstructor(Texture2D tex2d, Rect rect, Vector2 pivot) {
 
@@ -56,6 +63,13 @@ namespace UnityEngine.UI.Windows.Components {
             public Sprite Construct() {
 
                 return Sprite.Create(this.tex2d, this.rect, this.pivot);
+
+            }
+
+            public void Deconstruct(ref Sprite obj) {
+
+                Object.DestroyImmediate(obj);
+                obj = null;
 
             }
 

@@ -147,6 +147,9 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 4165838444229778871}
     graphics: {fileID: 5716814298807719289}
     rectMask: {fileID: 0}
+  - canvasRenderer: {fileID: 2884325997705751108}
+    graphics: {fileID: 1626494841347365779}
+    rectMask: {fileID: 0}
   isActiveSelf: 0
   createPool: 0
   animationParameters:
@@ -158,7 +161,7 @@ MonoBehaviour:
   hiddenByDefault: 0
   debugStateLog:
     items: []
-  isObjectRoot: 0
+  isObjectRoot: 1
   rootObject: {fileID: 0}
   subObjects:
   - {fileID: 7484497161558636500}
@@ -486,11 +489,7 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
-  registry:
-  - holder: {fileID: 5590231133715331329}
-    moduleHolder: {fileID: 0}
-    holdHiddenByDefault: 0
-    holdAllowRegisterInRoot: 1
+  registry: []
   componentModules:
     windowComponent: {fileID: 8199301820935925453}
     modules: []
@@ -794,11 +793,7 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
-  registry:
-  - holder: {fileID: 7484497161558636500}
-    moduleHolder: {fileID: 0}
-    holdHiddenByDefault: 0
-    holdAllowRegisterInRoot: 1
+  registry: []
   componentModules:
     windowComponent: {fileID: 1192130305656968135}
     modules: []

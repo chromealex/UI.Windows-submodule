@@ -57,6 +57,7 @@ namespace UnityEngine.UI.Windows {
         public static WindowPreferences Default => new WindowPreferences() {
             layer = new UIWSLayer() { value = 0 },
             takeFocus = true,
+            forceSyncLoad = true,
         };
 
         [Header("Base Parameters")]
@@ -64,6 +65,8 @@ namespace UnityEngine.UI.Windows {
         public UIWSLayer layer;
         [Tooltip("Check if you need to show this window only once.")]
         public bool singleInstance;
+        [Tooltip("Force sync screen load even loading set up via async WindowSystem.Show API")]
+        public bool forceSyncLoad;
 
         [Space(10f)]
         [Tooltip("Add in history into current breadcrumb.")]
@@ -81,12 +84,12 @@ namespace UnityEngine.UI.Windows {
         public UIWSCameraMode cameraMode;
 
         [Space(10f)]
-        [Tooltip("Collect windows into queue and use this queue automatically on event.")]
+        [Tooltip("Collect screens into queue and use this queue automatically on event.")]
         public bool showInSequence;
         public SequenceEvent showInSequenceEvent;
 
         [Header("Performance Options")]
-        [Tooltip("If this window has full-rect opaque background you can set this option as true to deactivate render on all windows behind this.")]
+        [Tooltip("If this screen has full-rect opaque background you can set this option as true to deactivate render on all screens behind this.")]
         public bool fullCoverage;
 
     }
@@ -1442,6 +1445,12 @@ namespace UnityEngine.UI.Windows {
             if (source == null) {
 
                 throw new System.Exception("Window Source is null, did you forget to collect your screens?");
+
+            }
+
+            if (source.preferences.forceSyncLoad == true && initialParameters.showSync == false) {
+
+                initialParameters.showSync = true;
 
             }
             

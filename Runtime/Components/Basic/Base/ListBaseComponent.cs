@@ -324,6 +324,12 @@ namespace UnityEngine.UI.Windows.Components {
                 
                 var pools = WindowSystem.GetPools();
                 var instance = pools.Spawn(asset, innerClosure.component.GetRoot());
+                #if UNITY_EDITOR
+                var profileMarker = new Unity.Profiling.ProfilerMarker("ListComponentBase::AddItemInternal::SetItemName (Editor Only)");
+                profileMarker.Begin();
+                instance.name = $"{asset.name}_{innerClosure.data.index}";
+                profileMarker.End();
+                #endif
                 innerClosure.component.RegisterSubObject(instance);
                 innerClosure.component.items.Add(instance);
                 innerClosure.component.NotifyModulesComponentAdded(instance);

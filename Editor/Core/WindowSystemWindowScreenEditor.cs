@@ -277,17 +277,7 @@ namespace UnityEditor.UI.Windows {
         
             GUILayout.Space(10f);
 
-            var iter = this.serializedObject.GetIterator();
-            iter.NextVisible(true);
-            do {
-
-                if (EditorHelpers.IsFieldOfTypeBeneath(this.serializedObject.targetObject.GetType(), typeof(UnityEngine.UI.Windows.WindowTypes.LayoutWindowType), iter.propertyPath) == true) {
-
-                    EditorGUILayout.PropertyField(iter);
-
-                }
-
-            } while (iter.NextVisible(false) == true);
+            GUILayoutExt.DrawFieldsBeneath(this.serializedObject, typeof(UnityEngine.UI.Windows.WindowTypes.LayoutWindowType));
 
             this.serializedObject.ApplyModifiedProperties();
 

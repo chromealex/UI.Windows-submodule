@@ -7,6 +7,61 @@ using System.CodeDom.Compiler;
 
 namespace UnityEditor.UI.Windows {
     
+	
+	public static class SplitterGUI {
+	
+		public static readonly GUIStyle splitter;
+	
+		static SplitterGUI() {
+			//GUISkin skin = GUI.skin;
+		
+			SplitterGUI.splitter = new GUIStyle();
+			SplitterGUI.splitter.normal.background = EditorGUIUtility.whiteTexture;
+			SplitterGUI.splitter.stretchWidth = true;
+			SplitterGUI.splitter.margin = new RectOffset(0, 0, 7, 7);
+		}
+	
+		private static readonly Color splitterColor = EditorGUIUtility.isProSkin ? new Color(0.3f, 0.3f, 0.3f) : new Color(0.5f, 0.5f, 0.5f);
+	
+		// GUILayout Style
+		public static void Splitter(Color rgb, float thickness = 1) {
+			Rect position = GUILayoutUtility.GetRect(GUIContent.none, SplitterGUI.splitter, GUILayout.Height(thickness));
+		
+			if (Event.current.type == EventType.Repaint) {
+				Color restoreColor = GUI.color;
+				GUI.color = rgb;
+				SplitterGUI.splitter.Draw(position, false, false, false, false);
+				GUI.color = restoreColor;
+			}
+		}
+	
+		public static void Splitter(float thickness, GUIStyle splitterStyle) {
+			Rect position = GUILayoutUtility.GetRect(GUIContent.none, splitterStyle, GUILayout.Height(thickness));
+		
+			if (Event.current.type == EventType.Repaint) {
+				Color restoreColor = GUI.color;
+				GUI.color = SplitterGUI.splitterColor;
+				splitterStyle.Draw(position, false, false, false, false);
+				GUI.color = restoreColor;
+			}
+		}
+	
+		public static void Splitter(float thickness = 1) {
+			SplitterGUI.Splitter(thickness, SplitterGUI.splitter);
+		}
+	
+		// GUI Style
+		public static void Splitter(Rect position) {
+			if (Event.current.type == EventType.Repaint) {
+				Color restoreColor = GUI.color;
+				GUI.color = SplitterGUI.splitterColor;
+				SplitterGUI.splitter.Draw(position, false, false, false, false);
+				GUI.color = restoreColor;
+			}
+		}
+	
+	}
+
     public abstract class CustomEditorAttribute : System.Attribute {
 
         public System.Type type;
@@ -49,6 +104,25 @@ namespace UnityEditor.UI.Windows {
     
     public static class GUILayoutExt {
 
+	    public struct GUIBackgroundColorUsing : IDisposable {
+
+		    private Color oldColor;
+
+		    public GUIBackgroundColorUsing(Color color) {
+
+			    this.oldColor = GUI.backgroundColor;
+			    GUI.backgroundColor = color;
+
+		    }
+		    
+		    public void Dispose() {
+
+			    GUI.backgroundColor = this.oldColor;
+
+		    }
+
+	    }
+
 	    public struct GUIColorUsing : IDisposable {
 
 		    private Color oldColor;
@@ -68,12 +142,60 @@ namespace UnityEditor.UI.Windows {
 
 	    }
 	    
+	    public static GUIBackgroundColorUsing GUIBackgroundColor(Color color) {
+		    
+		    return new GUIBackgroundColorUsing(color);
+		    
+	    }
+
 	    public static GUIColorUsing GUIColor(Color color) {
 		    
 		    return new GUIColorUsing(color);
 		    
 	    }
 
+	    public static void DrawFieldsBeneath(SerializedObject serializedObject, System.Type baseType) {
+		    
+		    var iter = serializedObject.GetIterator();
+		    iter.NextVisible(true);
+		    System.Type baseClassType = null;
+		    do {
+
+			    if (EditorHelpers.IsFieldOfTypeBeneath(serializedObject.targetObject.GetType(), baseType, iter.propertyPath) == true) {
+
+				    var newBaseClassType = EditorHelpers.GetFieldViaPath(serializedObject.targetObject.GetType(), iter.propertyPath).DeclaringType;
+				    if (newBaseClassType != null && newBaseClassType != baseClassType) {
+                        
+					    GUILayoutExt.DrawSplitter(newBaseClassType.Name);
+					    baseClassType = newBaseClassType;
+                        
+				    }
+				    EditorGUILayout.PropertyField(iter);
+
+			    }
+
+		    } while (iter.NextVisible(false) == true);
+		    
+	    }
+	    
+	    public static void DrawSplitter(string label) {
+
+		    var splitted = label.Split('`');
+		    if (splitted.Length > 1) {
+
+			    label = splitted[0];
+
+		    }
+
+		    var labelStyle = EditorStyles.centeredGreyMiniLabel;
+		    var size = labelStyle.CalcSize(new GUIContent(label.ToSentenceCase()));
+		    GUILayout.Label(label.ToSentenceCase().UppercaseWords(), labelStyle);
+		    var lastRect = GUILayoutUtility.GetLastRect();
+		    SplitterGUI.Splitter(new Rect(lastRect.x, lastRect.y + lastRect.height * 0.5f, lastRect.width * 0.5f - size.x * 0.5f, 1f));
+		    SplitterGUI.Splitter(new Rect(lastRect.x + lastRect.width * 0.5f + size.x * 0.5f, lastRect.y + lastRect.height * 0.5f, lastRect.width * 0.5f - size.x * 0.5f, 1f));
+
+	    }
+	    
 	    public static void DrawSafeAreaFields(UnityEngine.Object target, SerializedProperty useSafeZone, SerializedProperty safeZone) {
 		    
 		    EditorGUILayout.PropertyField(useSafeZone);

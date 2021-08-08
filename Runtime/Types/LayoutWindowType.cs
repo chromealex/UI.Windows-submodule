@@ -265,7 +265,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                             initialParameters = initialParameters,
                         };
                         ++this.loadingCount;
-                        Coroutines.Run(resources.LoadAsync<WindowComponent, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, windowInstance, data, layoutComponent.component, (asset, closure) => {
+                        Coroutines.Run(resources.LoadAsync<WindowComponent, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, layoutElement, data, layoutComponent.component, (asset, closure) => {
 
                             if (asset == null) {
 

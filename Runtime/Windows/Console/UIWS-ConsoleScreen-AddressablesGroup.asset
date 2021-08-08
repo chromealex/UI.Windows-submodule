@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: UIWS-ConsoleScreen-AddressablesGroup
+  m_EditorClassIdentifier: 
+  m_GroupName: UIWS-ConsoleScreen-AddressablesGroup
+  m_Data:
+    m_SerializedData: []
+  m_GUID: eadfa632443be46ffb8e0a437891e326
+  m_SerializeEntries:
+  - m_GUID: 957852f283c92495cadd753b12847282
+    m_Address: 957852f283c92495cadd753b12847282
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+  - m_GUID: b525f1dcb523b4a6290e5518b5cbb118
+    m_Address: b525f1dcb523b4a6290e5518b5cbb118
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+  - m_GUID: 19f3e1d84486d41eb8a64f9ff768e4f1
+    m_Address: 19f3e1d84486d41eb8a64f9ff768e4f1
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+  - m_GUID: 1c10b7c4270a3436aa31517c54f8fe05
+    m_Address: 1c10b7c4270a3436aa31517c54f8fe05
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+  m_ReadOnly: 1
+  m_Settings: {fileID: 11400000, guid: 4c121f26e7f1b45b097cf47c5761e045, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 4467254967371481021}
+--- !u!114 &4467254967371481021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5d17a21594effb4e9591490b009e7aa, type: 3}
+  m_Name: BundledAssetGroupSchema
+  m_EditorClassIdentifier: 
+  m_Group: {fileID: 11400000}
+  m_InternalBundleIdMode: 1
+  m_Compression: 1
+  m_IncludeAddressInCatalog: 1
+  m_IncludeGUIDInCatalog: 1
+  m_IncludeLabelsInCatalog: 1
+  m_InternalIdNamingMode: 0
+  m_CacheClearBehavior: 0
+  m_IncludeInBuild: 1
+  m_BundledAssetProviderType:
+    m_AssemblyName: Unity.ResourceManager, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    m_ClassName: UnityEngine.ResourceManagement.ResourceProviders.BundledAssetProvider
+  m_ForceUniqueProvider: 0
+  m_UseAssetBundleCache: 1
+  m_UseAssetBundleCrc: 1
+  m_UseAssetBundleCrcForCachedBundles: 1
+  m_UseUWRForLocalBundles: 0
+  m_Timeout: 0
+  m_ChunkedTransfer: 0
+  m_RedirectLimit: -1
+  m_RetryCount: 0
+  m_BuildPath:
+    m_Id: ea2da8f3bb7954e98b8f767f9d33e5f6
+  m_LoadPath:
+    m_Id: c71a0f33a723d4b59857d1234e702ff2
+  m_BundleMode: 0
+  m_AssetBundleProviderType:
+    m_AssemblyName: Unity.ResourceManager, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    m_ClassName: UnityEngine.ResourceManagement.ResourceProviders.AssetBundleProvider
+  m_BundleNaming: 0
+  m_AssetLoadMode: 0

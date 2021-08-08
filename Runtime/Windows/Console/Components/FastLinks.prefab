@@ -603,7 +603,7 @@ MonoBehaviour:
   hiddenByDefault: 0
   debugStateLog:
     items: []
-  isObjectRoot: 0
+  isObjectRoot: 1
   rootObject: {fileID: 0}
   subObjects:
   - {fileID: 1250138211036181806}
@@ -752,11 +752,7 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
-  registry:
-  - holder: {fileID: 1068094537600266531}
-    moduleHolder: {fileID: 0}
-    holdHiddenByDefault: 0
-    holdAllowRegisterInRoot: 1
+  registry: []
   componentModules:
     windowComponent: {fileID: 3695580543768649993}
     modules: []

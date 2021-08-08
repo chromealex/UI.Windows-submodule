@@ -43,7 +43,7 @@ namespace UnityEngine.UI.Windows {
 
         public override string ToString() {
             
-            return "Resource: " + this.type + "/" + this.objectType + "/" + this.guid + ". Ref: " + this.directRef;
+            return $"[Resource] Type: {this.type}, Object Type: {this.objectType}, GUID: {this.guid} ({this.subObjectName}), Direct Reference: {this.directRef}";
             
         }
 
@@ -133,6 +133,7 @@ namespace UnityEngine.UI.Windows.Modules {
     public interface IResourceConstructor<T> where T : class {
 
         T Construct();
+        void Deconstruct(ref T obj);
 
     }
 
@@ -141,6 +142,12 @@ namespace UnityEngine.UI.Windows.Modules {
         public T Construct() {
 
             return new T();
+
+        }
+
+        public void Deconstruct(ref T obj) {
+
+            obj = default;
 
         }
 
@@ -168,13 +175,15 @@ namespace UnityEngine.UI.Windows.Modules {
             public readonly object resource;
             public readonly int resourceId;
             public readonly Resource resourceSource;
+            public readonly System.Action deconstruct;
 
-            public InternalResourceItem(object handler, object resource, Resource resourceSource) {
+            public InternalResourceItem(object handler, object resource, Resource resourceSource, System.Action deconstruct) {
 
                 this.handler = handler;
                 this.resource = resource;
                 this.resourceId = resource.GetHashCode();
                 this.resourceSource = resourceSource;
+                this.deconstruct = deconstruct;
 
             }
 
@@ -184,6 +193,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 this.resource = null;
                 this.resourceId = resourceId;
                 this.resourceSource = default;
+                this.deconstruct = null;
 
             }
 
@@ -227,10 +237,32 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        private Dictionary<InternalTask, System.Action<object>> tasks = new Dictionary<InternalTask, System.Action<object>>();
-        private Dictionary<int, HashSet<InternalResourceItem>> handlerToObjects = new Dictionary<int, HashSet<InternalResourceItem>>();
-        private Dictionary<int, HashSet<System.Action>> handlerToTasks = new Dictionary<int, HashSet<System.Action>>();
+        public struct DefaultClosureData { }
 
+        public class ClosureResult<T> {
+
+            public T result;
+            
+        }
+
+        public struct LoadParameters {
+
+            public bool async;
+
+        }
+
+        private readonly Dictionary<InternalTask, System.Action<object>> tasks = new Dictionary<InternalTask, System.Action<object>>();
+        private readonly Dictionary<int, HashSet<InternalResourceItem>> handlerToObjects = new Dictionary<int, HashSet<InternalResourceItem>>();
+        private readonly Dictionary<int, int> objectsToReferenceCount = new Dictionary<int, int>();
+        private readonly Dictionary<int, HashSet<System.Action>> handlerToTasks = new Dictionary<int, HashSet<System.Action>>();
+        private readonly List<InternalResourceItem> internalDeleteAllCache = new List<InternalResourceItem>();
+
+        public Dictionary<InternalTask, System.Action<object>> GetTasks() {
+
+            return this.tasks;
+
+        }
+        
         private bool RequestLoad<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
             
             var item = new InternalTask(resource);
@@ -260,20 +292,6 @@ namespace UnityEngine.UI.Windows.Modules {
                 this.tasks.Remove(item);
 
             }
-
-        }
-
-        public struct DefaultClosureData { }
-
-        public class ClosureResult<T> {
-
-            public T result;
-            
-        }
-
-        public struct LoadParameters {
-
-            public bool async;
 
         }
 
@@ -337,14 +355,14 @@ namespace UnityEngine.UI.Windows.Modules {
                     if (resource.directRef is GameObject go && typeof(T).IsAssignableFrom(typeof(Component))) {
 
                         var direct = go.GetComponent<T>();
-                        this.AddObject(handler, direct, resource);
+                        this.AddObject(handler, direct, resource, null);
 
                         this.CompleteTask(handler, resource, direct);
                         yield break;
 
                     } else if (resource.directRef is T direct) {
 
-                        this.AddObject(handler, direct, resource);
+                        this.AddObject(handler, direct, resource, null);
 
                         this.CompleteTask(handler, resource, direct);
                         yield break;
@@ -383,7 +401,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                                 } else {
 
-                                    this.AddObject(handler, asset, resource);
+                                    this.AddObject(handler, asset, resource, () => UnityEngine.AddressableAssets.Addressables.Release(asset));
 
                                     this.CompleteTask(handler, resource, asset.GetComponent<T>());
 
@@ -400,7 +418,7 @@ namespace UnityEngine.UI.Windows.Modules {
                         UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle<T> op;
                         if (string.IsNullOrEmpty(resource.subObjectName) == false) {
                             
-                            op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(resource.guid + "[" + resource.subObjectName + "]");
+                            op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>($"{resource.guid}[{resource.subObjectName}]");
                             
                         } else {
                             
@@ -428,7 +446,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                                 } else {
 
-                                    this.AddObject(handler, asset, resource);
+                                    this.AddObject(handler, asset, resource, () => UnityEngine.AddressableAssets.Addressables.Release(asset));
 
                                     this.CompleteTask(handler, resource, asset);
 
@@ -534,7 +552,7 @@ namespace UnityEngine.UI.Windows.Modules {
             if (handler == null) handler = this;
 
             var obj = resourceConstructor.Construct();
-            this.AddObject(handler, obj, new Resource() { type = Resource.Type.Manual });
+            this.AddObject(handler, obj, new Resource() { type = Resource.Type.Manual }, () => resourceConstructor.Deconstruct(ref obj));
             return obj;
 
         }
@@ -562,9 +580,14 @@ namespace UnityEngine.UI.Windows.Modules {
             if (obj == null) return;
             if (handler == null) handler = this;
 
+            //Debug.Log("Delete obj: " + handler + " :: " + obj);
             var objId = obj.GetHashCode();
-            this.UnloadObject(handler, obj);
-            this.RemoveObject(handler, objId);
+            if (this.RemoveObject(handler, objId, out var resource) == true) {
+                
+                this.UnloadObject(handler, obj, resource);
+                
+            }
+
             obj = null;
 
         }
@@ -572,114 +595,97 @@ namespace UnityEngine.UI.Windows.Modules {
         public void DeleteAll(object handler) {
 
             if (handler == null) handler = this;
-
-            this.UnloadAllObjects(handler);
-            this.RemoveAllObjects(handler);
-
-        }
-
-        private void UnloadAllObjects(object handler) {
-
+            
             var key = handler.GetHashCode();
             if (this.handlerToObjects.TryGetValue(key, out var list) == true) {
 
-                foreach (var resItem in list) {
-
-                    this.UnloadObject(resItem.handler, resItem.resource);
+                this.internalDeleteAllCache.Clear();
+                this.internalDeleteAllCache.AddRange(list);
+                foreach (var item in this.internalDeleteAllCache) {
+                    
+                    this.Delete(handler, item.resource);
 
                 }
-
+                
             }
+            
+        }
+
+        private void UnloadObject(object handler, object obj, InternalResourceItem resource) {
+
+            //Debug.Log("Unload obj: " + handler + " :: " + obj);
+            resource.deconstruct?.Invoke();
 
         }
 
-        private void UnloadObject(object handler, object obj) {
+        private bool RemoveObject(object handler, int objId, out InternalResourceItem resource) {
+
+            resource = default;
 
             var key = handler.GetHashCode();
             if (this.handlerToObjects.TryGetValue(key, out var list) == true) {
 
-                var objId = obj.GetHashCode();
                 var resItem = new InternalResourceItem(handler, objId);
-                foreach (var item in list) {
+                if (list.Contains(resItem) == true) {
 
-                    if (item.GetHashCode() == resItem.GetHashCode()) {
+                    foreach (var item in list) {
 
-                        //Debug.Log("Attempt to unload object " + obj + " (handler: " + handler + "), type: " + item.resourceSource.type);
-                        switch (item.resourceSource.type) {
+                        if (item.GetHashCode() == resItem.GetHashCode()) {
+                            
+                            if (list.Remove(resItem) == true) {
 
-                            case Resource.Type.Manual: {
+                                if (list.Count == 0) this.handlerToObjects.Remove(key);
 
-                                // TODO: Put into pool if object could been pooled
+                                if (this.DecreaseRefCount(resItem.resourceId) == true) {
 
-                                if (obj is Object o) {
-
-                                    Object.DestroyImmediate(o);
+                                    resource = item;
+                                    return true;
 
                                 }
 
                             }
-                                break;
-
-                            case Resource.Type.Direct: {
-
-                                // Direct asset skipped because there are always in memory
-
-                            }
-                                break;
-
-                            case Resource.Type.Addressables: {
-
-                                UnityEngine.AddressableAssets.Addressables.Release(obj);
-
-                            }
-                                break;
-
+                            break;
+                            
                         }
 
-                        break;
-
                     }
 
                 }
-
+                
             }
+
+            return false;
 
         }
 
-        private void RemoveObject(object handler, int objId) {
+        private bool DecreaseRefCount(int resourceId) {
 
-            var key = handler.GetHashCode();
-            if (this.handlerToObjects.TryGetValue(key, out var list) == true) {
+            if (this.objectsToReferenceCount.TryGetValue(resourceId, out var counter) == true) {
 
-                var resItem = new InternalResourceItem(handler, objId);
-                if (list.Remove(resItem) == true) {
-
-                    if (list.Count == 0) {
-
-                        this.handlerToObjects.Remove(key);
-
-                    }
-
-                }
+                this.objectsToReferenceCount[resourceId] = --counter;
+                return counter <= 0;
 
             }
-
+            
+            return false;
+            
         }
 
-        private void RemoveAllObjects(object handler) {
+        private void IncreaseRefCount(int resourceId) {
 
-            var key = handler.GetHashCode();
-            if (this.handlerToObjects.TryGetValue(key, out var list) == true) {
+            if (this.objectsToReferenceCount.TryGetValue(resourceId, out var counter) == true) {
 
-                list.Clear();
-
+                this.objectsToReferenceCount[resourceId] = ++counter;
+                
+            } else {
+                
+                this.objectsToReferenceCount.Add(resourceId, counter);
+                
             }
-
-            this.handlerToObjects.Remove(key);
-
+            
         }
 
-        private void AddObject(object handler, object obj, Resource resource) {
+        private void AddObject(object handler, object obj, Resource resource, System.Action deconstruct) {
 
             var key = handler.GetHashCode();
             if (this.handlerToObjects.TryGetValue(key, out var list) == false) {
@@ -691,12 +697,14 @@ namespace UnityEngine.UI.Windows.Modules {
 
             {
 
-                var resItem = new InternalResourceItem(handler, obj, resource);
+                var resItem = new InternalResourceItem(handler, obj, resource, deconstruct);
                 if (list.Contains(resItem) == false) {
 
                     list.Add(resItem);
 
                 }
+
+                this.IncreaseRefCount(resItem.resourceId);
 
             }
 

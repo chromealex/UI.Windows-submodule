@@ -173,6 +173,27 @@ namespace UnityEditor.UI.Windows {
 
                                     var path = AssetDatabase.GetAssetPath(window);
                                     var dir = System.IO.Path.GetDirectoryName(path);
+                                    var mainDir = dir.Replace("/Screens", "");
+
+                                    var name = $"UIWS-{window.name}-AddressablesGroup";
+                                    UnityEditor.AddressableAssets.Settings.AddressableAssetSettings aaSettings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
+                                    var groupPath = $"{mainDir}/{name}.asset";
+                                    UnityEditor.AddressableAssets.Settings.AddressableAssetGroup group;
+                                    if (System.IO.File.Exists(groupPath) == false) {
+                                        
+                                        group = aaSettings.CreateGroup(name, false, true, true, null);
+                                        var scheme = group.AddSchema<UnityEditor.AddressableAssets.Settings.GroupSchemas.BundledAssetGroupSchema>();
+                                        var schemeInstance = Object.Instantiate(scheme);
+                                        schemeInstance.name = "BundledAssetGroupSchema";
+                                        AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(scheme));
+                                        AssetDatabase.AddObjectToAsset(schemeInstance, group);
+                                        group.Schemas.Clear();
+                                        group.Schemas.Add(schemeInstance);
+                                        AssetDatabase.MoveAsset(AssetDatabase.GetAssetPath(group), groupPath);
+                                        
+                                    }
+                                    group = AssetDatabase.LoadAssetAtPath<UnityEditor.AddressableAssets.Settings.AddressableAssetGroup>(groupPath);
+                                    
                                     dir = dir.Replace("/Screens", "/Components");
                                     var components = AssetDatabase.FindAssets("t:GameObject", new string[] { dir });
                                     foreach (var guid in components) {
@@ -182,9 +203,9 @@ namespace UnityEditor.UI.Windows {
                                         var component = componentGo.GetComponent<WindowComponent>();
                                         if (component != null) {
 
-                                            componentGo.SetAddressableID(p);
+                                            componentGo.SetAddressableID(p, group);
                                             EditorUtility.SetDirty(componentGo);
-
+                                            
                                         }
 
                                     }

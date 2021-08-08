@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace UnityEditor.UI.Windows {
 
-    public struct EditPrefabAssetScope : System.IDisposable {
+    public readonly struct EditPrefabAssetScope : System.IDisposable {
  
         public readonly string assetPath;
         public readonly GameObject prefabRoot;
@@ -22,7 +22,54 @@ namespace UnityEditor.UI.Windows {
         }
     }
 
-    public class EditorHelpers {
+    public static class StringExtensions {
+        
+        public static string ToSentenceCase(this string str) {
+
+            if (str == null) return string.Empty;
+            return System.Text.RegularExpressions.Regex.Replace(str, "[a-z][A-Z]", m => $"{m.Value[0]} {char.ToLower(m.Value[1])}");
+		
+        }
+	
+        public static string UppercaseWords(this string value) {
+
+            var chars = new char[] { ' ', '_', '?', '.', ',', '!', '@', '#', '$', '%', '^', '&', '*', '(', '{', '[', '/', '\\' };
+
+            char[] array = value.ToCharArray();
+            // Handle the first letter in the string.
+            if (array.Length >= 1) {
+
+                if (char.IsLower(array[0])) {
+
+                    array[0] = char.ToUpper(array[0]);
+
+                }
+
+            }
+
+            // Scan through the letters, checking for spaces.
+            // ... Uppercase the lowercase letters following spaces.
+            for (int i = 1; i < array.Length; ++i) {
+
+                if (System.Array.IndexOf(chars, array[i - 1]) >= 0) {
+
+                    if (char.IsLower(array[i])) {
+
+                        array[i] = char.ToUpper(array[i]);
+
+                    }
+
+                }
+
+            }
+
+            return new string(array);
+
+        }
+
+    }
+
+    public static class EditorHelpers {
 
         public static void FindType(object root, System.Type searchType, System.Func<FieldInfo, object, object> del, HashSet<object> visited = null) {
             

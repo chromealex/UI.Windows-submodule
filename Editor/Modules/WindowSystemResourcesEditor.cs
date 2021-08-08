@@ -25,13 +25,13 @@ namespace UnityEditor.UI.Windows {
 
             GUILayoutExt.DrawComponentHeader(this.serializedObject, "EXT", () => {
                 
-                GUILayout.Label("WindowSystem Internal module.\nWorking with resources.", GUILayout.Height(36f));
+                GUILayout.Label("WindowSystem Resources Internal module", GUILayout.Height(36f));
                 
             }, new Color(0.4f, 0.2f, 0.7f, 1f));
             
             var target = this.target as WindowSystemResources;
             var allObjects = target.GetAllObjects();
-            var loadedBundles = AssetBundle.GetAllLoadedAssetBundles();
+            var loadedBundles = AssetBundle.GetAllLoadedAssetBundles().ToList();
             var tasks = target.GetTasks();
                                     
             GUILayout.Space(5f);
@@ -43,178 +43,221 @@ namespace UnityEditor.UI.Windows {
                     caption = $"Tasks ({tasks.Count})",
                     onDraw = () => {
 
-                        foreach (var task in tasks) {
-                            
-                            var internalTask = task.Key;
-                            GUILayoutExt.DrawHeader($"Resource Id: {internalTask.resourceId}");
-                            EditorGUILayout.LabelField($"Pending count: {task.Value?.GetInvocationList().Length}");
-                            EditorGUILayout.SelectableLabel(internalTask.resourceSource.ToString());
-                            
+                        if (tasks.Count == 0) {
+
+                            GUILayout.Space(10f);
+                            GUILayout.Label("There are no tasks in loading stage yet.", EditorStyles.centeredGreyMiniLabel);
+                            GUILayout.Space(10f);
+
+                        } else {
+
+                            foreach (var task in tasks) {
+
+                                var internalTask = task.Key;
+                                GUILayoutExt.DrawHeader($"Resource Id: {internalTask.resourceId}");
+                                EditorGUILayout.LabelField($"Pending count: {task.Value?.GetInvocationList().Length}");
+                                EditorGUILayout.SelectableLabel(internalTask.resourceSource.ToString());
+                                
+                            }
+
                         }
-                        
+
                     },
                 },
                 new GUITab() {
                     caption = $"Resources ({target.GetAllocatedCount()})",
                     onDraw = () => {
                         
-                        foreach (var item in allObjects) {
+                        if (tasks.Count == 0) {
 
-                            //EditorGUILayout.ObjectField("Handler", item.Value as Object, typeof(Object), allowSceneObjects: true);
-                            GUILayoutExt.DrawHeader($"Handler: {item.Key} (Count: {item.Value.Count})");
+                            GUILayout.Space(10f);
+                            GUILayout.Label("There are no loaded resources yet.", EditorStyles.centeredGreyMiniLabel);
+                            GUILayout.Space(10f);
 
-                            ++EditorGUI.indentLevel;
-                            GUILayoutExt.Box(2f, 2f, () => {
-                                
-                                foreach (var resItem in item.Value) {
+                        } else {
 
-                                    EditorGUILayout.SelectableLabel(resItem.resourceSource.ToString());
-                                    EditorGUILayout.LabelField("Resource ID:", resItem.resourceId.ToString());
-                                    if (resItem.handler != null) {
-                            
-                                        if (resItem.handler is Object handler) {
+                            foreach (var item in allObjects) {
 
-                                            EditorGUILayout.ObjectField("Handler:", handler, typeof(Object), allowSceneObjects: true);
+                                //EditorGUILayout.ObjectField("Handler", item.Value as Object, typeof(Object), allowSceneObjects: true);
+                                GUILayoutExt.DrawHeader($"Handler: {item.Key} (Count: {item.Value.Count})");
+
+                                ++EditorGUI.indentLevel;
+                                GUILayoutExt.Box(2f, 2f, () => {
+
+                                    foreach (var resItem in item.Value) {
+
+                                        EditorGUILayout.SelectableLabel(resItem.resourceSource.ToString());
+                                        EditorGUILayout.LabelField("Resource ID:", resItem.resourceId.ToString());
+                                        if (resItem.handler != null) {
+
+                                            if (resItem.handler is Object handler) {
+
+                                                EditorGUILayout.ObjectField("Handler:", handler, typeof(Object), allowSceneObjects: true);
+
+                                            } else {
+
+                                                EditorGUILayout.LabelField("Handler:", resItem.handler.ToString());
+
+                                            }
+
+                                        }
+
+                                        if (resItem.resource is Object obj) {
+
+                                            EditorGUILayout.ObjectField(obj, typeof(Object), allowSceneObjects: true);
 
                                         } else {
 
-                                            EditorGUILayout.LabelField("Handler:", resItem.handler.ToString());
+                                            EditorGUILayout.LabelField(resItem.resource.ToString());
 
                                         }
-                            
-                                    }
-
-                                    if (resItem.resource is Object obj) {
-                         
-                                        EditorGUILayout.ObjectField(obj, typeof(Object), allowSceneObjects: true);
-                            
-                                    } else {
-
-                                        EditorGUILayout.LabelField(resItem.resource.ToString());
 
                                     }
 
-                                }
-                                
-                            });
-                            --EditorGUI.indentLevel;
+                                });
+                                --EditorGUI.indentLevel;
+
+                            }
 
                         }
 
                     },
                 }, new GUITab() {
-                    caption = $"Bundles ({loadedBundles.Count()})",
+                    caption = $"Bundles ({loadedBundles.Count})",
                     onDraw = () => {
 
-                        GUILayoutExt.Box(2f, 2f, () => {
-
-                            const float boxSize = 12f;
+                        if (loadedBundles.Count == 0) {
                             
-                            GUILayout.BeginHorizontal();
-                            {
-                                GUILayoutExt.Box(0f, 1f, () => {
-                                    
-                                    var rect = EditorGUILayout.GetControlRect(GUILayout.Width(boxSize), GUILayout.Height(boxSize));
-                                    rect.x += 1f;
-                                    rect.y += 1f;
-                                    EditorGUI.DrawRect(rect, Color.yellow);
-                                    
-                                }, null, GUILayout.Width(boxSize), GUILayout.Height(boxSize));
-                                GUILayout.Label("Used from bundle because of direct reference dependency", EditorStyles.miniLabel, GUILayout.ExpandWidth(true));
+                            GUILayout.Space(10f);
+                            if (UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.ActivePlayModeDataBuilder is UnityEditor.AddressableAssets.Build
+                                    .DataBuilders.BuildScriptVirtualMode ||
+                                UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.ActivePlayModeDataBuilder is UnityEditor.AddressableAssets.Build
+                                    .DataBuilders.BuildScriptFastMode) {
+                                
+                                GUILayout.Label("Seems like there are no bundles loaded yet.\nYou run with VirtualMode now, change mode to use Addressables as in build version.", EditorStyles.centeredGreyMiniLabel);
+
+                            } else {
+
+                                GUILayout.Label("Seems like there are no bundles loaded yet.\nMay be you forgot to turn bundles simulation on.", EditorStyles.centeredGreyMiniLabel);
+
                             }
-                            GUILayout.EndHorizontal();
 
-                            GUILayout.Space(4f);
-
-                            GUILayout.BeginHorizontal();
-                            {
-                                GUILayoutExt.Box(0f, 1f, () => {
-                                    
-                                    var rect = EditorGUILayout.GetControlRect(GUILayout.Width(boxSize), GUILayout.Height(boxSize));
-                                    rect.x += 1f;
-                                    rect.y += 1f;
-                                    EditorGUI.DrawRect(rect, Color.green);
-                                    
-                                }, null, GUILayout.Width(boxSize), GUILayout.Height(boxSize));
-                                GUILayout.Label("Used from bundle", EditorStyles.miniLabel, GUILayout.ExpandWidth(true));
-                            }
-                            GUILayout.EndHorizontal();
-
-                            GUILayout.Space(4f);
-
-                            GUILayout.BeginHorizontal();
-                            {
-                                GUILayoutExt.Box(0f, 1f, () => {
-                                    
-                                    var rect = EditorGUILayout.GetControlRect(GUILayout.Width(boxSize), GUILayout.Height(boxSize));
-                                    rect.x += 1f;
-                                    rect.y += 1f;
-                                    EditorGUI.DrawRect(rect, Color.grey);
-                                    
-                                }, null, GUILayout.Width(boxSize), GUILayout.Height(boxSize));
-                                GUILayout.Label("Don't used", EditorStyles.miniLabel, GUILayout.ExpandWidth(true));
-                            }
-                            GUILayout.EndHorizontal();
-
-                        });
-
-                        GUILayoutExt.Box(2f, 2f, () => {
+                            GUILayout.Space(10f);
                             
-                            foreach (var bundle in loadedBundles) {
-                            
+                        } else {
+
+                            GUILayoutExt.Box(2f, 2f, () => {
+
+                                const float boxSize = 12f;
+
                                 GUILayout.BeginHorizontal();
+                                {
+                                    GUILayoutExt.Box(0f, 1f, () => {
 
-                                EditorGUILayout.SelectableLabel(bundle.name, EditorStyles.boldLabel, GUILayout.Height(18f));
-                                if (GUILayout.Button("Unload", EditorStyles.miniButton) == true) {
-                                    
-                                    bundle.Unload(true);
-                                    GUILayout.EndHorizontal();
-                                    return;
+                                        var rect = EditorGUILayout.GetControlRect(GUILayout.Width(boxSize), GUILayout.Height(boxSize));
+                                        rect.x += 1f;
+                                        rect.y += 1f;
+                                        EditorGUI.DrawRect(rect, Color.yellow);
 
+                                    }, null, GUILayout.Width(boxSize), GUILayout.Height(boxSize));
+                                    GUILayout.Label("Used from bundle because of direct reference dependency", EditorStyles.miniLabel, GUILayout.ExpandWidth(true));
                                 }
                                 GUILayout.EndHorizontal();
-                                
-                                GUILayoutExt.Box(2f, 8f, () => {
 
-                                    var c1 = new Color(1f, 1f, 1f, 0f);
-                                    var c2 = new Color(1f, 1f, 1f, 0.02f);
-                                    var prevColor = GUI.color;
-                                    var assets = bundle.GetAllAssetNames();
-                                    var i = 0;
-                                    foreach (var asset in assets) {
+                                GUILayout.Space(4f);
 
-                                        GUI.color = Color.white;
-                                        if (this.IsLoaded(asset, allObjects, out var hasDirectRef) == true) {
-                                            if (hasDirectRef == true) {
-                                                GUI.color = Color.yellow;
-                                            } else {
-                                                GUI.color = Color.green;
-                                            }
-                                        }
+                                GUILayout.BeginHorizontal();
+                                {
+                                    GUILayoutExt.Box(0f, 1f, () => {
 
-                                        var rect = EditorGUILayout.GetControlRect(GUILayout.Height(14f), GUILayout.ExpandWidth(true));
-                                        GUILayoutExt.DrawRect(rect, ++i % 2 == 0 ? c1 : c2);
-                                        var path = AssetDatabase.GUIDToAssetPath(asset);
-                                        if (string.IsNullOrEmpty(path) == false) {
+                                        var rect = EditorGUILayout.GetControlRect(GUILayout.Width(boxSize), GUILayout.Height(boxSize));
+                                        rect.x += 1f;
+                                        rect.y += 1f;
+                                        EditorGUI.DrawRect(rect, Color.green);
 
-                                            EditorGUI.SelectableLabel(rect, path, EditorStyles.miniLabel);
+                                    }, null, GUILayout.Width(boxSize), GUILayout.Height(boxSize));
+                                    GUILayout.Label("Used from bundle", EditorStyles.miniLabel, GUILayout.ExpandWidth(true));
+                                }
+                                GUILayout.EndHorizontal();
 
-                                        } else {
+                                GUILayout.Space(4f);
 
-                                            EditorGUI.SelectableLabel(rect, asset, EditorStyles.miniLabel);
+                                GUILayout.BeginHorizontal();
+                                {
+                                    GUILayoutExt.Box(0f, 1f, () => {
 
-                                        }
+                                        var rect = EditorGUILayout.GetControlRect(GUILayout.Width(boxSize), GUILayout.Height(boxSize));
+                                        rect.x += 1f;
+                                        rect.y += 1f;
+                                        EditorGUI.DrawRect(rect, Color.grey);
+
+                                    }, null, GUILayout.Width(boxSize), GUILayout.Height(boxSize));
+                                    GUILayout.Label("Don't used", EditorStyles.miniLabel, GUILayout.ExpandWidth(true));
+                                }
+                                GUILayout.EndHorizontal();
+
+                            });
+
+                            GUILayoutExt.Box(2f, 2f, () => {
+
+                                foreach (var bundle in loadedBundles) {
+
+                                    GUILayout.BeginHorizontal();
+
+                                    EditorGUILayout.SelectableLabel(bundle.name, EditorStyles.boldLabel, GUILayout.Height(18f));
+                                    if (GUILayout.Button("Unload", EditorStyles.miniButton) == true) {
+
+                                        bundle.Unload(true);
+                                        GUILayout.EndHorizontal();
+                                        return;
 
                                     }
-                                    
-                                    GUI.color = prevColor;
 
-                                });
+                                    GUILayout.EndHorizontal();
 
-                            }
+                                    GUILayoutExt.Box(2f, 8f, () => {
 
-                        });
-                        
+                                        var c1 = new Color(1f, 1f, 1f, 0f);
+                                        var c2 = new Color(1f, 1f, 1f, 0.02f);
+                                        var prevColor = GUI.color;
+                                        var assets = bundle.GetAllAssetNames();
+                                        var i = 0;
+                                        foreach (var asset in assets) {
+
+                                            GUI.color = Color.white;
+                                            if (this.IsLoaded(asset, allObjects, out var hasDirectRef) == true) {
+                                                if (hasDirectRef == true) {
+                                                    GUI.color = Color.yellow;
+                                                } else {
+                                                    GUI.color = Color.green;
+                                                }
+                                            }
+
+                                            var rect = EditorGUILayout.GetControlRect(GUILayout.Height(14f), GUILayout.ExpandWidth(true));
+                                            GUILayoutExt.DrawRect(rect, ++i % 2 == 0 ? c1 : c2);
+                                            var path = AssetDatabase.GUIDToAssetPath(asset);
+                                            if (string.IsNullOrEmpty(path) == false) {
+
+                                                EditorGUI.SelectableLabel(rect, path, EditorStyles.miniLabel);
+
+                                            } else {
+
+                                                EditorGUI.SelectableLabel(rect, asset, EditorStyles.miniLabel);
+
+                                            }
+
+                                        }
+
+                                        GUI.color = prevColor;
+
+                                    });
+
+                                }
+
+                            });
+
+                        }
+
                     },
                 });
 

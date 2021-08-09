@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.U2D;
 
 namespace UnityEditor.UI.Windows {
 
@@ -53,8 +54,13 @@ namespace UnityEditor.UI.Windows {
         }
 
         private UnityEditorInternal.ReorderableList listModules;
+        private System.Type textureUtils;
+        private System.Reflection.MethodInfo getTextureSizeMethod;
 
         public void OnEnable() {
+
+            this.textureUtils = typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.TextureUtil");
+            this.getTextureSizeMethod = this.textureUtils.GetMethod("GetStorageMemorySize", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 
             this.emulatePlatform = this.serializedObject.FindProperty("emulatePlatform");
             this.emulateRuntimePlatform = this.serializedObject.FindProperty("emulateRuntimePlatform");
@@ -110,8 +116,17 @@ namespace UnityEditor.UI.Windows {
             }
 
         }
+
+        public struct AtlasData {
+
+            public UnityEngine.U2D.SpriteAtlas atlas;
+            public Texture2D[] previews;
+
+        }
         
         private Dictionary<WindowBase, HashSet<UsedResource>> usedResources = new Dictionary<WindowBase, HashSet<UsedResource>>();
+        private HashSet<AtlasData> usedAtlases = new HashSet<AtlasData>();
+        private bool dependenciesState;
 
         public override void OnInspectorGUI() {
 
@@ -329,7 +344,32 @@ namespace UnityEditor.UI.Windows {
                         if (GUILayout.Button("Find Direct References", GUILayout.Width(200f), GUILayout.Height(30f)) == true) {
 
                             try {
+                                
+                                /*var listAtlases = new List<UnityEngine.U2D.SpriteAtlas>();
+                                System.Action<UnityEngine.U2D.SpriteAtlas> action = (atlas) => {
+                                    listAtlases.Add(atlas);
+                                    Debug.Log("Reg atlas: " + atlas);
+                                };*/
+                                UnityEditor.U2D.SpriteAtlasUtility.PackAllAtlases(EditorUserBuildSettings.activeBuildTarget);
+                                
+                                var listAtlases = new List<AtlasData>();
+                                var atlasesGUID = AssetDatabase.FindAssets("t:spriteatlas");
+                                foreach (var atlasGUID in atlasesGUID) {
 
+                                    var atlas = AssetDatabase.LoadAssetAtPath<UnityEngine.U2D.SpriteAtlas>(AssetDatabase.GUIDToAssetPath(atlasGUID));
+                                    if (atlas != null) {
+                                        
+                                        var previews = typeof(SpriteAtlasExtensions).GetMethod("GetPreviewTextures", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+                                        listAtlases.Add(new AtlasData() {
+                                            atlas = atlas,
+                                            previews = (Texture2D[])previews.Invoke(null, new [] { atlas }),
+                                        });
+                                        
+                                    }
+                                    
+                                }
+                                
+                                this.usedAtlases.Clear();
                                 this.usedResources.Clear();
                                 for (int i = 0; i < this.registeredPrefabs.arraySize; ++i) {
 
@@ -355,6 +395,25 @@ namespace UnityEditor.UI.Windows {
                                                     var r = (Object)res;
                                                     if (r != null) {
 
+                                                        if (res is Sprite sprite) {
+
+                                                            if (sprite != null) {
+
+                                                                foreach (var atlas in listAtlases) {
+
+                                                                    if (atlas.atlas.CanBindTo(sprite) == true) {
+
+                                                                        if (this.usedAtlases.Contains(atlas) == false) this.usedAtlases.Add(atlas);
+                                                                        break;
+
+                                                                    }
+
+                                                                }
+
+                                                            }
+
+                                                        }
+                                                        
                                                         var usedRes = new UsedResource(window, component, r);
                                                         if (this.usedResources.TryGetValue(window, out var hs) == true) {
                                                             
@@ -393,24 +452,57 @@ namespace UnityEditor.UI.Windows {
                         GUILayout.EndHorizontal();
                         GUILayout.Label("Find all used direct reference resources and group them by screen.", EditorStyles.centeredGreyMiniLabel);
 
-                        {
+                        if (this.usedResources.Count > 0) {
 
-                            foreach (var kv in this.usedResources) {
-                                
-                                GUILayoutExt.DrawHeader(kv.Key.name);
-                                foreach (var res in kv.Value) {
+                            GUILayoutExt.FoldOut(ref this.dependenciesState, "Direct References", () => {
+
+                                GUILayout.Space(10f);
+                                GUILayout.Label($"Used atlases ({this.usedAtlases.Count}):");
+                                var usedSize = 0;
+                                foreach (var atlas in this.usedAtlases) {
 
                                     GUILayout.BeginHorizontal();
-                                    EditorGUILayout.ObjectField(res.component, typeof(Object), allowSceneObjects: false);
-                                    EditorGUILayout.ObjectField(res.resource, typeof(Object), allowSceneObjects: false);
+                                    EditorGUILayout.ObjectField(atlas.atlas, typeof(Object), allowSceneObjects: false);
+                                    var atlasSize = 0;
+                                    foreach (var tex in atlas.previews) {
+
+                                        var size = (int)this.getTextureSizeMethod.Invoke(null, new[] { (Texture)tex });
+                                        atlasSize += size;
+                                        usedSize += size;
+
+                                    }
+
+                                    var str = EditorUtility.FormatBytes(atlasSize);
+                                    GUILayout.Label(str, GUILayout.Width(70f));
                                     GUILayout.EndHorizontal();
-                                    
+
                                 }
 
-                            }
-                            
+                                GUILayout.BeginHorizontal();
+                                GUILayout.FlexibleSpace();
+                                GUILayout.Label($"Size: {EditorUtility.FormatBytes(usedSize)}");
+                                GUILayout.EndHorizontal();
+
+                                GUILayout.Space(10f);
+                                GUILayout.Label("Used resources:");
+                                foreach (var kv in this.usedResources) {
+
+                                    GUILayoutExt.DrawHeader(kv.Key.name);
+                                    foreach (var res in kv.Value) {
+
+                                        GUILayout.BeginHorizontal();
+                                        EditorGUILayout.ObjectField(res.component, typeof(Object), allowSceneObjects: false);
+                                        EditorGUILayout.ObjectField(res.resource, typeof(Object), allowSceneObjects: false);
+                                        GUILayout.EndHorizontal();
+
+                                    }
+
+                                }
+
+                            });
+
                         }
-                        
+
                     },
                 }
                 );

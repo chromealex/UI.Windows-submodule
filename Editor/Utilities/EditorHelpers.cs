@@ -71,6 +71,55 @@ namespace UnityEditor.UI.Windows {
 
     public static class EditorHelpers {
 
+        public static void FindType(object root, System.Type[] searchTypes, System.Func<FieldInfo, object, object> del, HashSet<object> visited = null) {
+            
+            if (root == null) return;
+            if (visited == null) visited = new HashSet<object>();
+
+            if (visited.Contains(root) == true) return;
+            visited.Add(root);
+
+            var fields = root.GetType().GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+            foreach (var field in fields) {
+
+                if (field.FieldType.IsPrimitive == true) continue;
+                if (field.FieldType.IsPointer == true) continue;
+                if (typeof(Component).IsAssignableFrom(field.FieldType) == true) continue;
+                
+                if (System.Array.IndexOf(searchTypes, field.FieldType) >= 0) {
+
+                    var obj = field.GetValue(root);
+                    field.SetValue(root, del.Invoke(field, obj));
+
+                } else if (field.FieldType.IsArray == true) {
+                    
+                    var arr = (System.Array)field.GetValue(root);
+                    if (arr != null) {
+                        for (int i = 0; i < arr.Length; ++i) {
+                            var r = arr.GetValue(i);
+                            if (r != null) {
+                                if (System.Array.IndexOf(searchTypes, r.GetType()) >= 0) {
+                                    arr.SetValue(del.Invoke(field, r), i);
+                                } else {
+                                    EditorHelpers.FindType(r, searchTypes, del, visited);
+                                    arr.SetValue(r, i);
+                                }
+                            }
+                        }
+                    }
+
+                } else {
+                    
+                    var obj = field.GetValue(root);
+                    EditorHelpers.FindType(obj, searchTypes, del, visited);
+                    field.SetValue(root, obj);
+                    
+                }
+
+            }
+
+        }
+
         public static void FindType(object root, System.Type searchType, System.Func<FieldInfo, object, object> del, HashSet<object> visited = null) {
             
             if (root == null) return;

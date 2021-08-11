@@ -1300,7 +1300,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                     var lastItem = new ListEndlessComponentModule.Item() {
                         accumulatedSize = 10f,
                     };
-                    if (this.scrollbarItems.Count > 0 && i > 1) {
+                    if (this.scrollbarItems.Count > 0 && i > 1 && i < module.GetCount()) {
 
                         lastItem = module.GetItemByIndex(i - 1);
 

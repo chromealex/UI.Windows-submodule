@@ -386,6 +386,12 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public int GetCount() {
+            
+            return this.items.Length;
+
+        }
+
         public Item GetItemByIndex(int index) {
             
             return this.items[index];

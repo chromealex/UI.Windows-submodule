@@ -176,7 +176,8 @@ MonoBehaviour:
       autoStopDuration: 0
   registry: []
   componentModules:
-    windowComponent: {fileID: 5590231133715331329}
+    windowComponent: {fileID: 1068094537600266531, guid: b525f1dcb523b4a6290e5518b5cbb118,
+      type: 3}
     modules:
     - {fileID: 3200967013095831660}
   components:

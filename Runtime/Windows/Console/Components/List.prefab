@@ -176,8 +176,7 @@ MonoBehaviour:
       autoStopDuration: 0
   registry: []
   componentModules:
-    windowComponent: {fileID: 1068094537600266531, guid: b525f1dcb523b4a6290e5518b5cbb118,
-      type: 3}
+    windowComponent: {fileID: 5590231133715331329}
     modules:
     - {fileID: 3200967013095831660}
   components:
@@ -271,8 +270,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02b28a913c4f04e34bc30b53ae167ea0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  windowComponent: {fileID: 5590231133715331329}
-  listComponent: {fileID: 5590231133715331329}
+  windowComponent: {fileID: 1068094537600266531, guid: b525f1dcb523b4a6290e5518b5cbb118,
+    type: 3}
+  listComponent: {fileID: 1068094537600266531, guid: b525f1dcb523b4a6290e5518b5cbb118,
+    type: 3}
   scrollRect: {fileID: 9082243373082858038}
   direction: 0
   layoutGroup: {fileID: 7877236072924902541}

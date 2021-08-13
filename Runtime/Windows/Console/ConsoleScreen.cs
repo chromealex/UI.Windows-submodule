@@ -277,14 +277,14 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         private void AddLog(string text, LogType type = LogType.Log, string trace = null) {
 
             if (this.logsCounter == null) return;
-            
-            if (this.logsCounter.TryGetValue(type, out var count) == true) {
 
-                this.logsCounter[type] = count + 1;
+            lock (this.logsCounter) {
 
-            } else {
+                if (this.logsCounter.TryAdd(type, 1) == false) {
 
-                this.logsCounter.TryAdd(type, 1);
+                    this.logsCounter[type] += 1;
+
+                }
 
             }
 
@@ -1250,7 +1250,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 this.logsCounterComponent.SetInfo();
                 this.isDirty = false;
 
-                {
+                /*{
                     var module = this.list.GetModule<ListEndlessComponentModule>();
                     this.scrollbarItems.Clear();
                     var i = 0;
@@ -1315,7 +1315,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                         data = this,
                         lastItem = lastItem,
                     });
-                }
+                }*/
 
             }
 

@@ -505,10 +505,14 @@ namespace UnityEngine.UI.Windows {
 
         private void InitializeConsole() {
 
-            this.consoleWindowInstance = WindowSystem.ShowSync<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(transitionParameters: TransitionParameters.Default.ReplaceImmediately(true));
-            this.consoleWindowInstance.Hide(TransitionParameters.Default.ReplaceImmediately(true));
-            this.consoleWindowInstance = null;
-
+            Coroutines.NextFrame(() => {
+            
+                this.consoleWindowInstance = WindowSystem.ShowSync<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(transitionParameters: TransitionParameters.Default.ReplaceImmediately(true));
+                this.consoleWindowInstance.Hide(TransitionParameters.Default.ReplaceImmediately(true));
+                this.consoleWindowInstance = null;
+    
+            });
+            
         }
         
         public void Update() {

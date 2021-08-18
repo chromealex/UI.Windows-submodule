@@ -11,7 +11,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         public ImageComponent directoryUpIcon;
         public WindowComponent directoryContainer;
         
-        public void SetInfo(ConsoleScreen.FastLink data) {
+        public void SetInfo(WindowSystemConsole.FastLink data) {
 
             if (data.style == FastLinkType.Directory) {
 

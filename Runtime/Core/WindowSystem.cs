@@ -251,6 +251,7 @@ namespace UnityEngine.UI.Windows {
         public WindowSystemSettings settings;
         public WindowSystemResources resources;
         public WindowSystemPools pools;
+        public WindowSystemConsole console;
         public Tweener tweener;
 
         private List<WindowItem> currentWindows = new List<WindowItem>();
@@ -258,8 +259,6 @@ namespace UnityEngine.UI.Windows {
         private Dictionary<int, WindowBase> topWindowsByLayer = new Dictionary<int, WindowBase>();
         private Dictionary<int, WindowBase> hashToPrefabs = new Dictionary<int, WindowBase>();
 
-        private WindowBase consoleWindowInstance;
-        
         private int nextWindowId;
 
         private System.Action waitInteractableOnComplete;
@@ -505,60 +504,21 @@ namespace UnityEngine.UI.Windows {
 
         private void InitializeConsole() {
 
-            Coroutines.NextFrame(() => {
+            /*Coroutines.WaitTime(3f, () => {
             
                 this.consoleWindowInstance = WindowSystem.ShowSync<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(transitionParameters: TransitionParameters.Default.ReplaceImmediately(true));
                 this.consoleWindowInstance.Hide(TransitionParameters.Default.ReplaceImmediately(true));
                 this.consoleWindowInstance = null;
     
-            });
+            });*/
+            
+            this.console = new WindowSystemConsole();
             
         }
         
         public void Update() {
 
-            if (Input.GetKeyDown(KeyCode.BackQuote) == true ||
-                Input.touchCount >= 3) {
-
-                var isActive = true;
-                var checkTouch = Input.touchCount >= 3;
-                if (checkTouch == true) {
-
-                    isActive = false;
-                    if (this.consoleWindowInstance == null) {
-                        
-                        isActive = (Input.touchCount == 5 && Input.GetTouch(Input.touchCount - 1).phase == TouchPhase.Began);
-                        
-                    } else {
-                        
-                        isActive = (Input.touchCount == 3 && Input.GetTouch(Input.touchCount - 1).phase == TouchPhase.Began);
-                        
-                    }
-
-                }
-
-                if (isActive == true) {
-
-                    if (this.consoleWindowInstance == null) {
-
-                        WindowSystem.Show<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(x => {
-
-                            this.consoleWindowInstance = x;
-                            WindowSystem.GetEvents().RegisterOnce(x, WindowEvent.OnHideBegin, () => { this.consoleWindowInstance = null; });
-                            x.OnEmptyPass();
-
-                        });
-
-                    } else {
-
-                        this.consoleWindowInstance.Hide();
-                        this.consoleWindowInstance = null;
-
-                    }
-
-                }
-
-            }
+            if (this.console != null) this.console.Update();
             
             #if ENABLE_INPUT_SYSTEM
             if (UnityEngine.InputSystem.Mouse.current.leftButton.wasReleasedThisFrame == true ||
@@ -845,6 +805,12 @@ namespace UnityEngine.UI.Windows {
 
             var events = WindowSystem.GetEvents();
             events.UnRegister(instance, windowEvent, callback);
+
+        }
+
+        public static WindowSystemConsole GetConsole() {
+
+            return WindowSystem.instance.console;
 
         }
 

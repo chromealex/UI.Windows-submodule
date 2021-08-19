@@ -69,6 +69,19 @@ namespace UnityEngine.UI.Windows.Utilities {
 	        
         }
 
+        public static void Wait<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+	        
+	        Coroutines.instance.StartCoroutine(Coroutines.Waiter_INTERNAL(state, waitFor, callback));
+	        
+        }
+
+        private static IEnumerator Waiter_INTERNAL<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+
+	        while (waitFor.Invoke(state) == false) yield return null;
+	        callback.Invoke(state);
+
+        }
+        
         private static IEnumerator Waiter_INTERNAL(System.Func<bool> waitFor, System.Action callback) {
 
 	        while (waitFor.Invoke() == false) yield return null;

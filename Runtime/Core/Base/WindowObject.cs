@@ -160,7 +160,20 @@ namespace UnityEngine.UI.Windows {
         
         internal bool internalManualShow;
         internal bool internalManualHide;
-        
+        private bool readyToHide = true;
+
+        public bool IsReadyToHide() {
+
+            return this.readyToHide;
+
+        }
+
+        public void SetReadyToHide(bool state) {
+            
+            this.readyToHide = state;
+            
+        }
+
         public void SetState(ObjectState state) {
 
             var isDebug = WindowSystem.GetSettings().collectDebugInfo;

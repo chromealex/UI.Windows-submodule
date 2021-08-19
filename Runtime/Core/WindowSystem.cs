@@ -1031,6 +1031,13 @@ namespace UnityEngine.UI.Windows {
             parameters.RaiseCallback();
 
         }
+
+        private struct HideInstanceClosure {
+
+            public WindowObject instance;
+            public TransitionParameters parameters;
+
+        }
         
         public static void HideInstance(WindowObject instance, TransitionParameters parameters) {
 
@@ -1053,67 +1060,75 @@ namespace UnityEngine.UI.Windows {
             instance.OnHideBegin();
             WindowSystem.RaiseEvent(instance, WindowEvent.OnHideBegin);
 
-            {
+            var closureInstance = new HideInstanceClosure() {
+                instance = instance,
+                parameters = parameters,
+            };
+            Coroutines.Wait(closureInstance, (inst) => inst.instance.IsReadyToHide(), (inst) => {
+                
+                {
 
-                var closure = PoolClass<ShowHideClosureParametersClass>.Spawn();
-                closure.animationComplete = false;
-                closure.hierarchyComplete = false;
-                closure.instance = instance;
-                closure.parameters = parameters;
+                    var closure = PoolClass<ShowHideClosureParametersClass>.Spawn();
+                    closure.animationComplete = false;
+                    closure.hierarchyComplete = false;
+                    closure.instance = inst.instance;
+                    closure.parameters = inst.parameters;
 
-                if (parameters.data.replaceAffectChilds == false ||
-                    parameters.data.affectChilds == true) {
+                    if (inst.parameters.data.replaceAffectChilds == false ||
+                        inst.parameters.data.affectChilds == true) {
 
-                    instance.BreakStateHierarchy();
-                    
-                } else {
-                    
-                    instance.BreakState();
-
-                }
-
-                WindowObjectAnimation.Hide(closure, instance, parameters, (cParams) => {
-                    
-                    if (cParams.parameters.data.replaceAffectChilds == false ||
-                        cParams.parameters.data.affectChilds == true) {
-
-                        Coroutines.CallInSequence((p) => {
-
-                            p.hierarchyComplete = true;
-                        
-                            if (p.animationComplete == true) {
-
-                                var pars = p.parameters;
-                                p.Dispose();
-                                pars.RaiseCallback();
-
-                            }
-
-                        }, cParams, cParams.instance.subObjects, (obj, cb, p) => {
-                        
-                            obj.Hide(p.parameters.ReplaceCallback(cb));
-                        
-                        });
+                        inst.instance.BreakStateHierarchy();
                         
                     } else {
                         
-                        cParams.hierarchyComplete = true;
-                        
+                        inst.instance.BreakState();
+
                     }
 
-                    cParams.animationComplete = true;
-                    if (cParams.hierarchyComplete == true) {
+                    WindowObjectAnimation.Hide(closure, inst.instance, inst.parameters, (cParams) => {
                         
-                        var pars = cParams.parameters;
-                        cParams.Dispose();
-                        pars.RaiseCallback();
+                        if (cParams.parameters.data.replaceAffectChilds == false ||
+                            cParams.parameters.data.affectChilds == true) {
+
+                            Coroutines.CallInSequence((p) => {
+
+                                p.hierarchyComplete = true;
+                            
+                                if (p.animationComplete == true) {
+
+                                    var pars = p.parameters;
+                                    p.Dispose();
+                                    pars.RaiseCallback();
+
+                                }
+
+                            }, cParams, cParams.instance.subObjects, (obj, cb, p) => {
+                            
+                                obj.Hide(p.parameters.ReplaceCallback(cb));
+                            
+                            });
+                            
+                        } else {
+                            
+                            cParams.hierarchyComplete = true;
+                            
+                        }
+
+                        cParams.animationComplete = true;
+                        if (cParams.hierarchyComplete == true) {
+                            
+                            var pars = cParams.parameters;
+                            cParams.Dispose();
+                            pars.RaiseCallback();
+                            
+                        }
                         
-                    }
-                    
-                });
+                    });
 
-            }
+                }
 
+            });
+            
         }
 
         /// <summary>

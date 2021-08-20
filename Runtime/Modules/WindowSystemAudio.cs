@@ -108,6 +108,8 @@
         public FMODParameter[] parameters;
         public bool autoStopOnceParameters;
         public float autoStopDuration;
+        public bool autoRelease;
+        public float autoReleaseDuration;
 
         private static FMOD.Studio.EventInstance GetInstance(string audioEvent, FMOD.Studio.EventDescription eventDescription, bool stopOthersOnPlay = false) {
             
@@ -222,8 +224,18 @@
             if (setPlay == true) {
                 
                 instance.start();
-                if (eventDescription.isOneshot(out var isOneShot) == FMOD.RESULT.OK && isOneShot == true) instance.release();
-                
+                if (eventDescription.isOneshot(out var isOneShot) == FMOD.RESULT.OK && isOneShot == true) {
+                    instance.release();
+                } else {
+                    if (this.autoRelease == true) {
+                        UnityEngine.UI.Windows.Utilities.Coroutines.WaitTime(this.autoReleaseDuration, () => {
+                            
+                            instance.release();
+
+                        });
+                    }
+                }
+
             }
 
         }

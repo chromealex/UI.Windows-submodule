@@ -405,7 +405,18 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             var console = WindowSystem.GetConsole();
             var items = console.GetItems();
-            return items.Count(x => x.isCommand == true || this.HasLogFilterType(x.logType) == true);
+            var cnt = 0;
+            foreach (var item in items) {
+
+                if (item.isCommand == true || this.HasLogFilterType(item.logType) == true) {
+
+                    ++cnt;
+
+                }
+                
+            }
+            
+            return cnt;
 
         }
 

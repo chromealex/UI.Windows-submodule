@@ -142,11 +142,11 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private ConcurrentQueue<DrawItem> drawItems = new ConcurrentQueue<DrawItem>();
+        private Queue<DrawItem> drawItems = new Queue<DrawItem>();
         private readonly List<FastLink> fastLinkItems = new List<FastLink>();
         private readonly List<CommandItem> commands = new List<CommandItem>();
         private readonly List<IConsoleModule> moduleItems = new List<IConsoleModule>();
-        private ConcurrentDictionary<LogType, int> logsCounter = new ConcurrentDictionary<LogType, int>();
+        private Dictionary<LogType, int> logsCounter = new Dictionary<LogType, int>();
         private int logsFilter;
         
         private string helpInitPrint;
@@ -229,7 +229,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public ConcurrentQueue<DrawItem> GetItems() {
+        public Queue<DrawItem> GetItems() {
 
             return this.drawItems;
 
@@ -754,12 +754,16 @@ namespace UnityEngine.UI.Windows {
 
         public void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false) {
 
-            this.drawItems.Enqueue(new DrawItem() {
-                line = text,
-                logType = logType,
-                isCommand = isCommand,
-            });
-            
+            lock (this.drawItems) {
+
+                this.drawItems.Enqueue(new DrawItem() {
+                    line = text,
+                    logType = logType,
+                    isCommand = isCommand,
+                });
+
+            }
+
         }
 
         private void OnAddLogThreaded(string text, string trace, LogType type) {
@@ -782,9 +786,9 @@ namespace UnityEngine.UI.Windows {
 
             lock (this.logsCounter) {
 
-                if (this.logsCounter.TryAdd(type, 1) == false) {
+                if (this.logsCounter.TryGetValue(type, out var count) == false) {
 
-                    this.logsCounter[type] += 1;
+                    this.logsCounter[type] = count + 1;
 
                 }
 

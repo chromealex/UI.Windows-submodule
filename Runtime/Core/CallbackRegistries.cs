@@ -95,7 +95,10 @@ namespace UnityEngine.UI.Windows {
 
         public void DeInitialize() {
 
-            if (this.list != null) PoolClass<System.Collections.Generic.List<RegistryBase>>.Recycle(ref this.list);
+            if (this.list != null) {
+                this.Clear();
+                PoolClass<System.Collections.Generic.List<RegistryBase>>.Recycle(ref this.list);
+            }
 
         }
 

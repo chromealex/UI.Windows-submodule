@@ -341,6 +341,7 @@ namespace UnityEngine.UI.Windows {
             }
             this.registries.Clear();
 
+            this.forceRebuild = (this.allCount != count);
             this.allCount = count;
             System.Array.Resize(ref this.items, count);
             var registry = this.GetRegistry<T, TClosure>();
@@ -357,7 +358,7 @@ namespace UnityEngine.UI.Windows {
 
             }
             this.registries.Add(registry);
-            this.forceRebuild = true;
+            //this.forceRebuild = true;
 
             if (onComplete != null) onComplete.Invoke();
             

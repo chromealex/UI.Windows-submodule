@@ -288,9 +288,15 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        private readonly System.Text.StringBuilder builderCache = new System.Text.StringBuilder();
+        private int prevDirId = -1;
+        private string prevDirPath;
         public string GetDirectoryPath(int dirId) {
 
-            var str = new System.Text.StringBuilder();
+            if (this.prevDirId == dirId) return this.prevDirPath;
+
+            var str = this.builderCache;
+            str.Clear();
             while (dirId >= 0) {
 
                 var found = false;
@@ -318,7 +324,9 @@ namespace UnityEngine.UI.Windows {
             }
             str.Insert(0, '/');
 
-            return str.ToString();
+            this.prevDirPath = str.ToString();
+            this.prevDirId = dirId;
+            return this.prevDirPath;
 
         }
 

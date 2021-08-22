@@ -41,13 +41,13 @@ namespace UnityEngine.UI.Windows.Components {
         
         [RequiredReference]
         public Button button;
-        
-        private System.Action callback;
-        private System.Action<ButtonComponent> callbackWithInstance;
 
+        private CallbackRegistries callbackRegistries;
+        
         internal override void OnInitInternal() {
             
             this.button.onClick.AddListener(this.DoClickInternal);
+            this.callbackRegistries.Initialize();
             
             base.OnInitInternal();
             
@@ -58,6 +58,7 @@ namespace UnityEngine.UI.Windows.Components {
             base.OnDeInitInternal();
             
             this.ResetInstance();
+            this.callbackRegistries.DeInitialize();
             
         }
 
@@ -111,8 +112,7 @@ namespace UnityEngine.UI.Windows.Components {
         
         internal void DoClickInternal() {
             
-            if (this.callback == null &&
-                this.callbackWithInstance == null) {
+            if (this.callbackRegistries.Count == 0) {
                 
                 return;
                 
@@ -130,11 +130,28 @@ namespace UnityEngine.UI.Windows.Components {
 
         protected virtual void DoClick() {
 
-            if (this.callback != null) this.callback.Invoke();
-            if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this);
+            this.callbackRegistries.Invoke();
 
         }
         
+        private struct WithInstance : System.IEquatable<WithInstance> {
+
+            public ButtonComponent component;
+            public System.Action<ButtonComponent> action;
+
+            public bool Equals(WithInstance other) {
+                return this.component == other.component && this.action == other.action;
+            }
+
+        }
+
+        public void SetCallback<TState>(TState state, System.Action<TState> callback) where TState : System.IEquatable<TState> {
+
+            this.RemoveCallbacks();
+            this.AddCallback(state, callback);
+
+        }
+
         public void SetCallback(System.Action callback) {
 
             this.RemoveCallbacks();
@@ -151,32 +168,49 @@ namespace UnityEngine.UI.Windows.Components {
 
         public void AddCallback(System.Action callback) {
 
-            this.callback += callback;
+            this.callbackRegistries.Add(callback);
+
+        }
+
+        public void AddCallback<TState>(TState state, System.Action<TState> callback) where TState : System.IEquatable<TState> {
+
+            this.callbackRegistries.Add(state, callback);
 
         }
 
         public void AddCallback(System.Action<ButtonComponent> callback) {
 
-            this.callbackWithInstance += callback;
+            this.AddCallback(new WithInstance() { component = this, action = callback, }, cb => cb.action.Invoke(cb.component));
 
         }
 
         public void RemoveCallback(System.Action callback) {
 
-            this.callback -= callback;
+            this.callbackRegistries.Remove(callback);
 
         }
 
         public void RemoveCallback(System.Action<ButtonComponent> callback) {
 
-            this.callbackWithInstance -= callback;
+            this.callbackRegistries.Remove(new WithInstance() { component = this, action = callback, }, null);
 
         }
-        
+
+        public void RemoveCallback<TState>(TState state) where TState : System.IEquatable<TState> {
+
+            this.callbackRegistries.Remove(state, null);
+
+        }
+
+        public void RemoveCallback<TState>(System.Action<TState> callback) where TState : System.IEquatable<TState> {
+
+            this.callbackRegistries.Remove(default, callback);
+
+        }
+
         public virtual void RemoveCallbacks() {
             
-            this.callback = null;
-            this.callbackWithInstance = null;
+            this.callbackRegistries.Clear();
             
         }
 

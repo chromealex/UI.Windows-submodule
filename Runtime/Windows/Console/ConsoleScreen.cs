@@ -379,6 +379,19 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        private struct ClosureParametersItem : System.IEquatable<ClosureParametersItem> {
+
+            public ClosureParameters parameters;
+            public WindowSystemConsole.DrawItem data;
+
+            public bool Equals(ClosureParametersItem other) {
+
+                return this.data.line == other.data.line;
+
+            }
+
+        }
+
         private struct ClosureParametersScrollbar : IListClosureParameters {
 
             public int index { get; set; }
@@ -392,6 +405,19 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             public int index { get; set; }
             public List<WindowSystemConsole.FastLink> data;
             public ConsoleScreen screen;
+
+        }
+
+        private struct ClosureFastLinksParametersButtonCallback : System.IEquatable<ClosureFastLinksParametersButtonCallback> {
+
+            public ClosureFastLinksParameters parameters;
+            public WindowSystemConsole.FastLink data;
+
+            public bool Equals(ClosureFastLinksParametersButtonCallback other) {
+
+                return this.data.cmd == other.data.cmd;
+
+            }
 
         }
 
@@ -498,10 +524,10 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                     button.SetInteractable(true);
 
                     // Draw directory
-                    button.SetCallback(() => {
+                    button.SetCallback(new ClosureFastLinksParametersButtonCallback() { parameters = parameters, data = item, }, (innerData) => {
 
-                        parameters.screen.prevDirectoryId = parameters.screen.currentDirectoryId;
-                        parameters.screen.currentDirectoryId = item.id;
+                        innerData.parameters.screen.prevDirectoryId = innerData.parameters.screen.currentDirectoryId;
+                        innerData.parameters.screen.currentDirectoryId = innerData.data.id;
 
                     });
                     button.Show();
@@ -510,15 +536,15 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                     
                     button.SetInteractable(WindowSystem.GetConsole().ValidateFastLink(item));
 
-                    button.SetCallback(() => {
+                    button.SetCallback(new ClosureFastLinksParametersButtonCallback() { parameters = parameters, data = item, }, (innerData) => {
 
-                        if (item.run == true) {
+                        if (innerData.data.run == true) {
 
-                            parameters.screen.ApplyCommand(item.cmd);
+                            innerData.parameters.screen.ApplyCommand(innerData.data.cmd);
 
                         } else {
                         
-                            parameters.screen.ReplaceInput($"{item.cmd} ");
+                            innerData.parameters.screen.ReplaceInput($"{innerData.data.cmd} ");
                         
                         }
                     
@@ -539,8 +565,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 var text = component.Get<TextComponent>();
                 text.SetText(item.isCommand == true ? "<color=#777><b>></b></color> " : string.Empty, item.line);
                 text.SetColor(item.isCommand == true ? new Color(0.15f, 0.6f, 1f) : ConsoleScreen.GetColorByLogType(item.logType));
-                component.SetCallback(() => {
-                    parameters.data.ReplaceInput(item.line);
+                component.SetCallback(new ClosureParametersItem() { parameters = parameters, data = item, },(innerData) => {
+                    innerData.parameters.data.ReplaceInput(innerData.data.line);
                 });
                 component.SetInteractable(item.isCommand);
                 component.Show();

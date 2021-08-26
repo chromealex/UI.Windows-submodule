@@ -234,6 +234,7 @@ namespace UnityEditor.UI.Windows {
                                         var mainDir = dir;
 
                                         if (System.IO.File.Exists(mainDir + "/UIWS-IgnoreAddressables.txt") == true) continue;
+                                        if (System.IO.File.Exists(mainDir + "\\UIWS-IgnoreAddressables.txt") == true) continue;
 
                                         var name = $"UIWS-{window.name}-AddressablesGroup";
                                         UnityEditor.AddressableAssets.Settings.AddressableAssetSettings aaSettings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;

@@ -242,7 +242,7 @@ namespace UnityEditor.UI.Windows {
                                         UnityEditor.AddressableAssets.Settings.AddressableAssetGroup group;
                                         if (System.IO.File.Exists(groupPath) == false) {
                                             
-                                            group = aaSettings.CreateGroup(name, false, true, true, null);
+                                            group = aaSettings.CreateGroup(name, false, false, true, null);
                                             var scheme = group.AddSchema<UnityEditor.AddressableAssets.Settings.GroupSchemas.BundledAssetGroupSchema>();
                                             var schemeInstance = WindowSystemEditor.Instantiate(scheme);
                                             schemeInstance.name = "BundledAssetGroupSchema";

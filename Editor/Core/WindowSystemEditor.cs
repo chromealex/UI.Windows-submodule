@@ -228,8 +228,10 @@ namespace UnityEditor.UI.Windows {
                                         EditorUtility.DisplayProgressBar("Updating Addressables", window.ToString(), i / (float)this.registeredPrefabs.arraySize);
 
                                         var path = AssetDatabase.GetAssetPath(window);
-                                        var dir = System.IO.Path.GetDirectoryName(path);
-                                        var mainDir = dir.Replace("/Screens", "");
+                                        var sourceDir = System.IO.Path.GetDirectoryName(path);
+                                        var dir = sourceDir.Replace("/Screens", "");
+                                        dir = dir.Replace("\\Screens", "");
+                                        var mainDir = dir;
 
                                         if (System.IO.File.Exists(mainDir + "/UIWS-IgnoreAddressables.txt") == true) continue;
 
@@ -252,7 +254,8 @@ namespace UnityEditor.UI.Windows {
                                         }
                                         group = AssetDatabase.LoadAssetAtPath<UnityEditor.AddressableAssets.Settings.AddressableAssetGroup>(groupPath);
                                         
-                                        dir = dir.Replace("/Screens", "/Components");
+                                        dir = sourceDir.Replace("/Screens", "/Components");
+                                        dir = dir.Replace("\\Screens", "\\Components");
                                         var components = AssetDatabase.FindAssets("t:GameObject", new string[] { dir });
                                         foreach (var guid in components) {
 

@@ -21,6 +21,25 @@
 
         }
 
+        public T GetStrong<T>() where T : WindowComponent {
+
+            var type = typeof(T);
+
+            for (int i = 0; i < this.components.Length; ++i) {
+
+                var comp = this.components[i];
+                if (comp != null && comp.GetType() == type) {
+
+                    return comp as T;
+
+                }
+
+            }
+
+            return default;
+
+        }
+
     }
 
 }

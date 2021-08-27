@@ -287,8 +287,13 @@ namespace UnityEngine.UI.Windows.Modules {
 
             var item = new InternalTask(resource);
             if (this.tasks.TryGetValue(item, out var onCompleteActions) == true) {
-                
-                onCompleteActions.Invoke(result);
+
+                try {
+                    onCompleteActions.Invoke(result);
+                } catch (System.Exception ex) {
+                    Debug.LogException(ex);
+                }
+
                 this.tasks.Remove(item);
 
             }

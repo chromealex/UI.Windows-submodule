@@ -113,10 +113,11 @@ namespace UnityEngine.UI.Windows {
 
                     if (reg.Remove(callback) == true) {
                         
+                        this.list.RemoveAt(i);
                         --this.count;
+                        --i;
                         
                     }
-                    --i;
 
                 }
                 
@@ -134,11 +135,12 @@ namespace UnityEngine.UI.Windows {
                 if (item is Registry<TState> reg) {
 
                     if (reg.Remove(state, callback) == true) {
-                        
+
+                        this.list.RemoveAt(i);
                         --this.count;
+                        --i;
                         
                     }
-                    --i;
 
                 }
                 

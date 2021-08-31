@@ -352,10 +352,16 @@ namespace UnityEngine.UI.Windows {
 
         public void Start() {
 
-            this.InitializeConsole();
+            this.console = new WindowSystemConsole();
 
             if (this.showRootOnStart == true) WindowSystem.ShowRoot();
 
+        }
+
+        public void OnDestroy() {
+            
+            this.console.Dispose();
+            
         }
 
         private Vector2 pointerScreenPosition;
@@ -502,20 +508,6 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private void InitializeConsole() {
-
-            /*Coroutines.WaitTime(3f, () => {
-            
-                this.consoleWindowInstance = WindowSystem.ShowSync<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(transitionParameters: TransitionParameters.Default.ReplaceImmediately(true));
-                this.consoleWindowInstance.Hide(TransitionParameters.Default.ReplaceImmediately(true));
-                this.consoleWindowInstance = null;
-    
-            });*/
-            
-            this.console = new WindowSystemConsole();
-            
-        }
-        
         public void Update() {
 
             if (this.console != null) this.console.Update();

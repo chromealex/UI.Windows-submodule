@@ -108,7 +108,8 @@ namespace UnityEngine.UI.Windows {
 
                         var instance = this.module.listComponent.items[k];
                         var item = this.items[i];
-                        var data = this.module.items[i];
+                        ref var data = ref this.module.items[i];
+                        if (forceRebuild == true) data.size = this.module.dataSource.GetSize(i);
                         
                         var isLocalDirty = false;
                         var pos = instance.rectTransform.anchoredPosition;
@@ -405,7 +406,7 @@ namespace UnityEngine.UI.Windows {
             for (int i = 0; i < this.allCount; ++i) {
                 
                 ref var item = ref this.items[i];
-                item.size = this.dataSource.GetSize(i);
+                if (item.size <= 0f) item.size = this.dataSource.GetSize(i);
                 item.accumulatedSize = accumulatedSize;
                 accumulatedSize += item.size;
                 

@@ -178,6 +178,7 @@ namespace UnityEngine.UI.Windows.Components {
                     case Resource.ObjectType.Sprite:
                         Coroutines.Run(resources.LoadAsync<Sprite, SetImageClosure>(this, data, resource, (asset, closure) => {
 
+                            if (closure.component == null) return;
                             closure.component.currentLoaded = asset;
                             closure.component.SetImage(asset);
                             closure.component.isLoading = false;
@@ -188,6 +189,7 @@ namespace UnityEngine.UI.Windows.Components {
                     case Resource.ObjectType.Texture:
                         Coroutines.Run(resources.LoadAsync<Texture, SetImageClosure>(this, data, resource, (asset, closure) => {
 
+                            if (closure.component == null) return;
                             closure.component.currentLoaded = asset;
                             closure.component.SetImage(asset);
                             closure.component.isLoading = false;

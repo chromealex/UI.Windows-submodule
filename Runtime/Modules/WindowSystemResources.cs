@@ -372,6 +372,12 @@ namespace UnityEngine.UI.Windows.Modules {
 
         private IEnumerator Load_INTERNAL<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
 
+            if (typeof(Component).IsAssignableFrom(typeof(T)) == true) {
+                        
+                resource.objectType = Resource.ObjectType.Component;
+                        
+            }
+
             if (this.RequestLoad(handler, closure, resource, onComplete) == true) {
                 
                 // Waiting for loading then break
@@ -417,12 +423,6 @@ namespace UnityEngine.UI.Windows.Modules {
                 }
 
                 case Resource.Type.Addressables: {
-
-                    if (typeof(Component).IsAssignableFrom(typeof(T)) == true) {
-                        
-                        resource.objectType = Resource.ObjectType.Component;
-                        
-                    }
 
                     if (resource.objectType == Resource.ObjectType.Component) {
 

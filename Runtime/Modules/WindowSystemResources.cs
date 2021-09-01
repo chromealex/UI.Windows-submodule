@@ -357,7 +357,7 @@ namespace UnityEngine.UI.Windows.Modules {
         public T Load<T>(object handler, Resource resource) where T : class {
             
             var closure = PoolClass<ClosureResult<T>>.Spawn();
-            var op = this.Load_INTERNAL<T, ClosureResult<T>>(new LoadParameters() { async = true }, handler, closure, resource, (asset, c) => {
+            var op = this.Load_INTERNAL<T, ClosureResult<T>>(new LoadParameters() { async = false }, handler, closure, resource, (asset, c) => {
 
                 c.result = asset;
 

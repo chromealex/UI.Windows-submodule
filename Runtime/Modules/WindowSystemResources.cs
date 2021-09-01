@@ -12,6 +12,42 @@ namespace UnityEngine.UI.Windows {
         OnDeInit,
 
     }
+
+    [System.Serializable]
+    public class Resource<T> where T : UnityEngine.Object {
+
+        [SerializeField]
+        private Resource data;
+        private T loaded;
+        
+        internal Resource() { }
+
+        public T Load(object handler) {
+
+            this.loaded = WindowSystem.GetResources().Load<T>(handler, this.data);
+            return this.loaded;
+
+        }
+
+        public T Get() {
+
+            return this.loaded;
+
+        }
+
+        public void Unload(object handler) {
+
+            WindowSystem.GetResources().Delete(handler, ref this.loaded);
+
+        }
+        
+        public static implicit operator T(Resource<T> item) {
+
+            return item.loaded;
+
+        }
+
+    }
     
     [System.Serializable]
     public struct Resource {

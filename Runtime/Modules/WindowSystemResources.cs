@@ -418,6 +418,12 @@ namespace UnityEngine.UI.Windows.Modules {
 
                 case Resource.Type.Addressables: {
 
+                    if (typeof(Component).IsAssignableFrom(typeof(T)) == true) {
+                        
+                        resource.objectType = Resource.ObjectType.Component;
+                        
+                    }
+
                     if (resource.objectType == Resource.ObjectType.Component) {
 
                         //Debug.Log("Loading: " + resource.guid);

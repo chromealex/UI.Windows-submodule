@@ -53,6 +53,18 @@ namespace UnityEditor.UI.Windows {
             labelRect.y += labelPadding;
             labelRect.height -= labelPadding * 2f;
 
+            if (type == typeof(Sprite)) {
+
+                value.objectType = Resource.ObjectType.Sprite;
+
+            } else if (type == typeof(Texture) ||
+                       type == typeof(Texture2D) ||
+                       type == typeof(RenderTexture)) {
+
+                value.objectType = Resource.ObjectType.Texture;
+
+            }
+
             var obj = Resource.GetEditorRef(value.guid, value.subObjectName, type, value.objectType, value.directRef);
             var oldValue = EditorGUI.showMixedValue;
             EditorGUI.showMixedValue = hasMultipleDifferentValues;
@@ -110,13 +122,12 @@ namespace UnityEditor.UI.Windows {
         
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
 
-            var field = UnityEditor.UI.Windows.EditorHelpers.GetFieldViaPath(property.serializedObject.targetObject.GetType(), property.propertyPath);
             var guid = property.FindPropertyRelative("guid");
             var loadType = property.FindPropertyRelative("type");
             var objectType = property.FindPropertyRelative("objectType");
             var directRef = property.FindPropertyRelative("directRef");
 
-            var newRes = WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, label, field, new Resource() {
+            var newRes = WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, label, this.fieldInfo, new Resource() {
                 guid = guid.stringValue,
                 type = (Resource.Type)loadType.enumValueIndex,
                 objectType = (Resource.ObjectType)objectType.enumValueIndex,

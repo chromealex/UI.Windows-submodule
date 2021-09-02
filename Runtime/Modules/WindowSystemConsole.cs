@@ -30,12 +30,18 @@ namespace UnityEngine.UI.Windows {
 
     }
 
-    public interface IConsoleModule {}
+    public interface IConsoleModule {
+
+        void OnStart();
+
+    }
 
     public abstract class ConsoleModule : IConsoleModule {
 
         public ConsoleScreen screen;
-        
+
+        public virtual void OnStart() { }
+
         [Help("Prints available methods for this module")]
         public void Help() {
 
@@ -337,6 +343,7 @@ namespace UnityEngine.UI.Windows {
             foreach (var type in types) {
 
                 var module = (IConsoleModule)System.Activator.CreateInstance(type);
+                module.OnStart();
                 this.moduleItems.Add(module);
                 
                 var methods = module.GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);

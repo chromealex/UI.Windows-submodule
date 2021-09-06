@@ -360,7 +360,7 @@ namespace UnityEngine.UI.Windows {
 
         public void OnDestroy() {
             
-            this.console.Dispose();
+            this.console?.Dispose();
             
         }
 

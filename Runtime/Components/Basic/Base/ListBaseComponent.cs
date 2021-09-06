@@ -384,8 +384,8 @@ namespace UnityEngine.UI.Windows.Components {
             for (int i = 0; i < this.Count; ++i) {
 
                 closure.index = i;
-                onItem.Invoke((T)this.items[i], closure);
-                    
+                if (this.items[i] is T item) onItem.Invoke(item, closure);
+                
             }
             
         }

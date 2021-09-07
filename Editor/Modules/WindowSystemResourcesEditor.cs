@@ -206,7 +206,8 @@ namespace UnityEditor.UI.Windows {
                                     GUILayout.BeginHorizontal();
 
                                     state = EditorGUILayout.Foldout(state, bundle.name);
-                                    if (GUILayout.Button("Unload", EditorStyles.miniButton) == true) {
+                                    
+                                    if (GUILayout.Button("Unload", EditorStyles.miniButton, GUILayout.Width(70f)) == true) {
 
                                         bundle.Unload(true);
                                         GUILayout.EndHorizontal();

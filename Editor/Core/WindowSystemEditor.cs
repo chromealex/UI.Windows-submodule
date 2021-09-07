@@ -301,18 +301,33 @@ namespace UnityEditor.UI.Windows {
 
                             try {
                                 
+                                var markDirtyCount = 0;
                                 var gos = AssetDatabase.FindAssets("t:GameObject");
+                                var visited = new HashSet<object>();
+                                var visitedGeneric = new HashSet<object>();
                                 var i = 0;
                                 foreach (var guid in gos) {
 
                                     var path = AssetDatabase.GUIDToAssetPath(guid);
                                     var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                                    EditorUtility.DisplayProgressBar("Validating Resources", path, i / (float)gos.Length);
+                                    EditorUtility.DisplayProgressBar("Validating Resources 1 / 2", path, i / (float)gos.Length);
 
                                     {
-                                        var allComponents = go.GetComponentsInChildren<WindowObject>(true);
+                                        var allComponents = go.GetComponentsInChildren<Component>(true);
                                         foreach (var component in allComponents) {
 
+                                            EditorHelpers.FindType(component, typeof(Resource<>), (fieldInfo, res) => {
+
+                                                var rField = (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
+                                                var r = (Resource)rField.GetValue(res);
+                                                System.Type resType = res.GetType().GetGenericArguments()[0];
+                                                WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
+                                                EditorUtility.SetDirty(component);
+                                                ++markDirtyCount;
+                                                rField.SetValue(res, r);
+                                                return res;
+
+                                            }, visitedGeneric);
                                             EditorHelpers.FindType(component, typeof(Resource), (fieldInfo, res) => {
 
                                                 System.Type resType = null;
@@ -322,9 +337,11 @@ namespace UnityEditor.UI.Windows {
                                                 }
                                                 var r = (Resource)res;
                                                 WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
+                                                EditorUtility.SetDirty(component);
+                                                ++markDirtyCount;
                                                 return r;
 
-                                            });
+                                            }, visited);
 
                                         }
                                     }
@@ -332,7 +349,50 @@ namespace UnityEditor.UI.Windows {
                                     ++i;
 
                                 }
+                                
+                                var sos = AssetDatabase.FindAssets("t:ScriptableObject");
+                                i = 0;
+                                foreach (var guid in sos) {
 
+                                    var path = AssetDatabase.GUIDToAssetPath(guid);
+                                    var go = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
+                                    EditorUtility.DisplayProgressBar("Validating Resources 2 / 2", path, i / (float)sos.Length);
+
+                                    {
+                                        EditorHelpers.FindType(go, typeof(Resource<>), (fieldInfo, res) => {
+
+                                            var rField = (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
+                                            var r = (Resource)rField.GetValue(res);
+                                            System.Type resType = res.GetType().GetGenericArguments()[0];
+                                            WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
+                                            EditorUtility.SetDirty(go);
+                                            ++markDirtyCount;
+                                            rField.SetValue(res, r);
+                                            return res;
+
+                                        }, visitedGeneric);
+                                        EditorHelpers.FindType(go, typeof(Resource), (fieldInfo, res) => {
+
+                                            System.Type resType = null;
+                                            var resTypeAttrs = fieldInfo.GetCustomAttributes(typeof(ResourceTypeAttribute), true);
+                                            if (resTypeAttrs.Length > 0) {
+                                                resType = ((ResourceTypeAttribute)resTypeAttrs[0]).type;
+                                            }
+                                            var r = (Resource)res;
+                                            WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
+                                            EditorUtility.SetDirty(go);
+                                            ++markDirtyCount;
+                                            return r;
+
+                                        }, visited);
+                                    }
+
+                                    ++i;
+
+                                }
+                                
+                                Debug.Log("Done. Updated: " + markDirtyCount);
+                                
                             } catch (System.Exception ex) {
                                 Debug.LogException(ex);
                             }

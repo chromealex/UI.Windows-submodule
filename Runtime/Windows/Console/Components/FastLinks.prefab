@@ -163,6 +163,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 4876203065588919837}
@@ -310,6 +312,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 3702011091554380859}
@@ -472,6 +476,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 8556863168935618024}
@@ -616,6 +622,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 1068094537600266531}
@@ -752,6 +760,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 3695580543768649993}
@@ -815,6 +825,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -954,6 +965,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 2041170896813225387}
@@ -1104,6 +1117,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 213425025972884344}
@@ -1330,6 +1345,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 1250138211036181806}

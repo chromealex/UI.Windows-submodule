@@ -448,9 +448,9 @@ namespace UnityEngine.UI.Windows.Modules {
 
                                 } else {
 
-                                    this.AddObject(handler, asset, resource, () => UnityEngine.AddressableAssets.Addressables.Release(asset));
-
-                                    this.CompleteTask(handler, resource, asset.GetComponent<T>());
+                                    var result = asset.GetComponent<T>();
+                                    this.AddObject(handler, result, resource, () => UnityEngine.AddressableAssets.Addressables.Release(asset));
+                                    this.CompleteTask(handler, resource, result);
 
                                 }
 
@@ -494,7 +494,6 @@ namespace UnityEngine.UI.Windows.Modules {
                                 } else {
 
                                     this.AddObject(handler, asset, resource, () => UnityEngine.AddressableAssets.Addressables.Release(asset));
-
                                     this.CompleteTask(handler, resource, asset);
 
                                 }
@@ -679,7 +678,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                         if (item.GetHashCode() == resItem.GetHashCode()) {
                             
-                            if (list.Remove(resItem) == true) {
+                            if (list.Remove(item) == true) {
 
                                 if (list.Count == 0) this.handlerToObjects.Remove(key);
 

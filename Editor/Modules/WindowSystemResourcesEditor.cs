@@ -202,9 +202,10 @@ namespace UnityEditor.UI.Windows {
 
                                 foreach (var bundle in loadedBundles) {
 
+                                    var state = EditorPrefs.GetBool($"UIWR.FoldOut.Bundles.{bundle.name}", false);
                                     GUILayout.BeginHorizontal();
 
-                                    EditorGUILayout.SelectableLabel(bundle.name, EditorStyles.boldLabel, GUILayout.Height(18f));
+                                    state = EditorGUILayout.Foldout(state, bundle.name);
                                     if (GUILayout.Button("Unload", EditorStyles.miniButton) == true) {
 
                                         bundle.Unload(true);
@@ -215,42 +216,49 @@ namespace UnityEditor.UI.Windows {
 
                                     GUILayout.EndHorizontal();
 
-                                    GUILayoutExt.Box(2f, 8f, () => {
+                                    EditorPrefs.SetBool($"UIWR.FoldOut.Bundles.{bundle.name}", state);
+                                    if (state == true) {
 
-                                        var c1 = new Color(1f, 1f, 1f, 0f);
-                                        var c2 = new Color(1f, 1f, 1f, 0.02f);
-                                        var prevColor = GUI.color;
-                                        var assets = bundle.GetAllAssetNames();
-                                        var i = 0;
-                                        foreach (var asset in assets) {
+                                        EditorGUILayout.SelectableLabel(bundle.name, EditorStyles.boldLabel, GUILayout.Height(18f));
 
-                                            GUI.color = Color.white;
-                                            if (this.IsLoaded(asset, allObjects, out var hasDirectRef) == true) {
-                                                if (hasDirectRef == true) {
-                                                    GUI.color = Color.yellow;
-                                                } else {
-                                                    GUI.color = Color.green;
+                                        GUILayoutExt.Box(2f, 8f, () => {
+
+                                            var c1 = new Color(1f, 1f, 1f, 0f);
+                                            var c2 = new Color(1f, 1f, 1f, 0.02f);
+                                            var prevColor = GUI.color;
+                                            var assets = bundle.GetAllAssetNames();
+                                            var i = 0;
+                                            foreach (var asset in assets) {
+
+                                                GUI.color = Color.white;
+                                                if (this.IsLoaded(asset, allObjects, out var hasDirectRef) == true) {
+                                                    if (hasDirectRef == true) {
+                                                        GUI.color = Color.yellow;
+                                                    } else {
+                                                        GUI.color = Color.green;
+                                                    }
                                                 }
+
+                                                var rect = EditorGUILayout.GetControlRect(GUILayout.Height(14f), GUILayout.ExpandWidth(true));
+                                                GUILayoutExt.DrawRect(rect, ++i % 2 == 0 ? c1 : c2);
+                                                var path = AssetDatabase.GUIDToAssetPath(asset);
+                                                if (string.IsNullOrEmpty(path) == false) {
+
+                                                    EditorGUI.SelectableLabel(rect, path, EditorStyles.miniLabel);
+
+                                                } else {
+
+                                                    EditorGUI.SelectableLabel(rect, asset, EditorStyles.miniLabel);
+
+                                                }
+
                                             }
 
-                                            var rect = EditorGUILayout.GetControlRect(GUILayout.Height(14f), GUILayout.ExpandWidth(true));
-                                            GUILayoutExt.DrawRect(rect, ++i % 2 == 0 ? c1 : c2);
-                                            var path = AssetDatabase.GUIDToAssetPath(asset);
-                                            if (string.IsNullOrEmpty(path) == false) {
+                                            GUI.color = prevColor;
 
-                                                EditorGUI.SelectableLabel(rect, path, EditorStyles.miniLabel);
+                                        });
 
-                                            } else {
-
-                                                EditorGUI.SelectableLabel(rect, asset, EditorStyles.miniLabel);
-
-                                            }
-
-                                        }
-
-                                        GUI.color = prevColor;
-
-                                    });
+                                    }
 
                                 }
 

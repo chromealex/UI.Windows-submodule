@@ -128,6 +128,21 @@ namespace UnityEditor.UI.Windows {
             if (visited.Contains(root) == true) return;
             visited.Add(root);
 
+            var isGeneric = searchType.IsGenericType;
+            
+            System.Func<System.Type, System.Type, bool> check = (t1, search) => {
+
+                if (isGeneric == true) {
+
+                    if (t1.IsGenericType == false) return false;
+                    return t1.GetGenericTypeDefinition() == search;
+
+                }
+                
+                return t1 == search;
+                
+            };
+
             var fields = root.GetType().GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
             foreach (var field in fields) {
 
@@ -135,7 +150,7 @@ namespace UnityEditor.UI.Windows {
                 if (field.FieldType.IsPointer == true) continue;
                 if (typeof(Component).IsAssignableFrom(field.FieldType) == true) continue;
                 
-                if (field.FieldType == searchType) {
+                if (check.Invoke(field.FieldType, searchType) == true) {
 
                     var obj = field.GetValue(root);
                     field.SetValue(root, del.Invoke(field, obj));
@@ -147,7 +162,7 @@ namespace UnityEditor.UI.Windows {
                         for (int i = 0; i < arr.Length; ++i) {
                             var r = arr.GetValue(i);
                             if (r != null) {
-                                if (r.GetType() == searchType) {
+                                if (check.Invoke(r.GetType(), searchType) == true) {
                                     arr.SetValue(del.Invoke(field, r), i);
                                 } else {
                                     EditorHelpers.FindType(r, searchType, del, visited);

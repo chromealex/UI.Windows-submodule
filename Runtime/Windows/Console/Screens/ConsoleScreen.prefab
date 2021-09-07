@@ -79,6 +79,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   preferences:
     layer:
@@ -154,7 +156,6 @@ MonoBehaviour:
           subObjectName: 
           directRef: {fileID: 5124798591967899215, guid: 1c10b7c4270a3436aa31517c54f8fe05,
             type: 3}
-  autoConnectLogs: 1
   references:
     version: 1
 --- !u!20 &2012446584845969934

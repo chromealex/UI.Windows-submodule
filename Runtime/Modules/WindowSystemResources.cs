@@ -80,7 +80,7 @@ namespace UnityEngine.UI.Windows {
 
         public string GetAddress() {
 
-            if (string.IsNullOrEmpty(this.address) == false) return this.address;
+            if (string.IsNullOrEmpty(this.address) == false && string.IsNullOrEmpty(this.address.Trim()) == false) return this.address;
             return this.guid;
 
         }

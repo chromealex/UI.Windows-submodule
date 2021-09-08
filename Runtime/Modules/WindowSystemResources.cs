@@ -435,7 +435,6 @@ namespace UnityEngine.UI.Windows.Modules {
 
                     if (resource.objectType == Resource.ObjectType.Component) {
 
-                        Debug.Log("Loading: " + resource.guid);
                         var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(resource.GetAddress());
                         System.Action cancellationTask = () => { if (op.IsValid() == true) UnityEngine.AddressableAssets.Addressables.Release(op); };
                         this.LoadBegin(handler, cancellationTask);

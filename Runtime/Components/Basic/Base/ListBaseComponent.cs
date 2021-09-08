@@ -315,6 +315,14 @@ namespace UnityEngine.UI.Windows.Components {
             };
             Coroutines.Run(resources.LoadAsync<T, AddItemClosure<T, TClosure>>(this, data, source, (asset, innerClosure) => {
 
+                if (innerClosure.component == null ||
+                    innerClosure.component.GetState() >= ObjectState.DeInitialized) {
+                    
+                    WindowSystem.GetResources().DeleteAll(innerClosure.component);
+                    return;
+                    
+                }
+                
                 if (innerClosure.component.loadedAssets.Contains(asset) == false) {
                     
                     if (asset.createPool == true) WindowSystem.GetPools().CreatePool(asset);

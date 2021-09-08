@@ -142,6 +142,7 @@ namespace UnityEditor.UI.Windows {
 
         public static void DrawGUI(Rect position, SerializedProperty property, GUIContent label, System.Type type, UnityEngine.UI.Windows.Utilities.RequiredType requiredType) {
             
+            var address = property.FindPropertyRelative("address");
             var guid = property.FindPropertyRelative("guid");
             var loadType = property.FindPropertyRelative("type");
             var objectType = property.FindPropertyRelative("objectType");
@@ -159,6 +160,7 @@ namespace UnityEditor.UI.Windows {
                 property.serializedObject.Update();
                 {
                     guid.stringValue = newRes.resource.guid;
+                    address.stringValue = newRes.resource.address;
                     loadType.enumValueIndex = (int)newRes.resource.type;
                     objectType.enumValueIndex = (int)newRes.resource.objectType;
                     directRef.objectReferenceValue = newRes.resource.directRef;

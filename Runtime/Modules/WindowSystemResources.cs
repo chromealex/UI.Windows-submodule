@@ -73,9 +73,17 @@ namespace UnityEngine.UI.Windows {
 
         public Type type;
         public ObjectType objectType;
+        public string address;
         public string guid;
         public string subObjectName;
         public Object directRef;
+
+        public string GetAddress() {
+
+            if (string.IsNullOrEmpty(this.address) == false) return this.address;
+            return this.guid;
+
+        }
 
         public override string ToString() {
             
@@ -93,6 +101,7 @@ namespace UnityEngine.UI.Windows {
 
             return this.type == other.type &&
                    this.objectType == other.objectType &&
+                   this.address == other.address &&
                    this.guid == other.guid &&
                    this.subObjectName == other.subObjectName &&
                    this.directRef == other.directRef;
@@ -426,8 +435,8 @@ namespace UnityEngine.UI.Windows.Modules {
 
                     if (resource.objectType == Resource.ObjectType.Component) {
 
-                        //Debug.Log("Loading: " + resource.guid);
-                        var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(resource.guid);
+                        Debug.Log("Loading: " + resource.guid);
+                        var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(resource.GetAddress());
                         System.Action cancellationTask = () => { if (op.IsValid() == true) UnityEngine.AddressableAssets.Addressables.Release(op); };
                         this.LoadBegin(handler, cancellationTask);
                         if (loadParameters.async == false) op.WaitForCompletion();
@@ -465,11 +474,11 @@ namespace UnityEngine.UI.Windows.Modules {
                         UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle<T> op;
                         if (string.IsNullOrEmpty(resource.subObjectName) == false) {
                             
-                            op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>($"{resource.guid}[{resource.subObjectName}]");
+                            op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>($"{resource.GetAddress()}[{resource.subObjectName}]");
                             
                         } else {
                             
-                            op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(resource.guid);
+                            op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(resource.address ?? resource.guid);
                             
                         }
                         

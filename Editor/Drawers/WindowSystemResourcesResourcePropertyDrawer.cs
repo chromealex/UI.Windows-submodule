@@ -239,7 +239,8 @@ namespace UnityEditor.UI.Windows {
 
             } else {
 
-                if (UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(resource.guid, includeImplicit: true) != null) {
+                var entry = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(resource.guid, includeImplicit: true);
+                if (entry != null) {
 
                     //if (loadType.enumValueIndex != (int)Resource.Type.Addressables)
                     {
@@ -248,7 +249,8 @@ namespace UnityEditor.UI.Windows {
                         {
                             resource.type = Resource.Type.Addressables; //AssetDatabase.AssetPathToGUID(assetPath);
                             resource.directRef = null;
-                            newObj.SetAddressableID(resource.guid);
+                            resource.address = entry.address;
+                            //newObj.SetAddressableID(resource.guid);
                         }
 
                     }

@@ -186,6 +186,7 @@ MonoBehaviour:
   source:
     type: 1
     objectType: 2
+    address: 
     guid: 
     subObjectName: 
     directRef: {fileID: 8199301820935925453}
@@ -699,6 +700,7 @@ MonoBehaviour:
   source:
     type: 1
     objectType: 2
+    address: 
     guid: 
     subObjectName: 
     directRef: {fileID: 1192130305656968135}

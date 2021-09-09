@@ -386,8 +386,18 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         public LayoutItem[] items;
 
         private int activeIndex;
+        private bool forcedIndex;
+
+        public void SetActive(int index) {
+
+            this.activeIndex = index;
+            this.forcedIndex = true;
+
+        }
 
         public void SetActive() {
+
+            if (this.forcedIndex == true) return;
 
             var targetData = WindowSystem.GetTargetData();
             for (int i = this.items.Length - 1; i >= 0; --i) {

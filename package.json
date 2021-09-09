@@ -5,7 +5,8 @@
   "description": "Better UI workflow with Screen/Layout/Component model.",
   "unity": "2019.1",
   "dependencies": {
-    "com.unity.localization": "0.11.1-preview"
+    "com.unity.localization": "0.11.1-preview",
+    "com.unity.addressables": "1.19.4"
   },
   "scopedRegistries": [
     {

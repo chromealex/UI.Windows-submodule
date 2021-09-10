@@ -322,9 +322,9 @@ namespace UnityEditor.UI.Windows {
                                                 var r = (Resource)rField.GetValue(res);
                                                 System.Type resType = res.GetType().GetGenericArguments()[0];
                                                 WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
-                                                EditorUtility.SetDirty(component);
                                                 ++markDirtyCount;
                                                 rField.SetValue(res, r);
+                                                EditorUtility.SetDirty(component.gameObject);
                                                 return res;
 
                                             }, visitedGeneric);
@@ -337,8 +337,8 @@ namespace UnityEditor.UI.Windows {
                                                 }
                                                 var r = (Resource)res;
                                                 WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
-                                                EditorUtility.SetDirty(component);
                                                 ++markDirtyCount;
+                                                EditorUtility.SetDirty(component.gameObject);
                                                 return r;
 
                                             }, visited);
@@ -365,9 +365,9 @@ namespace UnityEditor.UI.Windows {
                                             var r = (Resource)rField.GetValue(res);
                                             System.Type resType = res.GetType().GetGenericArguments()[0];
                                             WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
-                                            EditorUtility.SetDirty(go);
                                             ++markDirtyCount;
                                             rField.SetValue(res, r);
+                                            EditorUtility.SetDirty(go);
                                             return res;
 
                                         }, visitedGeneric);
@@ -380,8 +380,8 @@ namespace UnityEditor.UI.Windows {
                                             }
                                             var r = (Resource)res;
                                             WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
-                                            EditorUtility.SetDirty(go);
                                             ++markDirtyCount;
+                                            EditorUtility.SetDirty(go);
                                             return r;
 
                                         }, visited);

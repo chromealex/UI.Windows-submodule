@@ -13,14 +13,22 @@ namespace UnityEngine.UI.Windows {
 
     }
 
+    public interface IResourceProvider {
+
+        Resource GetResource();
+
+    }
+
     [System.Serializable]
-    public class Resource<T> where T : UnityEngine.Object {
+    public class Resource<T> : IResourceProvider where T : UnityEngine.Object {
 
         [SerializeField]
         private Resource data;
         private T loaded;
         
         internal Resource() { }
+        
+        Resource IResourceProvider.GetResource() => this.data;
 
         public T Load(object handler) {
 

@@ -155,6 +155,14 @@ namespace UnityEngine.UI.Windows.Components {
 
         private bool isLoading;
         private Resource prevResourceLoad;
+
+        public void SetImage<T>(T provider) where T : IResourceProvider {
+
+            if (provider != null) return;
+            this.SetImage(provider.GetResource());
+
+        }
+
         public void SetImage(Resource resource) {
 
             if (this.prevResourceLoad.IsEquals(resource) == false) {

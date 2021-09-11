@@ -273,7 +273,7 @@ namespace UnityEngine.UI.Windows {
             get {
 
                 #if UNITY_EDITOR
-                if (Application.isPlaying == false && WindowSystem._instance == null) {
+                if (WindowSystem._instance == null && Application.isPlaying == false) {
 
                     WindowSystem._instance = Object.FindObjectOfType<WindowSystem>();
 

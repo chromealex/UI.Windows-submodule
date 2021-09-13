@@ -382,6 +382,7 @@ namespace UnityEngine.UI.Windows.Modules {
             while (op.MoveNext() == true) { }
 
             var result = closure.result;
+            closure.result = null;
             PoolClass<ClosureResult<T>>.Recycle(ref closure);
             return result;
 

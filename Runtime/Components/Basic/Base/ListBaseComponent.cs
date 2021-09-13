@@ -298,6 +298,24 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        public virtual WindowComponent AddItemSync() {
+            
+            return this.AddItemSyncInternal<WindowComponent>(this.source);
+            
+        }
+
+        public virtual T AddItemSync<T>() where T : WindowComponent {
+
+            return this.AddItemSyncInternal<T>(this.source);
+
+        }
+
+        public virtual T AddItemSync<T>(Resource source) where T : WindowComponent {
+
+            return this.AddItemSyncInternal<T>(source);
+
+        }
+
         private struct AddItemClosure<T, TClosure> {
 
             public TClosure data;
@@ -305,6 +323,54 @@ namespace UnityEngine.UI.Windows.Components {
             public ListBaseComponent component;
 
         }
+
+        private static T SetupLoadedAsset<T, TClosure>(T asset, AddItemClosure<T, TClosure> innerClosure) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
+            
+            if (innerClosure.component == null ||
+                innerClosure.component.GetState() >= ObjectState.DeInitialized) {
+                
+                WindowSystem.GetResources().DeleteAll(innerClosure.component);
+                return null;
+                
+            }
+            
+            if (innerClosure.component.loadedAssets.Contains(asset) == false) {
+                
+                if (asset.createPool == true) WindowSystem.GetPools().CreatePool(asset);
+                innerClosure.component.loadedAssets.Add(asset);
+                
+            }
+            
+            var pools = WindowSystem.GetPools();
+            var instance = pools.Spawn(asset, innerClosure.component.GetRoot());
+            #if UNITY_EDITOR
+            var profileMarker = new Unity.Profiling.ProfilerMarker("ListComponentBase::AddItemInternal::SetItemName (Editor Only)");
+            profileMarker.Begin();
+            instance.name = $"{asset.name}_{innerClosure.data.index}";
+            profileMarker.End();
+            #endif
+            innerClosure.component.RegisterSubObject(instance);
+            innerClosure.component.items.Add(instance);
+            innerClosure.component.NotifyModulesComponentAdded(instance);
+            innerClosure.component.OnElementsChanged();
+            if (innerClosure.onComplete != null) innerClosure.onComplete.Invoke(instance, innerClosure.data);
+            
+            return instance;
+
+        }
+
+        internal T AddItemSyncInternal<T>(Resource source) where T : WindowComponent {
+            
+            var resources = WindowSystem.GetResources();
+            var data = new AddItemClosure<T, DefaultParameters>() {
+                data = new DefaultParameters(),
+                component = this,
+            };
+            var asset = resources.Load<T>(this, source);
+            return ListBaseComponent.SetupLoadedAsset(asset, data);
+            
+        }
+
         internal void AddItemInternal<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
             
             var resources = WindowSystem.GetResources();
@@ -315,35 +381,8 @@ namespace UnityEngine.UI.Windows.Components {
             };
             Coroutines.Run(resources.LoadAsync<T, AddItemClosure<T, TClosure>>(this, data, source, (asset, innerClosure) => {
 
-                if (innerClosure.component == null ||
-                    innerClosure.component.GetState() >= ObjectState.DeInitialized) {
-                    
-                    WindowSystem.GetResources().DeleteAll(innerClosure.component);
-                    return;
-                    
-                }
+                ListBaseComponent.SetupLoadedAsset(asset, innerClosure);
                 
-                if (innerClosure.component.loadedAssets.Contains(asset) == false) {
-                    
-                    if (asset.createPool == true) WindowSystem.GetPools().CreatePool(asset);
-                    innerClosure.component.loadedAssets.Add(asset);
-                    
-                }
-                
-                var pools = WindowSystem.GetPools();
-                var instance = pools.Spawn(asset, innerClosure.component.GetRoot());
-                #if UNITY_EDITOR
-                var profileMarker = new Unity.Profiling.ProfilerMarker("ListComponentBase::AddItemInternal::SetItemName (Editor Only)");
-                profileMarker.Begin();
-                instance.name = $"{asset.name}_{innerClosure.data.index}";
-                profileMarker.End();
-                #endif
-                innerClosure.component.RegisterSubObject(instance);
-                innerClosure.component.items.Add(instance);
-                innerClosure.component.NotifyModulesComponentAdded(instance);
-                innerClosure.component.OnElementsChanged();
-                if (innerClosure.onComplete != null) innerClosure.onComplete.Invoke(instance, innerClosure.data);
-
             }));
 
         }

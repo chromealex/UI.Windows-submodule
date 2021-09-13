@@ -391,6 +391,22 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
         
+        public virtual WindowComponent AddItemSync() {
+            
+            var item = this.list.AddItemSync();
+            this.TrySetCallbackToInteractable(item, this.list.Count - 1, null);
+            return item;
+
+        }
+
+        public virtual T AddItemSync<T>() where T : WindowComponent {
+            
+            var item = this.list.AddItemSync<T>();
+            this.TrySetCallbackToInteractable(item, this.list.Count - 1, null);
+            return item;
+
+        }
+
         public virtual void AddItem(System.Action<WindowComponent> onComplete = null) {
             
             this.list.AddItem((x, p) => this.TrySetCallbackToInteractable(x, p.index, onComplete));

@@ -30,6 +30,19 @@ namespace UnityEngine.UI.Windows {
         
         Resource IResourceProvider.GetResource() => this.data;
 
+        #if UNITY_EDITOR
+        public static Resource<T> Validate(T resource) {
+            
+            var res = new Resource<T>();
+            res.data.directRef = resource;
+            res.data.objectType = Resource.ObjectType.Unknown;
+            res.data.guid = UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(resource));
+            res.data.type = Resource.Type.Direct;
+            return res;
+
+        }
+        #endif
+
         public T Load(object handler) {
 
             this.loaded = WindowSystem.GetResources().Load<T>(handler, this.data);

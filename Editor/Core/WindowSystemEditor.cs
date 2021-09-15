@@ -299,24 +299,71 @@ namespace UnityEditor.UI.Windows {
                         GUILayout.FlexibleSpace();
                         if (GUILayout.Button("Validate Resources", GUILayout.Width(200f), GUILayout.Height(30f)) == true) {
 
-                            try {
-                                
-                                var markDirtyCount = 0;
-                                var gos = AssetDatabase.FindAssets("t:GameObject");
-                                var visited = new HashSet<object>();
-                                var visitedGeneric = new HashSet<object>();
-                                var i = 0;
-                                foreach (var guid in gos) {
+                            EditorApplication.delayCall += () => {
 
-                                    var path = AssetDatabase.GUIDToAssetPath(guid);
-                                    var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                                    EditorUtility.DisplayProgressBar("Validating Resources 1 / 2", path, i / (float)gos.Length);
+                                try {
 
-                                    {
-                                        var allComponents = go.GetComponentsInChildren<Component>(true);
-                                        foreach (var component in allComponents) {
+                                    var markDirtyCount = 0;
+                                    var gos = AssetDatabase.FindAssets("t:GameObject");
+                                    var visited = new HashSet<object>();
+                                    var visitedGeneric = new HashSet<object>();
+                                    var i = 0;
+                                    foreach (var guid in gos) {
 
-                                            EditorHelpers.FindType(component, typeof(Resource<>), (fieldInfo, res) => {
+                                        var path = AssetDatabase.GUIDToAssetPath(guid);
+                                        var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                                        EditorUtility.DisplayProgressBar("Validating Resources 1 / 2", path, i / (float)gos.Length);
+
+                                        {
+                                            var allComponents = go.GetComponentsInChildren<Component>(true);
+                                            foreach (var component in allComponents) {
+
+                                                EditorHelpers.FindType(component, typeof(Resource<>), (fieldInfo, res) => {
+
+                                                    var rField =
+                                                        (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
+                                                    var r = (Resource)rField.GetValue(res);
+                                                    System.Type resType = res.GetType().GetGenericArguments()[0];
+                                                    WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
+                                                    ++markDirtyCount;
+                                                    rField.SetValue(res, r);
+                                                    EditorUtility.SetDirty(component.gameObject);
+                                                    return res;
+
+                                                }, visitedGeneric);
+                                                EditorHelpers.FindType(component, typeof(Resource), (fieldInfo, res) => {
+
+                                                    System.Type resType = null;
+                                                    var resTypeAttrs = fieldInfo.GetCustomAttributes(typeof(ResourceTypeAttribute), true);
+                                                    if (resTypeAttrs.Length > 0) {
+                                                        resType = ((ResourceTypeAttribute)resTypeAttrs[0]).type;
+                                                    }
+
+                                                    var r = (Resource)res;
+                                                    WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
+                                                    ++markDirtyCount;
+                                                    EditorUtility.SetDirty(component.gameObject);
+                                                    return r;
+
+                                                }, visited);
+
+                                            }
+                                        }
+
+                                        ++i;
+
+                                    }
+
+                                    var sos = AssetDatabase.FindAssets("t:ScriptableObject");
+                                    i = 0;
+                                    foreach (var guid in sos) {
+
+                                        var path = AssetDatabase.GUIDToAssetPath(guid);
+                                        var go = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
+                                        EditorUtility.DisplayProgressBar("Validating Resources 2 / 2", path, i / (float)sos.Length);
+
+                                        {
+                                            EditorHelpers.FindType(go, typeof(Resource<>), (fieldInfo, res) => {
 
                                                 var rField = (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
                                                 var r = (Resource)rField.GetValue(res);
@@ -324,80 +371,40 @@ namespace UnityEditor.UI.Windows {
                                                 WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
                                                 ++markDirtyCount;
                                                 rField.SetValue(res, r);
-                                                EditorUtility.SetDirty(component.gameObject);
+                                                EditorUtility.SetDirty(go);
                                                 return res;
 
                                             }, visitedGeneric);
-                                            EditorHelpers.FindType(component, typeof(Resource), (fieldInfo, res) => {
+                                            EditorHelpers.FindType(go, typeof(Resource), (fieldInfo, res) => {
 
                                                 System.Type resType = null;
                                                 var resTypeAttrs = fieldInfo.GetCustomAttributes(typeof(ResourceTypeAttribute), true);
                                                 if (resTypeAttrs.Length > 0) {
                                                     resType = ((ResourceTypeAttribute)resTypeAttrs[0]).type;
                                                 }
+
                                                 var r = (Resource)res;
                                                 WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
                                                 ++markDirtyCount;
-                                                EditorUtility.SetDirty(component.gameObject);
+                                                EditorUtility.SetDirty(go);
                                                 return r;
 
                                             }, visited);
-
                                         }
+
+                                        ++i;
+
                                     }
 
-                                    ++i;
+                                    Debug.Log("Done. Updated: " + markDirtyCount);
 
+                                } catch (System.Exception ex) {
+                                    Debug.LogException(ex);
                                 }
-                                
-                                var sos = AssetDatabase.FindAssets("t:ScriptableObject");
-                                i = 0;
-                                foreach (var guid in sos) {
 
-                                    var path = AssetDatabase.GUIDToAssetPath(guid);
-                                    var go = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
-                                    EditorUtility.DisplayProgressBar("Validating Resources 2 / 2", path, i / (float)sos.Length);
+                                EditorUtility.ClearProgressBar();
 
-                                    {
-                                        EditorHelpers.FindType(go, typeof(Resource<>), (fieldInfo, res) => {
-
-                                            var rField = (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
-                                            var r = (Resource)rField.GetValue(res);
-                                            System.Type resType = res.GetType().GetGenericArguments()[0];
-                                            WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
-                                            ++markDirtyCount;
-                                            rField.SetValue(res, r);
-                                            EditorUtility.SetDirty(go);
-                                            return res;
-
-                                        }, visitedGeneric);
-                                        EditorHelpers.FindType(go, typeof(Resource), (fieldInfo, res) => {
-
-                                            System.Type resType = null;
-                                            var resTypeAttrs = fieldInfo.GetCustomAttributes(typeof(ResourceTypeAttribute), true);
-                                            if (resTypeAttrs.Length > 0) {
-                                                resType = ((ResourceTypeAttribute)resTypeAttrs[0]).type;
-                                            }
-                                            var r = (Resource)res;
-                                            WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
-                                            ++markDirtyCount;
-                                            EditorUtility.SetDirty(go);
-                                            return r;
-
-                                        }, visited);
-                                    }
-
-                                    ++i;
-
-                                }
-                                
-                                Debug.Log("Done. Updated: " + markDirtyCount);
-                                
-                            } catch (System.Exception ex) {
-                                Debug.LogException(ex);
-                            }
-
-                            EditorUtility.ClearProgressBar();
+                            };
 
                         }
                         GUILayout.FlexibleSpace();

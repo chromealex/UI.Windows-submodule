@@ -291,6 +291,7 @@ namespace UnityEngine.UI.Windows.Components {
 
             this.list.SetSortingOrderDelta(1);
             this.list.Show();
+            this.ValidateSearch();
 
         }
         

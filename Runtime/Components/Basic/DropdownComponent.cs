@@ -110,7 +110,7 @@ namespace UnityEngine.UI.Windows.Components {
                 var text = item.Get<TextComponent>();
                 if (text != null) {
 
-                    item.ShowHide(text.GetText().ToLower().Contains(lowerValue));
+                    item.ShowHide(lowerValue.Length == 0 || text.GetText().ToLower().Contains(lowerValue));
                     
                 }
 

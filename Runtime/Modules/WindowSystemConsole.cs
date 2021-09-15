@@ -65,7 +65,7 @@ namespace UnityEngine.UI.Windows {
 
     }
 
-    [System.AttributeUsageAttribute(System.AttributeTargets.Class)]
+    [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Method)]
     public class AliasAttribute : System.Attribute {
 
         public string text;
@@ -708,20 +708,37 @@ namespace UnityEngine.UI.Windows {
 
                             try {
 
-                                var objs = new object[command.argsCount];
-                                for (int i = 0; i < command.argsCount; ++i) {
+                                if (command.argsCount == 0) {
 
-                                    objs[i] = this.ConvertArg(command.args[i], pars[i].ParameterType);
+                                    method.Invoke(module, null);
+
+                                } else {
+
+                                    var objs = new object[command.argsCount];
+                                    for (int i = 0; i < command.argsCount; ++i) {
+
+                                        objs[i] = this.ConvertArg(command.args[i], pars[i].ParameterType);
+
+                                    }
+
+                                    method.Invoke(module, objs);
 
                                 }
 
-                                method.Invoke(module, objs);
                                 run = true;
 
                             } catch (System.Exception ex) {
-                                
-                                this.AddLog(ex.Message, LogType.Error);
-                                
+
+                                if (ex.InnerException != null) {
+                                    
+                                    this.AddLog(ex.InnerException.Message, LogType.Exception, ex.InnerException.StackTrace);
+                                    
+                                } else {
+
+                                    this.AddLog(ex.Message, LogType.Error);
+
+                                }
+
                             }
 
                             break;

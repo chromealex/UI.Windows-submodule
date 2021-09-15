@@ -84,6 +84,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   canvas: {fileID: 3002262861325224963}
   canvasScaler: {fileID: 4562398388743874407}
@@ -140,6 +142,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &196098531136970820
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -248,6 +251,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 3255332376146199288}
@@ -355,6 +360,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 4118133958301854147}
@@ -496,6 +503,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 1542688171465374743}
@@ -654,6 +663,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 1900920675354936357}
@@ -778,6 +789,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 5470113545036599192}
@@ -945,6 +958,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 52396318872534020}

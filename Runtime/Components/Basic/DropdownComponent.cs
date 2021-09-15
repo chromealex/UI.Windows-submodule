@@ -49,6 +49,8 @@ namespace UnityEngine.UI.Windows.Components {
         [RequiredReference]
         public ScrollRect scrollRect;
 
+        public InputFieldComponent searchField;
+
         public Side anchor;
         public Side dropSide;
         public Vector2 minMaxSizeX = new Vector2(-1f, -1f);
@@ -72,6 +74,12 @@ namespace UnityEngine.UI.Windows.Components {
             WindowSystem.onPointerUp += this.OnPointerUp;
             WindowSystem.onPointerDown += this.OnPointerDown;
 
+            if (this.searchField != null) {
+                
+                this.searchField.SetCallbackValueChanged(this.OnSearch);
+                
+            }
+
         }
 
         internal override void OnDeInitInternal() {
@@ -84,13 +92,52 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        private void ValidateSearch() {
+
+            if (this.searchField != null) {
+
+                this.OnSearch(this.searchField.GetText());
+
+            }
+            
+        }
+        
+        private void OnSearch(string value) {
+
+            var lowerValue = value.ToLower();
+            this.list.ForEach<GenericComponent>((item, data) => {
+
+                var text = item.Get<TextComponent>();
+                if (text != null) {
+
+                    item.ShowHide(text.GetText().ToLower().Contains(lowerValue));
+                    
+                }
+
+            });
+            
+        }
+
+        private bool IsPointerInside(Vector2 position) {
+
+            if (RectTransformUtility.RectangleContainsScreenPoint(this.label.rectTransform, position, this.GetWindow().workCamera) == false &&
+                RectTransformUtility.RectangleContainsScreenPoint(this.list.rectTransform, position, this.GetWindow().workCamera) == false &&
+                (this.searchField != null && RectTransformUtility.RectangleContainsScreenPoint(this.searchField.rectTransform, position, this.GetWindow().workCamera) == false)) {
+
+                return false;
+
+            }
+            
+            return true;
+            
+        }
+
         private void OnPointerDown() {
             
             if (this.autoCloseOnOutClick == false) return;
             
             var position = WindowSystem.GetPointerPosition();
-            if (RectTransformUtility.RectangleContainsScreenPoint(this.label.rectTransform, position, this.GetWindow().workCamera) == false &&
-                RectTransformUtility.RectangleContainsScreenPoint(this.list.rectTransform, position, this.GetWindow().workCamera) == false) {
+            if (this.IsPointerInside(position) == false) {
 
                 this.pointerDownInside = false;
 
@@ -110,8 +157,7 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.pointerDownInside == false) {
                 
                 var position = WindowSystem.GetPointerPosition();
-                if (RectTransformUtility.RectangleContainsScreenPoint(this.label.rectTransform, position, this.GetWindow().workCamera) == false &&
-                    RectTransformUtility.RectangleContainsScreenPoint(this.list.rectTransform, position, this.GetWindow().workCamera) == false) {
+                if (this.IsPointerInside(position) == false) {
 
                     this.HideDropdown();
 
@@ -121,11 +167,12 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
         
-        public override void OnShowBegin() {
+        internal override void OnShowBeginInternal() {
             
-            base.OnShowBegin();
+            base.OnShowBeginInternal();
             
             this.OnElementsChanged();
+            this.ValidateSearch();
             
         }
 

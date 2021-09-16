@@ -31,6 +31,14 @@ namespace UnityEngine.UI.Windows {
         Resource IResourceProvider.GetResource() => this.data;
 
         #if UNITY_EDITOR
+        public void ValidateSource(T resource) {
+            
+            var res = Resource<T>.Validate(resource);
+            this.data = res.data;
+            this.loaded = res.loaded;
+
+        }
+        
         public static Resource<T> Validate(T resource) {
             
             var res = new Resource<T>();
@@ -38,6 +46,7 @@ namespace UnityEngine.UI.Windows {
             res.data.objectType = Resource.ObjectType.Unknown;
             res.data.guid = UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(resource));
             res.data.type = Resource.Type.Direct;
+            res.data.validationRequired = true;
             return res;
 
         }
@@ -98,6 +107,7 @@ namespace UnityEngine.UI.Windows {
         public string guid;
         public string subObjectName;
         public Object directRef;
+        public bool validationRequired;
 
         public string GetAddress() {
 

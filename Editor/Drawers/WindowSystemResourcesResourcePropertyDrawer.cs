@@ -14,7 +14,13 @@ namespace UnityEditor.UI.Windows {
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
 
-            var type = this.fieldInfo.FieldType.GetGenericArguments()[0];
+            System.Type type = null;
+            if (this.fieldInfo.FieldType.IsArray == true) {
+                type = this.fieldInfo.FieldType.GetElementType().GetGenericArguments()[0];
+            } else {
+                type = this.fieldInfo.FieldType.GetGenericArguments()[0];
+            }
+
             var res = property.FindPropertyRelative("data");
             WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, res, label, type, UnityEngine.UI.Windows.Utilities.RequiredType.None);
             
@@ -56,7 +62,7 @@ namespace UnityEditor.UI.Windows {
 
             var result = new Result() {
                 resource = value,
-                changed = false
+                changed = false,
             };
             
             if (type == null) type = typeof(Object);
@@ -91,7 +97,7 @@ namespace UnityEditor.UI.Windows {
             var newObj = EditorGUI.ObjectField(objRect, label, obj, type, allowSceneObjects: true);
             EditorGUI.showMixedValue = oldValue;
             if (newObj == null) WindowSystemRequiredReferenceDrawer.DrawRequired(objRect, requiredType);
-            if (newObj != obj) {
+            if (newObj != obj || value.validationRequired == true) {
 
                 result.changed = true;
                 {
@@ -147,15 +153,17 @@ namespace UnityEditor.UI.Windows {
             var loadType = property.FindPropertyRelative("type");
             var objectType = property.FindPropertyRelative("objectType");
             var directRef = property.FindPropertyRelative("directRef");
+            var validationRequired = property.FindPropertyRelative("validationRequired");
 
             var newRes = WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, label, new Resource() {
                 guid = guid.stringValue,
                 type = (Resource.Type)loadType.enumValueIndex,
                 objectType = (Resource.ObjectType)objectType.enumValueIndex,
                 directRef = directRef.objectReferenceValue,
+                validationRequired = validationRequired.boolValue,
             }, hasMultipleDifferentValues: property.hasMultipleDifferentValues, type: type, requiredType: requiredType);
 
-            if (newRes.changed == true) {
+            if (validationRequired.boolValue == true || newRes.changed == true) {
 
                 property.serializedObject.Update();
                 {
@@ -164,6 +172,7 @@ namespace UnityEditor.UI.Windows {
                     loadType.enumValueIndex = (int)newRes.resource.type;
                     objectType.enumValueIndex = (int)newRes.resource.objectType;
                     directRef.objectReferenceValue = newRes.resource.directRef;
+                    validationRequired.boolValue = false;
                 }
                 property.serializedObject.ApplyModifiedProperties();
 

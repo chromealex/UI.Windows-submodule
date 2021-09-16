@@ -190,6 +190,7 @@ MonoBehaviour:
     guid: 
     subObjectName: 
     directRef: {fileID: 8199301820935925453}
+    validationRequired: 0
   customRoot: {fileID: 7469489609975794831}
   items: []
   listRectTransformChangedInternal: {fileID: 65919088101131696}
@@ -704,6 +705,7 @@ MonoBehaviour:
     guid: 
     subObjectName: 
     directRef: {fileID: 1192130305656968135}
+    validationRequired: 0
   customRoot: {fileID: 0}
   items: []
   listRectTransformChangedInternal: {fileID: 1423912937176574192}

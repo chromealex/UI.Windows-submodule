@@ -490,7 +490,7 @@ namespace UnityEngine.UI.Windows.Modules {
                                 } else {
 
                                     var result = asset.GetComponent<T>();
-                                    this.AddObject(handler, asset, resource, () => UnityEngine.AddressableAssets.Addressables.Release(asset));
+                                    this.AddObject(handler, result, resource, () => UnityEngine.AddressableAssets.Addressables.Release(asset));
                                     this.CompleteTask(handler, resource, result);
 
                                 }

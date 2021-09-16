@@ -818,10 +818,14 @@ namespace UnityEngine.UI.Windows {
 
             lock (this.logsCounter) {
 
-                if (this.logsCounter.TryGetValue(type, out var count) == false) {
+                if (this.logsCounter.TryGetValue(type, out var count) == true) {
 
                     this.logsCounter[type] = count + 1;
 
+                } else {
+                    
+                    this.logsCounter.Add(type, 1);
+                    
                 }
 
             }

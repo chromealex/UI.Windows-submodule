@@ -69,9 +69,103 @@ namespace UnityEditor.UI.Windows {
 
     }
 
+    public struct ImageCollectionItem {
+
+        public Component holder;
+        public Object obj;
+
+    }
+
     public static class EditorHelpers {
 
-        public static void FindType(object root, System.Type[] searchTypes, System.Func<FieldInfo, object, object> del, HashSet<object> visited = null) {
+        public static Texture2D CollectImages(Object target, List<ImageCollectionItem> images) {
+            
+            var used = new HashSet<Object>();
+            var visited = new HashSet<object>();
+            var visitedFonts = new HashSet<object>();
+            var components = ((UnityEngine.Component)target).gameObject.GetComponentsInChildren<Component>(true);
+            foreach (var component in components) {
+
+                EditorHelpers.FindType(component, new[] { typeof(Sprite), typeof(Texture), typeof(Texture2D) }, (fieldInfo, obj) => {
+
+                    if (obj is Object texObj && texObj != null) {
+                        images.Add(new ImageCollectionItem() {
+                            holder = component,
+                            obj = texObj,
+                        });
+                    }
+                
+                    return obj;
+
+                }, visited, includeUnityObjects: true, ignoreTypes: new [] { typeof(TMPro.TMP_FontAsset), typeof(TMPro.TextMeshProUGUI) });
+
+                EditorHelpers.FindType(component, new[] { typeof(Font), typeof(TMPro.TMP_FontAsset) }, (fieldInfo, obj) => {
+
+                    if (obj is Object texObj && texObj != null) {
+                        images.Add(new ImageCollectionItem() {
+                            holder = component,
+                            obj = texObj,
+                        });
+                    }
+                
+                    return obj;
+
+                }, visitedFonts, includeUnityObjects: true);
+
+            }
+
+            {
+                var preview = new List<Texture2D>();
+                foreach (var img in images) {
+
+                    if (used.Contains(img.obj) == true) continue;
+
+                    used.Add(img.obj);
+                    var tex = img.obj as Texture2D;
+                    if (img.obj is Sprite sprite) {
+
+                        tex = UnityEditor.Sprites.SpriteUtility.GetSpriteTexture(sprite, false);
+
+                    }
+
+                    if (tex != null) {
+
+                        var copy = EditorHelpers.CopyTexture(tex);
+                        preview.Add(copy);
+
+                    }
+
+                }
+
+                var previewTexture = new Texture2D(10, 10, TextureFormat.RGBA32, false);
+                previewTexture.PackTextures(preview.ToArray(), 0, 4096, false);
+                return previewTexture;
+            }
+            
+        }
+
+        public static Texture2D CopyTexture(Texture2D texture) {
+        
+            RenderTexture tmp = RenderTexture.GetTemporary( 
+                texture.width,
+                texture.height,
+                0,
+                RenderTextureFormat.Default,
+                RenderTextureReadWrite.Linear);
+            Graphics.Blit(texture, tmp);
+            RenderTexture previous = RenderTexture.active;
+            RenderTexture.active = tmp;
+            Texture2D myTexture2D = new Texture2D(texture.width, texture.height);
+            myTexture2D.ReadPixels(new Rect(0, 0, tmp.width, tmp.height), 0, 0);
+            myTexture2D.Apply();
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary(tmp);
+
+            return myTexture2D;
+
+        }
+
+        public static void FindType(object root, System.Type[] searchTypes, System.Func<FieldInfo, object, object> del, HashSet<object> visited = null, bool includeUnityObjects = false, System.Type[] ignoreTypes = null) {
             
             if (root == null) return;
             if (visited == null) visited = new HashSet<object>();
@@ -79,7 +173,14 @@ namespace UnityEditor.UI.Windows {
             if (visited.Contains(root) == true) return;
             visited.Add(root);
 
-            var fields = root.GetType().GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+            var rootType = root.GetType();
+            if (ignoreTypes != null) {
+
+                if (System.Array.IndexOf(ignoreTypes, rootType) >= 0) return;
+
+            }
+
+            var fields = rootType.GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
             foreach (var field in fields) {
 
                 if (field.FieldType.IsPrimitive == true) continue;
@@ -101,7 +202,7 @@ namespace UnityEditor.UI.Windows {
                                 if (System.Array.IndexOf(searchTypes, r.GetType()) >= 0) {
                                     arr.SetValue(del.Invoke(field, r), i);
                                 } else {
-                                    if ((r is Object) == false) EditorHelpers.FindType(r, searchTypes, del, visited);
+                                    if (includeUnityObjects == true || (r is Object) == false) EditorHelpers.FindType(r, searchTypes, del, visited);
                                     arr.SetValue(r, i);
                                 }
                             }
@@ -111,7 +212,7 @@ namespace UnityEditor.UI.Windows {
                 } else {
                     
                     var obj = field.GetValue(root);
-                    if ((obj is Object) == false) EditorHelpers.FindType(obj, searchTypes, del, visited);
+                    if (includeUnityObjects == true || (obj is Object) == false) EditorHelpers.FindType(obj, searchTypes, del, visited);
                     field.SetValue(root, obj);
                     
                 }
@@ -120,7 +221,7 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        public static void FindType(object root, System.Type searchType, System.Func<FieldInfo, object, object> del, HashSet<object> visited = null) {
+        public static void FindType(object root, System.Type searchType, System.Func<FieldInfo, object, object> del, HashSet<object> visited = null, bool includeUnityObjects = false, System.Type[] ignoreTypes = null) {
             
             if (root == null) return;
             if (visited == null) visited = new HashSet<object>();
@@ -143,7 +244,14 @@ namespace UnityEditor.UI.Windows {
                 
             };
 
-            var fields = root.GetType().GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+            var rootType = root.GetType();
+            if (ignoreTypes != null) {
+
+                if (System.Array.IndexOf(ignoreTypes, rootType) >= 0) return;
+
+            }
+
+            var fields = rootType.GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
             foreach (var field in fields) {
 
                 if (field.FieldType.IsPrimitive == true) continue;
@@ -165,7 +273,7 @@ namespace UnityEditor.UI.Windows {
                                 if (check.Invoke(r.GetType(), searchType) == true) {
                                     arr.SetValue(del.Invoke(field, r), i);
                                 } else {
-                                    if ((r is Object) == false) EditorHelpers.FindType(r, searchType, del, visited);
+                                    if (includeUnityObjects == true || (r is Object) == false) EditorHelpers.FindType(r, searchType, del, visited);
                                     arr.SetValue(r, i);
                                 }
                             }
@@ -175,7 +283,7 @@ namespace UnityEditor.UI.Windows {
                 } else {
                     
                     var obj = field.GetValue(root);
-                    if ((obj is Object) == false) EditorHelpers.FindType(obj, searchType, del, visited);
+                    if (includeUnityObjects == true || (obj is Object) == false) EditorHelpers.FindType(obj, searchType, del, visited);
                     field.SetValue(root, obj);
                     
                 }

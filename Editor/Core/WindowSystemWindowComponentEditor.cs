@@ -351,84 +351,13 @@ namespace UnityEditor.UI.Windows {
                         if (GUILayout.Button("Collect Images", GUILayout.Height(30f)) == true) {
 
                             var images = new List<ImageCollectionItem>();
-                            var used = new HashSet<Object>();
-                            var visited = new HashSet<object>();
-                            var components = ((WindowComponent)this.target).gameObject.GetComponentsInChildren<Component>(true);
-                            foreach (var component in components) {
-
-                                EditorHelpers.FindType(component, new[] { typeof(Sprite), typeof(Texture), typeof(Texture2D) }, (fieldInfo, obj) => {
-
-                                    if (obj is Object texObj && texObj != null && used.Contains(texObj) == false) {
-                                        used.Add(texObj);
-                                        images.Add(new ImageCollectionItem() {
-                                            holder = component,
-                                            obj = texObj,
-                                        });
-                                    }
-                                
-                                    return obj;
-
-                                }, visited);
-
-                            }
-
+                            this.lastImagesPreview = EditorHelpers.CollectImages(this.target, images);
                             this.lastImages = images;
 
-                            {
-                                var preview = new List<Texture2D>();
-                                foreach (var img in this.lastImages) {
-
-                                    var tex = img.obj as Texture2D;
-                                    if (img.obj is Sprite sprite) {
-
-                                        tex = UnityEditor.Sprites.SpriteUtility.GetSpriteTexture(sprite, false);
-
-                                    }
-
-                                    var copy = this.CopyTexture(tex);
-                                    preview.Add(copy);
-
-                                }
-
-                                var previewTexture = new Texture2D(10, 10, TextureFormat.RGBA32, false);
-                                previewTexture.PackTextures(preview.ToArray(), 0, 4096, false);
-                                this.lastImagesPreview = previewTexture;
-                            }
-                            
                         }
 
-                        if (this.lastImages != null) {
-
-                            GUILayoutExt.Box(4f, 4f, () => {
-
-                                if (this.lastImagesPreview != null) {
-                                    
-                                    var labelStyle = new GUIStyle(EditorStyles.label);
-                                    labelStyle.fontStyle = FontStyle.Bold;
-                                    labelStyle.alignment = TextAnchor.LowerCenter;
-                                    var w = EditorGUIUtility.currentViewWidth - 80f;
-                                    var h = w / this.lastImagesPreview.width * this.lastImagesPreview.height;
-                                    GUILayout.Label(string.Empty, GUILayout.MinWidth(w), GUILayout.MinHeight(h), GUILayout.Width(w), GUILayout.Height(h));
-                                    var lastRect = GUILayoutUtility.GetLastRect();
-                                    lastRect.width = w;
-                                    lastRect.height = h;
-                                    EditorGUI.DrawTextureTransparent(lastRect, this.lastImagesPreview);
-                                    EditorGUI.DropShadowLabel(lastRect, this.lastImagesPreview.width + "x" + this.lastImagesPreview.height, labelStyle);
-                                    
-                                }
-
-                                foreach (var img in this.lastImages) {
-
-                                    EditorGUILayout.ObjectField(img.holder, typeof(Component), allowSceneObjects: true);
-                                    EditorGUILayout.ObjectField(img.obj, typeof(Object), allowSceneObjects: true);
-                                    GUILayoutExt.Separator();
-
-                                }
-
-                            });
-
-                        }
-
+                        GUILayoutExt.DrawImages(this.lastImagesPreview, this.lastImages);
+                        
                     });
                     
                 })
@@ -443,36 +372,8 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        private Texture2D CopyTexture(Texture2D texture) {
-        
-            RenderTexture tmp = RenderTexture.GetTemporary( 
-                texture.width,
-                texture.height,
-                0,
-                RenderTextureFormat.Default,
-                RenderTextureReadWrite.Linear);
-            Graphics.Blit(texture, tmp);
-            RenderTexture previous = RenderTexture.active;
-            RenderTexture.active = tmp;
-            Texture2D myTexture2D = new Texture2D(texture.width, texture.height);
-            myTexture2D.ReadPixels(new Rect(0, 0, tmp.width, tmp.height), 0, 0);
-            myTexture2D.Apply();
-            RenderTexture.active = previous;
-            RenderTexture.ReleaseTemporary(tmp);
-
-            return myTexture2D;
-
-        }
-
         private List<ImageCollectionItem> lastImages;
         private Texture2D lastImagesPreview;
-
-    }
-
-    public struct ImageCollectionItem {
-
-        public Component holder;
-        public Object obj;
 
     }
 

@@ -168,6 +168,23 @@ namespace UnityEditor.UI.Windows {
 
                     this.DrawParameters();
 
+                }),
+                new GUITab("Tools", () => {
+
+                    GUILayoutExt.Box(4f, 4f, () => {
+                        
+                        if (GUILayout.Button("Collect Images", GUILayout.Height(30f)) == true) {
+
+                            var images = new List<ImageCollectionItem>();
+                            this.lastImagesPreview = EditorHelpers.CollectImages(this.target, images);
+                            this.lastImages = images;
+
+                        }
+
+                        GUILayoutExt.DrawImages(this.lastImagesPreview, this.lastImages);
+                        
+                    });
+                    
                 })
                 );
             this.tabScrollPosition = scroll;
@@ -183,6 +200,9 @@ namespace UnityEditor.UI.Windows {
             this.serializedObject.ApplyModifiedProperties();
 
         }
+
+        private Texture2D lastImagesPreview;
+        private List<ImageCollectionItem> lastImages;
 
     }
 

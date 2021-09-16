@@ -154,6 +154,44 @@ namespace UnityEditor.UI.Windows {
 		    
 	    }
 
+	    public static void DrawImages(Texture2D preview, System.Collections.Generic.List<ImageCollectionItem> images) {
+		    
+		    if (images != null) {
+
+			    GUILayoutExt.Box(4f, 4f, () => {
+
+				    if (preview != null) {
+                                    
+					    var labelStyle = new GUIStyle(EditorStyles.label);
+					    labelStyle.fontStyle = FontStyle.Bold;
+					    labelStyle.alignment = TextAnchor.LowerCenter;
+					    var w = EditorGUIUtility.currentViewWidth - 80f;
+					    var h = w / preview.width * preview.height;
+					    GUILayout.Label(string.Empty, GUILayout.MinWidth(w), GUILayout.MinHeight(h), GUILayout.Width(w), GUILayout.Height(h));
+					    var lastRect = GUILayoutUtility.GetLastRect();
+					    lastRect.width = w;
+					    lastRect.height = h;
+					    EditorGUI.DrawTextureTransparent(lastRect, preview);
+					    EditorGUI.DropShadowLabel(lastRect, preview.width + "x" + preview.height, labelStyle);
+                                    
+				    }
+
+				    foreach (var img in images) {
+
+					    EditorGUI.BeginDisabledGroup(true);
+					    EditorGUILayout.ObjectField(img.holder, typeof(Component), allowSceneObjects: true);
+					    EditorGUILayout.ObjectField(img.obj, typeof(UnityEngine.Object), allowSceneObjects: true);
+					    GUILayoutExt.Separator();
+					    EditorGUI.EndDisabledGroup();
+
+				    }
+
+			    });
+
+		    }
+
+	    }
+
 	    public static void DrawFieldsBeneath(SerializedObject serializedObject, System.Type baseType) {
 		    
 		    var iter = serializedObject.GetIterator();

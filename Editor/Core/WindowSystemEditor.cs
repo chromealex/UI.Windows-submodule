@@ -320,8 +320,7 @@ namespace UnityEditor.UI.Windows {
 
                                                 EditorHelpers.FindType(component, typeof(Resource<>), (fieldInfo, res) => {
 
-                                                    var rField =
-                                                        (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
+                                                    var rField = (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
                                                     var r = (Resource)rField.GetValue(res);
                                                     System.Type resType = res.GetType().GetGenericArguments()[0];
                                                     WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);

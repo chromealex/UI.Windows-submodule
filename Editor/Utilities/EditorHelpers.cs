@@ -101,7 +101,7 @@ namespace UnityEditor.UI.Windows {
                                 if (System.Array.IndexOf(searchTypes, r.GetType()) >= 0) {
                                     arr.SetValue(del.Invoke(field, r), i);
                                 } else {
-                                    EditorHelpers.FindType(r, searchTypes, del, visited);
+                                    if ((r is Object) == false) EditorHelpers.FindType(r, searchTypes, del, visited);
                                     arr.SetValue(r, i);
                                 }
                             }
@@ -111,7 +111,7 @@ namespace UnityEditor.UI.Windows {
                 } else {
                     
                     var obj = field.GetValue(root);
-                    EditorHelpers.FindType(obj, searchTypes, del, visited);
+                    if ((obj is Object) == false) EditorHelpers.FindType(obj, searchTypes, del, visited);
                     field.SetValue(root, obj);
                     
                 }
@@ -165,7 +165,7 @@ namespace UnityEditor.UI.Windows {
                                 if (check.Invoke(r.GetType(), searchType) == true) {
                                     arr.SetValue(del.Invoke(field, r), i);
                                 } else {
-                                    EditorHelpers.FindType(r, searchType, del, visited);
+                                    if ((r is Object) == false) EditorHelpers.FindType(r, searchType, del, visited);
                                     arr.SetValue(r, i);
                                 }
                             }
@@ -175,7 +175,7 @@ namespace UnityEditor.UI.Windows {
                 } else {
                     
                     var obj = field.GetValue(root);
-                    EditorHelpers.FindType(obj, searchType, del, visited);
+                    if ((obj is Object) == false) EditorHelpers.FindType(obj, searchType, del, visited);
                     field.SetValue(root, obj);
                     
                 }

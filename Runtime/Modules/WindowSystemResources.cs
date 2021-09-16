@@ -322,6 +322,7 @@ namespace UnityEngine.UI.Windows.Modules {
         private readonly Dictionary<int, int> objectsToReferenceCount = new Dictionary<int, int>();
         private readonly Dictionary<int, HashSet<System.Action>> handlerToTasks = new Dictionary<int, HashSet<System.Action>>();
         private readonly List<InternalResourceItem> internalDeleteAllCache = new List<InternalResourceItem>();
+        private readonly HashSet<object> loadedAssets = new HashSet<object>();
 
         public Dictionary<InternalTask, System.Action<object>> GetTasks() {
 
@@ -479,7 +480,7 @@ namespace UnityEngine.UI.Windows.Modules {
                                 } else {
 
                                     var result = asset.GetComponent<T>();
-                                    this.AddObject(handler, result, resource, () => UnityEngine.AddressableAssets.Addressables.Release(asset));
+                                    this.AddObject(handler, asset, resource, () => UnityEngine.AddressableAssets.Addressables.Release(asset));
                                     this.CompleteTask(handler, resource, result);
 
                                 }
@@ -687,9 +688,16 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
 
+        public HashSet<object> GetLoadedAssets() {
+
+            return this.loadedAssets;
+
+        }
+
         private void UnloadObject(object handler, object obj, InternalResourceItem resource) {
 
             //Debug.Log("Unload obj: " + handler + " :: " + obj);
+            this.loadedAssets.Remove(obj);
             resource.deconstruct?.Invoke();
 
         }
@@ -762,6 +770,8 @@ namespace UnityEngine.UI.Windows.Modules {
         }
 
         private void AddObject(object handler, object obj, Resource resource, System.Action deconstruct) {
+
+            if (this.loadedAssets.Contains(obj) == false) this.loadedAssets.Add(obj);
 
             var key = handler.GetHashCode();
             if (this.handlerToObjects.TryGetValue(key, out var list) == false) {

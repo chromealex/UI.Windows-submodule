@@ -412,7 +412,7 @@ namespace UnityEditor.UI.Windows {
                                     var lastRect = GUILayoutUtility.GetLastRect();
                                     lastRect.width = w;
                                     lastRect.height = h;
-                                    EditorGUI.DrawPreviewTexture(lastRect, this.lastImagesPreview);
+                                    EditorGUI.DrawTextureTransparent(lastRect, this.lastImagesPreview);
                                     EditorGUI.DropShadowLabel(lastRect, this.lastImagesPreview.width + "x" + this.lastImagesPreview.height, labelStyle);
                                     
                                 }

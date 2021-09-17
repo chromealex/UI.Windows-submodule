@@ -258,48 +258,6 @@ namespace UnityEngine.UI.Windows.Modules {
 
     public class WindowSystemResources : MonoBehaviour {
 
-        public readonly struct InternalResourceItem : System.IEquatable<InternalResourceItem> {
-
-            public readonly object handler;
-            public readonly object resource;
-            public readonly int resourceId;
-            public readonly Resource resourceSource;
-            public readonly System.Action deconstruct;
-
-            public InternalResourceItem(object handler, object resource, Resource resourceSource, System.Action deconstruct) {
-
-                this.handler = handler;
-                this.resource = resource;
-                this.resourceId = resource.GetHashCode();
-                this.resourceSource = resourceSource;
-                this.deconstruct = deconstruct;
-
-            }
-
-            public InternalResourceItem(object handler, int resourceId) {
-
-                this.handler = handler;
-                this.resource = null;
-                this.resourceId = resourceId;
-                this.resourceSource = default;
-                this.deconstruct = null;
-
-            }
-
-            public bool Equals(InternalResourceItem other) {
-
-                return other.resourceId == this.resourceId;
-
-            }
-
-            public override int GetHashCode() {
-
-                return this.resourceId;
-
-            }
-
-        }
-
         public readonly struct InternalTask : System.IEquatable<InternalTask> {
 
             public readonly int resourceId;

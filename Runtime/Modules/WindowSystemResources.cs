@@ -109,16 +109,12 @@ namespace UnityEngine.UI.Windows {
         public string guid;
         public string subObjectName;
         public Object directRef;
+        public int directRefHash;
         public bool validationRequired;
 
         public bool Equals(Resource other) {
 
-            return this.type == other.type &&
-                this.objectType == other.objectType &&
-                this.address == other.address &&
-                this.guid == other.guid &&
-                this.subObjectName == other.subObjectName &&
-                this.directRef == other.directRef;
+            return this.IsEquals(in other);
 
         }
 
@@ -136,9 +132,9 @@ namespace UnityEngine.UI.Windows {
         }
 
         public override int GetHashCode() {
-            
-            return (int)this.type ^ (int)this.objectType ^ (this.guid != null ? this.guid.GetHashCode() : 0) ^ (this.directRef != null ? this.directRef.GetHashCode() : 0);
-            
+
+            return (int)this.type ^ (int)this.objectType ^ (this.guid != null ? this.guid.GetHashCode() : 0) ^ this.directRefHash;
+
         }
 
         public bool IsEquals(in Resource other) {
@@ -320,13 +316,29 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
+        public class ResourceComparer : IEqualityComparer<Resource> {
+            
+            public bool Equals(Resource x, Resource y) {
+
+                return x.Equals(y);
+
+            }
+
+            public int GetHashCode(Resource obj) {
+
+                return obj.GetHashCode();
+
+            }
+
+        }
+
         private readonly Dictionary<InternalTask, System.Action<object>> tasks = new Dictionary<InternalTask, System.Action<object>>();
         private readonly Dictionary<int, HashSet<System.Action>> handlerToTasks = new Dictionary<int, HashSet<System.Action>>();
-        private readonly Dictionary<string, IntResource> loaded = new Dictionary<string, IntResource>();
+        private readonly Dictionary<Resource, IntResource> loaded = new Dictionary<Resource, IntResource>(new ResourceComparer());
         private readonly Dictionary<object, IntResource> loadedObjCache = new Dictionary<object, IntResource>();
         private readonly List<object> internalDeleteAllCache = new List<object>();
 
-        public Dictionary<string, IntResource> GetAllObjects() {
+        public Dictionary<Resource, IntResource> GetAllObjects() {
 
             return this.loaded;
 
@@ -424,8 +436,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         private bool IsLoaded(object handler, Resource resource) {
 
-            var key = this.GetKey(resource);
-            if (this.loaded.TryGetValue(key, out var internalResource) == true) {
+            if (this.loaded.TryGetValue(resource, out var internalResource) == true) {
 
                 this.AddObject(handler, internalResource.loaded, resource, internalResource.deconstruct);
                 this.CompleteTask(handler, resource, internalResource.loaded);
@@ -445,18 +456,22 @@ namespace UnityEngine.UI.Windows.Modules {
                         
             }
 
-            if (this.RequestLoad(handler, closure, resource, onComplete) == true) {
+            if (resource.type != Resource.Type.Direct) {
                 
-                // Waiting for loading then break
-                var item = new InternalTask(resource);
-                while (this.tasks.ContainsKey(item) == true) yield return null;
-                yield break;
-                
-            }
+                if (this.RequestLoad(handler, closure, resource, onComplete) == true) {
+                    
+                    // Waiting for loading then break
+                    var item = new InternalTask(resource);
+                    while (this.tasks.ContainsKey(item) == true) yield return null;
+                    yield break;
+                    
+                }
 
-            if (this.IsLoaded(handler, resource) == true) {
-                
-                yield break;
+                if (this.IsLoaded(handler, resource) == true) {
+                    
+                    yield break;
+                    
+                }
                 
             }
             
@@ -472,24 +487,18 @@ namespace UnityEngine.UI.Windows.Modules {
 
                 case Resource.Type.Direct: {
 
-                    if (resource.directRef is GameObject go && typeof(T).IsAssignableFrom(typeof(Component))) {
+                    if (resource.directRef is GameObject go && resource.objectType == Resource.ObjectType.Component) {
 
                         var direct = go.GetComponent<T>();
-                        this.AddObject(handler, direct, resource, null);
-
-                        this.CompleteTask(handler, resource, direct);
+                        onComplete.Invoke(direct, closure);
                         yield break;
 
                     } else if (resource.directRef is T direct) {
 
-                        this.AddObject(handler, direct, resource, null);
-
-                        this.CompleteTask(handler, resource, direct);
+                        onComplete.Invoke(direct, closure);
                         yield break;
 
                     }
-
-                    this.CompleteTask(handler, resource, default);
 
                     break;
 
@@ -690,7 +699,11 @@ namespace UnityEngine.UI.Windows.Modules {
 
                 if (kv.Value.handlers.Contains(handler) == true) {
 
-                    this.internalDeleteAllCache.Add(kv.Value.loaded);
+                    foreach (var item in kv.Value.references) {
+                        
+                        this.internalDeleteAllCache.Add(kv.Value.loaded);
+                        
+                    }
 
                 }
                 
@@ -704,25 +717,7 @@ namespace UnityEngine.UI.Windows.Modules {
             this.internalDeleteAllCache.Clear();
             
         }
-
-        public string GetKey(Resource resource) {
-
-            var str = new System.Text.StringBuilder();
-            str.Append(resource.address);
-            str.Append(':');
-            str.Append(resource.guid);
-            str.Append(':');
-            str.Append(resource.subObjectName);
-            str.Append(':');
-            str.Append((int)resource.type);
-            str.Append(':');
-            str.Append((int)resource.objectType);
-            str.Append(':');
-            str.Append(resource.directRef != null ? "D" : "B");
-            return str.ToString();
-
-        }
-
+        
         private bool RemoveObject<T>(object handler, T obj) where T : class {
 
             if (this.loadedObjCache.TryGetValue(obj, out var intResource) == true) {
@@ -746,8 +741,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     
                     if (intResource.referencesCount == 0) {
 
-                        var key = this.GetKey(intResource.resource);
-                        if (this.loaded.Remove(key) == false) {
+                        if (this.loaded.Remove(intResource.resource) == false) {
                             
                             Debug.LogError($"[ UIWR ] Remove resource failed while refCount = 0 and resource is {intResource.resource}");
                             
@@ -774,8 +768,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         private void AddObject(object handler, object obj, Resource resource, System.Action deconstruct) {
 
-            var key = this.GetKey(resource);
-            if (this.loaded.TryGetValue(key, out var intResource) == false) {
+            if (this.loaded.TryGetValue(resource, out var intResource) == false) {
 
                 intResource = PoolClass<IntResource>.Spawn();
                 intResource.handlers = PoolHashSet<object>.Spawn();
@@ -783,7 +776,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 intResource.loaded = obj;
                 intResource.resource = resource;
                 intResource.deconstruct = deconstruct;
-                this.loaded.Add(key, intResource);
+                this.loaded.Add(resource, intResource);
                 this.loadedObjCache.Add(obj, intResource);
 
             }

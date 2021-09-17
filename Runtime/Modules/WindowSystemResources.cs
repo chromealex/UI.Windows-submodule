@@ -322,11 +322,11 @@ namespace UnityEngine.UI.Windows.Modules {
 
         private readonly Dictionary<InternalTask, System.Action<object>> tasks = new Dictionary<InternalTask, System.Action<object>>();
         private readonly Dictionary<int, HashSet<System.Action>> handlerToTasks = new Dictionary<int, HashSet<System.Action>>();
-        private readonly Dictionary<Resource, IntResource> loaded = new Dictionary<Resource, IntResource>();
+        private readonly Dictionary<string, IntResource> loaded = new Dictionary<string, IntResource>();
         private readonly Dictionary<object, IntResource> loadedObjCache = new Dictionary<object, IntResource>();
         private readonly List<object> internalDeleteAllCache = new List<object>();
 
-        public Dictionary<Resource, IntResource> GetAllObjects() {
+        public Dictionary<string, IntResource> GetAllObjects() {
 
             return this.loaded;
 
@@ -424,7 +424,8 @@ namespace UnityEngine.UI.Windows.Modules {
 
         private bool IsLoaded(object handler, Resource resource) {
 
-            if (this.loaded.TryGetValue(resource, out var internalResource) == true) {
+            var key = this.GetKey(resource);
+            if (this.loaded.TryGetValue(key, out var internalResource) == true) {
 
                 this.AddObject(handler, internalResource.loaded, resource, internalResource.deconstruct);
                 this.CompleteTask(handler, resource, internalResource.loaded);
@@ -704,6 +705,24 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
 
+        public string GetKey(Resource resource) {
+
+            var str = new System.Text.StringBuilder();
+            str.Append(resource.address);
+            str.Append(':');
+            str.Append(resource.guid);
+            str.Append(':');
+            str.Append(resource.subObjectName);
+            str.Append(':');
+            str.Append((int)resource.type);
+            str.Append(':');
+            str.Append((int)resource.objectType);
+            str.Append(':');
+            str.Append(resource.directRef != null ? "D" : "B");
+            return str.ToString();
+
+        }
+
         private bool RemoveObject<T>(object handler, T obj) where T : class {
 
             if (this.loadedObjCache.TryGetValue(obj, out var intResource) == true) {
@@ -727,10 +746,16 @@ namespace UnityEngine.UI.Windows.Modules {
                     
                     if (intResource.referencesCount == 0) {
 
+                        var key = this.GetKey(intResource.resource);
+                        if (this.loaded.Remove(key) == false) {
+                            
+                            Debug.LogError($"[ UIWR ] Remove resource failed while refCount = 0 and resource is {intResource.resource}");
+                            
+                        }
+                        this.loadedObjCache.Remove(obj);
+                        
                         intResource.handlers.Remove(handler);
                         intResource.deconstruct?.Invoke();
-                        this.loaded.Remove(intResource.resource);
-                        this.loadedObjCache.Remove(obj);
                         PoolHashSet<object>.Recycle(ref intResource.handlers);
                         PoolList<object>.Recycle(ref intResource.references);
                         intResource.Reset();
@@ -749,7 +774,8 @@ namespace UnityEngine.UI.Windows.Modules {
 
         private void AddObject(object handler, object obj, Resource resource, System.Action deconstruct) {
 
-            if (this.loaded.TryGetValue(resource, out var intResource) == false) {
+            var key = this.GetKey(resource);
+            if (this.loaded.TryGetValue(key, out var intResource) == false) {
 
                 intResource = PoolClass<IntResource>.Spawn();
                 intResource.handlers = PoolHashSet<object>.Spawn();
@@ -757,7 +783,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 intResource.loaded = obj;
                 intResource.resource = resource;
                 intResource.deconstruct = deconstruct;
-                this.loaded.Add(resource, intResource);
+                this.loaded.Add(key, intResource);
                 this.loadedObjCache.Add(obj, intResource);
 
             }

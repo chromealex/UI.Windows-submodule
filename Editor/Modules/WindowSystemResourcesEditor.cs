@@ -272,7 +272,7 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        private bool IsLoaded(string asset, Dictionary<Resource, WindowSystemResources.IntResource> allObjects, out bool hasDirectRef) {
+        private bool IsLoaded(string asset, Dictionary<string, WindowSystemResources.IntResource> allObjects, out bool hasDirectRef) {
 
             hasDirectRef = false;
             foreach (var obj in allObjects) {

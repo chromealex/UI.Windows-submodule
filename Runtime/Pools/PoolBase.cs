@@ -39,6 +39,66 @@ namespace UnityEngine.UI.Windows {
 	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.ArrayBoundsChecks, false),
 	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.DivideByZeroChecks, false)]
 	#endif
+	public static class PoolList<T> where T : class, new() {
+
+		private static PoolInternalBase pool = new PoolInternalBase(() => new List<T>(), (h) => ((List<T>)h).Clear());
+
+		public static List<T> Spawn() {
+		    
+			return (List<T>)PoolList<T>.pool.Spawn();
+		    
+		}
+
+		public static void Recycle(ref List<T> instance) {
+		    
+			PoolList<T>.pool.Recycle(instance);
+			instance = null;
+
+		}
+
+		public static void Recycle(List<T> instance) {
+		    
+			PoolList<T>.pool.Recycle(instance);
+		    
+		}
+
+	}
+
+	#if ECS_COMPILE_IL2CPP_OPTIONS
+	[Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.NullChecks, false),
+	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.ArrayBoundsChecks, false),
+	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.DivideByZeroChecks, false)]
+	#endif
+	public static class PoolHashSet<T> where T : class, new() {
+
+		private static PoolInternalBase pool = new PoolInternalBase(() => new HashSet<T>(), (h) => ((HashSet<T>)h).Clear());
+
+		public static HashSet<T> Spawn() {
+		    
+			return (HashSet<T>)PoolHashSet<T>.pool.Spawn();
+		    
+		}
+
+		public static void Recycle(ref HashSet<T> instance) {
+		    
+			PoolHashSet<T>.pool.Recycle(instance);
+			instance = null;
+
+		}
+
+		public static void Recycle(HashSet<T> instance) {
+		    
+			PoolHashSet<T>.pool.Recycle(instance);
+		    
+		}
+
+	}
+
+	#if ECS_COMPILE_IL2CPP_OPTIONS
+	[Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.NullChecks, false),
+	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.ArrayBoundsChecks, false),
+	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.DivideByZeroChecks, false)]
+	#endif
 	public static class PoolClass<T> where T : class, new() {
 
 		private static PoolInternalBase pool = new PoolInternalBase(() => new T(), null);

@@ -23,9 +23,9 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             }
             
             Debug.Log("Loaded Assets:");
-            foreach (var asset in res.GetLoadedAssets()) {
+            foreach (var asset in res.GetAllObjects()) {
 
-                Debug.Log(asset);
+                Debug.Log(asset.Value.loaded);
 
             }
 

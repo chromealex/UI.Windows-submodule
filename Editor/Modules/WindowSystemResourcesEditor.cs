@@ -78,44 +78,44 @@ namespace UnityEditor.UI.Windows {
 
                             foreach (var item in allObjects) {
 
-                                //EditorGUILayout.ObjectField("Handler", item.Value as Object, typeof(Object), allowSceneObjects: true);
-                                GUILayoutExt.DrawHeader($"Handler: {item.Key} (Count: {item.Value.Count})");
-
-                                ++EditorGUI.indentLevel;
                                 GUILayoutExt.Box(2f, 2f, () => {
 
-                                    foreach (var resItem in item.Value) {
+                                    var resItem = item.Value;
+                                    if (resItem.loaded is Object loaded) {
 
-                                        EditorGUILayout.SelectableLabel(resItem.resourceSource.ToString());
-                                        EditorGUILayout.LabelField("Resource ID:", resItem.resourceId.ToString());
-                                        if (resItem.handler != null) {
+                                        EditorGUILayout.ObjectField($"Object ({resItem.referencesCount} refs):", loaded, typeof(Object), allowSceneObjects: true);
 
-                                            if (resItem.handler is Object handler) {
+                                    } else {
 
-                                                EditorGUILayout.ObjectField("Handler:", handler, typeof(Object), allowSceneObjects: true);
+                                        EditorGUILayout.LabelField($"Object ({resItem.referencesCount} refs):", resItem.loaded.ToString());
 
-                                            } else {
+                                    }
 
-                                                EditorGUILayout.LabelField("Handler:", resItem.handler.ToString());
+                                    ++EditorGUI.indentLevel;
+                                    GUILayoutExt.Box(2f, 2f, () => {
+
+                                        foreach (var handler in resItem.references) {
+
+                                            if (handler != null) {
+
+                                                if (handler is Object handlerObj) {
+
+                                                    EditorGUILayout.ObjectField("Handler:", handlerObj, typeof(Object), allowSceneObjects: true);
+
+                                                } else {
+
+                                                    EditorGUILayout.LabelField("Handler:", handler.ToString());
+
+                                                }
 
                                             }
 
                                         }
 
-                                        if (resItem.resource is Object obj) {
-
-                                            EditorGUILayout.ObjectField(obj, typeof(Object), allowSceneObjects: true);
-
-                                        } else {
-
-                                            EditorGUILayout.LabelField(resItem.resource.ToString());
-
-                                        }
-
-                                    }
+                                    });
+                                    --EditorGUI.indentLevel;
 
                                 });
-                                --EditorGUI.indentLevel;
 
                             }
 
@@ -272,30 +272,27 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        private bool IsLoaded(string asset, Dictionary<int, HashSet<WindowSystemResources.InternalResourceItem>> allObjects, out bool hasDirectRef) {
+        private bool IsLoaded(string asset, Dictionary<Resource, WindowSystemResources.IntResource> allObjects, out bool hasDirectRef) {
 
             hasDirectRef = false;
             foreach (var obj in allObjects) {
 
-                foreach (var item in obj.Value) {
+                var item = obj.Value;
+                var unityObj = item.loaded as Object;
+                if (unityObj == null) continue;
 
-                    var unityObj = item.resource as Object;
-                    if (unityObj == null) continue;
-
-                    hasDirectRef = (item.resourceSource.type == Resource.Type.Direct);
-                    
-                    var unityGuid = item.resourceSource.guid;
-                    var unityPath = AssetDatabase.GUIDToAssetPath(unityGuid);
-                    if (unityPath == asset || unityGuid == asset) return true;
-                    
-                    var path = AssetDatabase.GetAssetPath(unityObj);
-                    if (string.IsNullOrEmpty(path) == true) continue;
-                    
-                    var guid = AssetDatabase.AssetPathToGUID(path);
-                    if (guid == asset || path == asset) return true;
-
-                }
+                hasDirectRef = (item.resource.type == Resource.Type.Direct);
                 
+                var unityGuid = item.resource.guid;
+                var unityPath = AssetDatabase.GUIDToAssetPath(unityGuid);
+                if (unityPath == asset || unityGuid == asset) return true;
+                
+                var path = AssetDatabase.GetAssetPath(unityObj);
+                if (string.IsNullOrEmpty(path) == true) continue;
+                
+                var guid = AssetDatabase.AssetPathToGUID(path);
+                if (guid == asset || path == asset) return true;
+
             }
 
             return false;

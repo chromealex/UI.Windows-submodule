@@ -340,13 +340,45 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
+        public class IntResource {
+
+            public object loaded;
+            public Resource resource;
+            public List<object> references;
+            public HashSet<object> handlers;
+            public System.Action deconstruct;
+
+            public int referencesCount => this.references.Count;
+
+            public void Reset() {
+                
+                this.loaded = null;
+                this.resource = default;
+                this.references = null;
+                this.handlers = null;
+                this.deconstruct = null;
+                
+            }
+
+        }
+
         private readonly Dictionary<InternalTask, System.Action<object>> tasks = new Dictionary<InternalTask, System.Action<object>>();
-        private readonly Dictionary<int, HashSet<InternalResourceItem>> handlerToObjects = new Dictionary<int, HashSet<InternalResourceItem>>();
-        private readonly Dictionary<int, int> objectsToReferenceCount = new Dictionary<int, int>();
-        private readonly Dictionary<Resource, InternalResourceItem> loadedResources = new Dictionary<Resource, InternalResourceItem>();
         private readonly Dictionary<int, HashSet<System.Action>> handlerToTasks = new Dictionary<int, HashSet<System.Action>>();
-        private readonly List<InternalResourceItem> internalDeleteAllCache = new List<InternalResourceItem>();
-        private readonly HashSet<object> loadedAssets = new HashSet<object>();
+        private readonly Dictionary<Resource, IntResource> loaded = new Dictionary<Resource, IntResource>();
+        private readonly Dictionary<object, IntResource> loadedObjCache = new Dictionary<object, IntResource>();
+        private readonly List<object> internalDeleteAllCache = new List<object>();
+
+        public Dictionary<Resource, IntResource> GetAllObjects() {
+
+            return this.loaded;
+
+        }
+
+        public int GetAllocatedCount() {
+
+            return this.loaded.Count;
+
+        }
 
         public Dictionary<InternalTask, System.Action<object>> GetTasks() {
 
@@ -434,10 +466,10 @@ namespace UnityEngine.UI.Windows.Modules {
 
         private bool IsLoaded(object handler, Resource resource) {
 
-            if (this.loadedResources.TryGetValue(resource, out var internalResource) == true) {
+            if (this.loaded.TryGetValue(resource, out var internalResource) == true) {
 
-                this.AddObject(handler, internalResource.resource, resource, internalResource.deconstruct);
-                this.CompleteTask(handler, resource, internalResource.resource);
+                this.AddObject(handler, internalResource.loaded, resource, internalResource.deconstruct);
+                this.CompleteTask(handler, resource, internalResource.loaded);
                 return true;
                 
             }
@@ -633,29 +665,6 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        public Dictionary<int, HashSet<InternalResourceItem>> GetAllObjects() {
-
-            return this.handlerToObjects;
-
-        }
-
-        public int GetAllocatedCount() {
-
-            var count = 0;
-            foreach (var item in this.handlerToObjects) {
-
-                foreach (var resItem in item.Value) {
-
-                    ++count;
-
-                }
-
-            }
-
-            return count;
-
-        }
-
         public T New<T>() where T : class, new() {
 
             return this.New<T, DefaultConstructor<T>>(null, new DefaultConstructor<T>());
@@ -708,13 +717,7 @@ namespace UnityEngine.UI.Windows.Modules {
             if (handler == null) handler = this;
 
             //Debug.Log("Delete obj: " + handler + " :: " + obj);
-            var objId = obj.GetHashCode();
-            if (this.RemoveObject(handler, objId, out var resource) == true) {
-                
-                this.UnloadObject(handler, obj, resource);
-                
-            }
-
+            this.RemoveObject(handler, obj);
             obj = null;
 
         }
@@ -722,68 +725,60 @@ namespace UnityEngine.UI.Windows.Modules {
         public void DeleteAll(object handler) {
 
             if (handler == null) handler = this;
-            
-            var key = handler.GetHashCode();
-            if (this.handlerToObjects.TryGetValue(key, out var list) == true) {
 
-                this.internalDeleteAllCache.Clear();
-                this.internalDeleteAllCache.AddRange(list);
-                foreach (var item in this.internalDeleteAllCache) {
-                    
-                    this.Delete(handler, item.resource);
+            this.internalDeleteAllCache.Clear();
+            foreach (var kv in this.loaded) {
+
+                if (kv.Value.handlers.Contains(handler) == true) {
+
+                    this.internalDeleteAllCache.Add(kv.Value.loaded);
 
                 }
-                this.internalDeleteAllCache.Clear();
                 
             }
+
+            foreach (var obj in this.internalDeleteAllCache) {
+
+                this.RemoveObject(handler, obj);
+
+            }
+            this.internalDeleteAllCache.Clear();
             
         }
 
-        public HashSet<object> GetLoadedAssets() {
+        private bool RemoveObject<T>(object handler, T obj) where T : class {
 
-            return this.loadedAssets;
+            if (this.loadedObjCache.TryGetValue(obj, out var intResource) == true) {
 
-        }
+                if (intResource.handlers.Contains(handler) == true) {
 
-        private void UnloadObject(object handler, object obj, InternalResourceItem resource) {
+                    var hidx = 0;
+                    var count = 0;
+                    for (int i = 0; i < intResource.references.Count; ++i) {
 
-            //Debug.Log("Unload obj: " + handler + " :: " + obj);
-            this.loadedAssets.Remove(obj);
-            resource.deconstruct?.Invoke();
-
-        }
-
-        private bool RemoveObject(object handler, int objId, out InternalResourceItem resource) {
-
-            resource = default;
-
-            var key = handler.GetHashCode();
-            if (this.handlerToObjects.TryGetValue(key, out var list) == true) {
-
-                var resItem = new InternalResourceItem(handler, objId);
-                if (list.Contains(resItem) == true) {
-
-                    foreach (var item in list) {
-
-                        if (item.GetHashCode() == resItem.GetHashCode()) {
+                        if (intResource.references[i] == handler) {
                             
-                            if (list.Remove(item) == true) {
+                            hidx = i;
+                            ++count;
 
-                                if (list.Count == 0) this.handlerToObjects.Remove(key);
-
-                                if (this.DecreaseRefCount(resItem.resourceId) == true) {
-
-                                    this.loadedResources.Remove(item.resourceSource);
-                                    resource = item;
-                                    return true;
-
-                                }
-
-                            }
-                            break;
-                            
                         }
+                        
+                    }
+                    intResource.references.RemoveAt(hidx);
+                    if (count == 1) intResource.handlers.Remove(handler);
+                    
+                    if (intResource.referencesCount == 0) {
 
+                        intResource.handlers.Remove(handler);
+                        intResource.deconstruct?.Invoke();
+                        this.loaded.Remove(intResource.resource);
+                        this.loadedObjCache.Remove(obj);
+                        PoolHashSet<object>.Recycle(ref intResource.handlers);
+                        PoolList<object>.Recycle(ref intResource.references);
+                        intResource.Reset();
+                        PoolClass<IntResource>.Recycle(intResource);
+                        return true;
+                        
                     }
 
                 }
@@ -794,59 +789,23 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        private bool DecreaseRefCount(int resourceId) {
-
-            if (this.objectsToReferenceCount.TryGetValue(resourceId, out var counter) == true) {
-
-                this.objectsToReferenceCount[resourceId] = --counter;
-                return counter <= 0;
-
-            }
-            
-            return false;
-            
-        }
-
-        private void IncreaseRefCount(int resourceId) {
-
-            if (this.objectsToReferenceCount.TryGetValue(resourceId, out var counter) == true) {
-
-                this.objectsToReferenceCount[resourceId] = ++counter;
-                
-            } else {
-                
-                this.objectsToReferenceCount.Add(resourceId, counter);
-                
-            }
-            
-        }
-
         private void AddObject(object handler, object obj, Resource resource, System.Action deconstruct) {
 
-            if (this.loadedAssets.Contains(obj) == false) this.loadedAssets.Add(obj);
+            if (this.loaded.TryGetValue(resource, out var intResource) == false) {
 
-            var key = handler.GetHashCode();
-            if (this.handlerToObjects.TryGetValue(key, out var list) == false) {
-
-                list = new HashSet<InternalResourceItem>();
-                this.handlerToObjects.Add(key, list);
-
-            }
-
-            {
-
-                var resItem = new InternalResourceItem(handler, obj, resource, deconstruct);
-                if (list.Contains(resItem) == false) {
-
-                    list.Add(resItem);
-
-                }
-
-                if (this.loadedResources.ContainsKey(resource) == false) this.loadedResources.Add(resource, resItem);
-
-                this.IncreaseRefCount(resItem.resourceId);
+                intResource = PoolClass<IntResource>.Spawn();
+                intResource.handlers = PoolHashSet<object>.Spawn();
+                intResource.references = PoolList<object>.Spawn();
+                intResource.loaded = obj;
+                intResource.resource = resource;
+                intResource.deconstruct = deconstruct;
+                this.loaded.Add(resource, intResource);
+                this.loadedObjCache.Add(obj, intResource);
 
             }
+            
+            intResource.handlers.Add(handler);
+            intResource.references.Add(handler);
 
         }
 

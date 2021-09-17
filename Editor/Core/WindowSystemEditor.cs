@@ -30,6 +30,8 @@ namespace UnityEditor.UI.Windows {
 
         private SerializedProperty showRootOnStart;
         private SerializedProperty rootScreen;
+
+        private SerializedProperty loaderScreen;
         
         private int selectedTab {
             get {
@@ -67,6 +69,8 @@ namespace UnityEditor.UI.Windows {
             this.registeredPrefabs = this.serializedObject.FindProperty("registeredPrefabs");
             this.showRootOnStart = this.serializedObject.FindProperty("showRootOnStart");
             this.rootScreen = this.serializedObject.FindProperty("rootScreen");
+            
+            this.loaderScreen = this.serializedObject.FindProperty("loaderScreen");
 
             this.settings = this.serializedObject.FindProperty("settings");
 
@@ -153,6 +157,10 @@ namespace UnityEditor.UI.Windows {
                     
                     EditorGUILayout.PropertyField(this.showRootOnStart);
                     EditorGUILayout.PropertyField(this.rootScreen);
+
+                    GUILayout.Space(10f);
+
+                    EditorGUILayout.PropertyField(this.loaderScreen);
 
                     GUILayout.Space(10f);
 

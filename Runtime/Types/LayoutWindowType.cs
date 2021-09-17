@@ -212,7 +212,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         private int loadingCount;
         private IEnumerator InitLayoutInstance(InitialParameters initialParameters, LayoutWindowType windowInstance, WindowObject root, WindowLayout windowLayout, HashSet<WindowLayout> used, System.Action onComplete, bool isInner = false) {
 
-            if (((ILayoutInstance)root).windowLayoutInstance != null) {
+            if (((ILayoutInstance)root).windowLayoutInstance != null || windowLayout == null) {
                 
                 if (onComplete != null) onComplete.Invoke();
                 yield break;

@@ -239,6 +239,8 @@ namespace UnityEngine.UI.Windows {
         public bool showRootOnStart;
         public WindowBase rootScreen;
         
+        public WindowBase loaderScreen;
+        
         public List<WindowBase> registeredPrefabs = new List<WindowBase>();
 
         [Tooltip("Platform emulation for target filters.")]
@@ -259,6 +261,7 @@ namespace UnityEngine.UI.Windows {
         private Dictionary<int, WindowBase> topWindowsByLayer = new Dictionary<int, WindowBase>();
         private Dictionary<int, WindowBase> hashToPrefabs = new Dictionary<int, WindowBase>();
 
+        private WindowBase loaderInstance;
         private int nextWindowId;
 
         private System.Action waitInteractableOnComplete;
@@ -1135,6 +1138,24 @@ namespace UnityEngine.UI.Windows {
             var pools = WindowSystem.GetPools();
             pools.RemoveInstance(instance);
             
+        }
+
+        public static void ShowLoader(TransitionParameters transitionParameters = default) {
+
+            if (WindowSystem.instance.loaderScreen != null && WindowSystem.instance.loaderInstance == null) {
+
+                WindowSystem.Show(WindowSystem.instance.loaderScreen, new InitialParameters() { showSync = true },
+                                  onInitialized: (w) => { WindowSystem.instance.loaderInstance = w; }, transitionParameters);
+
+            }
+
+        }
+
+        public static void HideLoader() {
+
+            if (WindowSystem.instance.loaderInstance != null) WindowSystem.instance.loaderInstance.Hide();
+            WindowSystem.instance.loaderInstance = null;
+
         }
 
         public static void ShowRoot(TransitionParameters transitionParameters = default) {

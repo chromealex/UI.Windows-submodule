@@ -54,6 +54,7 @@ namespace UnityEngine.UI.Windows {
 
         public T Load(object handler) {
 
+            if (this.loaded != null) return this.loaded;
             this.loaded = WindowSystem.GetResources().Load<T>(handler, this.data);
             return this.loaded;
 
@@ -67,6 +68,7 @@ namespace UnityEngine.UI.Windows {
 
         public void Unload(object handler) {
 
+            if (this.loaded == null) return;
             WindowSystem.GetResources().Delete(handler, ref this.loaded);
 
         }
@@ -80,7 +82,7 @@ namespace UnityEngine.UI.Windows {
     }
     
     [System.Serializable]
-    public struct Resource {
+    public struct Resource : System.IEquatable<Resource> {
 
         public enum ObjectType {
 
@@ -108,6 +110,17 @@ namespace UnityEngine.UI.Windows {
         public string subObjectName;
         public Object directRef;
         public bool validationRequired;
+
+        public bool Equals(Resource other) {
+
+            return this.type == other.type &&
+                this.objectType == other.objectType &&
+                this.address == other.address &&
+                this.guid == other.guid &&
+                this.subObjectName == other.subObjectName &&
+                this.directRef == other.directRef;
+
+        }
 
         public string GetAddress() {
 
@@ -330,6 +343,7 @@ namespace UnityEngine.UI.Windows.Modules {
         private readonly Dictionary<InternalTask, System.Action<object>> tasks = new Dictionary<InternalTask, System.Action<object>>();
         private readonly Dictionary<int, HashSet<InternalResourceItem>> handlerToObjects = new Dictionary<int, HashSet<InternalResourceItem>>();
         private readonly Dictionary<int, int> objectsToReferenceCount = new Dictionary<int, int>();
+        private readonly Dictionary<Resource, InternalResourceItem> loadedResources = new Dictionary<Resource, InternalResourceItem>();
         private readonly Dictionary<int, HashSet<System.Action>> handlerToTasks = new Dictionary<int, HashSet<System.Action>>();
         private readonly List<InternalResourceItem> internalDeleteAllCache = new List<InternalResourceItem>();
         private readonly HashSet<object> loadedAssets = new HashSet<object>();
@@ -412,6 +426,26 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
+        private static void ReleaseAddressableAsset<T>(T obj) {
+            
+            UnityEngine.AddressableAssets.Addressables.Release(obj);
+            
+        }
+
+        private bool IsLoaded(object handler, Resource resource) {
+
+            if (this.loadedResources.TryGetValue(resource, out var internalResource) == true) {
+
+                this.AddObject(handler, internalResource.resource, resource, internalResource.deconstruct);
+                this.CompleteTask(handler, resource, internalResource.resource);
+                return true;
+                
+            }
+
+            return false;
+
+        }
+
         private IEnumerator Load_INTERNAL<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
 
             if (typeof(Component).IsAssignableFrom(typeof(T)) == true) {
@@ -425,6 +459,12 @@ namespace UnityEngine.UI.Windows.Modules {
                 // Waiting for loading then break
                 var item = new InternalTask(resource);
                 while (this.tasks.ContainsKey(item) == true) yield return null;
+                yield break;
+                
+            }
+
+            if (this.IsLoaded(handler, resource) == true) {
+                
                 yield break;
                 
             }
@@ -490,7 +530,7 @@ namespace UnityEngine.UI.Windows.Modules {
                                 } else {
 
                                     var result = asset.GetComponent<T>();
-                                    this.AddObject(handler, result, resource, () => UnityEngine.AddressableAssets.Addressables.Release(asset));
+                                    this.AddObject(handler, result, resource, () => WindowSystemResources.ReleaseAddressableAsset(asset));
                                     this.CompleteTask(handler, resource, result);
 
                                 }
@@ -534,7 +574,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                                 } else {
 
-                                    this.AddObject(handler, asset, resource, () => UnityEngine.AddressableAssets.Addressables.Release(asset));
+                                    this.AddObject(handler, asset, resource, () => WindowSystemResources.ReleaseAddressableAsset(asset));
                                     this.CompleteTask(handler, resource, asset);
 
                                 }
@@ -693,6 +733,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     this.Delete(handler, item.resource);
 
                 }
+                this.internalDeleteAllCache.Clear();
                 
             }
             
@@ -732,6 +773,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                                 if (this.DecreaseRefCount(resItem.resourceId) == true) {
 
+                                    this.loadedResources.Remove(item.resourceSource);
                                     resource = item;
                                     return true;
 
@@ -799,6 +841,8 @@ namespace UnityEngine.UI.Windows.Modules {
                     list.Add(resItem);
 
                 }
+
+                if (this.loadedResources.ContainsKey(resource) == false) this.loadedResources.Add(resource, resItem);
 
                 this.IncreaseRefCount(resItem.resourceId);
 

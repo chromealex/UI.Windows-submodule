@@ -512,7 +512,13 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        private class EmitClosure<T, TClosure> : IListClosureParameters where T : WindowComponent where TClosure : IListClosureParameters {
+        private class EmitLoaded {
+
+            public int loaded;
+
+        }
+
+        private struct EmitClosure<T, TClosure> : IListClosureParameters where T : WindowComponent where TClosure : IListClosureParameters {
 
             public int index { get; set; }
             public ListBaseComponent list;
@@ -521,7 +527,7 @@ namespace UnityEngine.UI.Windows.Components {
             public System.Action<TClosure> onComplete;
             public TClosure data;
             public System.Func<TClosure, TClosure> onClosure;
-            public int loaded;
+            public EmitLoaded loadedCounter;
 
         }
         private void Emit<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete = null, System.Func<TClosure, TClosure> onClosure = null) where T : WindowComponent where TClosure : IListClosureParameters {
@@ -534,14 +540,16 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
             
-            var closureInner = PoolClass<EmitClosure<T, TClosure>>.Spawn();
+            var loadedCounter = PoolClass<EmitLoaded>.Spawn();
+            loadedCounter.loaded = 0;
+            var closureInner = new EmitClosure<T, TClosure>();
             closureInner.data = closure;
             closureInner.onItem = onItem;
             closureInner.onComplete = onComplete;
             closureInner.list = this;
             closureInner.onClosure = onClosure;
             closureInner.requiredCount = count;
-            closureInner.loaded = 0;
+            closureInner.loadedCounter = loadedCounter;
             
             this.isLoadingRequest = true;
             var offset = this.Count;
@@ -556,12 +564,12 @@ namespace UnityEngine.UI.Windows.Components {
                     if (c.onClosure != null) c.data = c.onClosure.Invoke(c.data);
                     c.onItem.Invoke(item, c.data);
                     
-                    ++c.loaded;
-                    if (c.loaded == c.requiredCount) {
+                    ++c.loadedCounter.loaded;
+                    if (c.loadedCounter.loaded == c.requiredCount) {
                         
                         if (c.onComplete != null) c.onComplete.Invoke(c.data);
                         c.list.isLoadingRequest = false;
-                        PoolClass<EmitClosure<T, TClosure>>.Recycle(ref c);
+                        PoolClass<EmitLoaded>.Recycle(ref c.loadedCounter);
                         
                     }
                     

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 
@@ -279,8 +280,21 @@ namespace UnityEditor.UI.Windows {
                         if (GUILayout.Button("Collect Images", GUILayout.Height(30f)) == true) {
 
                             var images = new List<ImageCollectionItem>();
-                            this.lastImagesPreview = EditorHelpers.CollectImages(this.target, images);
-                            this.lastImages = images;
+                            if (this.target is UnityEngine.UI.Windows.WindowTypes.LayoutWindowType layoutWindowType) {
+                                
+                                var components = new List<Object>();
+                                var resources = layoutWindowType.layouts.items.SelectMany(x => x.components.Select(x => x.component)).ToArray();
+                                var type = typeof(WindowComponent);
+                                foreach (var resource in resources) {
+                                    
+                                    var editorRef = Resource.GetEditorRef(resource.guid, resource.subObjectName, type, resource.objectType, resource.directRef);
+                                    if (editorRef != null) components.Add(editorRef);
+                                    
+                                }
+                                this.lastImagesPreview = EditorHelpers.CollectImages(components.ToArray(), images);
+                                this.lastImages = images;
+                                
+                            }
 
                         }
 

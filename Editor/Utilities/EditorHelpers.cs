@@ -79,38 +79,48 @@ namespace UnityEditor.UI.Windows {
     public static class EditorHelpers {
 
         public static Texture2D CollectImages(Object target, List<ImageCollectionItem> images) {
+
+            return CollectImages(new[] { target }, images);
+
+        }
+
+        public static Texture2D CollectImages(Object[] targets, List<ImageCollectionItem> images) {
             
             var used = new HashSet<Object>();
             var visited = new HashSet<object>();
             var visitedFonts = new HashSet<object>();
-            var components = ((UnityEngine.Component)target).gameObject.GetComponentsInChildren<Component>(true);
-            foreach (var component in components) {
+            foreach (var target in targets) {
 
-                EditorHelpers.FindType(component, new[] { typeof(Sprite), typeof(Texture), typeof(Texture2D) }, (fieldInfo, obj) => {
+                var components = ((UnityEngine.Component)target).gameObject.GetComponentsInChildren<Component>(true);
+                foreach (var component in components) {
 
-                    if (obj is Object texObj && texObj != null) {
-                        images.Add(new ImageCollectionItem() {
-                            holder = component,
-                            obj = texObj,
-                        });
-                    }
-                
-                    return obj;
+                    EditorHelpers.FindType(component, new[] { typeof(Sprite), typeof(Texture), typeof(Texture2D) }, (fieldInfo, obj) => {
 
-                }, visited, includeUnityObjects: true, ignoreTypes: new [] { typeof(TMPro.TMP_FontAsset), typeof(TMPro.TextMeshProUGUI) });
+                        if (obj is Object texObj && texObj != null) {
+                            images.Add(new ImageCollectionItem() {
+                                holder = component,
+                                obj = texObj,
+                            });
+                        }
 
-                EditorHelpers.FindType(component, new[] { typeof(Font), typeof(TMPro.TMP_FontAsset) }, (fieldInfo, obj) => {
+                        return obj;
 
-                    if (obj is Object texObj && texObj != null) {
-                        images.Add(new ImageCollectionItem() {
-                            holder = component,
-                            obj = texObj,
-                        });
-                    }
-                
-                    return obj;
+                    }, visited, includeUnityObjects: true, ignoreTypes: new[] { typeof(TMPro.TMP_FontAsset), typeof(TMPro.TextMeshProUGUI) });
 
-                }, visitedFonts, includeUnityObjects: true);
+                    EditorHelpers.FindType(component, new[] { typeof(Font), typeof(TMPro.TMP_FontAsset) }, (fieldInfo, obj) => {
+
+                        if (obj is Object texObj && texObj != null) {
+                            images.Add(new ImageCollectionItem() {
+                                holder = component,
+                                obj = texObj,
+                            });
+                        }
+
+                        return obj;
+
+                    }, visitedFonts, includeUnityObjects: true);
+
+                }
 
             }
 

@@ -484,6 +484,7 @@ namespace UnityEngine.UI.Windows.Components {
             public int index { get; set; }
             public DropdownComponent component;
             public System.Action<T, int> onItem;
+            public System.Action onComplete;
 
         }
         public virtual void SetItems<T>(int count, System.Action<T, int> onItem, System.Action onComplete = null) where T : WindowComponent {
@@ -496,7 +497,12 @@ namespace UnityEngine.UI.Windows.Components {
             }, new DropdownClosureParameters<T>() {
                 component = this,
                 onItem = onItem,
-            }, onComplete);
+                onComplete = onComplete,
+            }, (closure) => {
+                
+                closure.onComplete?.Invoke();
+                
+            });
             
         }
 
@@ -510,7 +516,12 @@ namespace UnityEngine.UI.Windows.Components {
             }, new DropdownClosureParameters<T>() {
                 component = this,
                 onItem = onItem,
-            }, onComplete);
+                onComplete = onComplete,
+            }, (closure) => {
+                
+                closure.onComplete?.Invoke();
+                
+            });
 
         }
 

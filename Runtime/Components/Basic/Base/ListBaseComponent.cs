@@ -10,7 +10,13 @@ namespace UnityEngine.UI.Windows.Components {
 
     }
 
-    public abstract class ListBaseComponent : GenericComponent, ILayoutSelfController, UnityEngine.EventSystems.IBeginDragHandler, UnityEngine.EventSystems.IDragHandler, UnityEngine.EventSystems.IEndDragHandler {
+    public interface IListItemClosureParameters<T> : IListClosureParameters {
+
+        T data { get; set; }
+
+    }
+
+    public abstract partial class ListBaseComponent : GenericComponent, ILayoutSelfController, UnityEngine.EventSystems.IBeginDragHandler, UnityEngine.EventSystems.IDragHandler, UnityEngine.EventSystems.IEndDragHandler {
 
         [UnityEngine.UI.Windows.Modules.ResourceTypeAttribute(typeof(WindowComponent), RequiredType.Warning)]
         public Resource source;
@@ -420,6 +426,13 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        public struct DefaultItemParameters<T> : IListItemClosureParameters<T> {
+
+            public int index { get; set; }
+            public T data { get; set; }
+
+        }
+
         public virtual void ForEach<T>(System.Action<T, DefaultParameters> onItem) where T : WindowComponent {
             
             this.ForEach(onItem, new DefaultParameters());
@@ -437,20 +450,20 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public virtual void SetItems<T>(int count, System.Action<T, DefaultParameters> onItem, System.Action onComplete = null) where T : WindowComponent {
+        public virtual void SetItems<T>(int count, System.Action<T, DefaultParameters> onItem, System.Action<DefaultParameters> onComplete = null) where T : WindowComponent {
             
             this.SetItems(count, this.source, onItem, new DefaultParameters(), onComplete);
             
         }
 
-        public virtual void SetItems<T, TClosure>(int count, System.Action<T, TClosure> onItem, TClosure closure, System.Action onComplete = null) where T : WindowComponent where TClosure : IListClosureParameters {
+        public virtual void SetItems<T, TClosure>(int count, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete = null) where T : WindowComponent where TClosure : IListClosureParameters {
             
             this.SetItems(count, this.source, onItem, closure, onComplete);
             
         }
 
         private bool isLoadingRequest = false;
-        public virtual void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action onComplete) where T : WindowComponent where TClosure : IListClosureParameters {
+        public virtual void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListClosureParameters {
 
             if (this.isLoadingRequest == true) {
 
@@ -467,7 +480,7 @@ namespace UnityEngine.UI.Windows.Components {
                     
                 }
 
-                if (onComplete != null) onComplete.Invoke();
+                if (onComplete != null) onComplete.Invoke(closure);
 
             } else {
 
@@ -491,7 +504,7 @@ namespace UnityEngine.UI.Windows.Components {
                         onItem.Invoke((T)this.items[i], closure);
                     
                     }
-                    if (onComplete != null) onComplete.Invoke();
+                    if (onComplete != null) onComplete.Invoke(closure);
                     
                 }
 
@@ -499,36 +512,39 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        private struct EmitClosure<T, TClosure> : IListClosureParameters where T : WindowComponent where TClosure : IListClosureParameters {
+        private class EmitClosure<T, TClosure> : IListClosureParameters where T : WindowComponent where TClosure : IListClosureParameters {
 
             public int index { get; set; }
             public ListBaseComponent list;
             public int requiredCount;
             public System.Action<T, TClosure> onItem;
-            public System.Action onComplete;
+            public System.Action<TClosure> onComplete;
             public TClosure data;
+            public System.Func<TClosure, TClosure> onClosure;
+            public int loaded;
 
         }
-        private void Emit<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action onComplete = null) where T : WindowComponent where TClosure : IListClosureParameters {
+        private void Emit<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete = null, System.Func<TClosure, TClosure> onClosure = null) where T : WindowComponent where TClosure : IListClosureParameters {
 
             if (count == 0) {
                 
-                if (onComplete != null) onComplete.Invoke();
+                if (onComplete != null) onComplete.Invoke(closure);
                 this.isLoadingRequest = false;
                 return;
 
             }
             
-            var closureInner = new EmitClosure<T, TClosure>();
+            var closureInner = PoolClass<EmitClosure<T, TClosure>>.Spawn();
             closureInner.data = closure;
             closureInner.onItem = onItem;
             closureInner.onComplete = onComplete;
             closureInner.list = this;
+            closureInner.onClosure = onClosure;
             closureInner.requiredCount = count;
+            closureInner.loaded = 0;
             
             this.isLoadingRequest = true;
             var offset = this.Count;
-            var loaded = 0;
             for (int i = 0; i < count; ++i) {
 
                 var index = i + offset;
@@ -537,13 +553,15 @@ namespace UnityEngine.UI.Windows.Components {
                 this.AddItemInternal<T, EmitClosure<T, TClosure>>(source, closureInner, (item, c) => {
 
                     c.data.index = c.index;
+                    if (c.onClosure != null) c.data = c.onClosure.Invoke(c.data);
                     c.onItem.Invoke(item, c.data);
                     
-                    ++loaded;
-                    if (loaded == c.requiredCount) {
+                    ++c.loaded;
+                    if (c.loaded == c.requiredCount) {
                         
-                        if (c.onComplete != null) c.onComplete.Invoke();
+                        if (c.onComplete != null) c.onComplete.Invoke(c.data);
                         c.list.isLoadingRequest = false;
+                        PoolClass<EmitClosure<T, TClosure>>.Recycle(ref c);
                         
                     }
                     

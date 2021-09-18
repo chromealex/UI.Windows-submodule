@@ -39,7 +39,7 @@ namespace UnityEngine.UI.Windows {
 	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.ArrayBoundsChecks, false),
 	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.DivideByZeroChecks, false)]
 	#endif
-	public static class PoolList<T> where T : class, new() {
+	public static class PoolList<T> {
 
 		private static PoolInternalBase pool = new PoolInternalBase(() => new List<T>(), (h) => ((List<T>)h).Clear());
 

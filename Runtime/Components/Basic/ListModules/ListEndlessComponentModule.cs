@@ -332,7 +332,7 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        public override void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action onComplete) {
+        public override void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) {
 
             foreach (var reg in this.registries) {
 
@@ -361,7 +361,7 @@ namespace UnityEngine.UI.Windows {
             this.registries.Add(registry);
             //this.forceRebuild = true;
 
-            if (onComplete != null) onComplete.Invoke();
+            if (onComplete != null) onComplete.Invoke(closure);
             
         }
 

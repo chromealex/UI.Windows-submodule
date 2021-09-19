@@ -133,7 +133,7 @@ namespace UnityEditor.UI.Windows {
             if (this.prevSelected == activeObject) return this.list.Count > 0 ? this.list : null;
             this.prevSelected = activeObject;
             
-            var components = activeObject.GetComponentsInParent<WindowComponent>(true);
+            var components = activeObject.GetComponentsInParent<WindowObject>(true);
             if (components.Length > 0) {
 
                 var path = string.Empty;

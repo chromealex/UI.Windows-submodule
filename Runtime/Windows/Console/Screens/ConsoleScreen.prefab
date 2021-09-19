@@ -65,6 +65,8 @@ MonoBehaviour:
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
+  editorRefLocks:
+    directories: []
   debugStateLog:
     items: []
   isObjectRoot: 1

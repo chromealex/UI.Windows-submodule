@@ -158,7 +158,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         public void SetImage<T>(T provider) where T : IResourceProvider {
 
-            if (provider != null) return;
+            if (provider == null) return;
             this.SetImage(provider.GetResource());
 
         }

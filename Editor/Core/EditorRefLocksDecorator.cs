@@ -27,7 +27,7 @@ namespace UnityEditor.UI.Windows {
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
 
-            var dirs = this.GetDirectories();
+            var dirs = this.GetDirectories(property);
             var h = EditorGUI.GetPropertyHeight(property, label);
             if (dirs == null) {
 
@@ -74,7 +74,7 @@ namespace UnityEditor.UI.Windows {
 
             var source = position;
             position.height = EditorGUI.GetPropertyHeight(property, label);
-            var dirs = this.GetDirectories();
+            var dirs = this.GetDirectories(property);
             if (dirs == null) {
                 
                 EditorGUI.PropertyField(position, property, label);
@@ -117,30 +117,42 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        public System.Collections.Generic.List<string> GetDirectories() {
+        public System.Collections.Generic.List<string> GetDirectories(SerializedProperty property) {
             
             var activeObject = Selection.activeObject as GameObject;
-            if (activeObject == null) return null;
+            var usePrefabMode = true;
+            if (activeObject == null ||
+                (UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null &&
+                 activeObject != null &&
+                 activeObject.scene.IsValid() == true)) {
+                activeObject = (property.serializedObject.targetObject as Component)?.gameObject;
+                usePrefabMode = false;
+                if (activeObject == null) return null;
+            }
 
-            if (this.prevSelected == activeObject) return this.list;
+            if (this.prevSelected == activeObject) return this.list.Count > 0 ? this.list : null;
             this.prevSelected = activeObject;
             
             var components = activeObject.GetComponentsInParent<WindowComponent>(true);
             if (components.Length > 0) {
 
                 var path = string.Empty;
-                var prefabMode = UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
-                if (prefabMode.IsPartOfPrefabContents(activeObject) == true) {
+                if (usePrefabMode == true) {
 
-                    path = prefabMode.assetPath;
+                    var prefabMode = UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+                    if (prefabMode != null && prefabMode.IsPartOfPrefabContents(activeObject) == true) {
 
-                } else {
+                        path = prefabMode.assetPath;
 
-                    path = AssetDatabase.GetAssetPath(activeObject);
-                    
+                    } else {
+
+                        path = AssetDatabase.GetAssetPath(activeObject);
+
+                    }
+
+                    if (string.IsNullOrEmpty(path) == true) return null;
+
                 }
-
-                if (string.IsNullOrEmpty(path) == true) return null;
 
                 this.list.Clear();
                 foreach (var component in components) {
@@ -149,17 +161,21 @@ namespace UnityEditor.UI.Windows {
 
                 }
 
-                var splitted = path.Split(new[] { "/Components" }, System.StringSplitOptions.RemoveEmptyEntries);
-                var rootPath = splitted[0] + "/Screens";
-                var objs = AssetDatabase.FindAssets("t:prefab", new[] { rootPath });
-                foreach (var obj in objs) {
+                if (usePrefabMode == true) {
+                    
+                    var splitted = path.Split(new[] { "/Components" }, System.StringSplitOptions.RemoveEmptyEntries);
+                    var rootPath = splitted[0] + "/Screens";
+                    var objs = AssetDatabase.FindAssets("t:prefab", new[] { rootPath });
+                    foreach (var obj in objs) {
 
-                    var screenPath = AssetDatabase.GUIDToAssetPath(obj);
-                    var screen = AssetDatabase.LoadAssetAtPath<GameObject>(screenPath);
-                    if (screen != null) {
+                        var screenPath = AssetDatabase.GUIDToAssetPath(obj);
+                        var screen = AssetDatabase.LoadAssetAtPath<GameObject>(screenPath);
+                        if (screen != null) {
 
-                        var window = screen.GetComponent<WindowBase>();
-                        if (window.editorRefLocks.directories != null) this.list.AddRange(window.editorRefLocks.directories);
+                            var window = screen.GetComponent<WindowBase>();
+                            if (window.editorRefLocks.directories != null) this.list.AddRange(window.editorRefLocks.directories);
+
+                        }
 
                     }
 

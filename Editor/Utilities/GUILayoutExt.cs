@@ -775,19 +775,19 @@ namespace UnityEditor.UI.Windows {
         
         public static void DrawHeader(string caption) {
 
-            var style = GUIStyle.none;//new GUIStyle("In BigTitle");
-            //new Editor().DrawHeader();
+	        var style = GUIStyle.none;//new GUIStyle("In BigTitle");
+	        //new Editor().DrawHeader();
             
-            GUILayout.Space(4f);
-            GUILayoutExt.Separator();
-            GUILayoutExt.Padding(
-                16f, 4f,
-                () => {
+	        GUILayout.Space(4f);
+	        GUILayoutExt.Separator();
+	        GUILayoutExt.Padding(
+		        16f, 4f,
+		        () => {
                     
-                    GUILayout.Label(caption, EditorStyles.boldLabel);
+			        GUILayout.Label(caption, EditorStyles.boldLabel);
                     
-                }, style);
-            GUILayoutExt.Separator(new Color(0.2f, 0.2f, 0.2f, 1f));
+		        }, style);
+	        GUILayoutExt.Separator(new Color(0.2f, 0.2f, 0.2f, 1f));
             
         }
 

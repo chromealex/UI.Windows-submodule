@@ -29,6 +29,8 @@ namespace UnityEditor.UI.Windows {
 
         private SerializedProperty audioEvents;
 
+        private SerializedProperty editorRefLocks;
+
         private UnityEditorInternal.ReorderableList listModules;
 
         private int selectedTab {
@@ -84,6 +86,8 @@ namespace UnityEditor.UI.Windows {
             this.canvasSortingOrderDelta = this.serializedObject.FindProperty("canvasSortingOrderDelta");
             
             this.audioEvents = this.serializedObject.FindProperty("audioEvents");
+            
+            this.editorRefLocks = this.serializedObject.FindProperty("editorRefLocks");
 
             if (this.listModules == null) {
                 
@@ -345,6 +349,12 @@ namespace UnityEditor.UI.Windows {
 
                 }),
                 new GUITab("Tools", () => {
+
+                    GUILayoutExt.Box(4f, 4f, () => {
+
+                        EditorGUILayout.PropertyField(this.editorRefLocks);
+                        
+                    });
 
                     GUILayoutExt.Box(4f, 4f, () => {
                         

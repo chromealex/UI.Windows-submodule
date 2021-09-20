@@ -23,19 +23,6 @@ namespace UnityEditor.UI.Windows {
 
             var res = property.FindPropertyRelative("data");
             WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, res, label, type, UnityEngine.UI.Windows.Utilities.RequiredType.None);
-            if (type == typeof(Sprite)) {
-                
-                var objectType = res.FindPropertyRelative("objectType");
-                var objType = (Resource.ObjectType)objectType.enumValueIndex;
-                if (objType == Resource.ObjectType.Texture) {
-                    
-                    property.serializedObject.Update();
-                    objectType.enumValueIndex = (int)Resource.ObjectType.Sprite;
-                    property.serializedObject.ApplyModifiedProperties();
-                    
-                }
-
-            }
             
         }
 
@@ -103,7 +90,7 @@ namespace UnityEditor.UI.Windows {
                 value.objectType = Resource.ObjectType.Texture;
 
             }
-
+            
             var obj = Resource.GetEditorRef(value.guid, value.subObjectName, type, value.objectType, value.directRef);
             var oldValue = EditorGUI.showMixedValue;
             EditorGUI.showMixedValue = hasMultipleDifferentValues;
@@ -153,6 +140,17 @@ namespace UnityEditor.UI.Windows {
             } else {
 
                 DrawLabel(labelRect, new GUIContent("GUID", tooltip), new Color(0.2f, 0.6f, 1f, 0.7f));
+
+            }
+
+            if (type == typeof(Sprite)) {
+                
+                var objType = result.resource.objectType;
+                if (objType == Resource.ObjectType.Texture) {
+                    
+                    result.resource.objectType = Resource.ObjectType.Sprite;
+                    
+                }
 
             }
 

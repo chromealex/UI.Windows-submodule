@@ -23,6 +23,19 @@ namespace UnityEditor.UI.Windows {
 
             var res = property.FindPropertyRelative("data");
             WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, res, label, type, UnityEngine.UI.Windows.Utilities.RequiredType.None);
+            if (type == typeof(Sprite)) {
+                
+                var objectType = res.FindPropertyRelative("objectType");
+                var objType = (Resource.ObjectType)objectType.enumValueIndex;
+                if (objType == Resource.ObjectType.Texture) {
+                    
+                    property.serializedObject.Update();
+                    objectType.enumValueIndex = (int)Resource.ObjectType.Sprite;
+                    property.serializedObject.ApplyModifiedProperties();
+                    
+                }
+
+            }
             
         }
 

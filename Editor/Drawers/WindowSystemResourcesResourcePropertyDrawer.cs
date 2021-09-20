@@ -143,17 +143,6 @@ namespace UnityEditor.UI.Windows {
 
             }
 
-            if (type == typeof(Sprite)) {
-                
-                var objType = result.resource.objectType;
-                if (objType == Resource.ObjectType.Texture) {
-                    
-                    result.resource.objectType = Resource.ObjectType.Sprite;
-                    
-                }
-
-            }
-
             return result;
 
         }
@@ -298,6 +287,17 @@ namespace UnityEditor.UI.Windows {
 
             }
             
+            if (type == typeof(Sprite)) {
+                
+                var objType = resource.objectType;
+                if (objType == Resource.ObjectType.Texture) {
+                    
+                    resource.objectType = Resource.ObjectType.Sprite;
+                    
+                }
+
+            }
+
         }
 
     }

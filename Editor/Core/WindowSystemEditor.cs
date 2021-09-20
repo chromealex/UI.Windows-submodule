@@ -330,8 +330,13 @@ namespace UnityEditor.UI.Windows {
 
                                                     var rField = (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
                                                     var r = (Resource)rField.GetValue(res);
-                                                    System.Type resType = res.GetType().GetGenericArguments()[0];
-                                                    WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
+                                                    System.Type type = null;
+                                                    if (res.GetType().IsArray == true) {
+                                                        type = res.GetType().GetElementType().GetGenericArguments()[0];
+                                                    } else {
+                                                        type = res.GetType().GetGenericArguments()[0];
+                                                    }
+                                                    WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, type);
                                                     ++markDirtyCount;
                                                     rField.SetValue(res, r);
                                                     EditorUtility.SetDirty(component.gameObject);

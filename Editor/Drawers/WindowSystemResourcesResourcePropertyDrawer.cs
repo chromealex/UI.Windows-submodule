@@ -111,7 +111,6 @@ namespace UnityEditor.UI.Windows {
                 }
                 
                 WindowSystemResourcesResourcePropertyDrawer.Validate(ref result.resource, type);
-                result.resource.directRefHash = (result.resource.directRef != null ? result.resource.directRef.GetHashCode() : 0);
                 
             }
 
@@ -209,6 +208,17 @@ namespace UnityEditor.UI.Windows {
         public static void Validate(ref Resource resource, System.Type type = null) {
             
             if (type == null) type = typeof(Object);
+            if (type == typeof(Sprite)) {
+                
+                var objType = resource.objectType;
+                if (objType == Resource.ObjectType.Texture) {
+                    
+                    resource.objectType = Resource.ObjectType.Sprite;
+                    
+                }
+
+            }
+
             var newObj = Resource.GetEditorRef(resource.guid, resource.subObjectName, type, resource.objectType, resource.directRef);
 
             if (newObj != null) {
@@ -297,6 +307,8 @@ namespace UnityEditor.UI.Windows {
                 }
 
             }
+
+            resource.directRefHash = (resource.directRef != null ? resource.directRef.GetHashCode() : 0);
 
         }
 

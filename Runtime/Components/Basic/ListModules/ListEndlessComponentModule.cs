@@ -113,10 +113,10 @@ namespace UnityEngine.UI.Windows {
                         
                         var isLocalDirty = false;
                         var pos = instance.rectTransform.anchoredPosition;
-                        var posOffset = contentSize - data.accumulatedSize - data.size;
 
                         if (this.module.direction == Direction.Vertical) {
 
+                            var posOffset = contentSize - data.accumulatedSize - data.size;
                             if (UnityEngine.Mathf.Abs(pos.y - posOffset) >= Mathf.Epsilon) {
 
                                 pos.y = posOffset;
@@ -136,6 +136,7 @@ namespace UnityEngine.UI.Windows {
 
                         } else if (this.module.direction == Direction.Horizontal) {
                             
+                            var posOffset = data.accumulatedSize;
                             if (UnityEngine.Mathf.Abs(pos.x - posOffset) >= Mathf.Epsilon) {
 
                                 pos.x = posOffset;
@@ -200,7 +201,7 @@ namespace UnityEngine.UI.Windows {
         public Direction direction;
 
         [Space(10f)]
-        public LayoutGroup layoutGroup;
+        public HorizontalOrVerticalLayoutGroup layoutGroup;
         public List<RegistryBase> registries = new List<RegistryBase>();
         public float createOffset = 50f;
 
@@ -233,7 +234,7 @@ namespace UnityEngine.UI.Windows {
 
             if (this.scrollRect != null && this.scrollRect.content != null && this.layoutGroup == null) {
 
-                this.layoutGroup = this.scrollRect.content.GetComponent<LayoutGroup>();
+                this.layoutGroup = this.scrollRect.content.GetComponent<HorizontalOrVerticalLayoutGroup>();
 
             }
             
@@ -402,17 +403,18 @@ namespace UnityEngine.UI.Windows {
 
         public void CalculateBounds() {
 
-            var accumulatedSize = 0f;
+            var padding = this.layoutGroup.padding;
+            float accumulatedSize = (this.direction == Direction.Vertical ? padding.top : padding.left);
             for (int i = 0; i < this.allCount; ++i) {
                 
                 ref var item = ref this.items[i];
                 if (item.size <= 0f) item.size = this.dataSource.GetSize(i);
                 item.accumulatedSize = accumulatedSize;
-                accumulatedSize += item.size;
+                accumulatedSize += item.size + this.layoutGroup.spacing;
                 
             }
 
-            var contentSize = accumulatedSize;
+            var contentSize = accumulatedSize + (this.direction == Direction.Vertical ? padding.bottom : padding.right);
             var scrollRect = this.scrollRect.transform as RectTransform;
             var contentRect = this.scrollRect.content;
             var viewSize = (this.direction == Direction.Vertical ? scrollRect.rect.height + this.createOffset : scrollRect.rect.width + this.createOffset);

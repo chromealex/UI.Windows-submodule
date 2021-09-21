@@ -153,7 +153,6 @@ namespace UnityEditor.UI.Windows {
             var loadType = property.FindPropertyRelative("type");
             var objectType = property.FindPropertyRelative("objectType");
             var directRef = property.FindPropertyRelative("directRef");
-            var directRefHash = property.FindPropertyRelative("directRefHash");
             var validationRequired = property.FindPropertyRelative("validationRequired");
 
             var newRes = WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, label, new Resource() {
@@ -161,7 +160,6 @@ namespace UnityEditor.UI.Windows {
                 type = (Resource.Type)loadType.enumValueIndex,
                 objectType = (Resource.ObjectType)objectType.enumValueIndex,
                 directRef = directRef.objectReferenceValue,
-                directRefHash = directRefHash.intValue,
                 validationRequired = validationRequired.boolValue,
             }, hasMultipleDifferentValues: property.hasMultipleDifferentValues, type: type, requiredType: requiredType);
 
@@ -174,7 +172,6 @@ namespace UnityEditor.UI.Windows {
                     loadType.enumValueIndex = (int)newRes.resource.type;
                     objectType.enumValueIndex = (int)newRes.resource.objectType;
                     directRef.objectReferenceValue = newRes.resource.directRef;
-                    directRefHash.intValue = newRes.resource.directRefHash;
                     validationRequired.boolValue = false;
                 }
                 property.serializedObject.ApplyModifiedProperties();
@@ -307,8 +304,6 @@ namespace UnityEditor.UI.Windows {
                 }
 
             }
-
-            resource.directRefHash = (resource.directRef != null ? resource.directRef.GetHashCode() : 0);
 
         }
 

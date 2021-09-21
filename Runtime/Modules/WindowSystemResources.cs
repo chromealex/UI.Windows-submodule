@@ -109,7 +109,6 @@ namespace UnityEngine.UI.Windows {
         public string guid;
         public string subObjectName;
         public Object directRef;
-        public int directRefHash;
         public bool validationRequired;
 
         public bool Equals(Resource other) {
@@ -133,7 +132,7 @@ namespace UnityEngine.UI.Windows {
 
         public override int GetHashCode() {
 
-            return (int)this.type ^ (int)this.objectType ^ (this.guid != null ? this.guid.GetHashCode() : 0) ^ this.directRefHash;
+            return (int)this.type ^ (int)this.objectType ^ (this.guid != null ? this.guid.GetHashCode() : 0);
 
         }
 

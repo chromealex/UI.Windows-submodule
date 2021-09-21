@@ -192,7 +192,6 @@ MonoBehaviour:
     guid: 
     subObjectName: 
     directRef: {fileID: 8199301820935925453}
-    directRefHash: 35520
     validationRequired: 0
   customRoot: {fileID: 7469489609975794831}
   items: []
@@ -712,7 +711,6 @@ MonoBehaviour:
     guid: 
     subObjectName: 
     directRef: {fileID: 1192130305656968135}
-    directRefHash: 36358
     validationRequired: 0
   customRoot: {fileID: 0}
   items: []

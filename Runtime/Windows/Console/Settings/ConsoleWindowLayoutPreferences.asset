@@ -15,7 +15,7 @@ MonoBehaviour:
   canvasScalerData:
     scaleFactor: 1
     physicalUnit: 3
-    referenceResolution: {x: 800, y: 600}
+    referenceResolution: {x: 1024, y: 600}
     screenMatchMode: 0
     uiScaleMode: 1
     dynamicPixelsPerUnit: 1

@@ -311,6 +311,7 @@ namespace UnityEditor.UI.Windows {
 
                                 try {
 
+                                    var isBreak = false;
                                     var markDirtyCount = 0;
                                     var gos = AssetDatabase.FindAssets("t:GameObject");
                                     var visited = new HashSet<object>();
@@ -320,29 +321,17 @@ namespace UnityEditor.UI.Windows {
 
                                         var path = AssetDatabase.GUIDToAssetPath(guid);
                                         var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                                        EditorUtility.DisplayProgressBar("Validating Resources 1 / 2", path, i / (float)gos.Length);
+                                        if (EditorUtility.DisplayCancelableProgressBar("Validating Resources 1 / 2", path, i / (float)gos.Length) == true) {
+
+                                            isBreak = true;
+                                            break;
+
+                                        }
 
                                         {
                                             var allComponents = go.GetComponentsInChildren<Component>(true);
                                             foreach (var component in allComponents) {
 
-                                                EditorHelpers.FindType(component, typeof(Resource<>), (fieldInfo, res) => {
-
-                                                    var rField = (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
-                                                    var r = (Resource)rField.GetValue(res);
-                                                    System.Type type = null;
-                                                    if (res.GetType().IsArray == true) {
-                                                        type = res.GetType().GetElementType().GetGenericArguments()[0];
-                                                    } else {
-                                                        type = res.GetType().GetGenericArguments()[0];
-                                                    }
-                                                    WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, type);
-                                                    ++markDirtyCount;
-                                                    rField.SetValue(res, r);
-                                                    EditorUtility.SetDirty(component.gameObject);
-                                                    return res;
-
-                                                }, visitedGeneric);
                                                 EditorHelpers.FindType(component, typeof(Resource), (fieldInfo, res) => {
 
                                                     System.Type resType = null;
@@ -360,55 +349,102 @@ namespace UnityEditor.UI.Windows {
                                                 }, visited);
 
                                             }
+
+                                            foreach (var component in allComponents) {
+                                            
+                                                EditorHelpers.FindType(component, typeof(Resource<>), (fieldInfo, res) => {
+
+                                                    var rField =
+                                                        (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
+                                                    var r = (Resource)rField.GetValue(res);
+                                                    System.Type type = null;
+                                                    if (fieldInfo.FieldType.IsArray == true) {
+                                                        type = fieldInfo.FieldType.GetElementType().GetGenericArguments()[0];
+                                                    } else {
+                                                        type = fieldInfo.FieldType.GetGenericArguments()[0];
+                                                    }
+
+                                                    WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, type);
+                                                    ++markDirtyCount;
+                                                    rField.SetValue(res, r);
+                                                    EditorUtility.SetDirty(component.gameObject);
+                                                    return res;
+                                                    
+                                                }, visitedGeneric);
+                                                
+                                            }
+                                            
                                         }
 
                                         ++i;
 
                                     }
 
-                                    var sos = AssetDatabase.FindAssets("t:ScriptableObject");
-                                    i = 0;
-                                    foreach (var guid in sos) {
+                                    if (isBreak == false) {
 
-                                        var path = AssetDatabase.GUIDToAssetPath(guid);
-                                        var go = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
-                                        EditorUtility.DisplayProgressBar("Validating Resources 2 / 2", path, i / (float)sos.Length);
+                                        var sos = AssetDatabase.FindAssets("t:ScriptableObject");
+                                        i = 0;
+                                        foreach (var guid in sos) {
 
-                                        {
-                                            EditorHelpers.FindType(go, typeof(Resource<>), (fieldInfo, res) => {
+                                            var path = AssetDatabase.GUIDToAssetPath(guid);
+                                            var go = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
+                                            if (EditorUtility.DisplayCancelableProgressBar("Validating Resources 2 / 2", path, i / (float)sos.Length) == true) {
 
-                                                var rField = (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
-                                                var r = (Resource)rField.GetValue(res);
-                                                System.Type resType = res.GetType().GetGenericArguments()[0];
-                                                WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
-                                                ++markDirtyCount;
-                                                rField.SetValue(res, r);
-                                                EditorUtility.SetDirty(go);
-                                                return res;
+                                                isBreak = true;
+                                                break;
 
-                                            }, visitedGeneric);
-                                            EditorHelpers.FindType(go, typeof(Resource), (fieldInfo, res) => {
+                                            }
 
-                                                System.Type resType = null;
-                                                var resTypeAttrs = fieldInfo.GetCustomAttributes(typeof(ResourceTypeAttribute), true);
-                                                if (resTypeAttrs.Length > 0) {
-                                                    resType = ((ResourceTypeAttribute)resTypeAttrs[0]).type;
-                                                }
+                                            {
+                                                EditorHelpers.FindType(go, typeof(Resource), (fieldInfo, res) => {
 
-                                                var r = (Resource)res;
-                                                WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
-                                                ++markDirtyCount;
-                                                EditorUtility.SetDirty(go);
-                                                return r;
+                                                    System.Type resType = null;
+                                                    var resTypeAttrs = fieldInfo.GetCustomAttributes(typeof(ResourceTypeAttribute), true);
+                                                    if (resTypeAttrs.Length > 0) {
+                                                        resType = ((ResourceTypeAttribute)resTypeAttrs[0]).type;
+                                                    }
 
-                                            }, visited);
+                                                    var r = (Resource)res;
+                                                    WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, resType);
+                                                    ++markDirtyCount;
+                                                    EditorUtility.SetDirty(go);
+                                                    return r;
+
+                                                }, visited);
+                                                EditorHelpers.FindType(go, typeof(Resource<>), (fieldInfo, res) => {
+
+                                                    var rField =
+                                                        (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
+                                                    var r = (Resource)rField.GetValue(res);
+                                                    System.Type type = null;
+                                                    if (fieldInfo.FieldType.IsArray == true) {
+                                                        type = fieldInfo.FieldType.GetElementType().GetGenericArguments()[0];
+                                                    } else {
+                                                        type = fieldInfo.FieldType.GetGenericArguments()[0];
+                                                    }
+
+                                                    WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, type);
+                                                    ++markDirtyCount;
+                                                    rField.SetValue(res, r);
+                                                    EditorUtility.SetDirty(go);
+                                                    return res;
+
+                                                }, visitedGeneric);
+                                            }
+
+                                            ++i;
+
                                         }
 
-                                        ++i;
+                                        Debug.Log("Done. Updated: " + markDirtyCount);
 
                                     }
 
-                                    Debug.Log("Done. Updated: " + markDirtyCount);
+                                    if (isBreak == true) {
+                                        
+                                        Debug.Log("Break. Updated: " + markDirtyCount);
+                                        
+                                    }
 
                                 } catch (System.Exception ex) {
                                     Debug.LogException(ex);

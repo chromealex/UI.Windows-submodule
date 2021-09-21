@@ -81,16 +81,16 @@ namespace UnityEditor.UI.Windows {
 
             if (type == typeof(Sprite)) {
 
-                value.objectType = Resource.ObjectType.Sprite;
-
+                if (value.objectType != Resource.ObjectType.Sprite) value.validationRequired = true;
+                
             } else if (type == typeof(Texture) ||
                        type == typeof(Texture2D) ||
                        type == typeof(RenderTexture)) {
 
-                value.objectType = Resource.ObjectType.Texture;
+                if (value.objectType != Resource.ObjectType.Texture) value.validationRequired = true;
 
             }
-            
+
             var obj = Resource.GetEditorRef(value.guid, value.subObjectName, type, value.objectType, value.directRef);
             var oldValue = EditorGUI.showMixedValue;
             EditorGUI.showMixedValue = hasMultipleDifferentValues;

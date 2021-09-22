@@ -166,10 +166,10 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
-        public void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false) {
+        public void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false, bool canCopy = false) {
 
             var console = WindowSystem.GetConsole();
-            console.AddLine(text, logType, isCommand);
+            console.AddLine(text, logType, isCommand, canCopy);
             
         }
 
@@ -359,6 +359,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         float IDataSource.GetSize(int index) {
 
+            var canvas = this.GetWindow().GetCanvas();
             var button = (this.list.source.directRef as ButtonComponent);
             var layoutGroupPadding = button.GetComponent<LayoutGroup>().padding;
             var size = this.list.rectTransform.rect.size;
@@ -366,7 +367,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             var text = (button.Get<TextComponent>().graphics as Text);
             var gen = text.GetGenerationSettings(size);
             var textGen = text.cachedTextGenerator;
-            var canvas = this.GetWindow().GetCanvas();
             var scaleFactor = canvas.scaleFactor;
             return (textGen.GetPreferredHeight(this.GetDrawItem(index).line, gen) + layoutGroupPadding.top + layoutGroupPadding.bottom) / scaleFactor;
             
@@ -568,6 +568,13 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 component.SetCallback(new ClosureParametersItem() { parameters = parameters, data = item, },(innerData) => {
                     innerData.parameters.data.ReplaceInput(innerData.data.line);
                 });
+                {
+                    var copyButton = component.Get<ButtonComponent>();
+                    copyButton.SetCallback(new ClosureParametersItem() { parameters = parameters, data = item, }, (innerData) => {
+                        GUIUtility.systemCopyBuffer = System.Text.RegularExpressions.Regex.Replace(innerData.data.line, "<.*?>", System.String.Empty);
+                    });
+                    copyButton.ShowHide(item.canCopy);
+                }
                 component.SetInteractable(item.isCommand);
                 component.Show();
                 

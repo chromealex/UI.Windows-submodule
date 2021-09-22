@@ -115,6 +115,7 @@ namespace UnityEngine.UI.Windows {
             public string line;
             public LogType logType;
             public bool isCommand;
+            public bool canCopy;
 
         }
         
@@ -784,7 +785,7 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false) {
+        public void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false, bool canCopy = false) {
 
             lock (this.drawItems) {
 
@@ -792,6 +793,7 @@ namespace UnityEngine.UI.Windows {
                     line = text,
                     logType = logType,
                     isCommand = isCommand,
+                    canCopy = canCopy,
                 });
 
             }
@@ -830,8 +832,8 @@ namespace UnityEngine.UI.Windows {
 
             }
 
-            this.AddLine(text, type);
-            if (type == LogType.Exception && string.IsNullOrEmpty(trace) == false) this.AddLine(trace, type);
+            this.AddLine(text, type, canCopy: true);
+            if (type == LogType.Exception && string.IsNullOrEmpty(trace) == false) this.AddLine(trace, type, canCopy: true);
 
             this.isDirty = true;
 

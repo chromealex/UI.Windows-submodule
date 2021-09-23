@@ -782,7 +782,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 	                    if (this.onUpdate != null) {
 		                    
 		                    var val = EaseFunctions.GetEase(this.easeFunction).Invoke(this.timer, this.@from, this.to - this.from, 1f);
-		                    this.onUpdate.Invoke(this.obj, Mathf.Clamp(val, this.from, this.to));
+		                    this.onUpdate.Invoke(this.obj, Mathf.Clamp(val, Mathf.Min(this.from, this.to), Mathf.Max(this.from, this.to)));
 		                    
 	                    }
 

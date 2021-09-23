@@ -35,8 +35,10 @@ namespace UnityEngine.UI.Windows {
             private int loadingCount;
             private bool isDirty;
             private bool forceRebuild;
-            private int fromIndex;
-            private int toIndex;
+            private int fromIndex = -1;
+            private int toIndex = -1;
+            private int prevFromIndex;
+            private int prevToIndex;
 
             public override void Clear() {
                 
@@ -70,6 +72,8 @@ namespace UnityEngine.UI.Windows {
                 if (this.fromIndex != fromIndex ||
                     this.toIndex != toIndex) {
 
+                    this.prevFromIndex = this.fromIndex;
+                    this.prevToIndex = this.toIndex;
                     this.fromIndex = fromIndex;
                     this.toIndex = toIndex;
                     this.isDirty = true;
@@ -85,12 +89,13 @@ namespace UnityEngine.UI.Windows {
 
                             var k = i + fromIndex;
                             var item = this.items[k];
+                            //item.closure.index = k;
                             ++currentVisibleCount;
                             ++this.loadingCount;
-                            this.module.listComponent.AddItemInternal<T, InnerClosure>(item.source, new InnerClosure() { closure = item.closure, registry = this, item = item },
+                            this.module.listComponent.AddItemInternal<T, InnerClosure>(item.source, new InnerClosure() { closure = item.closure, registry = this, item = item, },
                                                                                        (obj, closure) => {
                                                                                            --closure.registry.loadingCount;
-                                                                                           closure.item.onItem.Invoke(obj, closure.closure);
+                                                                                           //closure.item.onItem.Invoke(obj, closure.closure);
                                                                                            closure.registry.isDirty = true;
                                                                                            closure.registry.forceRebuild = true;
                                                                                        });
@@ -200,8 +205,13 @@ namespace UnityEngine.UI.Windows {
 
                         if (isLocalDirty == true || this.forceRebuild == true || forceRebuild == true) LayoutRebuilder.ForceRebuildLayoutImmediate(instance.rectTransform);
 
-                        item.closure.index = i;
-                        item.onItem.Invoke((T)instance, item.closure);
+                        {
+
+                            item.closure.index = i;
+                            item.onItem.Invoke((T)instance, item.closure);
+
+                        }
+
                         ++k;
 
                     }

@@ -9,7 +9,8 @@ namespace UnityEngine.UI.Windows.Modules {
         [System.Serializable]
         public class Parameters {
 
-            public int defaultOrder;
+            public int defaultOrder = 0;
+            public bool applyCanvasScaler = true;
 
             public virtual void Apply(WindowModule instance) {
 
@@ -119,10 +120,14 @@ namespace UnityEngine.UI.Windows.Modules {
                     instance.Setup(closure.window);
                     if (closure.parameters != null) closure.parameters.Apply(instance);
                     instance.SetResetState();
-                    
-                    var layoutPreferences = closure.window.GetCurrentLayoutPreferences();
-                    if (layoutPreferences != null && instance.canvasScaler != null) layoutPreferences.Apply(instance.canvasScaler);
 
+                    if (closure.parameters != null && closure.parameters.applyCanvasScaler == true) {
+
+                        var layoutPreferences = closure.window.GetCurrentLayoutPreferences();
+                        if (layoutPreferences != null && instance.canvasScaler != null) layoutPreferences.Apply(instance.canvasScaler);
+
+                    }
+                    
                     closure.window.RegisterSubObject(instance);
 
                     closure.windowModules.modules[closure.index].moduleInstance = instance;

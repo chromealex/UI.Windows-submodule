@@ -74,7 +74,7 @@ namespace UnityEngine.UI.Windows {
 
                 if (breadcrumb.history[i].instance == instance) {
 
-                    idx = i;
+                    idx = i - 1;
                     break;
 
                 }

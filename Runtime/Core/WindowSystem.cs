@@ -18,6 +18,7 @@ namespace UnityEngine.UI.Windows {
         UseSettings,
         Orthographic,
         Perspective,
+        UseCameraSettings,
 
     }
 

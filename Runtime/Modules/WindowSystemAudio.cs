@@ -200,8 +200,20 @@
             instance.setParameterByName(name, value);
             
         }
-        
+
         public void Play() {
+            
+            this.Play_INTERNAL(default, false);
+            
+        }
+
+        public void Play(Vector3 position) {
+            
+            this.Play_INTERNAL(position, true);
+            
+        }
+
+        private void Play_INTERNAL(Vector3 position, bool usePosition) {
 
             if (string.IsNullOrEmpty(this.audioEvent) == true) return;
 
@@ -222,7 +234,19 @@
             }
 
             if (setPlay == true) {
-                
+
+                if (usePosition == true) {
+
+                    instance.set3DAttributes(new FMOD.ATTRIBUTES_3D() {
+                        position = new FMOD.VECTOR() {
+                            x = position.x,
+                            y = position.y,
+                            z = position.z,
+                        },
+                    });
+
+                }
+
                 instance.start();
                 if (eventDescription.isOneshot(out var isOneShot) == FMOD.RESULT.OK && isOneShot == true) {
                     instance.release();

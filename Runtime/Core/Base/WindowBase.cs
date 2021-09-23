@@ -164,11 +164,30 @@
         internal void ApplyCamera() {
 
             var settings = WindowSystem.GetSettings();
-            switch (this.preferences.cameraMode) {
+            if (this.preferences.cameraMode == UIWSCameraMode.UseSettings) {
+            
+                if (settings.camera.orthographicDefault == true) {
+                    
+                    this.ApplyCameraSettings(UIWSCameraMode.Orthographic);
+                    
+                } else {
+                    
+                    this.ApplyCameraSettings(UIWSCameraMode.Perspective);
+                    
+                }
+                
+                return;
+                
+            }
 
-                case UIWSCameraMode.UseSettings:
-                    this.workCamera.orthographic = settings.camera.orthographicDefault;
-                    break;
+            this.ApplyCameraSettings(this.preferences.cameraMode);
+
+        }
+
+        private void ApplyCameraSettings(UIWSCameraMode mode) {
+            
+            var settings = WindowSystem.GetSettings();
+            switch (mode) {
 
                 case UIWSCameraMode.Orthographic:
                     this.workCamera.orthographic = true;
@@ -185,7 +204,7 @@
                     break;
 
             }
-
+            
         }
 
         public override void TurnOffRender() {

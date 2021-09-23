@@ -89,10 +89,14 @@
 
         public override void ApplyState(State state) {
 
-            var toState = (RectState)state;
-            if ((this.parameters & AnimationParameter.Position) != 0) this.rectTransform.anchoredPosition = toState.anchorPosition;
-            if ((this.parameters & AnimationParameter.Rotation) != 0) this.rectTransform.rotation = Quaternion.Euler(toState.rotation);
-            if ((this.parameters & AnimationParameter.Scale) != 0) this.rectTransform.localScale = toState.scale;
+            if (this.rectTransform != null) {
+            
+                var toState = (RectState)state;
+                if ((this.parameters & AnimationParameter.Position) != 0) this.rectTransform.anchoredPosition = toState.anchorPosition;
+                if ((this.parameters & AnimationParameter.Rotation) != 0) this.rectTransform.rotation = Quaternion.Euler(toState.rotation);
+                if ((this.parameters & AnimationParameter.Scale) != 0) this.rectTransform.localScale = toState.scale;
+                
+            }
 
             this.currentState.CopyFrom(state);
 

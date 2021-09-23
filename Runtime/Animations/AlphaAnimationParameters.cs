@@ -58,7 +58,7 @@
         public override void ApplyState(State state) {
 
             var toState = (AlphaState)state;
-            this.canvasGroup.alpha = toState.alpha;
+            if (this.canvasGroup != null) this.canvasGroup.alpha = toState.alpha;
 
             this.currentState.CopyFrom(state);
 

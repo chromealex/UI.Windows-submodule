@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace UnityEngine.UI.Windows {
-    
+
     using Utilities;
 
     public interface IEndlessElement {
@@ -207,8 +207,11 @@ namespace UnityEngine.UI.Windows {
 
                         {
 
-                            item.closure.index = i;
-                            item.onItem.Invoke((T)instance, item.closure);
+                            if (item.closure.index != i || item.initialized == false) {
+                                item.closure.index = i;
+                                item.onItem.Invoke((T)instance, item.closure);
+                            }
+                            
 
                         }
 
@@ -229,7 +232,7 @@ namespace UnityEngine.UI.Windows {
             public Resource source;
             public System.Action<T, TClosure> onItem;
             public TClosure closure;
-
+            public bool initialized;
         }
 
         [System.Serializable]
@@ -268,7 +271,8 @@ namespace UnityEngine.UI.Windows {
         private IDataSource dataSource;
         private Item[] items;
         private bool forceRebuild;
-        
+        private float contentRectExtend = 0f;
+
         public override void ValidateEditor() {
             
             base.ValidateEditor();
@@ -308,6 +312,16 @@ namespace UnityEngine.UI.Windows {
                 
                 this.scrollRect.onValueChanged.AddListener(this.OnScrollValueChanged);
                 this.OnScrollValueChanged(this.scrollRect.normalizedPosition);
+
+                var contentLayoutGroup = scrollRect.content.GetComponent<HorizontalOrVerticalLayoutGroup>();
+
+                if (contentLayoutGroup != null) {
+                    if (this.direction == Direction.Horizontal || this.direction == Direction.HorizontalUpside) {
+                        this.contentRectExtend = contentLayoutGroup.padding.horizontal;
+                    } else {
+                        this.contentRectExtend = contentLayoutGroup.padding.vertical;
+                    }
+                }
                 
             }
             
@@ -408,6 +422,7 @@ namespace UnityEngine.UI.Windows {
                     source = source,
                     onItem = onItem,
                     closure = closure,
+                    initialized = false
                 };
 
                 registry.Add(item);
@@ -557,7 +572,7 @@ namespace UnityEngine.UI.Windows {
             }
             
             this.contentSize = contentSize;
-            contentRect.sizeDelta = new Vector2(contentSize * axis.x, contentSize * axis.y);
+            contentRect.sizeDelta = new Vector2((contentSize + contentRectExtend) * axis.x, (contentSize + contentRectExtend) * axis.y);
             
             var offInv = 1f - posOffset;
             this.invOffset = offInv;

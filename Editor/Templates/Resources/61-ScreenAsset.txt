@@ -71,7 +71,7 @@ MonoBehaviour:
     layer:
       value: 0
     singleInstance: 0
-    addInHistory: 0
+    addInHistory: 1
     takeFocus: 1
     renderMode: 0
     cameraMode: 0

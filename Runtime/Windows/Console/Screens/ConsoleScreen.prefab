@@ -89,7 +89,7 @@ MonoBehaviour:
       value: 10
     singleInstance: 1
     forceSyncLoad: 0
-    addInHistory: 0
+    addInHistory: 1
     takeFocus: 1
     dontDestroy: 1
     renderMode: 0

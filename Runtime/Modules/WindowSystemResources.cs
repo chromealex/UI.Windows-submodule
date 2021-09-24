@@ -529,6 +529,9 @@ namespace UnityEngine.UI.Windows.Modules {
                                 } else {
 
                                     var result = asset.GetComponent<T>();
+                                    if (result == null) {
+                                        Debug.LogError("Failed to load resource: " + resource.GetAddress() + ", gameObject loaded " + asset + ", but component was not found with type " + typeof(T));
+                                    }
                                     this.AddObject(handler, result, resource, () => WindowSystemResources.ReleaseAddressableAsset(asset));
                                     this.CompleteTask(handler, resource, result);
 

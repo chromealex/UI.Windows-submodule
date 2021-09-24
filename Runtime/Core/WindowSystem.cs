@@ -219,6 +219,8 @@ namespace UnityEngine.UI.Windows {
 
         OnFocusTook,
         OnFocusLost,
+        
+        OnLayoutReady,
 
     }
 
@@ -1577,11 +1579,24 @@ namespace UnityEngine.UI.Windows {
 
                 }
 
+                var tr = transitionParameters.ReplaceCallback(() => {
+
+                    Coroutines.Run(WindowSystem.WaitForLayoutBuildComplete(instance));
+                    transitionParameters.RaiseCallback();
+                    
+                });
                 instance.DoInit();
-                instance.ShowInternal(transitionParameters);
+                instance.ShowInternal(tr);
 
             });
 
+        }
+
+        private static System.Collections.IEnumerator WaitForLayoutBuildComplete(WindowBase instance) {
+            
+            yield return new WaitForEndOfFrame();
+            instance.DoLayoutReady();
+            
         }
 
     }

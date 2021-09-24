@@ -1270,6 +1270,20 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public void DoLayoutReady() {
+
+            this.OnLayoutReady();
+            WindowSystem.RaiseEvent(this, WindowEvent.OnLayoutReady);
+
+            for (int i = 0; i < this.subObjects.Count; ++i) {
+
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
+                this.subObjects[i].DoLayoutReady();
+
+            }
+
+        }
+
         internal virtual void OnInitInternal() { }
 
         internal virtual void OnDeInitInternal() { }
@@ -1283,6 +1297,8 @@ namespace UnityEngine.UI.Windows {
         internal virtual void OnHideEndInternal() { }
 
         #region Public Override Events
+        public virtual void OnLayoutReady() { }
+        
         public virtual void OnInit() { }
 
         public virtual void OnDeInit() { }

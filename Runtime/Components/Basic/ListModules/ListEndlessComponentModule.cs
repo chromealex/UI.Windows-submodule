@@ -313,8 +313,7 @@ namespace UnityEngine.UI.Windows {
                 this.scrollRect.onValueChanged.AddListener(this.OnScrollValueChanged);
                 this.OnScrollValueChanged(this.scrollRect.normalizedPosition);
 
-                var contentLayoutGroup = scrollRect.content.GetComponent<HorizontalOrVerticalLayoutGroup>();
-
+                var contentLayoutGroup = this.layoutGroup;
                 if (contentLayoutGroup != null) {
                     if (this.direction == Direction.Horizontal || this.direction == Direction.HorizontalUpside) {
                         this.contentRectExtend = contentLayoutGroup.padding.horizontal;
@@ -538,7 +537,7 @@ namespace UnityEngine.UI.Windows {
 
             }
 
-            var scrollRect = this.scrollRect.transform as RectTransform;
+            var scrollRect = (RectTransform)this.scrollRect.transform;
             var contentRect = this.scrollRect.content;
             var viewSize = 0f;
             var contentSize = accumulatedSize;
@@ -572,7 +571,7 @@ namespace UnityEngine.UI.Windows {
             }
             
             this.contentSize = contentSize;
-            contentRect.sizeDelta = new Vector2((contentSize + contentRectExtend) * axis.x, (contentSize + contentRectExtend) * axis.y);
+            contentRect.sizeDelta = new Vector2((accumulatedSize + this.contentRectExtend) * axis.x, (accumulatedSize + this.contentRectExtend) * axis.y);
             
             var offInv = 1f - posOffset;
             this.invOffset = offInv;

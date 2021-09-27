@@ -233,6 +233,7 @@ namespace UnityEngine.UI.Windows {
             public System.Action<T, TClosure> onItem;
             public TClosure closure;
             public bool initialized;
+            
         }
 
         [System.Serializable]

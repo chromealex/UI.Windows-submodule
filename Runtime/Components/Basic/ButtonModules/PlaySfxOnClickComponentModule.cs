@@ -1,8 +1,13 @@
 ﻿namespace UnityEngine.UI.Windows {
 
-    public class PlaySfxComponentModule : ButtonComponentModule {
+    [ComponentModuleDisplayName("Play SFX on Click")]
+    public class PlaySfxOnClickComponentModule : ButtonComponentModule {
 
+        #if FMOD_SUPPORT
+        public FMODAudioComponent data;
+        #else
         public AudioClip clip;
+        #endif
 
         public override void OnInit() {
             
@@ -22,7 +27,11 @@
 
         private void OnClick() {
 
+            #if FMOD_SUPPORT
+            this.data.Play();
+            #else
             WindowSystem.GetAudio().Play(this.clip);
+            #endif
             
         }
 

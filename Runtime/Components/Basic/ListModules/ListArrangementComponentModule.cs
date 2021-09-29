@@ -5,7 +5,7 @@ namespace UnityEngine.UI.Windows {
     using Utilities;
     
     [ComponentModuleDisplayName("Arrangement")]
-    public class ListArrangementComponentModule : ListComponentModule {
+    public class ListArrangementComponentModule : ListComponentDraggableModule {
 
         public enum Type {
 
@@ -100,23 +100,17 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public override void OnDragBegin(UnityEngine.EventSystems.PointerEventData data) {
+        public override void OnBeginDrag(UnityEngine.EventSystems.PointerEventData data) {
 	        
-	        base.OnDragBegin(data);
-
 	        this.isDragging = true;
 
         }
 
-        public override void OnDragMove(UnityEngine.EventSystems.PointerEventData data) {
-	        
-	        base.OnDragMove(data);
+        public override void OnDrag(UnityEngine.EventSystems.PointerEventData data) {
 	        
         }
 
-        public override void OnDragEnd(UnityEngine.EventSystems.PointerEventData data) {
-	        
-	        base.OnDragEnd(data);
+        public override void OnEndDrag(UnityEngine.EventSystems.PointerEventData data) {
 	        
 	        this.isDragging = false;
 

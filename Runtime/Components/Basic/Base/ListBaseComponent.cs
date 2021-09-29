@@ -16,7 +16,7 @@ namespace UnityEngine.UI.Windows.Components {
 
     }
 
-    public abstract partial class ListBaseComponent : GenericComponent, ILayoutSelfController, UnityEngine.EventSystems.IBeginDragHandler, UnityEngine.EventSystems.IDragHandler, UnityEngine.EventSystems.IEndDragHandler {
+    public abstract partial class ListBaseComponent : GenericComponent, ILayoutSelfController {
 
         [UnityEngine.UI.Windows.Modules.ResourceTypeAttribute(typeof(WindowComponent), RequiredType.Warning)]
         public Resource source;
@@ -133,14 +133,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
         
-        public override void OnInit() {
-            
-            base.OnInit();
-
-            WindowSystem.onPointerUp += this.OnPointerUp;
-
-        }
-
         public override void OnDeInit() {
             
             base.OnDeInit();
@@ -165,8 +157,6 @@ namespace UnityEngine.UI.Windows.Components {
             this.onElementsChangedCallback = null;
             this.onLayoutChangedCallback = null;
             
-            WindowSystem.onPointerUp -= this.OnPointerUp;
-            
             var resources = WindowSystem.GetResources();
             foreach (var asset in this.loadedAssets) {
             
@@ -174,59 +164,6 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
             this.loadedAssets.Clear();
-
-        }
-
-        private void OnPointerUp() {
-            
-            var eventData = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current);
-            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
-
-                var module = this.componentModules.modules[i] as ListComponentModule;
-                if (module == null) continue;
-                
-                module.OnDragEnd(eventData);
-
-            }
-
-        }
-        
-        void UnityEngine.EventSystems.IBeginDragHandler.OnBeginDrag(UnityEngine.EventSystems.PointerEventData eventData) {
-            
-            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
-
-                var module = this.componentModules.modules[i] as ListComponentModule;
-                if (module == null) continue;
-                
-                module.OnDragBegin(eventData);
-
-            }
-            
-        }
-
-        void UnityEngine.EventSystems.IDragHandler.OnDrag(UnityEngine.EventSystems.PointerEventData eventData) {
-            
-            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
-
-                var module = this.componentModules.modules[i] as ListComponentModule;
-                if (module == null) continue;
-                
-                module.OnDragMove(eventData);
-
-            }
-
-        }
-
-        void UnityEngine.EventSystems.IEndDragHandler.OnEndDrag(UnityEngine.EventSystems.PointerEventData eventData) {
-            
-            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
-
-                var module = this.componentModules.modules[i] as ListComponentModule;
-                if (module == null) continue;
-                
-                module.OnDragEnd(eventData);
-
-            }
 
         }
 

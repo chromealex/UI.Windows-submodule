@@ -61,6 +61,7 @@
 
         public override void Hide(TransitionParameters parameters = default) {
 
+            parameters = parameters.ReplaceIgnoreTouch(true);
             var cbParameters = parameters.ReplaceCallback(() => {
 
                 this.PushToPool();

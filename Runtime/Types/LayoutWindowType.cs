@@ -240,6 +240,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             used.Add(this.windowLayout);
 
             this.loadingCount = 0;
+            Debug.Log("LAYOUT LOAD BEGIN: " + windowInstance.name);
             var arr = this.components;
             for (int i = 0; i < arr.Length; ++i) {
 
@@ -265,6 +266,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                             initialParameters = initialParameters,
                         };
                         ++this.loadingCount;
+                        Debug.Log("    Loading: " + i + " :: Tag: " + layoutComponent.tag);
                         Coroutines.Run(resources.LoadAsync<WindowComponent, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, layoutElement, data, layoutComponent.component, (asset, closure) => {
 
                             if (asset == null) {
@@ -277,6 +279,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                             ref var item = ref closure.layoutComponentItems[closure.index];
 
+                            Debug.Log("    Register SubObject: " + closure.index + " :: Tag: " + layoutComponent.tag);
                             var instance = closure.element.Load(asset);
                             instance.SetInvisible();
                             closure.windowLayoutInstance.SetLoadedComponent(item.tag, instance);
@@ -293,6 +296,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             }
 
             while (this.loadingCount > 0) yield return null;
+            Debug.Log("LAYOUT LOAD END: " + windowInstance.name);
 
             for (int i = 0; i < arr.Length; ++i) {
 

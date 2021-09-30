@@ -119,6 +119,9 @@ namespace UnityEngine.UI.Windows {
         internal bool replaceAffectChilds;
         internal bool affectChilds;
 
+        internal bool replaceIgnoreTouch;
+        internal bool ignoreTouch;
+
         internal System.Action callback;
 
     }
@@ -146,6 +149,15 @@ namespace UnityEngine.UI.Windows {
 
             if (this.contextCallback != null) this.contextCallback.Invoke(this.internalData.context, new TransitionParameters() { data = this.internalData.data });
             if (this.data.callback != null) this.data.callback.Invoke();
+
+        }
+
+        public TransitionParameters ReplaceIgnoreTouch(bool state) {
+
+            var instance = this;
+            instance.data.replaceIgnoreTouch = true;
+            instance.data.ignoreTouch = state;
+            return instance;
 
         }
 
@@ -1034,10 +1046,11 @@ namespace UnityEngine.UI.Windows {
 
             public WindowObject instance;
             public TransitionParameters parameters;
+            public bool internalCall;
 
         }
         
-        public static void HideInstance(WindowObject instance, TransitionParameters parameters) {
+        public static void HideInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
 
             if (instance.objectState <= ObjectState.Initializing) {
                 
@@ -1061,6 +1074,7 @@ namespace UnityEngine.UI.Windows {
             var closureInstance = new HideInstanceClosure() {
                 instance = instance,
                 parameters = parameters,
+                internalCall = internalCall,
             };
             Coroutines.Wait(closureInstance, (inst) => inst.instance.IsReadyToHide(), (inst) => {
                 
@@ -1071,6 +1085,7 @@ namespace UnityEngine.UI.Windows {
                     closure.hierarchyComplete = false;
                     closure.instance = inst.instance;
                     closure.parameters = inst.parameters;
+                    closure.internalCall = inst.internalCall;
 
                     if (inst.parameters.data.replaceAffectChilds == false ||
                         inst.parameters.data.affectChilds == true) {
@@ -1101,9 +1116,17 @@ namespace UnityEngine.UI.Windows {
                                 }
 
                             }, cParams, cParams.instance.subObjects, (obj, cb, p) => {
-                            
-                                obj.Hide(p.parameters.ReplaceCallback(cb));
-                            
+
+                                if (p.internalCall == true) {
+                                    
+                                    obj.HideInternal(p.parameters.ReplaceCallback(cb));
+
+                                } else {
+
+                                    obj.Hide(p.parameters.ReplaceCallback(cb));
+
+                                }
+
                             });
                             
                         } else {

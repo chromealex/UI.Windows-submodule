@@ -1119,9 +1119,21 @@ namespace UnityEngine.UI.Windows {
             
         }
 
+        private bool IsInternalManualTouch(TransitionParameters parameters) {
+
+            if (parameters.data.replaceIgnoreTouch == true) {
+
+                if (parameters.data.ignoreTouch == true) return false;
+
+            }
+            
+            return this.internalManualHide == true || this.internalManualShow == true;
+
+        }
+
         internal void ShowInternal(TransitionParameters parameters = default) {
             
-            if (this.hiddenByDefault == true || this.internalManualShow == true) {
+            if (this.hiddenByDefault == true || this.IsInternalManualTouch(parameters) == true) {
 
                 if (this.internalManualShow == false) {
 
@@ -1148,7 +1160,7 @@ namespace UnityEngine.UI.Windows {
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
-        
+
         public void Show(TransitionParameters parameters = default) {
 
             if (this.objectState <= ObjectState.Initializing) {
@@ -1166,8 +1178,6 @@ namespace UnityEngine.UI.Windows {
 
             }
 
-            this.internalManualShow = true;
-
             if (this.objectState == ObjectState.Showing || this.objectState == ObjectState.Shown) {
                 
                 parameters.RaiseCallback();
@@ -1175,10 +1185,28 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
+            this.internalManualShow = true;
+
             var cObj = this;
             var cParams = parameters;
             var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetShown, cObj, cParams);
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
+
+        }
+
+        internal void HideInternal(TransitionParameters parameters = default) {
+            
+            if (this.IsInternalManualTouch(parameters) == true) {
+
+                parameters.RaiseCallback();
+                return;
+
+            }
+            
+            var cObj = this;
+            var cParams = parameters;
+            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetHidden, cObj, cParams);
+            WindowSystem.HideInstance(this, cbParameters, internalCall: true);
 
         }
 
@@ -1199,8 +1227,6 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
-            this.internalManualHide = true;
-
             if (this.objectState == ObjectState.Hiding || this.objectState == ObjectState.Hidden) {
                 
                 parameters.RaiseCallback();
@@ -1208,10 +1234,12 @@ namespace UnityEngine.UI.Windows {
                 
             }
             
+            this.internalManualHide = true;
+
             var cObj = this;
             var cParams = parameters;
             var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetHidden, cObj, cParams);
-            WindowSystem.HideInstance(this, cbParameters);
+            WindowSystem.HideInstance(this, cbParameters, internalCall: true);
 
         }
 

@@ -14,7 +14,6 @@ namespace UnityEditor.UI.Windows {
 
         private SerializedProperty createPool;
         
-        private SerializedProperty objectState;
         private SerializedProperty animationParameters;
         private SerializedProperty subObjects;
 
@@ -65,7 +64,6 @@ namespace UnityEditor.UI.Windows {
 
             this.createPool = this.serializedObject.FindProperty("createPool");
             
-            this.objectState = this.serializedObject.FindProperty("objectState");
             this.animationParameters = this.serializedObject.FindProperty("animationParameters");
             this.renderBehaviourOnHidden = this.serializedObject.FindProperty("renderBehaviourOnHidden");
 
@@ -129,7 +127,7 @@ namespace UnityEditor.UI.Windows {
             
             GUILayoutExt.DrawComponentHeader(this.serializedObject, "L", () => {
                 
-                GUILayoutExt.DrawComponentHeaderItem("State", GUILayoutExt.GetPropertyToString(this.objectState));
+                GUILayoutExt.DrawComponentHeaderItem("State", ((WindowObject)this.target).GetState().ToString());
 
             }, new Color(1f, 0.6f, 0f, 0.4f));
             

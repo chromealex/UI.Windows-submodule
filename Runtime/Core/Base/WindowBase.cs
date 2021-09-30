@@ -19,18 +19,20 @@
         public int identifier;
         public int windowSourceId;
         
-        public FocusState focusState;
-
         [HideInInspector] public Camera workCamera;
 
         private float currentDepth;
         private float currentZDepth;
         
+        private FocusState focusState;
+
         public virtual void OnParametersPass() {
         }
         
         public virtual void OnEmptyPass() {}
 
+        public FocusState GetFocusState() => this.focusState;
+        
         protected internal override void SendEvent<T>(T data) {
             
             base.SendEvent(data);

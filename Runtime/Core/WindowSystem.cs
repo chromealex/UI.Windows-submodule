@@ -318,7 +318,7 @@ namespace UnityEngine.UI.Windows {
             
             foreach (var item in WindowSystem.instance.currentWindows) {
 
-                if (item.instance is T win && win.focusState == FocusState.Focused) return win;
+                if (item.instance is T win && win.GetFocusState() == FocusState.Focused) return win;
 
             }
 
@@ -891,7 +891,7 @@ namespace UnityEngine.UI.Windows {
 
         public static void ShowInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
 
-            if (instance.objectState == ObjectState.Showing || instance.objectState == ObjectState.Shown) {
+            if (instance.GetState() == ObjectState.Showing || instance.GetState() == ObjectState.Shown) {
                 
                 parameters.RaiseCallback();
                 return;
@@ -987,7 +987,7 @@ namespace UnityEngine.UI.Windows {
 
         internal static void SetShown(WindowObject instance, TransitionParameters parameters) {
 
-            if (instance.objectState != ObjectState.Showing) {
+            if (instance.GetState() != ObjectState.Showing) {
                 
                 parameters.RaiseCallback();
                 return;
@@ -1015,7 +1015,7 @@ namespace UnityEngine.UI.Windows {
 
         internal static void SetHidden(WindowObject instance, TransitionParameters parameters) {
 
-            if (instance.objectState != ObjectState.Hiding) {
+            if (instance.GetState() != ObjectState.Hiding) {
                 
                 parameters.RaiseCallback();
                 return;
@@ -1052,14 +1052,14 @@ namespace UnityEngine.UI.Windows {
         
         public static void HideInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
 
-            if (instance.objectState <= ObjectState.Initializing) {
+            if (instance.GetState() <= ObjectState.Initializing) {
                 
                 Debug.LogWarning("Object is out of state: " + instance, instance);
                 return;
                 
             }
 
-            if (instance.objectState == ObjectState.Hiding || instance.objectState == ObjectState.Hidden) {
+            if (instance.GetState() == ObjectState.Hiding || instance.GetState() == ObjectState.Hidden) {
                 
                 parameters.RaiseCallback();
                 return;

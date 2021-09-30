@@ -14,8 +14,6 @@ namespace UnityEditor.UI.Windows {
     public class WindowSystemWindowBaseEditor : Editor {
 
         private SerializedProperty createPool;
-        private SerializedProperty objectState;
-        private SerializedProperty focusState;
 
         private SerializedProperty preferences;
         private SerializedProperty modules;
@@ -64,9 +62,6 @@ namespace UnityEditor.UI.Windows {
             }
 
             this.createPool = this.serializedObject.FindProperty("createPool");
-            
-            this.objectState = this.serializedObject.FindProperty("objectState");
-            this.focusState = this.serializedObject.FindProperty("focusState");
             
             this.preferences = this.serializedObject.FindProperty("preferences");
             this.modules = this.serializedObject.FindProperty("modules");
@@ -234,8 +229,8 @@ namespace UnityEditor.UI.Windows {
             
             GUILayoutExt.DrawComponentHeader(this.serializedObject, "S", () => {
                 
-                GUILayoutExt.DrawComponentHeaderItem("State", GUILayoutExt.GetPropertyToString(this.objectState));
-                GUILayoutExt.DrawComponentHeaderItem("Focus", GUILayoutExt.GetPropertyToString(this.focusState));
+                GUILayoutExt.DrawComponentHeaderItem("State", ((WindowObject)this.target).GetState().ToString());
+                GUILayoutExt.DrawComponentHeaderItem("Focus", ((WindowBase)this.target).GetFocusState().ToString());
                 
                 GUILayout.FlexibleSpace();
                 

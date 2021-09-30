@@ -137,7 +137,7 @@ namespace UnityEngine.UI.Windows {
         public Canvas objectCanvas;
         public int canvasSortingOrderDelta;
         public RenderItem[] canvasRenderers;
-        public bool isActiveSelf;
+        
         //public CanvasGroup canvasGroupRender;
 
         [Tooltip("Should this object return in pool when window is hidden? Object will returns into pool only if parent object is not mark as `createPool`.")]
@@ -146,7 +146,6 @@ namespace UnityEngine.UI.Windows {
         [AnimationParameters]
         public AnimationParametersContainer animationParameters;
         
-        public ObjectState objectState;
         [Tooltip("Render behaviour when hidden state set or if hiddenByDefault is true.")]
         public RenderBehaviourSettings renderBehaviourOnHidden = RenderBehaviourSettings.UseSettings;
         
@@ -170,6 +169,9 @@ namespace UnityEngine.UI.Windows {
         internal bool internalManualHide;
         private bool readyToHide = true;
 
+        private bool isActiveSelf;
+        private ObjectState objectState;
+        
         public bool IsReadyToHide() {
 
             return this.readyToHide;

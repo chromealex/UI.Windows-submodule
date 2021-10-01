@@ -1107,20 +1107,6 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public void ShowHide(bool state, TransitionParameters parameters = default) {
-
-            if (state == true) {
-                
-                this.Show(parameters);
-                
-            } else {
-                
-                this.Hide(parameters);
-                
-            }
-            
-        }
-
         private bool IsInternalManualTouch(TransitionParameters parameters) {
 
             if (parameters.data.replaceIgnoreTouch == true) {
@@ -1163,7 +1149,49 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public void Show(TransitionParameters parameters = default) {
+        internal void HideInternal(TransitionParameters parameters = default) {
+            
+            if (this.IsInternalManualTouch(parameters) == true) {
+
+                parameters.RaiseCallback();
+                return;
+
+            }
+            
+            var cObj = this;
+            var cParams = parameters;
+            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetHidden, cObj, cParams);
+            WindowSystem.HideInstance(this, cbParameters, internalCall: true);
+
+        }
+
+        public void ShowHide(bool state) {
+
+            this.ShowHide(state, default);
+            
+        }
+
+        public void ShowHide(bool state, TransitionParameters parameters) {
+
+            if (state == true) {
+                
+                this.Show(parameters);
+                
+            } else {
+                
+                this.Hide(parameters);
+                
+            }
+            
+        }
+
+        public void Show() {
+            
+            this.Show(default);
+            
+        }
+
+        public virtual void Show(TransitionParameters parameters) {
 
             if (this.objectState <= ObjectState.Initializing) {
 
@@ -1196,23 +1224,13 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        internal void HideInternal(TransitionParameters parameters = default) {
+        public void Hide() {
             
-            if (this.IsInternalManualTouch(parameters) == true) {
-
-                parameters.RaiseCallback();
-                return;
-
-            }
+            this.Hide(default);
             
-            var cObj = this;
-            var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetHidden, cObj, cParams);
-            WindowSystem.HideInstance(this, cbParameters, internalCall: true);
-
         }
 
-        public virtual void Hide(TransitionParameters parameters = default) {
+        public virtual void Hide(TransitionParameters parameters) {
 
             if (this.objectState <= ObjectState.Initializing) {
                 

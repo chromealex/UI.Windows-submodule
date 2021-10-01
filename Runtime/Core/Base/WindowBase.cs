@@ -62,7 +62,7 @@
 
         }
 
-        public override void Hide(TransitionParameters parameters = default) {
+        public override void Hide(TransitionParameters parameters) {
 
             parameters = parameters.ReplaceIgnoreTouch(true);
             var cbParameters = parameters.ReplaceCallback(() => {

@@ -325,7 +325,10 @@ namespace UnityEngine.UI.Windows {
         void IOnPoolAdd.OnPoolAdd() {
             
             this.OnPoolAdd();
-
+            
+            this.internalManualHide = false;
+            this.internalManualShow = false;
+               
             for (int i = 0; i < this.subObjects.Count; ++i) {
                 
                 if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
@@ -1106,7 +1109,7 @@ namespace UnityEngine.UI.Windows {
             this.SetState(ObjectState.NotInitialized);
 
         }
-
+        
         private bool IsInternalManualTouch(TransitionParameters parameters) {
 
             if (parameters.data.replaceIgnoreTouch == true) {

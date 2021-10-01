@@ -190,7 +190,7 @@ namespace UnityEngine.UI.Windows {
 
             var instance = this;
             instance.data.delay = value;
-            instance.data.replaceDelay = true;
+            instance.data.replaceDelay = value > 0f;
             return instance;
 
         }
@@ -958,11 +958,11 @@ namespace UnityEngine.UI.Windows {
 
                         if (p.internalCall == true) {
 
-                            obj.ShowInternal(p.parameters.ReplaceCallback(cb));
+                            obj.ShowInternal(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
 
                         } else {
 
-                            obj.Show(p.parameters.ReplaceCallback(cb));
+                            obj.Show(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
 
                         }
 
@@ -1135,11 +1135,11 @@ namespace UnityEngine.UI.Windows {
 
                                 if (p.internalCall == true) {
                                     
-                                    obj.HideInternal(p.parameters.ReplaceCallback(cb));
+                                    obj.HideInternal(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
 
                                 } else {
 
-                                    obj.Hide(p.parameters.ReplaceCallback(cb));
+                                    obj.Hide(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
 
                                 }
 

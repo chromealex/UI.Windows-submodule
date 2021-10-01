@@ -72,7 +72,20 @@
 
             });
 
-            base.Hide(cbParameters);
+            if (cbParameters.data.replaceDelay == true) {
+
+                var tweener = WindowSystem.GetTweener();
+                tweener.Add(this, cbParameters.data.delay, 0f, 0f).Tag(this).OnComplete((obj) => {
+                    
+                    base.Hide(cbParameters.ReplaceDelay(0f));
+
+                });
+
+            } else {
+
+                base.Hide(cbParameters);
+
+            }
 
         }
 

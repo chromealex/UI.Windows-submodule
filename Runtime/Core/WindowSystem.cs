@@ -767,6 +767,22 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public static int GetNextCanvasDepth(UIWSLayer layer) {
+
+            var settings = WindowSystem.GetSettings();
+            var layerInfo = settings.GetLayerInfo(layer.value);
+
+            if (WindowSystem.instance.topWindowsByLayer.TryGetValue(layer.value, out var instance) == true) {
+
+                var step = settings.windowsPerLayer;
+                return instance.GetCanvasDepth() + step;
+
+            }
+
+            return layer.value * settings.windowsPerLayer;
+
+        }
+
         public static float GetNextZDepth(UIWSLayer layer) {
 
             var settings = WindowSystem.GetSettings();

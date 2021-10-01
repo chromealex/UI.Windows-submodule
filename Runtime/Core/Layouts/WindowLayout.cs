@@ -107,19 +107,42 @@ namespace UnityEngine.UI.Windows {
             switch (this.window.preferences.renderMode) {
 
                 case UIWSRenderMode.UseSettings:
-                    this.canvas.renderMode = WindowSystem.GetSettings().canvas.renderMode;
+                    this.ApplyRenderMode(WindowSystem.GetSettings().canvas.renderMode);
                     break;
 
                 case UIWSRenderMode.WorldSpace:
-                    this.canvas.renderMode = RenderMode.WorldSpace;
+                    this.ApplyRenderMode(RenderMode.WorldSpace);
                     break;
 
                 case UIWSRenderMode.ScreenSpaceCamera:
-                    this.canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    this.ApplyRenderMode(RenderMode.ScreenSpaceCamera);
                     break;
 
                 case UIWSRenderMode.ScreenSpaceOverlay:
+                    this.ApplyRenderMode(RenderMode.ScreenSpaceOverlay);
+                    break;
+
+            }
+
+        }
+
+        internal void ApplyRenderMode(RenderMode mode) {
+
+            switch (mode) {
+
+                case RenderMode.WorldSpace:
+                    this.canvas.renderMode = RenderMode.WorldSpace;
+                    this.window.workCamera.enabled = true;
+                    break;
+
+                case RenderMode.ScreenSpaceCamera:
+                    this.canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    this.window.workCamera.enabled = true;
+                    break;
+
+                case RenderMode.ScreenSpaceOverlay:
                     this.canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                    this.window.workCamera.enabled = false;
                     break;
 
             }

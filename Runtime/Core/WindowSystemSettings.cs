@@ -11,7 +11,7 @@
             public float maxDepth;
             public float minZDepth;
             public float maxZDepth;
-
+            
         }
 
         public int windowsPerLayer = 1000;

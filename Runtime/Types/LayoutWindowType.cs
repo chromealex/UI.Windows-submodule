@@ -230,7 +230,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             }
 
             windowLayoutInstance.Setup(windowInstance);
-            windowLayoutInstance.SetCanvasOrder(0);
+            windowLayoutInstance.SetCanvasOrder(windowInstance.GetCanvasDepth());
             root.RegisterSubObject(windowLayoutInstance);
             ((ILayoutInstance)root).windowLayoutInstance = windowLayoutInstance;
             this.ApplyLayoutPreferences(this.layoutPreferences);

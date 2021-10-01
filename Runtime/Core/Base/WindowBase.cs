@@ -23,6 +23,7 @@
 
         private float currentDepth;
         private float currentZDepth;
+        private int currentCanvasDepth;
         
         private FocusState focusState;
 
@@ -164,6 +165,12 @@
 
         }
 
+        public int GetCanvasDepth() {
+
+            return this.currentCanvasDepth;
+
+        }
+
         internal void ApplyCamera() {
 
             var settings = WindowSystem.GetSettings();
@@ -229,17 +236,19 @@
         internal void ApplyDepth() {
 
             var depth = WindowSystem.GetNextDepth(this.preferences.layer);
+            var canvasDepth = WindowSystem.GetNextCanvasDepth(this.preferences.layer);
             var zDepth = WindowSystem.GetNextZDepth(this.preferences.layer);
 
             this.currentDepth = depth;
             this.currentZDepth = zDepth;
+            this.currentCanvasDepth = canvasDepth;
 
             var tr = this.transform;
             this.workCamera.depth = depth;
             var pos = tr.position;
             pos.z = zDepth;
             tr.position = pos;
-
+            
         }
 
         #if UNITY_EDITOR

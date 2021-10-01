@@ -7,6 +7,12 @@ namespace UnityEngine.UI.Windows {
         public string sortingLayerName;
         public ParticleSystemRenderer particleSystemRenderer;
 
+        public void OnValidate() {
+            
+            if (this.particleSystemRenderer == null) this.particleSystemRenderer = this.GetComponent<ParticleSystemRenderer>();
+            
+        }
+        
         public void OnEnable() {
 
             var window = this.windowObject.GetWindow();
@@ -22,7 +28,7 @@ namespace UnityEngine.UI.Windows {
         private void ApplyOrder() {
 
             this.particleSystemRenderer.sortingOrder = this.windowObject.GetWindow().GetCanvasOrder() + this.sortingOrder;
-            this.particleSystemRenderer.sortingLayerName = this.sortingLayerName;
+            if (string.IsNullOrEmpty(this.sortingLayerName) == false) this.particleSystemRenderer.sortingLayerName = this.sortingLayerName;
 
         }
 

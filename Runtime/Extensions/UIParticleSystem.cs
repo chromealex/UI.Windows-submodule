@@ -15,9 +15,8 @@ namespace UnityEngine.UI.Windows {
         
         public void OnEnable() {
 
-            var window = this.windowObject.GetWindow();
-            WindowSystem.GetEvents().RegisterOnce(window, WindowEvent.OnShowBegin, this.ApplyOrder);
-            if (window.GetState() >= ObjectState.Showing) {
+            WindowSystem.GetEvents().RegisterOnce(this.windowObject, WindowEvent.OnShowBegin, this.ApplyOrder);
+            if (this.windowObject.GetState() >= ObjectState.Showing) {
                 
                 this.ApplyOrder();
                 

@@ -848,15 +848,22 @@ namespace UnityEngine.UI.Windows {
                     this.logsCounter[type] = count + 1;
 
                 } else {
-                    
+
                     this.logsCounter.Add(type, 1);
-                    
+
                 }
 
             }
 
-            this.AddLine(text, type, canCopy: true);
-            if (type == LogType.Exception && string.IsNullOrEmpty(trace) == false) this.AddLine(trace, type, canCopy: true);
+            if (type == LogType.Exception && string.IsNullOrEmpty(trace) == false) {
+                
+                this.AddLine(text + "\n" + trace, type, canCopy: true);
+                
+            } else {
+                
+                this.AddLine(text, type, canCopy: true);
+                
+            }
 
             this.isDirty = true;
 

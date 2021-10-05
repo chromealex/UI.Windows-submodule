@@ -788,12 +788,16 @@ namespace UnityEngine.UI.Windows.Utilities {
 
                         if (this.timer >= 1f) {
 
-	                        if (this.reflect == true) {
+                            if (this.reflect == true) {
 
-		                        this.direction = -1f;
-		                        return false;
-	                        
-	                        }
+                                this.direction = -1f;
+                                return false;
+
+                            } else {
+
+                                this.timer = 0f;
+
+                            }
 	                        
 	                        --this.loops;
 	                        if (this.loops == 0) {

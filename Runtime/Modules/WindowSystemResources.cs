@@ -331,6 +331,8 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
+        public bool showLogs;
+
         private readonly Dictionary<InternalTask, System.Action<object>> tasks = new Dictionary<InternalTask, System.Action<object>>();
         private readonly Dictionary<int, HashSet<System.Action>> handlerToTasks = new Dictionary<int, HashSet<System.Action>>();
         private readonly Dictionary<Resource, IntResource> loaded = new Dictionary<Resource, IntResource>(new ResourceComparer());
@@ -513,32 +515,30 @@ namespace UnityEngine.UI.Windows.Modules {
                         if (loadParameters.async == false) op.WaitForCompletion();
                         while (op.IsDone == false) yield return null;
 
-                        if (op.IsValid() == false) {
-                            
-                            //this.CompleteTask(handler, resource, default);
-                            
-                        } else {
+                        if (op.IsValid() == true &&
+                            op.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded) {
 
-                            if (op.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded) {
+                            var asset = op.Result;
+                            if (asset == null) {
 
-                                var asset = op.Result;
-                                if (asset == null) {
+                                this.CompleteTask(handler, resource, default);
 
-                                    this.CompleteTask(handler, resource, default);
+                            } else {
 
-                                } else {
-
-                                    var result = asset.GetComponent<T>();
-                                    if (result == null) {
-                                        Debug.LogError("Failed to load resource: " + resource.GetAddress() + ", gameObject loaded " + asset + ", but component was not found with type " + typeof(T));
-                                    }
-                                    this.AddObject(handler, result, resource, () => WindowSystemResources.ReleaseAddressableAsset(asset));
-                                    this.CompleteTask(handler, resource, result);
-
+                                var result = asset.GetComponent<T>();
+                                if (result == null) {
+                                    if (this.showLogs == true) Debug.LogError("[ UIWR ] Failed to load resource: " + resource.GetAddress() + ", gameObject loaded " + asset + ", but component was not found with type " + typeof(T));
                                 }
+                                this.AddObject(handler, result, resource, () => WindowSystemResources.ReleaseAddressableAsset(asset));
+                                this.CompleteTask(handler, resource, result);
 
                             }
 
+                        } else {
+                            
+                            if (this.showLogs == true) Debug.LogError("[ UIWR ] Resource failed while loading: " + resource + "\nValid: " + op.IsValid());
+                            this.CompleteTask(handler, resource, null);
+                            
                         }
 
                         this.LoadEnd(handler, cancellationTask);
@@ -561,28 +561,26 @@ namespace UnityEngine.UI.Windows.Modules {
                         if (loadParameters.async == false) op.WaitForCompletion();
                         while (op.IsDone == false) yield return null;
 
-                        if (op.IsValid() == false) {
-                            
-                            //this.CompleteTask(handler, resource, default);
-                            
-                        } else {
-                            
-                            if (op.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded) {
+                        if (op.IsValid() == true &&
+                            op.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded) {
 
-                                var asset = op.Result;
-                                if (asset == null) {
+                            var asset = op.Result;
+                            if (asset == null) {
 
-                                    this.CompleteTask(handler, resource, default);
+                                this.CompleteTask(handler, resource, default);
 
-                                } else {
+                            } else {
 
-                                    this.AddObject(handler, asset, resource, () => WindowSystemResources.ReleaseAddressableAsset(asset));
-                                    this.CompleteTask(handler, resource, asset);
-
-                                }
+                                this.AddObject(handler, asset, resource, () => WindowSystemResources.ReleaseAddressableAsset(asset));
+                                this.CompleteTask(handler, resource, asset);
 
                             }
 
+                        } else {
+                            
+                            if (this.showLogs == true) Debug.LogError("[ UIWR ] Resource failed while loading: " + resource + "\nValid: " + op.IsValid());
+                            this.CompleteTask(handler, resource, null);
+                            
                         }
                         
                         this.LoadEnd(handler, cancellationTask);
@@ -745,7 +743,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                         if (this.loaded.Remove(intResource.resource) == false) {
                             
-                            Debug.LogError($"[ UIWR ] Remove resource failed while refCount = 0 and resource is {intResource.resource}");
+                            if (this.showLogs == true) Debug.LogError($"[ UIWR ] Remove resource failed while refCount = 0 and resource is {intResource.resource}");
                             
                         }
                         this.loadedObjCache.Remove(obj);

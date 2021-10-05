@@ -40,6 +40,7 @@ namespace UnityEngine.UI.Windows {
 
         public ConsoleScreen screen;
 
+        [Ignore]
         public virtual void OnStart() { }
 
         [Help("Prints available methods for this module")]
@@ -49,6 +50,11 @@ namespace UnityEngine.UI.Windows {
             console.PrintHelp(this);
 
         }
+
+    }
+
+    [System.AttributeUsageAttribute(System.AttributeTargets.Method)]
+    public class IgnoreAttribute : System.Attribute {
 
     }
 
@@ -437,6 +443,9 @@ namespace UnityEngine.UI.Windows {
 
             var name = methodInfo.Name;
             if (name == "GetHashCode" || name == "ToString" || name == "Equals" || name == "GetType") return false;
+            
+            var ignoreAttrs = methodInfo.GetCustomAttributes(typeof(IgnoreAttribute), false);
+            if (ignoreAttrs.Length > 0) return false;
 
             return true;
 

@@ -512,7 +512,7 @@ namespace UnityEngine.UI.Windows {
                         accumulatedSize = padding.top;
                         break;
                 }
-                if (this.prevCount > 0) {
+                if (this.prevCount > 0 && this.prevCount - 1 < this.items.Length) {
                     
                     accumulatedSize = this.items[this.prevCount - 1].accumulatedSize + this.items[this.prevCount - 1].size;
                     

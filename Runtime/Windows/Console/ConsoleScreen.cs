@@ -475,7 +475,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         private readonly List<WindowSystemConsole.FastLink> fastLinkCache = new List<WindowSystemConsole.FastLink>();
         private int currentDirectoryId = -1;
-        private int prevDirectoryId = -1;
         private readonly List<ScrollbarItem> scrollbarItems = new List<ScrollbarItem>();
         public void LateUpdate() {
 
@@ -512,7 +511,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             this.inputField.Get<ButtonComponent>().SetInteractable(this.inputField.GetText().Length > 0);
 
             var console = WindowSystem.GetConsole();
-            console.GetFastLinks(this.currentDirectoryId, this.prevDirectoryId, this.fastLinkCache);
+            console.GetFastLinks(this.currentDirectoryId, this.fastLinkCache);
             this.fastLinks.Get<TextComponent>().SetText(console.GetDirectoryPath(this.currentDirectoryId));
             this.fastLinks.SetItems<FastLinkButtonComponent, ClosureFastLinksParameters>(this.fastLinkCache.Count, (button, parameters) => {
 
@@ -526,7 +525,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                     // Draw directory
                     button.SetCallback(new ClosureFastLinksParametersButtonCallback() { parameters = parameters, data = item, }, (innerData) => {
 
-                        innerData.parameters.screen.prevDirectoryId = innerData.parameters.screen.currentDirectoryId;
                         innerData.parameters.screen.currentDirectoryId = innerData.data.id;
 
                     });

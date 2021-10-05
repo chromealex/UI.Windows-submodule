@@ -132,6 +132,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        [System.Serializable]
         public class FastLink : FastLinkDirectory {
 
             public string cmd;
@@ -248,11 +249,24 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public void GetFastLinks(int parentId, int parentDirectoryId, List<WindowSystemConsole.FastLink> results) {
+        public void GetFastLinks(int dirId, List<WindowSystemConsole.FastLink> results) {
 
             results.Clear();
-            if (parentId >= 0) {
-                
+            if (dirId >= 0) {
+
+                int parentDirectoryId = -1;
+                for (int i = 0; i < this.fastLinkItems.Count; ++i) {
+                    
+                    var item = this.fastLinkItems[i];
+                    if (item.id == dirId) {
+
+                        parentDirectoryId = item.parentId;
+                        break;
+
+                    }
+                    
+                }
+
                 // Add [DIR UP] link
                 results.Add(new WindowSystemConsole.FastLink() {
                     id = parentDirectoryId,
@@ -265,7 +279,7 @@ namespace UnityEngine.UI.Windows {
             for (int i = 0; i < this.fastLinkItems.Count; ++i) {
                 
                 var item = this.fastLinkItems[i];
-                if (item.parentId == parentId) {
+                if (item.parentId == dirId) {
                     
                     results.Add(item);
                     

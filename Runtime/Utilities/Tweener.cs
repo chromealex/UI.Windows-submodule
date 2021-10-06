@@ -979,16 +979,25 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         public void Stop(object tag, bool ignoreEvents = false) {
 
+	        var list = PoolList<ITween>.Spawn();
             for (int i = this.tweens.Count - 1; i >= 0; --i) {
 
-                if (this.tweens[i].HasTag(tag) == true) {
+	            var tw = this.tweens[i];
+                if (tw.HasTag(tag) == true) {
 
-                    this.tweens[i].Stop(ignoreEvents);
-                    this.tweens.RemoveAt(i);
-
+	                this.tweens.RemoveAt(i);
+	                list.Add(tw);
+                    
                 }
 
             }
+
+            for (int i = 0; i < list.Count; ++i) {
+	            
+	            list[i].Stop(ignoreEvents);
+
+            }
+            PoolList<ITween>.Recycle(ref list);
 
         }
 

@@ -202,6 +202,22 @@ namespace UnityEditor.UI.Windows {
 
         }
 
+        public static void SetValue(Object value, ref Resource resource, System.Type type = null) {
+            
+            {
+                var assetPath = AssetDatabase.GetAssetPath(value);
+                resource.guid = AssetDatabase.AssetPathToGUID(assetPath);
+                resource.subObjectName = (value != null && AssetDatabase.IsSubAsset(value) == true ? AssetDatabase.LoadAllAssetsAtPath(assetPath).FirstOrDefault(x => x.name == value.name).name : string.Empty);
+                resource.directRef = null;
+                if (string.IsNullOrEmpty(assetPath) == true) {
+                    resource.directRef = value;
+                }
+            }
+                
+            WindowSystemResourcesResourcePropertyDrawer.Validate(ref resource, type);
+            
+        }
+
         public static void Validate(ref Resource resource, System.Type type = null) {
             
             if (type == null) type = typeof(Object);

@@ -43,6 +43,16 @@ namespace UnityEngine.UI.Windows.Modules {
         }
 
         public WindowModuleInfo[] modules;
+
+        public void Unload() {
+            
+            for (int i = 0; i < this.modules.Length; ++i) {
+
+                this.modules[i].moduleInstance = null;
+
+            }
+            
+        }
         
         public void LoadAsync(InitialParameters initialParameters, WindowBase window, System.Action onComplete) {
 

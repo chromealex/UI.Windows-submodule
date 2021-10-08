@@ -33,7 +33,15 @@
         public virtual void OnEmptyPass() {}
 
         public FocusState GetFocusState() => this.focusState;
-        
+
+        internal override void OnDeInitInternal() {
+
+            this.modules.Unload();
+            
+            base.OnDeInitInternal();
+            
+        }
+
         public WindowSystem.WindowItem GetBreadcrumbPrevious() {
 
             return this.breadcrumb.GetPreviousWindow(this);

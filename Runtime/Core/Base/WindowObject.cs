@@ -552,6 +552,8 @@ namespace UnityEngine.UI.Windows {
 
                 if (this.rootObject != null) this.rootObject.RemoveSubObject(this);
                 
+                this.window = null;
+                this.rootObject = null;
                 WindowSystem.GetPools().Despawn(this, (obj) => {
                     
                     obj.DoDeInit();

@@ -37,6 +37,17 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         internal WindowLayout windowLayoutInstance;
         private int localTag;
 
+        public void Unload() {
+
+            this.windowLayoutInstance = null;
+            for (int i = 0; i < this.components.Length; ++i) {
+
+                this.components[i].componentInstance = null;
+
+            }
+
+        }
+        
         public T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowComponent {
 
             return this.windowLayoutInstance.FindComponent<T>(filter);
@@ -388,6 +399,16 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         private int activeIndex;
         private bool forcedIndex;
 
+        public void Unload() {
+            
+            for (int i = this.items.Length - 1; i >= 0; --i) {
+                
+                this.items[i].Unload();
+                
+            }
+            
+        }
+
         public void SetActive(int index) {
 
             this.activeIndex = index;
@@ -447,10 +468,22 @@ namespace UnityEngine.UI.Windows.WindowTypes {
     public abstract class LayoutWindowType : WindowBase, ILayoutInstance {
 
         public Layouts layouts = new Layouts() {
-            items = new LayoutItem[1]
+            items = new LayoutItem[1],
         };
 
         private Dictionary<int, int> requestedIndexes = new Dictionary<int, int>();
+
+        internal override void OnDeInitInternal() {
+            
+            var currentItem = this.layouts.GetActive();
+            currentItem.Unload(this);
+            
+            this.layouts.Unload();
+            this.requestedIndexes.Clear();
+            
+            base.OnDeInitInternal();
+            
+        }
 
         WindowLayout ILayoutInstance.windowLayoutInstance {
             get {
@@ -544,15 +577,6 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             }
             
             return result;
-
-        }
-
-        public override void OnDeInit() {
-
-            base.OnDeInit();
-
-            var currentItem = this.layouts.GetActive();
-            currentItem.Unload(this);
 
         }
 

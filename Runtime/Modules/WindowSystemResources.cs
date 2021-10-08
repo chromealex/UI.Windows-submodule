@@ -68,8 +68,8 @@ namespace UnityEngine.UI.Windows {
 
         public void Unload(object handler) {
 
-            if (this.loaded == null) return;
-            WindowSystem.GetResources().Delete(handler, ref this.loaded);
+            if (this.loaded != null) WindowSystem.GetResources().Delete(handler, ref this.loaded);
+            this.loaded = null;
 
         }
         

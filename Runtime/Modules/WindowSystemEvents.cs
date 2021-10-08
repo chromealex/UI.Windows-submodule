@@ -6,9 +6,17 @@ namespace UnityEngine.UI.Windows.Modules {
 
     public class WindowSystemEvents : MonoBehaviour {
 
-        private Dictionary<long, System.Action> cache = new Dictionary<long, System.Action>();
-        private Dictionary<long, System.Action> cacheOnce = new Dictionary<long, System.Action>();
-        private int eventsCount;
+        public struct Info {
+
+            public string name;
+            public WindowObject instance;
+            
+        }
+
+        internal Dictionary<long, System.Action> cache = new Dictionary<long, System.Action>();
+        internal Dictionary<long, System.Action> cacheOnce = new Dictionary<long, System.Action>();
+        internal Dictionary<long, Info> objects = new Dictionary<long, Info>();
+        internal int eventsCount;
 
         public void Initialize() {
 
@@ -48,7 +56,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public void Clear(WindowObject instance) {
 
-            for (int i = 0; i < this.eventsCount; ++i) {
+            for (int i = 0; i <= this.eventsCount; ++i) {
 
                 var key = UIWSMath.GetKey(instance.GetHashCode(), i);
                 {
@@ -64,6 +72,9 @@ namespace UnityEngine.UI.Windows.Modules {
                         this.cacheOnce[key] = null;
 
                     }
+                }
+                {
+                    this.objects.Remove(key);
                 }
 
             }
@@ -86,6 +97,8 @@ namespace UnityEngine.UI.Windows.Modules {
 
             }
 
+            if (this.objects.ContainsKey(key) == false) this.objects.Add(key, new Info() { instance = instance, name = instance.name });
+
         }
 
         public void Register(WindowObject instance, WindowEvent windowEvent, System.Action callback) {
@@ -103,6 +116,8 @@ namespace UnityEngine.UI.Windows.Modules {
                 this.cache.Add(key, callback);
 
             }
+            
+            if (this.objects.ContainsKey(key) == false) this.objects.Add(key, new Info() { instance = instance, name = instance.name });
 
         }
 

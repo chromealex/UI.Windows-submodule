@@ -44,29 +44,6 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public WindowModuleInfo[] modules;
         
-        public T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowComponent {
-
-            for (int i = 0; i < this.modules.Length; ++i) {
-
-                var comp = this.modules[i].moduleInstance.FindComponent(filter);
-                if (comp != null) return comp;
-
-            }
-
-            return null;
-
-        }
-        
-        internal void SendEvent<T>(T data) {
-            
-            for (int i = 0; i < this.modules.Length; ++i) {
-
-                this.modules[i].moduleInstance.SendEvent(data);
-
-            }
-            
-        }
-        
         public void LoadAsync(InitialParameters initialParameters, WindowBase window, System.Action onComplete) {
 
             Coroutines.Run(this.InitModules(initialParameters, window, onComplete));
@@ -116,6 +93,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 ++this.loadingCount;
                 Coroutines.Run(resources.LoadAsync<WindowModule, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, window, data, moduleInfo.module, (asset, closure) => {
 
+                    if (asset.createPool == true) WindowSystem.GetPools().CreatePool(asset);
                     var instance = WindowSystem.GetPools().Spawn(asset, closure.window.transform);
                     instance.Setup(closure.window);
                     if (closure.parameters != null) closure.parameters.Apply(instance);

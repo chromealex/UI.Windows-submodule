@@ -15,11 +15,14 @@ namespace UnityEngine.UI.Windows {
         
         public void OnEnable() {
 
-            WindowSystem.GetEvents().RegisterOnce(this.windowObject, WindowEvent.OnShowBegin, this.ApplyOrder);
             if (this.windowObject.GetState() >= ObjectState.Showing) {
                 
                 this.ApplyOrder();
                 
+            } else {
+            
+                WindowSystem.GetEvents().RegisterOnce(this.windowObject, WindowEvent.OnShowBegin, this.ApplyOrder);
+
             }
             
         }

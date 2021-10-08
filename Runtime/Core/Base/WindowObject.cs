@@ -552,13 +552,11 @@ namespace UnityEngine.UI.Windows {
 
                 if (this.rootObject != null) this.rootObject.RemoveSubObject(this);
                 
-                if (this.createPool == false) {
-
-                    this.DoDeInit();
-
-                }
-
-                WindowSystem.GetPools().Despawn(this);
+                WindowSystem.GetPools().Despawn(this, (obj) => {
+                    
+                    obj.DoDeInit();
+                    
+                });
 
             }
 

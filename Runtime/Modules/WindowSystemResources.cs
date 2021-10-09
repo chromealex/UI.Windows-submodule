@@ -68,7 +68,7 @@ namespace UnityEngine.UI.Windows {
 
         public void Unload(object handler) {
 
-            if (this.loaded != null) WindowSystem.GetResources().Delete(handler, ref this.loaded);
+            WindowSystem.GetResources().Delete(handler, ref this.loaded);
             this.loaded = null;
 
         }
@@ -614,7 +614,10 @@ namespace UnityEngine.UI.Windows.Modules {
 
         private void LoadEnd(object handler, System.Action task) {
 
-            this.handlerToTasks[handler.GetHashCode()].Remove(task);
+            var key = handler.GetHashCode();
+            var list = this.handlerToTasks[key];
+            list.Remove(task);
+            if (list.Count == 0) this.handlerToTasks.Remove(key);
 
         }
 
@@ -681,7 +684,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public void Delete<T>(object handler, ref T obj) where T : class {
 
-            if (obj == null) return;
+            if (Object.ReferenceEquals(obj, null) == true) return;
             if (handler == null) handler = this;
 
             //Debug.Log("Delete obj: " + handler + " :: " + obj);

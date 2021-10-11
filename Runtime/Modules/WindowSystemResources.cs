@@ -552,7 +552,7 @@ namespace UnityEngine.UI.Windows.Modules {
                             
                         } else {
                             
-                            op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(resource.address ?? resource.guid);
+                            op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(resource.GetAddress());
                             
                         }
                         

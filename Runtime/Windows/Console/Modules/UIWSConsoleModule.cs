@@ -8,6 +8,14 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
     [Alias("uiws")]
     public class UIWSConsoleModule : ConsoleModule {
 
+        [Help("Destroy UIWS with all submodules")]
+        public void Destroy() {
+
+            var instance = WindowSystem.instance;
+            GameObject.Destroy(instance.gameObject);
+
+        }
+
         [Help("Prints all currently opened windows")]
         public void List() {
 

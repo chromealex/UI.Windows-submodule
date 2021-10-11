@@ -560,6 +560,11 @@ namespace UnityEngine.UI.Windows {
                     
                 });
 
+            } else {
+                
+                this.window = null;
+                this.rootObject = null;
+                
             }
 
         }

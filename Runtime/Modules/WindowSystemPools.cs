@@ -55,9 +55,15 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
 
+        public static int GetKey(Object obj) {
+
+            return obj.GetHashCode();
+
+        }
+
         public void CreatePool<T>(T prefab) where T : Component {
 
-            var key = prefab.GetHashCode();
+            var key = WindowSystemPools.GetKey(prefab);
             if (this.registeredPrefabs.Contains(key) == false) {
 
                 this.registeredPrefabs.Add(key);
@@ -137,7 +143,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public void RemovePool<T>(T prefab) where T : Component {
 
-            var key = prefab.GetHashCode();
+            var key = WindowSystemPools.GetKey(prefab);
             if (this.registeredPrefabs.Contains(key) == true) {
 
                 this.Clear(prefab);
@@ -150,7 +156,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public void Clear<T>(T prefab) where T : Component {
 
-            var key = prefab.GetHashCode();
+            var key = WindowSystemPools.GetKey(prefab);
 
             var list = new List<Component>();
             foreach (var instance in this.instanceOnSceneToPrefab) {
@@ -180,7 +186,7 @@ namespace UnityEngine.UI.Windows.Modules {
         public T Spawn<T>(T prefab, Transform root, out bool fromPool) where T : Component {
 
             T result = null;
-            var key = prefab.GetHashCode();
+            var key = WindowSystemPools.GetKey(prefab);
             if (this.registeredPrefabs.Contains(key) == false) {
 
                 fromPool = false;

@@ -240,6 +240,12 @@ namespace UnityEngine.UI.Windows {
         public void Dispose() {
             
             Application.logMessageReceivedThreaded -= this.OnAddLogThreaded;
+            if (this.consoleWindowInstance != null) {
+                
+                this.consoleWindowInstance.Hide(TransitionParameters.Default.ReplaceImmediately(true));
+                this.consoleWindowInstance = null;
+
+            }
 
         }
 

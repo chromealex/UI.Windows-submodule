@@ -285,9 +285,9 @@ namespace UnityEngine.UI.Windows {
         private bool lockInteractables;
         private System.Action<UnityEngine.UI.Windows.Components.IInteractable> callbackOnAnyInteractable;
         
-        private static WindowSystem _instance;
+        internal static WindowSystem _instance;
 
-        private static WindowSystem instance {
+        internal static WindowSystem instance {
             get {
 
                 #if UNITY_EDITOR
@@ -379,7 +379,12 @@ namespace UnityEngine.UI.Windows {
         public void OnDestroy() {
             
             this.console?.Dispose();
-            
+            this.console = null;
+            WindowSystem._instance = null;
+
+            WindowSystem.onPointerUp = null;
+            WindowSystem.onPointerDown = null;
+
         }
 
         private Vector2 pointerScreenPosition;

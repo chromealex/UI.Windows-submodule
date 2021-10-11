@@ -604,16 +604,16 @@ namespace UnityEditor.UI.Windows {
 		    
 	    }
 
-	    public static void ProgressBar(float value, float max, bool drawLabel = false) {
+	    public static Rect ProgressBar(float value, float max, bool drawLabel = false, float height = 4f) {
 		    
-		    GUILayoutExt.ProgressBar(value, max, new Color(0f, 0f, 0f, 0.3f), new Color32(104, 148, 192, 255), drawLabel);
+		    return GUILayoutExt.ProgressBar(value, max, new Color(0f, 0f, 0f, 0.3f), new Color32(104, 148, 192, 255), drawLabel, height);
 		    
 	    }
 
-	    public static void ProgressBar(float value, float max, Color back, Color fill, bool drawLabel = false) {
+	    public static Rect ProgressBar(float value, float max, Color back, Color fill, bool drawLabel = false, float height = 4f) {
 
 		    var progress = value / max;
-		    var lineHeight = (drawLabel == true ? 8f : 4f);
+		    var lineHeight = (drawLabel == true ? height * 2f : height);
 		    Rect rect = EditorGUILayout.GetControlRect(false, lineHeight);
 		    rect.height = lineHeight;
 		    var fillRect = rect;
@@ -626,6 +626,8 @@ namespace UnityEditor.UI.Windows {
 			    EditorGUI.LabelField(rect, string.Format("{0}/{1}", value, max), EditorStyles.centeredGreyMiniLabel);
 			    
 		    }
+
+		    return rect;
 
 	    }
 

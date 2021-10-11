@@ -25,7 +25,7 @@ namespace UnityEditor.UI.Windows {
 
             GUILayoutExt.DrawComponentHeader(this.serializedObject, "EXT", () => {
                 
-                GUILayout.Label("WindowSystem Resources Internal module", GUILayout.Height(36f));
+                GUILayout.Label("WindowSystem Internal module.\nResources system.", GUILayout.Height(36f));
                 
             }, new Color(0.4f, 0.2f, 0.7f, 1f));
             
@@ -33,7 +33,7 @@ namespace UnityEditor.UI.Windows {
             var allObjects = target.GetAllObjects();
             var loadedBundles = AssetBundle.GetAllLoadedAssetBundles().ToList();
             var tasks = target.GetTasks();
-                                    
+            
             GUILayout.Space(5f);
 
             this.selectedTabIndex = GUILayoutExt.DrawTabs(

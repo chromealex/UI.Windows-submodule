@@ -56,11 +56,9 @@ MonoBehaviour:
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
-  isActiveSelf: 0
   createPool: 1
   animationParameters:
     items: []
-  objectState: 0
   renderBehaviourOnHidden: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
@@ -103,7 +101,6 @@ MonoBehaviour:
     history: []
   identifier: 0
   windowSourceId: 0
-  focusState: 0
   workCamera: {fileID: 2012446584845969934}
   layouts:
     items:
@@ -120,7 +117,7 @@ MonoBehaviour:
         localTag: 1
         component:
           type: 1
-          objectType: 0
+          objectType: 2
           address: 
           guid: 19f3e1d84486d41eb8a64f9ff768e4f1
           subObjectName: 
@@ -146,7 +143,7 @@ MonoBehaviour:
         localTag: 3
         component:
           type: 1
-          objectType: 0
+          objectType: 2
           address: 
           guid: b525f1dcb523b4a6290e5518b5cbb118
           subObjectName: 

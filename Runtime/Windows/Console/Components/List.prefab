@@ -225,11 +225,9 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 2884325997705751108}
     graphics: {fileID: 1626494841347365779}
     rectMask: {fileID: 0}
-  isActiveSelf: 0
   createPool: 0
   animationParameters:
     items: []
-  objectState: 0
   renderBehaviourOnHidden: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
@@ -548,11 +546,9 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 6829510560483908229}
     graphics: {fileID: 3783671350493353326}
     rectMask: {fileID: 0}
-  isActiveSelf: 0
   createPool: 1
   animationParameters:
     items: []
-  objectState: 0
   renderBehaviourOnHidden: 0
   allowRegisterInRoot: 0
   autoRegisterSubObjects: 1
@@ -750,11 +746,9 @@ MonoBehaviour:
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
-  isActiveSelf: 0
   createPool: 0
   animationParameters:
     items: []
-  objectState: 0
   renderBehaviourOnHidden: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
@@ -866,11 +860,9 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 9176201299077987064}
     graphics: {fileID: 1565843327551206096}
     rectMask: {fileID: 0}
-  isActiveSelf: 0
   createPool: 0
   animationParameters:
     items: []
-  objectState: 0
   renderBehaviourOnHidden: 0
   allowRegisterInRoot: 0
   autoRegisterSubObjects: 1
@@ -1074,11 +1066,9 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 3016808032470598225}
     graphics: {fileID: 4070916238433496631}
     rectMask: {fileID: 0}
-  isActiveSelf: 0
   createPool: 0
   animationParameters:
     items: []
-  objectState: 0
   renderBehaviourOnHidden: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
@@ -1294,11 +1284,9 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 8255237959279564958}
     graphics: {fileID: 1384774512373395475}
     rectMask: {fileID: 0}
-  isActiveSelf: 0
   createPool: 0
   animationParameters:
     items: []
-  objectState: 0
   renderBehaviourOnHidden: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1

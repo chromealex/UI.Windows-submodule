@@ -119,8 +119,16 @@ namespace UnityEngine.UI.Windows {
 
         public string GetAddress() {
 
-            if (string.IsNullOrEmpty(this.address) == false && string.IsNullOrEmpty(this.address.Trim()) == false) return this.address;
-            return this.guid;
+            var result = this.guid;
+            if (string.IsNullOrEmpty(this.address) == false && string.IsNullOrEmpty(this.address.Trim()) == false) result = this.address;
+
+            if (string.IsNullOrEmpty(this.subObjectName) == false) {
+
+                return $"{result}[{this.subObjectName}]";
+
+            }
+
+            return result;
 
         }
 
@@ -545,17 +553,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                     } else {
 
-                        UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle<T> op;
-                        if (string.IsNullOrEmpty(resource.subObjectName) == false) {
-                            
-                            op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>($"{resource.GetAddress()}[{resource.subObjectName}]");
-                            
-                        } else {
-                            
-                            op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(resource.GetAddress());
-                            
-                        }
-                        
+                        var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(resource.GetAddress());
                         System.Action cancellationTask = () => { if (op.IsValid() == true) UnityEngine.AddressableAssets.Addressables.Release(op); };
                         this.LoadBegin(handler, cancellationTask);
                         if (loadParameters.async == false) op.WaitForCompletion();

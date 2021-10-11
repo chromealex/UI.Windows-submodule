@@ -847,43 +847,43 @@ namespace UnityEngine.UI.Windows {
 
         public static WindowSystemBreadcrumbs GetBreadcrumbs() {
 
-            return WindowSystem.instance.breadcrumbs;
+            return WindowSystem.instance?.breadcrumbs;
 
         }
 
         public static WindowSystemAudio GetAudio() {
 
-            return WindowSystem.instance.audio;
+            return WindowSystem.instance?.audio;
 
         }
 
         public static WindowSystemPools GetPools() {
 
-            return WindowSystem.instance.pools;
+            return WindowSystem.instance?.pools;
 
         }
 
         public static WindowSystemEvents GetEvents() {
 
-            return WindowSystem.instance.events;
+            return WindowSystem.instance?.events;
 
         }
 
         public static WindowSystemSettings GetSettings() {
 
-            return WindowSystem.instance.settings;
+            return WindowSystem.instance?.settings;
 
         }
 
         public static WindowSystemResources GetResources() {
 
-            return WindowSystem.instance.resources;
+            return WindowSystem.instance?.resources;
 
         }
 
         public static Tweener GetTweener() {
 
-            return WindowSystem.instance.tweener;
+            return WindowSystem.instance?.tweener;
 
         }
 

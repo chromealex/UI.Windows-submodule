@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace UnityEngine.UI.Windows.Runtime.Windows {
 
+    [UnityEngine.Scripting.PreserveAttribute]
     [Help("UI.Windows Resources Console Module")]
     [Alias("uiwr")]
     public class UIWRConsoleModule : ConsoleModule {

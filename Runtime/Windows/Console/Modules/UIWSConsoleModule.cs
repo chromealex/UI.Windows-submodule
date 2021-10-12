@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace UnityEngine.UI.Windows.Runtime.Windows {
 
+    [UnityEngine.Scripting.PreserveAttribute]
     [Help("UI.Windows Console Module")]
     [Alias("uiws")]
     public class UIWSConsoleModule : ConsoleModule {

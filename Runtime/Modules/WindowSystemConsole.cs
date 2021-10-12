@@ -36,6 +36,7 @@ namespace UnityEngine.UI.Windows {
 
     }
 
+    [UnityEngine.Scripting.PreserveAttribute]
     public abstract class ConsoleModule : IConsoleModule {
 
         public ConsoleScreen screen;

@@ -9,6 +9,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
     [Alias("uiws")]
     public class UIWSConsoleModule : ConsoleModule {
 
+        [UnityEngine.Scripting.PreserveAttribute]
         [Help("Destroy UIWS with all submodules")]
         public void Destroy() {
 
@@ -17,6 +18,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        [UnityEngine.Scripting.PreserveAttribute]
         [Help("Prints all currently opened windows")]
         public void List() {
 
@@ -29,6 +31,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        [UnityEngine.Scripting.PreserveAttribute]
         [Help("Hides all windows")]
         public void HideAll() {
             
@@ -36,6 +39,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
         }
 
+        [UnityEngine.Scripting.PreserveAttribute]
         [Help("Show root window")]
         public void Root() {
             

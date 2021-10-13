@@ -42,8 +42,10 @@ namespace UnityEngine.UI.Windows {
         public ConsoleScreen screen;
 
         [Ignore]
+        [UnityEngine.Scripting.PreserveAttribute]
         public virtual void OnStart() { }
 
+        [UnityEngine.Scripting.PreserveAttribute]
         [Help("Prints available methods for this module")]
         public void Help() {
 

@@ -9,6 +9,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
     [Alias("uiwr")]
     public class UIWRConsoleModule : ConsoleModule {
 
+        [UnityEngine.Scripting.PreserveAttribute]
         [Help("Prints all currently used resources")]
         public void Stat() {
 
@@ -32,6 +33,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        [UnityEngine.Scripting.PreserveAttribute]
         [Help("Prints all assets in bundle")]
         public void Bundle(string bundleName) {
 
@@ -53,6 +55,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        [UnityEngine.Scripting.PreserveAttribute]
         [Help("Prints all static non-null references")]
         public void Static() {
 

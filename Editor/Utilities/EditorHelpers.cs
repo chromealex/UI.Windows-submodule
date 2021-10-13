@@ -231,7 +231,7 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        public static void FindType(object root, System.Type searchType, System.Func<FieldInfo, object, object> del, HashSet<object> visited = null, bool includeUnityObjects = false, System.Type[] ignoreTypes = null) {
+        public static void FindType(object root, System.Type searchType, System.Func<MemberInfo, object, object> del, HashSet<object> visited = null, bool includeUnityObjects = false, System.Type[] ignoreTypes = null, bool getProperties = false) {
             
             if (root == null) return;
             if (visited == null) visited = new HashSet<object>();
@@ -262,6 +262,51 @@ namespace UnityEditor.UI.Windows {
             }
 
             var fields = rootType.GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+            if (getProperties == true) {
+                
+                var props = rootType.GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                foreach (var field in props) {
+
+                    if (field.GetMethod == null || field.SetMethod == null) continue;
+                    if (field.CanRead == false || field.CanWrite == false) continue;
+
+                    if (field.PropertyType.IsPrimitive == true) continue;
+                    if (field.PropertyType.IsPointer == true) continue;
+                    if (typeof(Component).IsAssignableFrom(field.PropertyType) == true) continue;
+
+                    if (check.Invoke(field.PropertyType, searchType) == true) {
+
+                        var obj = field.GetValue(root);
+                        field.SetValue(root, del.Invoke(field, obj));
+
+                    } else if (field.PropertyType.IsArray == true) {
+
+                        var arr = (System.Array)field.GetValue(root);
+                        if (arr != null) {
+                            for (int i = 0; i < arr.Length; ++i) {
+                                var r = arr.GetValue(i);
+                                if (r != null) {
+                                    if (check.Invoke(r.GetType(), searchType) == true) {
+                                        arr.SetValue(del.Invoke(field, r), i);
+                                    } else {
+                                        if (includeUnityObjects == true || (r is Object) == false) EditorHelpers.FindType(r, searchType, del, visited);
+                                        arr.SetValue(r, i);
+                                    }
+                                }
+                            }
+                        }
+
+                    } else {
+
+                        var obj = field.GetValue(root);
+                        if (includeUnityObjects == true || (obj is Object) == false) EditorHelpers.FindType(obj, searchType, del, visited);
+                        field.SetValue(root, obj);
+
+                    }
+
+                }
+                
+            }
             foreach (var field in fields) {
 
                 if (field.FieldType.IsPrimitive == true) continue;

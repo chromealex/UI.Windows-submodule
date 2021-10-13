@@ -358,10 +358,11 @@ namespace UnityEditor.UI.Windows {
                                                         (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
                                                     var r = (Resource)rField.GetValue(res);
                                                     System.Type type = null;
-                                                    if (fieldInfo.FieldType.IsArray == true) {
-                                                        type = fieldInfo.FieldType.GetElementType().GetGenericArguments()[0];
+                                                    var _fieldInfo = (System.Reflection.FieldInfo)fieldInfo;
+                                                    if (_fieldInfo.FieldType.IsArray == true) {
+                                                        type = _fieldInfo.FieldType.GetElementType().GetGenericArguments()[0];
                                                     } else {
-                                                        type = fieldInfo.FieldType.GetGenericArguments()[0];
+                                                        type = _fieldInfo.FieldType.GetGenericArguments()[0];
                                                     }
 
                                                     WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, type);
@@ -416,11 +417,12 @@ namespace UnityEditor.UI.Windows {
                                                     var rField =
                                                         (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
                                                     var r = (Resource)rField.GetValue(res);
+                                                    var _fieldInfo = (System.Reflection.FieldInfo)fieldInfo;
                                                     System.Type type = null;
-                                                    if (fieldInfo.FieldType.IsArray == true) {
-                                                        type = fieldInfo.FieldType.GetElementType().GetGenericArguments()[0];
+                                                    if (_fieldInfo.FieldType.IsArray == true) {
+                                                        type = _fieldInfo.FieldType.GetElementType().GetGenericArguments()[0];
                                                     } else {
-                                                        type = fieldInfo.FieldType.GetGenericArguments()[0];
+                                                        type = _fieldInfo.FieldType.GetGenericArguments()[0];
                                                     }
 
                                                     WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, type);

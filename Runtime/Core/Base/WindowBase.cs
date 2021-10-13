@@ -217,6 +217,9 @@
                     this.workCamera.orthographicSize = settings.camera.orthographicSize;
                     this.workCamera.nearClipPlane = settings.camera.orthographicNearClippingPlane;
                     this.workCamera.farClipPlane = settings.camera.orthographicFarClippingPlane;
+                    if (settings.canvas.renderMode == RenderMode.ScreenSpaceOverlay) {
+                        this.workCamera.enabled = false;
+                    }
                     break;
 
                 case UIWSCameraMode.Perspective:
@@ -242,7 +245,12 @@
             
             base.TurnOnRender();
             
-            this.workCamera.enabled = true;
+            var settings = WindowSystem.GetSettings();
+            if (settings.canvas.renderMode == RenderMode.ScreenSpaceOverlay) {
+                this.workCamera.enabled = false;
+            } else {
+                this.workCamera.enabled = true;
+            }
             
         }
 

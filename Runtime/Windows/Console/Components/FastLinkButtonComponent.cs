@@ -14,8 +14,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         public void SetInfo(WindowSystemConsole.FastLink data) {
 
             if (data.style == FastLinkType.Directory) {
-
-                if (data.parentId >= 0) {
+                
+                if (data.parentId > data.id) {
                  
                     this.directoryUpIcon.Show();
                     this.directoryIcon.Hide();

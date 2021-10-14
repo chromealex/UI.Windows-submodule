@@ -186,7 +186,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             var cmd = command.Trim();
             var console = WindowSystem.GetConsole();
 
-            if (cmd == "modulesample") {
+            if (cmd.ToLower() == "modulesample") {
                 
                 this.AddLine(cmd, isCommand: true);
                 var itemHelp = new WindowSystemConsole.CommandItem() {
@@ -204,7 +204,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             }
             
-            if (cmd == "help" || (string.IsNullOrEmpty(cmd) == true && autoComplete == true)) {
+            if (cmd.ToLower() == "help" || (string.IsNullOrEmpty(cmd) == true && autoComplete == true)) {
 
                 this.AddLine(cmd, isCommand: true);
                 var itemHelp = new WindowSystemConsole.CommandItem() {

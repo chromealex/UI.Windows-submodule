@@ -20,6 +20,8 @@ namespace UnityEditor.UI.Windows {
         public SerializedProperty resources;
         public SerializedProperty pools;
         public SerializedProperty tweener;
+        
+        public SerializedProperty modules;
 
         public SerializedProperty settings;
         
@@ -82,6 +84,8 @@ namespace UnityEditor.UI.Windows {
                 this.pools = this.serializedObject.FindProperty("pools");
                 this.tweener = this.serializedObject.FindProperty("tweener");
             }
+            
+            this.modules = this.serializedObject.FindProperty("modules");
             
             EditorHelpers.SetFirstSibling(this.targets);
 
@@ -175,6 +179,9 @@ namespace UnityEditor.UI.Windows {
                     EditorGUILayout.PropertyField(this.pools);
                     EditorGUILayout.PropertyField(this.tweener);
                     EditorGUILayout.PropertyField(this.audio);
+                    
+                    GUILayoutExt.DrawHeader("Custom Modules");
+                    EditorGUILayout.PropertyField(this.modules);
                     
                 }),
                 new GUITab("Windows", () => {

@@ -271,6 +271,9 @@ namespace UnityEngine.UI.Windows {
         public WindowSystemConsole console;
         public Tweener tweener;
 
+        [SearchAssetsByTypePopupAttribute(typeof(WindowSystemModule), menuName: "Modules")]
+        public WindowSystemModule[] modules;
+
         private List<WindowItem> currentWindows = new List<WindowItem>();
         private Dictionary<int, int> windowsCountByLayer = new Dictionary<int, int>();
         private Dictionary<int, WindowBase> topWindowsByLayer = new Dictionary<int, WindowBase>();
@@ -372,12 +375,32 @@ namespace UnityEngine.UI.Windows {
 
             this.console = new WindowSystemConsole();
 
+            if (this.modules != null) {
+
+                for (int i = 0; i < this.modules.Length; ++i) {
+
+                    this.modules[i]?.OnStart();
+
+                }
+
+            }
+
             if (this.showRootOnStart == true) WindowSystem.ShowRoot();
 
         }
 
         public void OnDestroy() {
             
+            if (this.modules != null) {
+
+                for (int i = this.modules.Length - 1; i >= 0; --i) {
+
+                    this.modules[i]?.OnDestroy();
+
+                }
+
+            }
+
             this.console?.Dispose();
             this.console = null;
             WindowSystem._instance = null;
@@ -414,6 +437,23 @@ namespace UnityEngine.UI.Windows {
 
             WindowSystem.instance.callbackOnAnyInteractable = callback;
 
+        }
+
+        public static void AddWaitIntractable(System.Action onComplete, UnityEngine.UI.Windows.Components.IInteractable interactable) {
+            
+            WindowSystem.instance.waitInteractableOnComplete = onComplete;
+            
+            ref var arr = ref WindowSystem.instance.waitInteractables;
+            if (arr == null) {
+                arr = new UnityEngine.UI.Windows.Components.IInteractable[1] {
+                    interactable,
+                };
+            } else {
+                var list = arr.ToList();
+                list.Add(interactable);
+                arr = list.ToArray();
+            }
+            
         }
 
         public static void WaitIntractable(System.Action onComplete, UnityEngine.UI.Windows.Components.IInteractable interactable) {
@@ -1570,8 +1610,7 @@ namespace UnityEngine.UI.Windows {
             if (instance.preferences.addInHistory == true) {
                 
                 this.breadcrumbs.Add(item);
-                instance.breadcrumb = this.breadcrumbs.GetMain();
-
+                
             }
             this.currentWindows.Add(item);
 

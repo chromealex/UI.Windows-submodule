@@ -123,6 +123,25 @@ namespace UnityEditor.UI.Windows {
 
 	    }
 
+	    public struct GUIAlphaUsing : IDisposable {
+
+		    private Color oldColor;
+
+		    public GUIAlphaUsing(float alpha) {
+
+			    this.oldColor = GUI.color;
+			    GUI.color = new Color(this.oldColor.r, this.oldColor.g, this.oldColor.b, alpha);
+
+		    }
+		    
+		    public void Dispose() {
+
+			    GUI.color = this.oldColor;
+
+		    }
+
+	    }
+
 	    public struct GUIColorUsing : IDisposable {
 
 		    private Color oldColor;

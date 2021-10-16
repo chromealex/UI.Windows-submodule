@@ -1,0 +1,18 @@
+{
+    "name": "UI.Windows.Essentials.Tutorial.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:92d7732eb7c1c4c5fb0dcb317425502c",
+        "GUID:59d78972f98f2474d940be7dbc6313d5",
+        "GUID:2df4fd010e8cc4ac8ac47736afb07034"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

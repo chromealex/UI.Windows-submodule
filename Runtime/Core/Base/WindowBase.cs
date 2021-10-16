@@ -14,7 +14,6 @@
 
         public WindowPreferences preferences = WindowPreferences.Default;
         public WindowModules modules = new WindowModules();
-        public Breadcrumb breadcrumb;
 
         public int identifier;
         public int windowSourceId;
@@ -42,12 +41,6 @@
             
         }
 
-        public WindowSystem.WindowItem GetBreadcrumbPrevious() {
-
-            return this.breadcrumb.GetPreviousWindow(this);
-
-        }
-        
         public void SetAsPerspective() {
 
             this.preferences.cameraMode = UIWSCameraMode.Perspective;

@@ -13,6 +13,7 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
 
+        internal Dictionary<int, System.Action<WindowBase>> cacheWindows = new Dictionary<int, System.Action<WindowBase>>();
         internal Dictionary<long, System.Action> cache = new Dictionary<long, System.Action>();
         internal Dictionary<long, System.Action> cacheOnce = new Dictionary<long, System.Action>();
         internal Dictionary<long, Info> objects = new Dictionary<long, Info>();
@@ -46,6 +47,48 @@ namespace UnityEngine.UI.Windows.Modules {
                 }
             }
 
+            if (instance is WindowBase window) {
+                
+                if (this.cacheWindows.TryGetValue((int)windowEvent, out var actions) == true) {
+
+                    actions?.Invoke(window);
+
+                }
+                
+            }
+
+        }
+
+        public void Register(WindowEvent windowEvent, System.Action<WindowBase> callback) {
+
+            if (windowEvent == WindowEvent.None) return;
+
+            var key = (int)windowEvent;
+            if (this.cacheWindows.TryGetValue(key, out var actions) == true) {
+
+                actions += callback;
+                this.cacheWindows[key] = actions;
+
+            } else {
+
+                this.cacheWindows.Add(key, callback);
+
+            }
+            
+        }
+
+        public void UnRegister(WindowEvent windowEvent, System.Action<WindowBase> callback) {
+
+            if (windowEvent == WindowEvent.None) return;
+
+            var key = (int)windowEvent;
+            if (this.cacheWindows.TryGetValue(key, out var actions) == true) {
+
+                actions -= callback;
+                this.cacheWindows[key] = actions;
+
+            }
+            
         }
 
         public void Clear() {

@@ -383,7 +383,8 @@ namespace UnityEditor.UI.Windows {
         }
         
         public static bool DrawLayout(float aspect, WindowLayout windowLayout, Rect r, float offset = 20f, HashSet<WindowLayout> used = null, DeviceInfo.ScreenData screenData = default, DeviceInfo.OrientationData orientationData = default, UnityEngine.UI.Windows.WindowTypes.LayoutWindowType drawComponents = null) {
-
+            
+            if (used == null) used = new HashSet<WindowLayout>();
             if (used.Contains(windowLayout) == true) return false;
             used.Add(windowLayout);
 

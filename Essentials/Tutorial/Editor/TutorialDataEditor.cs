@@ -20,6 +20,9 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
             var forWindowType = so.FindProperty("forWindowType");
             root.Add(new UnityEditor.UIElements.PropertyField(forWindowType, "For Window"));
 
+            var startEvent = so.FindProperty("startEvent");
+            root.Add(new UnityEditor.UIElements.PropertyField(startEvent, "Start Event"));
+
             {
                 var conditions = so.FindProperty("conditions");
                 var items = conditions.FindPropertyRelative("items");
@@ -243,6 +246,9 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                 container.style.marginTop = 6f;
                 root.Add(container);
             }
+
+            var next = so.FindProperty("next");
+            root.Add(new UnityEditor.UIElements.PropertyField(next, "Next On Complete"));
 
             return root;
             

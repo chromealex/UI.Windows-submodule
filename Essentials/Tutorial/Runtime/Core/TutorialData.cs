@@ -98,8 +98,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
     
     [System.Serializable]
     public struct Conditions {
-    
-        //[UnityEngine.UI.Windows.Utilities.SearchComponentsByTypePopupAttribute(typeof(ICondition))]
+        
         [SerializeReference]
         public ICondition[] items;
         
@@ -107,8 +106,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
     [System.Serializable]
     public struct Actions {
-    
-        //[UnityEngine.UI.Windows.Utilities.SearchComponentsByTypePopupAttribute(typeof(IAction))]
+        
         [SerializeReference]
         public IAction[] items;
         
@@ -118,13 +116,13 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
     public class TutorialData : ScriptableObject {
 
         public WindowType forWindowType;
-
+        public TutorialWindowEvent startEvent;
+        
         public Conditions conditions;
         public Actions actions;
 
-        [Header("On Complete")]
         public TutorialData next;
-
+        
         public bool IsValid(WindowBase window, in Context context) {
 
             var type = window.GetType().FullName;

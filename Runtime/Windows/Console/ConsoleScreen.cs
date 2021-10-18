@@ -7,6 +7,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
     public class ConsoleScreen : LayoutWindowType, IDataSource {
 
+        private const int MAX_TEXT_LENGTH = 2000;
+        
         private ListComponent list;
         private ListComponent fastLinks;
         private InputFieldComponent inputField;
@@ -561,7 +563,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                 var item = parameters.data.GetDrawItem(parameters.index);
                 var text = component.Get<TextComponent>();
-                text.SetText(item.isCommand == true ? "<color=#777><b>></b></color> " : string.Empty, item.line);
+                ConsoleScreen.SetText(text, item.isCommand == true ? "<color=#777><b>></b></color> " : string.Empty, item.line);
                 text.SetColor(item.isCommand == true ? new Color(0.15f, 0.6f, 1f) : ConsoleScreen.GetColorByLogType(item.logType));
                 component.SetCallback(new ClosureParametersItem() { parameters = parameters, data = item, },(innerData) => {
                     innerData.parameters.data.ReplaceInput(innerData.data.line);
@@ -653,6 +655,18 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 }*/
 
             }
+
+        }
+
+        private static void SetText(TextComponent component, string text1, string text2) {
+
+            if (text2.Length > MAX_TEXT_LENGTH) {
+
+                text2 = text2.Substring(0, MAX_TEXT_LENGTH) + "<truncate message>";
+
+            }
+            
+            component.SetText(text1, text2);
 
         }
 

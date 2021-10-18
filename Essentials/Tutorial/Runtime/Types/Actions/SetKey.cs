@@ -1,10 +1,9 @@
 
 namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
-    [System.Serializable]
+    [UnityEngine.UI.Windows.ComponentModuleDisplayNameAttribute("Storage/Set Key")]
     public struct SetKey : IAction {
 
-        public string caption => "Set Key";
         public string text => $"Set key `{this.key}` value to `{this.value}`";
 
         public string key;

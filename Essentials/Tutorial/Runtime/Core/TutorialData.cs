@@ -13,7 +13,6 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
     
     public interface ICondition {
 
-        string caption { get; }
         string text { get; }
 
         ConditionResult IsValid(in Context context);
@@ -22,7 +21,6 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
     public interface IAction {
 
-        string caption { get; }
         string text { get; }
 
         void Execute(in Context context);
@@ -121,8 +119,6 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public Conditions conditions;
         public Actions actions;
 
-        public TutorialData next;
-        
         public bool IsValid(WindowBase window, in Context context) {
 
             var type = window.GetType().FullName;

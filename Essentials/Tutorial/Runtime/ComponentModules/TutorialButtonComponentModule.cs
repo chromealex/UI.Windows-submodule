@@ -9,7 +9,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules {
     [ComponentModuleDisplayName("Essentials.Tutorial/Button")]
     public class TutorialButtonComponentModule : ButtonComponentModule {
 
-        public string tutorialTagId;
+        public string uiTag;
         public WindowComponent highlight;
 
         public override void ValidateEditor() {

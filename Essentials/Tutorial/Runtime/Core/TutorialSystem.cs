@@ -90,7 +90,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         }
 
-        private bool TryToStart(WindowBase window, TutorialData tutorialData, TutorialWindowEvent windowEvent) {
+        public bool TryToStart(WindowBase window, TutorialData tutorialData, TutorialWindowEvent windowEvent) {
 
             if (tutorialData.startEvent == windowEvent) {
 
@@ -110,12 +110,6 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             }
 
             return false;
-
-        }
-
-        public void Complete(in Context context) {
-
-            if (context.data.next != null) this.TryToStart(context.window, context.data.next, context.windowEvent);
 
         }
 

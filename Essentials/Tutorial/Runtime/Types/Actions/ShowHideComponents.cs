@@ -1,0 +1,73 @@
+namespace UnityEngine.UI.Windows.Essentials.Tutorial {
+    
+    [UnityEngine.UI.Windows.ComponentModuleDisplayNameAttribute("UI/Show-Hide Component")]
+    public struct ShowHideComponents : IAction {
+
+        public enum State {
+            Show,
+            Hide,
+        }
+
+        public string text => $"`{this.state.ToString()}` component with tag `{this.tag}`";
+
+        public State state;
+        public string tag;
+        public int listIndex;
+
+        public void Execute(in Context context) {
+
+            this.Do(in context);
+
+        }
+
+        public void Do(in Context context) {
+
+            var obj = this;
+            var tag = this.tag;
+            var listIndex = this.listIndex;
+            
+            var component = context.window.FindComponent<UnityEngine.UI.Windows.WindowComponent>(x => {
+
+                var module = x.GetModule<ProjectX.UI.Windows.ComponentModules.TutorialWindowComponentTagComponentModule>();
+                if (module != null) {
+
+                    if (module.uiTag == tag) {
+                        
+                        module.windowComponent.ShowHide(obj.state == State.Show ? true : false);
+                        
+                    }
+                    
+                }
+
+                return false;
+
+            });
+            if (component != null) {
+
+                return;
+
+            }
+
+            context.window.FindComponent<UnityEngine.UI.Windows.Components.ListComponent>(x => {
+
+                var module = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialListComponentModule>();
+                if (module != null) {
+                    
+                    if (module.uiTag == tag) {
+
+                        var c = module.listComponent.GetItem<WindowComponent>(listIndex);
+                        c.ShowHide(obj.state == State.Show ? true : false);
+
+                    }
+                    
+                }
+
+                return false;
+
+            });
+
+        }
+
+    }
+
+}

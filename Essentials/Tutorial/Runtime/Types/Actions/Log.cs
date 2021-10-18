@@ -1,9 +1,8 @@
 namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
-    [System.Serializable]
+    [UnityEngine.UI.Windows.ComponentModuleDisplayNameAttribute("Print Log")]
     public struct Log : IAction {
 
-        public string caption => "Log";
         public string text => $"Print log with string `{this.str}`";
 
         public string str;

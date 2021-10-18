@@ -39,9 +39,7 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                     if (val != null) {
                         
                         var obj = (ICondition)val;
-                        var content = new GUIContent(obj.caption);
-                        h += EditorStyles.boldLabel.CalcHeight(content, EditorGUIUtility.currentViewWidth);
-                        content = new GUIContent(obj.text);
+                        var content = new GUIContent(obj.text);
                         h += EditorStyles.miniLabel.CalcHeight(content, EditorGUIUtility.currentViewWidth);
                         
                     }
@@ -66,6 +64,8 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                 }; 
                 this.conditions.drawElementCallback = (rect, index, active, focused) => {
 
+                    GUILayoutExt.DrawRect(new Rect(rect.x - 20f, rect.y - 1f, rect.width + 20f + 6f, 1f), new Color(1f, 1f, 1f, 0.15f));
+
                     rect.height = 20f;
                     var attr = new UnityEngine.UI.Windows.Utilities.SearchComponentsByTypePopupAttribute(typeof(ICondition));
                     var prop = items.GetArrayElementAtIndex(index);
@@ -82,14 +82,8 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                         using (new GUILayoutExt.GUIAlphaUsing(0.8f)) {
 
                             var obj = (ICondition)val;
-                            var content = new GUIContent(obj.caption);
-                            var h = EditorStyles.boldLabel.CalcHeight(content, EditorGUIUtility.currentViewWidth);
-                            rect.height = h;
-                            EditorGUI.LabelField(rect, content, EditorStyles.boldLabel);
-                            rect.y += rect.height;
-
-                            content = new GUIContent(obj.text);
-                            h = EditorStyles.miniLabel.CalcHeight(content, EditorGUIUtility.currentViewWidth);
+                            var content = new GUIContent(obj.text);
+                            var h = EditorStyles.miniLabel.CalcHeight(content, EditorGUIUtility.currentViewWidth);
                             rect.height = h;
                             EditorGUI.LabelField(rect, obj.text, EditorStyles.miniLabel);
                             rect.y += rect.height;
@@ -152,9 +146,7 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                     if (val != null) {
                         
                         var obj = (IAction)val;
-                        var content = new GUIContent(obj.caption);
-                        h += EditorStyles.boldLabel.CalcHeight(content, EditorGUIUtility.currentViewWidth);
-                        content = new GUIContent(obj.text);
+                        var content = new GUIContent(obj.text);
                         h += EditorStyles.miniLabel.CalcHeight(content, EditorGUIUtility.currentViewWidth);
                         
                     }
@@ -178,6 +170,8 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                 }; 
                 this.actions.drawElementCallback = (rect, index, active, focused) => {
 
+                    GUILayoutExt.DrawRect(new Rect(rect.x - 20f, rect.y - 1f, rect.width + 20f + 6f, 1f), new Color(1f, 1f, 1f, 0.15f));
+
                     rect.height = 20f;
                     var attr = new UnityEngine.UI.Windows.Utilities.SearchComponentsByTypePopupAttribute(typeof(IAction));
                     var prop = items.GetArrayElementAtIndex(index);
@@ -194,14 +188,8 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                         using (new GUILayoutExt.GUIAlphaUsing(0.8f)) {
 
                             var obj = (IAction)val;
-                            var content = new GUIContent(obj.caption);
-                            var h = EditorStyles.boldLabel.CalcHeight(content, EditorGUIUtility.currentViewWidth);
-                            rect.height = h;
-                            EditorGUI.LabelField(rect, content, EditorStyles.boldLabel);
-                            rect.y += rect.height;
-
-                            content = new GUIContent(obj.text);
-                            h = EditorStyles.miniLabel.CalcHeight(content, EditorGUIUtility.currentViewWidth);
+                            var content = new GUIContent(obj.text);
+                            var h = EditorStyles.miniLabel.CalcHeight(content, EditorGUIUtility.currentViewWidth);
                             rect.height = h;
                             EditorGUI.LabelField(rect, obj.text, EditorStyles.miniLabel);
                             rect.y += rect.height;
@@ -247,31 +235,10 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                 root.Add(container);
             }
 
-            var next = so.FindProperty("next");
-            root.Add(new UnityEditor.UIElements.PropertyField(next, "Next On Complete"));
-
             return root;
             
         }
 
     }
     
-    public static class UIElementsEditorHelper
-    {
-        public static void FillDefaultInspector(VisualElement container, SerializedProperty property)
-        {
-            if (property.NextVisible(true)) // Expand first child.
-            {
-                do
-                {
-                    var field = new UnityEditor.UIElements.PropertyField(property);
-                    field.name = "PropertyField:" + property.propertyPath;
- 
-                    container.Add(field);
-                }
-                while (property.NextVisible(false));
-            }
-        }
-    }
-
 }

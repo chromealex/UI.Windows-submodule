@@ -15,7 +15,7 @@ namespace UnityEngine.UI.Windows {
 
     public interface IResourceProvider {
 
-        Resource GetResource();
+        ref Resource GetResource();
 
     }
 
@@ -28,7 +28,7 @@ namespace UnityEngine.UI.Windows {
         
         internal Resource() { }
         
-        Resource IResourceProvider.GetResource() => this.data;
+        ref Resource IResourceProvider.GetResource() => ref this.data;
 
         #if UNITY_EDITOR
         public void ValidateSource(T resource) {

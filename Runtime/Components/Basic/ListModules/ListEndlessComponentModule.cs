@@ -207,7 +207,8 @@ namespace UnityEngine.UI.Windows {
 
                         {
 
-                            if (item.closure.index != i || item.initialized == false) {
+                            //if (item.closure.index != i || item.initialized == false)
+                            {
                                 item.closure.index = i;
                                 item.onItem.Invoke((T)instance, item.closure);
                             }

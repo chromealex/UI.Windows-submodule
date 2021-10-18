@@ -12,7 +12,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         [RequiredReference]
         public UnityEngine.UI.Graphic graphics;
-        private Object currentLoaded;
 
         public bool preserveAspect;
         public bool useSpriteMesh;
@@ -116,7 +115,6 @@ namespace UnityEngine.UI.Windows.Components {
             this.prevResourceLoad = default;
 
             var resources = WindowSystem.GetResources();
-
             if (this.graphics is UnityEngine.UI.Image image) {
 
                 var obj = image.sprite;
@@ -147,13 +145,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        private struct SetImageClosure {
-
-            public ImageComponent component;
-
-        }
-
-        private bool isLoading;
         private Resource prevResourceLoad;
 
         public void SetImage<T>(T provider) where T : IResourceProvider {
@@ -167,45 +158,24 @@ namespace UnityEngine.UI.Windows.Components {
 
             if (this.prevResourceLoad.IsEquals(resource) == false) {
 
-                this.prevResourceLoad = resource;
-                
                 var resources = WindowSystem.GetResources();
-                if (this.isLoading == true) {
-
-                    resources.StopLoadAll(this);
-                    resources.Delete(this, ref this.currentLoaded);
-
-                }
-
-                var data = new SetImageClosure() {
-                    component = this,
-                };
-                this.isLoading = true;
                 switch (resource.objectType) {
 
-                    case Resource.ObjectType.Sprite:
-                        Coroutines.Run(resources.LoadAsync<Sprite, SetImageClosure>(this, data, resource, (asset, closure) => {
-
-                            if (closure.component == null) return;
-                            closure.component.currentLoaded = asset;
-                            closure.component.SetImage(asset);
-                            closure.component.isLoading = false;
-
-                        }));
+                    case Resource.ObjectType.Sprite: {
+                        var asset = resources.Load<Sprite>(this, resource);
+                        this.SetImage(asset);
+                    }
                         break;
 
-                    case Resource.ObjectType.Texture:
-                        Coroutines.Run(resources.LoadAsync<Texture, SetImageClosure>(this, data, resource, (asset, closure) => {
-
-                            if (closure.component == null) return;
-                            closure.component.currentLoaded = asset;
-                            closure.component.SetImage(asset);
-                            closure.component.isLoading = false;
-
-                        }));
+                    case Resource.ObjectType.Texture: {
+                        var asset = resources.Load<Texture>(this, resource);
+                        this.SetImage(asset);
+                    }
                         break;
 
                 }
+
+                this.prevResourceLoad = resource;
 
             }
 

@@ -14,7 +14,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             var contextData = context;
             WindowSystem.HideAll(x => {
 
-                if (x.windowSourceId == obj.source.windowSourceId) {
+                if (x.windowSourceId == obj.source.GetHashCode()) {
                     
                     return true;
                     

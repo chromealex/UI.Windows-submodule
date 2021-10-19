@@ -190,7 +190,7 @@ namespace UnityEditor.UI.Windows {
                 var allTypes = System.AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes()).ToArray();//searchType.Assembly.GetTypes();
                 foreach (var type in allTypes) {
 
-                    if (searchType.IsAssignableFrom(type) == true && type.IsInterface == false && type.IsAbstract == false) {
+                    if (((searchType != attr.baseType && searchType.IsAssignableFrom(type) == true) || attr.baseType == type.BaseType) && type.IsInterface == false && type.IsAbstract == false) {
 
                         var itemType = type;
                         if (singleOnly == true) {

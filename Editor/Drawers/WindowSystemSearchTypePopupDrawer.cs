@@ -99,8 +99,10 @@ namespace UnityEditor.UI.Windows {
         public static void DrawGUI(Rect position, GUIContent label, SearchComponentsByTypePopupAttribute attr, SerializedProperty property, System.Action onChanged = null, bool drawLabel = true) {
 
             var searchType = attr.baseType;
+            var useSearchTypeOverride = false;
             if (attr.allowClassOverrides == true && property.serializedObject.targetObject is ISearchComponentByTypeEditor searchComponentByTypeEditor) {
 
+                useSearchTypeOverride = true;
                 searchType = searchComponentByTypeEditor.GetSearchType();
 
             }
@@ -190,7 +192,10 @@ namespace UnityEditor.UI.Windows {
                 var allTypes = System.AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes()).ToArray();//searchType.Assembly.GetTypes();
                 foreach (var type in allTypes) {
 
-                    if (((searchType != attr.baseType && searchType.IsAssignableFrom(type) == true) || attr.baseType == type.BaseType) && type.IsInterface == false && type.IsAbstract == false) {
+                    if (
+                        (((useSearchTypeOverride == false || searchType != attr.baseType) && searchType.IsAssignableFrom(type) == true) || attr.baseType == type.BaseType) &&
+                        type.IsInterface == false &&
+                        type.IsAbstract == false) {
 
                         var itemType = type;
                         if (singleOnly == true) {

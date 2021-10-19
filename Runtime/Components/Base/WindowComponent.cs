@@ -8,7 +8,7 @@
 
             public WindowComponent windowComponent;
             
-            [UnityEngine.UI.Windows.Utilities.SearchComponentsByTypePopup(typeof(WindowComponentModule), "Window Component Module", allowClassOverrides: true, singleOnly: true)]
+            [UnityEngine.UI.Windows.Utilities.SearchComponentsByTypePopup(typeof(WindowComponentModule), "Window Component Module", allowClassOverrides: true, singleOnly: false)]
             public WindowComponentModule[] modules;
 
             public T GetModule<T>() {

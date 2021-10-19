@@ -91,8 +91,8 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                 
                 foreach (var item in this.currentTutorialItems) {
 
-                    if (this.TryToStart(window, item, windowEvent) == true) return;
-                    
+                    this.TryToStart(window, item, windowEvent);
+
                 }
 
             }

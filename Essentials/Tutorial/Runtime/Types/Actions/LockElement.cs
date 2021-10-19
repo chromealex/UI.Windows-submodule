@@ -17,6 +17,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         private void OnComplete(in Context context) {
             
+            WindowSystem.CancelWaitIntractables();
             if (this.nextOnClick != null) context.system.TryToStart(context.window, this.nextOnClick, context.windowEvent);
 
         }

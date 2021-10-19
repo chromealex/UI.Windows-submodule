@@ -28,15 +28,18 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             
             var component = context.window.FindComponent<UnityEngine.UI.Windows.WindowComponent>(x => {
 
-                var module = x.GetModule<ProjectX.UI.Windows.ComponentModules.TutorialWindowComponentTagComponentModule>();
-                if (module != null) {
+                foreach (var moduleBase in x.componentModules.modules) {
 
-                    if (module.uiTag == tag) {
-                        
-                        module.windowComponent.ShowHide(obj.state == State.Show ? true : false);
-                        
+                    if (moduleBase is UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule module) {
+
+                        if (module.uiTag == tag) {
+
+                            module.windowComponent.ShowHide(obj.state == State.Show ? true : false);
+
+                        }
+
                     }
-                    
+
                 }
 
                 return false;
@@ -50,13 +53,16 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
             context.window.FindComponent<UnityEngine.UI.Windows.Components.ListComponent>(x => {
 
-                var module = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialListComponentModule>();
-                if (module != null) {
-                    
-                    if (module.uiTag == tag) {
+                foreach (var moduleBase in x.componentModules.modules) {
 
-                        var c = module.listComponent.GetItem<WindowComponent>(listIndex);
-                        c.ShowHide(obj.state == State.Show ? true : false);
+                    if (moduleBase is UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialListComponentModule module) {
+
+                        if (module.uiTag == tag) {
+
+                            var c = module.listComponent.GetItem<WindowComponent>(listIndex);
+                            c.ShowHide(obj.state == State.Show ? true : false);
+
+                        }
 
                     }
                     

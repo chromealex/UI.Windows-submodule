@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ProjectX.UI.Windows.ComponentModules {
+namespace UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules {
 
     using UnityEngine.UI.Windows;
 

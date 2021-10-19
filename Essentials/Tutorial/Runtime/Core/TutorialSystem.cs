@@ -92,6 +92,8 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         public bool TryToStart(WindowBase window, TutorialData tutorialData, TutorialWindowEvent windowEvent) {
 
+            if (tutorialData == null) return false;
+
             if (tutorialData.startEvent == windowEvent) {
 
                 var context = new Context() {

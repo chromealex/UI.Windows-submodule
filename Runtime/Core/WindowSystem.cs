@@ -1321,6 +1321,20 @@ namespace UnityEngine.UI.Windows {
 
         }
         
+        public static T ShowSync<T>(T source, InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+
+            T instance = default;
+            initialParameters.showSync = true;
+            WindowSystem.instance.Show_INTERNAL<T>(source, initialParameters, (w) => {
+                
+                instance = w;
+                onInitialized?.Invoke(w);
+                
+            }, transitionParameters);
+            return instance;
+
+        }
+        
         /// <summary>
         /// Initializing window in sync mode.
         /// Just returns instance immediately, but still stay in async mode for layout because of Addressable assets.
@@ -1332,15 +1346,7 @@ namespace UnityEngine.UI.Windows {
         /// <returns></returns>
         public static T ShowSync<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
 
-            T instance = default;
-            initialParameters.showSync = true;
-            WindowSystem.instance.Show_INTERNAL<T>(initialParameters, (w) => {
-                
-                instance = w;
-                onInitialized?.Invoke(w);
-                
-            }, transitionParameters);
-            return instance;
+            return WindowSystem.ShowSync(WindowSystem.instance.GetSource<T>(), initialParameters, onInitialized, transitionParameters);
 
         }
 

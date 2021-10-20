@@ -87,8 +87,8 @@ MonoBehaviour:
       value: 10
     singleInstance: 1
     forceSyncLoad: 0
-    addInHistory: 1
-    takeFocus: 1
+    addInHistory: 0
+    takeFocus: 0
     dontDestroy: 1
     renderMode: 0
     cameraMode: 0
@@ -97,8 +97,6 @@ MonoBehaviour:
     fullCoverage: 0
   modules:
     modules: []
-  breadcrumb:
-    history: []
   identifier: 0
   windowSourceId: 0
   workCamera: {fileID: 2012446584845969934}

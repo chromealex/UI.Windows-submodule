@@ -10,6 +10,12 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         Failed,
 
     }
+
+    public interface IConditionRuntime {
+
+        string runtimeText { get; }
+
+    }
     
     public interface ICondition {
 
@@ -29,12 +35,12 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
     public enum ConditionValue {
 
-        Equals,
-        NotEquals,
-        Less,
-        Greater,
-        LessOrEquals,
-        GreaterOrEquals,
+        EqualsTo,
+        NotEqualsTo,
+        LessThan,
+        GreaterThan,
+        LessOrEqualsThan,
+        GreaterOrEqualsThan,
 
     }
 
@@ -54,27 +60,27 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         public bool GetResult() {
 
-            if (this.conditionValue == ConditionValue.Equals) {
+            if (this.conditionValue == ConditionValue.EqualsTo) {
                 
                 return this.value == this.checkValue;
 
-            } else if (this.conditionValue == ConditionValue.NotEquals) {
+            } else if (this.conditionValue == ConditionValue.NotEqualsTo) {
                 
                 return this.value != this.checkValue;
 
-            } else if (this.conditionValue == ConditionValue.Less) {
+            } else if (this.conditionValue == ConditionValue.LessThan) {
                 
                 return this.checkValue < this.value;
 
-            } else if (this.conditionValue == ConditionValue.Greater) {
+            } else if (this.conditionValue == ConditionValue.GreaterThan) {
                 
                 return this.checkValue > this.value;
 
-            } else if (this.conditionValue == ConditionValue.LessOrEquals) {
+            } else if (this.conditionValue == ConditionValue.LessOrEqualsThan) {
                 
                 return this.checkValue <= this.value;
 
-            } else if (this.conditionValue == ConditionValue.GreaterOrEquals) {
+            } else if (this.conditionValue == ConditionValue.GreaterOrEqualsThan) {
                 
                 return this.checkValue >= this.value;
 

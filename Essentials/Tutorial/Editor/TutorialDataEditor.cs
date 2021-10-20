@@ -44,6 +44,17 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                         
                     }
                     
+                    if (val is IConditionRuntime conditionRuntime) {
+
+                        using (new GUILayoutExt.GUIColorUsing(Color.cyan)) {
+
+                            var content = new GUIContent(conditionRuntime.runtimeText);
+                            h += EditorStyles.miniLabel.CalcHeight(content, EditorGUIUtility.currentViewWidth);
+                            
+                        }
+
+                    }
+                    
                     if (prop.hasVisibleChildren == true) {
 
                         h += EditorGUI.GetPropertyHeight(prop, true);
@@ -87,6 +98,20 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                             rect.height = h;
                             EditorGUI.LabelField(rect, obj.text, EditorStyles.miniLabel);
                             rect.y += rect.height;
+                            
+                        }
+
+                        if (val is IConditionRuntime conditionRuntime) {
+
+                            using (new GUILayoutExt.GUIColorUsing(Color.cyan)) {
+
+                                var content = new GUIContent(conditionRuntime.runtimeText);
+                                var h = EditorStyles.miniLabel.CalcHeight(content, EditorGUIUtility.currentViewWidth);
+                                rect.height = h;
+                                EditorGUI.LabelField(rect, conditionRuntime.runtimeText, EditorStyles.miniLabel);
+                                rect.y += rect.height;
+
+                            }
 
                         }
 

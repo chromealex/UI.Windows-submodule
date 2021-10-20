@@ -8,7 +8,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public WindowBase source;
         public TutorialData onShown;
 
-        public void Execute(in Context context) {
+        public ActionResult Execute(in Context context) {
 
             var obj = this;
             var contextData = context;
@@ -16,6 +16,8 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                                   default,
                               (x) => x.OnEmptyPass(),
                               TransitionParameters.Default.ReplaceCallback(() => { contextData.system.TryToStart(contextData.window, obj.onShown, contextData.windowEvent); }));
+
+            return ActionResult.MoveNext;
 
         }
 

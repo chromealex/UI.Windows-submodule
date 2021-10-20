@@ -26,6 +26,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public TutorialWindowEvent windowEvent;
         public TutorialSystem system;
         public TutorialData data;
+        public int index;
         public UnityEngine.UI.Windows.WindowTypes.LayoutWindowType window;
 
     }
@@ -113,7 +114,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                 };
                 if (tutorialData.IsValid(window, in context) == true) {
 
-                    tutorialData.OnStart(in context);
+                    tutorialData.OnStart(context);
                     return true;
 
                 }

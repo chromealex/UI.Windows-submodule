@@ -7,9 +7,11 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         public string str;
 
-        public void Execute(in Context context) {
+        public ActionResult Execute(in Context context) {
 
             Debug.Log($"Process action `{context.data.name}` for window `{context.window}` with string `{this.str}`");
+
+            return ActionResult.MoveNext;
 
         }
 

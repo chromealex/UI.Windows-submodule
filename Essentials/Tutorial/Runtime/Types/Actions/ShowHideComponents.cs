@@ -14,9 +14,11 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public string tag;
         public int listIndex;
 
-        public void Execute(in Context context) {
+        public ActionResult Execute(in Context context) {
 
             this.Do(in context);
+
+            return ActionResult.MoveNext;
 
         }
 

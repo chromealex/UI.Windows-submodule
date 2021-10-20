@@ -8,7 +8,15 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public WindowBase source;
         public TutorialData onHidden;
 
-        public void Execute(in Context context) {
+        public ActionResult Execute(in Context context) {
+
+            this.Do(in context);
+            
+            return ActionResult.MoveNext;
+
+        }
+        
+        private void Do(in Context context) {
 
             var obj = this;
             var contextData = context;

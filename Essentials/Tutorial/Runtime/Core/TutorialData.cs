@@ -11,6 +11,13 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
     }
 
+    public enum ActionResult {
+
+        MoveNext,
+        Break,
+
+    }
+
     public interface IConditionRuntime {
 
         string runtimeText { get; }
@@ -29,7 +36,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         string text { get; }
 
-        void Execute(in Context context);
+        ActionResult Execute(in Context context);
 
     }
 
@@ -144,11 +151,31 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         }
 
-        public void OnStart(in Context context) {
+        public void RunActions(Context context, int startIndex) {
+            
+            for (int i = startIndex; i < this.actions.items.Length; ++i) {
+
+                context.index = i;
+                if (this.actions.items[i].Execute(in context) == ActionResult.Break) {
+                    
+                    break;
+                    
+                }
+
+            }
+
+        }
+
+        public void OnStart(Context context) {
 
             for (int i = 0; i < this.actions.items.Length; ++i) {
 
-                this.actions.items[i].Execute(in context);
+                context.index = i;
+                if (this.actions.items[i].Execute(in context) == ActionResult.Break) {
+                    
+                    break;
+                    
+                }
 
             }
             

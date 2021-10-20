@@ -9,9 +9,11 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public Tag tag;
         public TutorialData nextOnClick;
 
-        public void Execute(in Context context) {
+        public ActionResult Execute(in Context context) {
 
             this.Do(in context);
+
+            return ActionResult.MoveNext;
 
         }
 

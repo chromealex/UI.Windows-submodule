@@ -9,10 +9,12 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public string key;
         public int value;
 
-        public void Execute(in Context context) {
+        public ActionResult Execute(in Context context) {
 
             PlayerPrefs.SetInt(this.key, this.value);
             PlayerPrefs.Save();
+
+            return ActionResult.MoveNext;
 
         }
 

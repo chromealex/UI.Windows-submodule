@@ -168,16 +168,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         public void OnStart(Context context) {
 
-            for (int i = 0; i < this.actions.items.Length; ++i) {
-
-                context.index = i;
-                if (this.actions.items[i].Execute(in context) == ActionResult.Break) {
-                    
-                    break;
-                    
-                }
-
-            }
+            this.RunActions(context, 0);
             
         }
 

@@ -22,7 +22,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             var contextData = context;
             WindowSystem.HideAll(x => {
 
-                if (x.windowSourceId == obj.source.GetHashCode()) {
+                if (x.windowSourceId == obj.source.GetType().GetHashCode()) {
                     
                     return true;
                     

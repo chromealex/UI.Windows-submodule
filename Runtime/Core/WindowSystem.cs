@@ -1437,6 +1437,18 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public static WindowBase GetSource(int windowSourceId) {
+            
+            if (WindowSystem.instance.hashToPrefabs.TryGetValue(windowSourceId, out var prefab) == true) {
+
+                return prefab;
+
+            }
+
+            return null;
+
+        }
+
         private T GetSource<T>() where T : WindowBase {
 
             var hash = typeof(T).GetHashCode();
@@ -1575,7 +1587,7 @@ namespace UnityEngine.UI.Windows {
             if (source.createPool == true) this.pools.CreatePool(source);
             instance = this.pools.Spawn(source, null, out var fromPool);
             instance.identifier = ++this.nextWindowId;
-            instance.windowSourceId = source.GetHashCode();
+            instance.windowSourceId = source.GetType().GetHashCode();
             instance.windowId = instance.identifier;
             #if UNITY_EDITOR
             instance.name = "[" + instance.identifier.ToString("00") + "] " + source.name;

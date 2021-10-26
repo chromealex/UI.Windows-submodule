@@ -24,23 +24,21 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-		public override void OnShowEnd()
-		{
+		public override void OnShowEnd() {
+            
 			base.OnShowEnd();
 
 			var sectorCount = 0;
-
-			for (int i = 0; i < container.childCount; i++)
-			{
-				if (container.GetChild(i).gameObject.activeSelf)
-				{
-					sectorCount++;
+			for (int i = 0; i < this.container.childCount; ++i) {
+				if (this.container.GetChild(i).gameObject.activeSelf) {
+					++sectorCount;
 				}
 			}
 
-			if(sectorCount == 0) return;
+			if (sectorCount == 0) return;
 
-			rotationAngle = 360 / sectorCount;
+            this.rotationAngle = 360f / sectorCount;
+            
 		}
 
 		private void UpdatePages() {

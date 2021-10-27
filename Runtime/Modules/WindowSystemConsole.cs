@@ -118,6 +118,8 @@ namespace UnityEngine.UI.Windows {
 
     public class WindowSystemConsole {
 
+        private const int MAX_TEXT_LENGTH = 2000;
+
         [System.Serializable]
         public struct DrawItem {
 
@@ -820,6 +822,12 @@ namespace UnityEngine.UI.Windows {
         public void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false, bool canCopy = false) {
 
             lock (this.drawItems) {
+
+                if (text.Length > MAX_TEXT_LENGTH) {
+
+                    text = text.Substring(0, MAX_TEXT_LENGTH) + "<truncate message>";
+
+                }
 
                 this.drawItems.Enqueue(new DrawItem() {
                     line = text,

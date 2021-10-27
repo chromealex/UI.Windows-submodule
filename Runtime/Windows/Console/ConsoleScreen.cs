@@ -7,8 +7,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
     public class ConsoleScreen : LayoutWindowType, IDataSource {
 
-        private const int MAX_TEXT_LENGTH = 2000;
-        
         private ListComponent list;
         private ListComponent fastLinks;
         private InputFieldComponent inputField;
@@ -660,12 +658,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         private static void SetText(TextComponent component, string text1, string text2) {
 
-            if (text2.Length > MAX_TEXT_LENGTH) {
-
-                text2 = text2.Substring(0, MAX_TEXT_LENGTH) + "<truncate message>";
-
-            }
-            
             component.SetText(text1, text2);
 
         }

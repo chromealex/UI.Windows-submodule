@@ -21,37 +21,29 @@ namespace UnityEngine.UI.Windows {
             base.OnInit();
 
             this.UpdatePages();
-            
+
         }
 
-		public override void OnShowEnd()
-		{
-			base.OnShowEnd();
+        public override void OnShowEnd() {
+            base.OnShowEnd();
 
-			var sectorCount = 0;
+            var sectorCount = 0;
 
-			for (int i = 0; i < container.childCount; i++)
-			{
-				if (container.GetChild(i).gameObject.activeSelf)
-				{
-					sectorCount++;
-				}
-			}
+            for (var i = 0; i < this.container.childCount; ++i) {
+                if (this.container.GetChild(i).gameObject.activeSelf) {
+                    ++sectorCount;
+                }
+            }
 
-			if(sectorCount == 0) return;
-
-			rotationAngle = 360 / sectorCount;
-		}
-
-		private void UpdatePages() {
-
-			if (sectorCount == 0) return;
+            if (sectorCount == 0) {
+                return;
+            }
 
             this.rotationAngle = 360f / sectorCount;
-            
-		}
 
-		private void UpdatePages() {
+        }
+
+        private void UpdatePages() {
 
             this.currentItemIndex = 0;
             this.onSelectedPageChanged?.Invoke(this.currentItemIndex);
@@ -103,7 +95,7 @@ namespace UnityEngine.UI.Windows {
 
             this.currentItemIndex = (int)sector;
             this.smoothLerpCoroutine = this.StartCoroutine(this.SmoothLerp());
-            
+
         }
 
         public override void OnDrag(PointerEventData eventData) {

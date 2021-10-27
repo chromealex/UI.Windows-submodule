@@ -229,7 +229,7 @@ namespace UnityEngine.UI.Windows {
 
 		            if (c == 1) {
 
-			            var middle = center / count;
+			            var middle = (count > 1 ? center / count : Vector2.zero);
 			            tr.rectTransform.anchoredPosition = new Vector2(p.x - middle.x, p.y - middle.y);
 			            this.tracker.Add(this, tr.rectTransform, DrivenTransformProperties.AnchoredPosition);
 			            

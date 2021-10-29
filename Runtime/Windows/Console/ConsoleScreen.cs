@@ -451,15 +451,19 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             var console = WindowSystem.GetConsole();
             var items = console.GetItems();
             var k = 0;
-            foreach (var item in items) {
-
-                if (item.isCommand == true || this.HasLogFilterType(item.logType) == true) {
-
-                    if (k == index) return item;
-                    ++k;
-
+            lock (items) {
+                
+                foreach (var item in items) {
+    
+                    if (item.isCommand == true || this.HasLogFilterType(item.logType) == true) {
+    
+                        if (k == index) return item;
+                        ++k;
+    
+                    }
+    
                 }
-
+                
             }
             
             return default;

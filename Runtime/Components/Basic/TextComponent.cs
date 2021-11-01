@@ -100,46 +100,58 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
 
-            public string GetShortestString(TimeResult shortestVariant) {
+            public string GetShortestString(TimeResult shortestVariant, TimeResult sourceVariant) {
 
                 var str = string.Empty;
                 switch (shortestVariant) {
 
-                    case TimeResult.TimeMSmi:
+                    case TimeResult.TimeMSmi: {
+                        var s = TimeResult.TimeMSmi;
+                        if (s <= sourceVariant) shortestVariant = s;
                         if (this.timeSpan.TotalHours >= 1d) {
                             goto case TimeResult.TimeHMSmi;
                         }
-
+                    }
                         break;
 
-                    case TimeResult.TimeHMSmi:
+                    case TimeResult.TimeHMSmi: {
+                        var s = TimeResult.TimeHMSmi;
+                        if (s <= sourceVariant) shortestVariant = s;
                         if (this.timeSpan.TotalDays >= 1d) {
                             goto case TimeResult.TimeDHMSmi;
                         }
-
+                    }
                         break;
 
                     case TimeResult.TimeDHMSmi: {
+                        var s = TimeResult.TimeDHMSmi;
+                        if (s <= sourceVariant) shortestVariant = s;
                         var format = new TimeFormat(this.timeResultStrings, TimeResult.TimeDHMSmi);
                         str = format.GetString();
                         return str;
                     }
 
-                    case TimeResult.TimeMS:
+                    case TimeResult.TimeMS: {
+                        var s = TimeResult.TimeMS;
+                        if (s <= sourceVariant) shortestVariant = s;
                         if (this.timeSpan.TotalHours >= 1d) {
                             goto case TimeResult.TimeHMS;
                         }
-
+                    }
                         break;
 
-                    case TimeResult.TimeHMS:
+                    case TimeResult.TimeHMS: {
+                        var s = TimeResult.TimeHMS;
+                        if (s <= sourceVariant) shortestVariant = s;
                         if (this.timeSpan.TotalDays >= 1d) {
                             goto case TimeResult.TimeDHMS;
                         }
-
+                    }
                         break;
 
                     case TimeResult.TimeDHMS: {
+                        var s = TimeResult.TimeDHMS;
+                        if (s <= sourceVariant) shortestVariant = s;
                         var format = new TimeFormat(this.timeResultStrings, TimeResult.TimeDHMS);
                         str = format.GetString();
                         return str;
@@ -340,6 +352,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        [System.Serializable]
         public struct ValueData {
 
             public bool Equals(ValueData other) {
@@ -409,7 +422,7 @@ namespace UnityEngine.UI.Windows.Components {
             if (timeShortestVariant > TimeResult.None && timeShortestVariant < timeValueResult) {
 
                 var ts = new TimeShort(value, this.timeResultStrings, sourceValue);
-                strFormat = ts.GetShortestString(timeShortestVariant);
+                strFormat = ts.GetShortestString(timeShortestVariant, timeValueResult);
 
             } else {
 

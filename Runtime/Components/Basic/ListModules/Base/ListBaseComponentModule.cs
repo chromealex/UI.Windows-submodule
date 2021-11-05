@@ -46,6 +46,7 @@
         public virtual void OnComponentsChanged() { }
         public virtual void OnComponentAdded(WindowComponent windowComponent) { }
         public virtual void OnComponentRemoved(WindowComponent windowComponent) { }
+        public virtual void OnSetItems() { }
         
         public virtual bool HasCustomAdd() {
             

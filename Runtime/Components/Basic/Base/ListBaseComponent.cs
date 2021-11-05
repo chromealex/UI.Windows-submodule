@@ -447,6 +447,15 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
 
+            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
+
+                var module = this.componentModules.modules[i] as ListComponentModule;
+                if (module == null) continue;
+                
+                module.OnSetItems();
+
+            }
+
         }
 
         private class EmitLoaded {

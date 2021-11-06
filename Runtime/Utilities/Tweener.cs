@@ -840,6 +840,22 @@ namespace UnityEngine.UI.Windows.Utilities {
 
                     }
 
+                } else {
+
+                    try {
+                        
+                        if (this.onUpdate != null) {
+
+                            this.onUpdate.Invoke(this.obj, this.from);
+
+                        }
+                        
+                    } catch (System.Exception ex) {
+
+                        Debug.LogException(ex);
+
+                    }
+
                 }
 
                 return false;

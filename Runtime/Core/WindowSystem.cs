@@ -1001,13 +1001,29 @@ namespace UnityEngine.UI.Windows {
 
                     }, closure, instance.subObjects, (obj, cb, p) => {
 
-                        if (p.internalCall == true) {
+                        if (p.parameters.data.replaceDelay == true) {
 
-                            obj.ShowInternal(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
+                            if (p.internalCall == true) {
+
+                                obj.ShowInternal(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
+
+                            } else {
+
+                                obj.Show(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
+
+                            }
 
                         } else {
+                            
+                            if (p.internalCall == true) {
 
-                            obj.Show(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
+                                obj.ShowInternal(p.parameters.ReplaceCallback(cb));
+
+                            } else {
+
+                                obj.Show(p.parameters.ReplaceCallback(cb));
+
+                            }
 
                         }
 
@@ -1178,13 +1194,29 @@ namespace UnityEngine.UI.Windows {
 
                             }, cParams, cParams.instance.subObjects, (obj, cb, p) => {
 
-                                if (p.internalCall == true) {
-                                    
-                                    obj.HideInternal(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
+                                if (p.parameters.data.replaceDelay == true) {
+
+                                    if (p.internalCall == true) {
+
+                                        obj.ShowInternal(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
+
+                                    } else {
+
+                                        obj.Show(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
+
+                                    }
 
                                 } else {
+                            
+                                    if (p.internalCall == true) {
 
-                                    obj.Hide(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
+                                        obj.ShowInternal(p.parameters.ReplaceCallback(cb));
+
+                                    } else {
+
+                                        obj.Show(p.parameters.ReplaceCallback(cb));
+
+                                    }
 
                                 }
 

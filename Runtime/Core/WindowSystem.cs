@@ -1198,11 +1198,11 @@ namespace UnityEngine.UI.Windows {
 
                                     if (p.internalCall == true) {
 
-                                        obj.ShowInternal(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
+                                        obj.HideInternal(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
 
                                     } else {
 
-                                        obj.Show(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
+                                        obj.Hide(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
 
                                     }
 
@@ -1210,11 +1210,11 @@ namespace UnityEngine.UI.Windows {
                             
                                     if (p.internalCall == true) {
 
-                                        obj.ShowInternal(p.parameters.ReplaceCallback(cb));
+                                        obj.HideInternal(p.parameters.ReplaceCallback(cb));
 
                                     } else {
 
-                                        obj.Show(p.parameters.ReplaceCallback(cb));
+                                        obj.Hide(p.parameters.ReplaceCallback(cb));
 
                                     }
 

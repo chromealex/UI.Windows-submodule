@@ -77,6 +77,7 @@ namespace UnityEngine.UI.Windows.Modules {
             public WindowBase window;
             public WindowModule.Parameters parameters;
             public WindowModules windowModules;
+            public InitialParameters initialParameters;
             public int index;
 
         }
@@ -99,6 +100,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     index = i,
                     parameters = parameters,
                     window = window,
+                    initialParameters = initialParameters,
                 };
                 ++this.loadingCount;
                 Coroutines.Run(resources.LoadAsync<WindowModule, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, window, data, moduleInfo.module, (asset, closure) => {
@@ -119,8 +121,9 @@ namespace UnityEngine.UI.Windows.Modules {
                     closure.window.RegisterSubObject(instance);
 
                     closure.windowModules.modules[closure.index].moduleInstance = instance;
-                    --closure.windowModules.loadingCount;
-
+                    
+                    instance.DoLoadScreenAsync(closure.initialParameters, () => { --closure.windowModules.loadingCount; });
+                    
                 }));
 
             }

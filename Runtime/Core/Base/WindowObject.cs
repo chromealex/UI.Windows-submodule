@@ -533,6 +533,10 @@ namespace UnityEngine.UI.Windows {
 
             }
 
+            #if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this.gameObject);
+            #endif
+
         }
 
         public void PushToPool() {

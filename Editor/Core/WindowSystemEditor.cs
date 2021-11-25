@@ -471,6 +471,69 @@ namespace UnityEditor.UI.Windows {
                         GUILayout.Space(10f);
                         GUILayout.BeginHorizontal();
                         GUILayout.FlexibleSpace();
+                        if (GUILayout.Button("Validate WindowObjects", GUILayout.Width(200f), GUILayout.Height(30f)) == true) {
+
+                            EditorApplication.delayCall += () => {
+
+                                try {
+
+                                    var isBreak = false;
+                                    var markDirtyCount = 0;
+                                    var gos = AssetDatabase.FindAssets("t:GameObject");
+                                    var i = 0;
+                                    foreach (var guid in gos) {
+
+                                        var path = AssetDatabase.GUIDToAssetPath(guid);
+                                        var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                                        if (EditorUtility.DisplayCancelableProgressBar("Validating Objects", path, i / (float)gos.Length) == true) {
+
+                                            isBreak = true;
+                                            break;
+
+                                        }
+
+                                        {
+                                            var allComponents = go.GetComponentsInChildren<WindowObject>(true);
+                                            foreach (var component in allComponents) {
+
+                                                component.ValidateEditor();
+                                                EditorUtility.SetDirty(component);
+                                                EditorUtility.SetDirty(go);
+                                                ++markDirtyCount;
+
+                                            }
+                                        }
+
+                                        ++i;
+
+                                    }
+
+                                    if (isBreak == true) {
+                                        
+                                        Debug.Log("Break. Updated: " + markDirtyCount);
+                                        
+                                    } else {
+
+                                        Debug.Log("Done. Updated: " + markDirtyCount);
+
+                                    }
+
+                                } catch (System.Exception ex) {
+                                    Debug.LogException(ex);
+                                }
+
+                                EditorUtility.ClearProgressBar();
+
+                            };
+
+                        }
+                        GUILayout.FlexibleSpace();
+                        GUILayout.EndHorizontal();
+                        GUILayout.Label("Find and Validate all WindowObject objects.", EditorStyles.centeredGreyMiniLabel);
+                        
+                        GUILayout.Space(10f);
+                        GUILayout.BeginHorizontal();
+                        GUILayout.FlexibleSpace();
                         if (GUILayout.Button("Find Direct References", GUILayout.Width(200f), GUILayout.Height(30f)) == true) {
 
                             try {

@@ -65,15 +65,15 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 4597125719989322073}
     graphics: {fileID: 2368193167506531856}
     rectMask: {fileID: 0}
-  isActiveSelf: 0
   createPool: 0
   animationParameters:
     items: []
-  objectState: 0
   renderBehaviourOnHidden: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
+  editorRefLocks:
+    directories: []
   debugStateLog:
     items: []
   isObjectRoot: 0
@@ -88,6 +88,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 8957172461844523635}
@@ -146,6 +148,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -314,15 +317,15 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 1053871952593780424}
     graphics: {fileID: 5048931175835979990}
     rectMask: {fileID: 0}
-  isActiveSelf: 0
   createPool: 0
   animationParameters:
     items: []
-  objectState: 0
   renderBehaviourOnHidden: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
+  editorRefLocks:
+    directories: []
   debugStateLog:
     items: []
   isObjectRoot: 0
@@ -337,6 +340,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 8315637883405603250}
@@ -530,15 +535,15 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 1131759301774170057}
     graphics: {fileID: 6860704351555833948}
     rectMask: {fileID: 0}
-  isActiveSelf: 0
   createPool: 0
   animationParameters:
     items: []
-  objectState: 0
   renderBehaviourOnHidden: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
+  editorRefLocks:
+    directories: []
   debugStateLog:
     items: []
   isObjectRoot: 1
@@ -555,6 +560,8 @@ MonoBehaviour:
       parameters: []
       autoStopOnceParameters: 0
       autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   componentModules:
     windowComponent: {fileID: 7157483974793182015}
@@ -577,6 +584,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -626,6 +634,7 @@ MonoBehaviour:
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 5
   m_ReadOnly: 0
+  m_ShouldActivateOnSelect: 1
 --- !u!222 &1430220109092960283
 CanvasRenderer:
   m_ObjectHideFlags: 0

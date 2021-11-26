@@ -12,6 +12,10 @@
             
         }
 
+        public virtual void OnSetValue(double prevValue, double value, UnityEngine.UI.Windows.Components.SourceValue sourceValue, string strFormat) { }
+        
+        public virtual void OnSetText(string prevText, string text) { }
+
     }
     
 }

@@ -415,6 +415,7 @@ namespace UnityEngine.UI.Windows.Components {
                 return;
             }
 
+            var prevData = this.lastValueData;
             this.lastValueData = currentData;
             this.lastText = null;
 
@@ -432,18 +433,40 @@ namespace UnityEngine.UI.Windows.Components {
 
             switch (sourceValue) {
                 case SourceValue.Digits:
-                    this.SetText(value.ToString());
-                    return;
+                    this.SetText_INTERNAL(value.ToString());
+                    break;
 
                 case SourceValue.Seconds:
-                    this.SetText(new TimeFormatFromSeconds() { format = strFormat }.GetValue(value));
-                    return;
+                    this.SetText_INTERNAL(new TimeFormatFromSeconds() { format = strFormat }.GetValue(value));
+                    break;
 
                 case SourceValue.Milliseconds:
-                    this.SetText(new TimeFormatFromMilliseconds() { format = strFormat }.GetValue(value));
-                    return;
+                    this.SetText_INTERNAL(new TimeFormatFromMilliseconds() { format = strFormat }.GetValue(value));
+                    break;
             }
+            
+            this.OnSetValue(prevData.value, value, sourceValue, strFormat);
 
+        }
+
+        private void OnSetValue(double prevValue, double value, SourceValue sourceValue, string strFormat) {
+
+            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
+                
+                if (this.componentModules.modules[i] is TextComponentModule module) module.OnSetValue(prevValue, value, sourceValue, strFormat);
+                
+            }
+            
+        }
+
+        private void OnSetText(string prevValue, string value) {
+
+            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
+                
+                if (this.componentModules.modules[i] is TextComponentModule module) module.OnSetText(prevValue, value);
+                
+            }
+            
         }
 
         public string GetText() {
@@ -481,6 +504,7 @@ namespace UnityEngine.UI.Windows.Components {
                 this.lastLocalizationKey = key;
                 this.lastLocalizationKey.Arguments = args;
                 this.lastLocalizationKey.StringChanged += this.OnLocalizationStringChanged;
+                this.lastLocalizationKey.RefreshString();
 
             }
 
@@ -504,18 +528,25 @@ namespace UnityEngine.UI.Windows.Components {
                 return;
             }
 
+            var prevText = this.lastText;
             this.lastText = text;
             this.lastValueData = default;
 
             #if UNITY_LOCALIZATION_SUPPORT
-
             if (this.avoidLocalizationUnsubscribe == false && this.lastLocalizationKey != null) {
                 this.lastLocalizationKey.StringChanged -= this.OnLocalizationStringChanged;
                 this.lastLocalizationKey = null;
             }
-
             #endif
 
+            this.OnSetText(prevText, text);
+
+            this.SetText_INTERNAL(text);
+
+        }
+
+        internal void SetText_INTERNAL(string text) {
+            
             if (this.graphics is UnityEngine.UI.Text textGraphic) {
 
                 textGraphic.text = text;

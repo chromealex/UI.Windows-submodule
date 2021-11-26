@@ -8,55 +8,69 @@ namespace UnityEngine.UI.Windows {
         public string formatValue;
 
         private bool setValueInternal;
+
+        private struct Closure {
+
+            public TextComponentModuleAnimateValue module;
+            public UnityEngine.UI.Windows.Components.SourceValue sourceValue;
+            public string strFormat;
+
+        }
         
         public override void OnSetValue(double prevValue, double value, UnityEngine.UI.Windows.Components.SourceValue sourceValue, string strFormat) {
 
             if (this.setValueInternal == true) return;
 
+            var closureData = new Closure() {
+                module = this,
+                sourceValue = sourceValue,
+                strFormat = strFormat,
+            };
+
             var tweener = WindowSystem.GetTweener();
             tweener.Stop(this.textComponent);
-            tweener.Add(this, this.animationTime, (float)prevValue, (float)value).Tag(this.textComponent).OnUpdate((obj, val) => {
+            tweener.Add(closureData, this.animationTime, (float)prevValue, (float)value).Tag(this.textComponent).OnUpdate((closure, val) => {
 
-                obj.setValueInternal = true;
-                if (sourceValue == UnityEngine.UI.Windows.Components.SourceValue.Digits) {
+                closure.module.setValueInternal = true;
+                if (closure.sourceValue == UnityEngine.UI.Windows.Components.SourceValue.Digits) {
 
-                    if (string.IsNullOrEmpty(obj.formatValue) == true) {
+                    if (string.IsNullOrEmpty(closure.module.formatValue) == true) {
 
-                        if (obj.roundToInt == true) {
+                        if (closure.module.roundToInt == true) {
 
-                            obj.textComponent.SetValue(Mathf.RoundToInt(val));
+                            closure.module.textComponent.SetValue(Mathf.RoundToInt(val));
 
                         } else {
 
-                            obj.textComponent.SetValue(val);
+                            closure.module.textComponent.SetValue(val);
 
                         }
 
                     } else {
 
-                        if (obj.roundToInt == true) {
+                        if (closure.module.roundToInt == true) {
 
-                            obj.textComponent.SetText_INTERNAL(Mathf.RoundToInt(val).ToString(obj.formatValue));
+                            closure.module.textComponent.SetText_INTERNAL(Mathf.RoundToInt(val).ToString(closure.module.formatValue));
 
                         } else {
 
-                            obj.textComponent.SetText_INTERNAL(val.ToString(obj.formatValue));
+                            closure.module.textComponent.SetText_INTERNAL(val.ToString(closure.module.formatValue));
 
                         }
 
                     }
 
-                } else if (sourceValue == UnityEngine.UI.Windows.Components.SourceValue.Seconds) {
+                } else if (closure.sourceValue == UnityEngine.UI.Windows.Components.SourceValue.Seconds) {
                     
-                    obj.textComponent.SetText_INTERNAL(new UnityEngine.UI.Windows.Components.TextComponent.TimeFormatFromSeconds() { format = strFormat }.GetValue(value));
+                    closure.module.textComponent.SetText_INTERNAL(new UnityEngine.UI.Windows.Components.TextComponent.TimeFormatFromSeconds() { format = closure.strFormat }.GetValue(val));
                     
-                } else if (sourceValue == UnityEngine.UI.Windows.Components.SourceValue.Milliseconds) {
+                } else if (closure.sourceValue == UnityEngine.UI.Windows.Components.SourceValue.Milliseconds) {
                     
-                    obj.textComponent.SetText_INTERNAL(new UnityEngine.UI.Windows.Components.TextComponent.TimeFormatFromMilliseconds() { format = strFormat }.GetValue(value));
+                    closure.module.textComponent.SetText_INTERNAL(new UnityEngine.UI.Windows.Components.TextComponent.TimeFormatFromMilliseconds() { format = closure.strFormat }.GetValue(val));
                     
                 }
 
-                obj.setValueInternal = false;
+                closure.module.setValueInternal = false;
 
             });
 

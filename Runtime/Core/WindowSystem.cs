@@ -1252,6 +1252,12 @@ namespace UnityEngine.UI.Windows {
         /// <param name="instance"></param>
         public static void Clean(WindowBase instance) {
 
+            if (instance.GetState() != ObjectState.Hidden) {
+
+                throw new System.Exception($"WindowSystem.Clean failed because of instance state: {instance.GetState()} (required state: Hidden)");
+                
+            }
+
             instance.DoDeInit();
 
             var pools = WindowSystem.GetPools();
@@ -1285,13 +1291,45 @@ namespace UnityEngine.UI.Windows {
         
         public static void HideAll<T>(TransitionParameters parameters = default) where T : WindowBase {
 
-            WindowSystem.HideAll((x) => x is T, parameters);
+            WindowSystem.HideAll_INTERNAL((x) => x is T, parameters);
 
         }
 
         public static void HideAll(TransitionParameters parameters = default) {
 
-            WindowSystem.HideAll(null, parameters);
+            WindowSystem.HideAll_INTERNAL(null, parameters);
+
+        }
+
+        public static void HideAll(System.Predicate<WindowBase> predicate, TransitionParameters parameters = default) {
+
+            WindowSystem.HideAll_INTERNAL(predicate, parameters);
+
+        }
+
+        public static void HideAllAndClean<T>(System.Predicate<T> predicate, TransitionParameters parameters = default) where T : WindowBase {
+            
+            WindowSystem.HideAllAndClean((w) => w is T, parameters);
+            
+        }
+
+        public static void HideAllAndClean(System.Predicate<WindowBase> predicate, TransitionParameters parameters = default) {
+
+            var list = PoolList<WindowBase>.Spawn();
+            var cb = parameters.ReplaceCallback(() => {
+
+                foreach (var item in list) {
+                    WindowSystem.Clean(item);
+                }
+                parameters.RaiseCallback();
+                PoolList<WindowBase>.Recycle(ref list);
+                
+            });
+            WindowSystem.HideAll_INTERNAL(predicate, cb, (w) => {
+
+                list.Add(w);
+
+            });
 
         }
 
@@ -1301,7 +1339,7 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        public static void HideAll(System.Predicate<WindowBase> predicate, TransitionParameters parameters = default) {
+        private static void HideAll_INTERNAL(System.Predicate<WindowBase> predicate, TransitionParameters parameters, System.Action<WindowBase> onWindow = null) {
 
             var currentList = WindowSystem.instance.currentWindows;
             var count = currentList.Count;
@@ -1345,6 +1383,7 @@ namespace UnityEngine.UI.Windows {
                     }
                     
                     instance.BreakStateHierarchy();
+                    onWindow?.Invoke(instance);
                     instance.Hide(instanceParameters);
                     
                 }

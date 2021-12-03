@@ -286,6 +286,7 @@ namespace UnityEngine.UI.Windows.Components {
             
             var pools = WindowSystem.GetPools();
             var instance = pools.Spawn(asset, innerClosure.component.GetRoot());
+            innerClosure.data.index = innerClosure.component.items.Count;
             #if UNITY_EDITOR
             var profileMarker = new Unity.Profiling.ProfilerMarker("ListComponentBase::AddItemInternal::SetItemName (Editor Only)");
             profileMarker.Begin();

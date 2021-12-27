@@ -180,7 +180,7 @@ namespace UnityEngine.UI.Windows.Utilities {
                 UnityEditor.EditorUtility.SetDirty(this.obj);
                 this.isDirty = false;
                 //var root = UnityEditor.PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(this.obj);
-                Debug.Log($"Set Dirty: {this.obj}", this.obj);
+                //Debug.Log($"Set Dirty: {this.obj}", this.obj);
             }
             #endif
             

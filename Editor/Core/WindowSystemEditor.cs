@@ -291,8 +291,9 @@ namespace UnityEditor.UI.Windows {
 
                                     if (window is UnityEngine.UI.Windows.WindowTypes.LayoutWindowType layoutWindowType) {
 
-                                        EditorHelpers.UpdateLayoutWindow(layoutWindowType);
-                                        EditorUtility.SetDirty(layoutWindowType);
+                                        var helper = new DirtyHelper(layoutWindowType);
+                                        EditorHelpers.UpdateLayoutWindow(helper, layoutWindowType);
+                                        helper.Apply();
 
                                     }
 

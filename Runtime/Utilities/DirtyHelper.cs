@@ -42,7 +42,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             if (CheckArr(fieldValue, newValue) == false) {
 
-                Debug.Log("SetList: " + fieldValue + " :: " + newValue);
                 fieldValue = newValue;
                 this.isDirty = true;
                 return true;
@@ -62,7 +61,6 @@ namespace UnityEngine.UI.Windows.Utilities {
                     (arr1 != null && arr2 == null) ||
                     (arr1.Count != arr2.Count)) {
 
-                    Debug.Log("SetList LENGTH: " + arr1.Count + " :: " + arr2.Count);
                     return false;
 
                 }
@@ -72,7 +70,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 
                     var temp = arr1[i];
                     if (this.Set(ref temp, arr2[i]) == true) {
-                        Debug.Log("SetList ITEM: " + temp + " :: " + arr2[i]);
                         arr1[i] = arr2[i];
                         areEquals = false;
                     }
@@ -85,7 +82,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             if (CheckArr(fieldValue, newValue) == false) {
 
-                Debug.Log("SetList: " + fieldValue + " :: " + newValue);
                 fieldValue = newValue;
                 this.isDirty = true;
                 return true;
@@ -125,7 +121,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             if (CheckArr(fieldValue, newValue) == false) {
 
-                Debug.Log("SetArr: " + fieldValue + " :: " + newValue);
                 fieldValue = newValue;
                 this.isDirty = true;
                 return true;
@@ -140,7 +135,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             if (fieldValue.Equals(newValue) == false) {
 
-                Debug.Log("Set: " + fieldValue + " :: " + newValue);
                 fieldValue = newValue;
                 this.isDirty = true;
                 return true;
@@ -155,7 +149,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             if (fieldValue.Equals(newValue) == false) {
 
-                Debug.Log("SetObj: " + fieldValue + " :: " + newValue);
                 fieldValue = newValue;
                 this.isDirty = true;
                 return true;
@@ -170,7 +163,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             if (Equals(fieldValue, newValue) == false) {
 
-                Debug.Log("SetEnum: " + fieldValue + " :: " + newValue);
                 fieldValue = newValue;
                 this.isDirty = true;
                 return true;
@@ -187,8 +179,7 @@ namespace UnityEngine.UI.Windows.Utilities {
             if (this.isDirty == true) {
                 UnityEditor.EditorUtility.SetDirty(this.obj);
                 this.isDirty = false;
-                var root = UnityEditor.PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(this.obj);
-                Debug.Log($"Set Dirty Prefab root: {root}");
+                //var root = UnityEditor.PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(this.obj);
                 Debug.Log($"Set Dirty: {this.obj}", this.obj);
             }
             #endif

@@ -250,7 +250,9 @@ namespace UnityEditor.UI.Windows {
 
                                 if (componentsProp.serializedObject.targetObject is LayoutWindowType layoutWindowType) {
 
-                                    EditorHelpers.UpdateLayoutWindow(layoutWindowType);
+                                    var helper = new UnityEngine.UI.Windows.Utilities.DirtyHelper(layoutWindowType);
+                                    EditorHelpers.UpdateLayoutWindow(helper, layoutWindowType);
+                                    helper.Apply();
                                     
                                 }
 

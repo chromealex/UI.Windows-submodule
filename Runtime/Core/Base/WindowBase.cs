@@ -270,13 +270,19 @@
             
             base.ValidateEditor();
 
-            if (this.workCamera == null) this.workCamera = this.GetComponent<Camera>();
-            if (this.workCamera == null) this.workCamera = this.GetComponentInChildren<Camera>(true);
+            var helper = new UnityEngine.UI.Windows.Utilities.DirtyHelper(this);
+            if (this.workCamera == null) helper.SetObj(ref this.workCamera, this.GetComponent<Camera>());
+            if (this.workCamera == null) helper.SetObj(ref this.workCamera, this.GetComponentInChildren<Camera>(true));
             if (this.workCamera != null) {
 
-                this.workCamera.clearFlags = CameraClearFlags.Depth;
-                
+                var workCameraClearFlags = this.workCamera.clearFlags;
+                if (helper.SetEnum(ref workCameraClearFlags, CameraClearFlags.Depth) == true) {
+                    this.workCamera.clearFlags = workCameraClearFlags;
+                }
+
             }
+
+            helper.Apply();
 
         }
         #endif

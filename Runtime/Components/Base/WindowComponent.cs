@@ -242,7 +242,7 @@
 
     }
 
-    public abstract class WindowComponentModule : MonoBehaviour {
+    public abstract class WindowComponentModule : MonoBehaviour, IHolder {
 
         public WindowComponent windowComponent;
 

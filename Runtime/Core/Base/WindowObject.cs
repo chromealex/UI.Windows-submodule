@@ -76,13 +76,19 @@ namespace UnityEngine.UI.Windows {
         }
 
     }
+
+    public interface IHolder {
+
+        void ValidateEditor();
+
+    }
     
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
-    public abstract class WindowObject : MonoBehaviour, IOnPoolGet, IOnPoolAdd, ISearchComponentByTypeSingleEditor {
+    public abstract class WindowObject : MonoBehaviour, IOnPoolGet, IOnPoolAdd, ISearchComponentByTypeSingleEditor, IHolder {
 
         [System.Serializable]
-        public struct RenderItem {
+        public struct RenderItem : System.IEquatable<RenderItem> {
 
             public CanvasRenderer canvasRenderer;
             public Graphic graphics;
@@ -108,6 +114,23 @@ namespace UnityEngine.UI.Windows {
 
                 if (this.canvasRenderer != null) this.canvasRenderer.cullTransparentMesh = state;
 
+            }
+
+            public bool Equals(RenderItem other) {
+                return Equals(this.canvasRenderer, other.canvasRenderer) && Equals(this.graphics, other.graphics) && Equals(this.rectMask, other.rectMask);
+            }
+
+            public override bool Equals(object obj) {
+                return obj is RenderItem other && Equals(other);
+            }
+
+            public override int GetHashCode() {
+                unchecked {
+                    var hashCode = (this.canvasRenderer != null ? this.canvasRenderer.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (this.graphics != null ? this.graphics.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (this.rectMask != null ? this.rectMask.GetHashCode() : 0);
+                    return hashCode;
+                }
             }
 
         }
@@ -193,7 +216,7 @@ namespace UnityEngine.UI.Windows {
         }
         
         [System.Serializable]
-        public struct EditorParametersRegistry {
+        public struct EditorParametersRegistry : System.IEquatable<EditorParametersRegistry> {
 
             [SerializeField]
             private WindowObject holder;
@@ -203,7 +226,12 @@ namespace UnityEngine.UI.Windows {
             public bool holdHiddenByDefault;
             public bool holdAllowRegisterInRoot;
 
-            public WindowObject GetHolder() => this.holder;
+            public IHolder GetHolder() {
+
+                if (this.holder == null) return this.moduleHolder;
+                return this.holder;
+                
+            }
 
             public string GetHolderName() {
                 if (this.moduleHolder != null) return this.moduleHolder.name;
@@ -237,13 +265,31 @@ namespace UnityEngine.UI.Windows {
                        this.holdAllowRegisterInRoot == other.holdAllowRegisterInRoot;
 
             }
-            
+
+            public bool Equals(EditorParametersRegistry other) {
+                return Equals(this.holder, other.holder) && Equals(this.moduleHolder, other.moduleHolder) && this.holdHiddenByDefault == other.holdHiddenByDefault && this.holdAllowRegisterInRoot == other.holdAllowRegisterInRoot;
+            }
+
+            public override bool Equals(object obj) {
+                return obj is EditorParametersRegistry other && Equals(other);
+            }
+
+            public override int GetHashCode() {
+                unchecked {
+                    var hashCode = (this.holder != null ? this.holder.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (this.moduleHolder != null ? this.moduleHolder.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ this.holdHiddenByDefault.GetHashCode();
+                    hashCode = (hashCode * 397) ^ this.holdAllowRegisterInRoot.GetHashCode();
+                    return hashCode;
+                }
+            }
+
         }
         
         public List<EditorParametersRegistry> registry = null;
         
         public void AddEditorParametersRegistry(EditorParametersRegistry param) {
-            
+
             if (this.registry == null) this.registry = new List<EditorParametersRegistry>();
 
             if (this.registry.Any(x => x.IsEquals(param)) == false) {
@@ -254,11 +300,11 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private void ValidateRegistry() {
+        private void ValidateRegistry(DirtyHelper dirtyHelper) {
             
             if (this.registry != null && this.registry.Count > 0) {
 
-                var holders = new List<WindowObject>();
+                var holders = new List<IHolder>();
                 foreach (var reg in this.registry) {
 
                     if (reg.GetHolder() != null) {
@@ -269,13 +315,18 @@ namespace UnityEngine.UI.Windows {
                     
                 }
                 
+                var prevRegistry = this.registry.ToList();
                 this.registry.Clear();
                 foreach (var holder in holders) {
                     
-                    if (holder != this) holder.ValidateEditor();
+                    if ((MonoBehaviour)holder != this) holder.ValidateEditor();
                     
                 }
-                
+
+                var newRegistry = this.registry;
+                this.registry = prevRegistry;
+                dirtyHelper.Set(ref this.registry, newRegistry);
+
             }
             
         }
@@ -422,17 +473,25 @@ namespace UnityEngine.UI.Windows {
             this.rectTransform = this.GetComponent<RectTransform>();
 
             this.ValidateEditor(updateParentObjects: false, updateChildObjects: false);
-            
+
         }
 
         public void ValidateEditor(bool updateParentObjects, bool updateChildObjects = false) {
+            
+            var helper = new DirtyHelper(this);
+            this.ValidateEditor(helper, updateParentObjects: false, updateChildObjects: false);
+            helper.Apply();
+            
+        }
 
-            this.ValidateRegistry();
+        public void ValidateEditor(DirtyHelper dirtyHelper, bool updateParentObjects, bool updateChildObjects = false) {
 
-            this.objectState = ObjectState.NotInitialized;
-            this.isObjectRoot = (this.transform.parent == null);
-            this.objectCanvas = this.GetComponent<Canvas>();
-            this.hasObjectCanvas = (this.objectCanvas != null);
+            this.ValidateRegistry(dirtyHelper);
+
+            dirtyHelper.SetEnum(ref this.objectState, ObjectState.NotInitialized);
+            dirtyHelper.Set(ref this.isObjectRoot, (this.transform.parent == null));
+            dirtyHelper.SetObj(ref this.objectCanvas, this.GetComponent<Canvas>());
+            dirtyHelper.Set(ref this.hasObjectCanvas, (this.objectCanvas != null));
 
             { // Collect render items
 
@@ -468,21 +527,21 @@ namespace UnityEngine.UI.Windows {
 
                 canvasRenderers = canvasRenderers.Where(x => x != null).ToArray();
                 var rectMasks = this.GetComponentsInChildren<RectMask2D>().Where(x => x.GetComponentsInParent<WindowObject>(true)[0] == this).ToArray();
-                this.canvasRenderers = new RenderItem[canvasRenderers.Length + rectMasks.Length];
+                var newCanvasRenderers = new RenderItem[canvasRenderers.Length + rectMasks.Length];
                 var k = 0;
-                for (int i = 0; i < this.canvasRenderers.Length; ++i) {
+                for (int i = 0; i < newCanvasRenderers.Length; ++i) {
 
                     if (i < rectMasks.Length) {
 
-                        this.canvasRenderers[i] = new RenderItem() {
-                            rectMask = rectMasks[i]
+                        newCanvasRenderers[i] = new RenderItem() {
+                            rectMask = rectMasks[i],
                         };
 
                     } else {
 
-                        this.canvasRenderers[i] = new RenderItem() {
+                        newCanvasRenderers[i] = new RenderItem() {
                             canvasRenderer = canvasRenderers[k],
-                            graphics = canvasRenderers[k].GetComponent<UnityEngine.UI.Graphic>()
+                            graphics = canvasRenderers[k].GetComponent<UnityEngine.UI.Graphic>(),
                         };
 
                         ++k;
@@ -491,13 +550,15 @@ namespace UnityEngine.UI.Windows {
 
                 }
                 
+                dirtyHelper.Set(ref this.canvasRenderers, newCanvasRenderers);
+
             }
 
             var roots = this.GetComponentsInParent<WindowObject>(true);
-            if (roots.Length >= 2) this.rootObject = roots[1];
+            if (roots.Length >= 2) dirtyHelper.SetObj(ref this.rootObject, roots[1]);
             if (this.autoRegisterSubObjects == true) {
 
-                this.subObjects = this.GetComponentsInChildren<WindowObject>(true).Where(x => {
+                var newSubObjects = this.GetComponentsInChildren<WindowObject>(true).Where(x => {
 
                     if (x.allowRegisterInRoot == false) return false;
                     
@@ -508,6 +569,7 @@ namespace UnityEngine.UI.Windows {
                     return x != this && c == this;
 
                 }).ToList();
+                dirtyHelper.SetObj(ref this.subObjects, newSubObjects);
 
             }
 

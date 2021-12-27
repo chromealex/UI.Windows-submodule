@@ -704,7 +704,7 @@ namespace UnityEditor.UI.Windows {
 	        var hasAnyReg = false;
 	        var description = string.Empty;
 	        var holders = new System.Collections.Generic.List<string>();
-	        var holdersObjs = new System.Collections.Generic.List<Component>();
+	        var holdersObjs = new System.Collections.Generic.List<UnityEngine.UI.Windows.IHolder>();
 	        if (regCheck != null) {
 
 		        description = $"Value is hold by "; //{string.Join(", ", holders)}";
@@ -778,7 +778,7 @@ namespace UnityEditor.UI.Windows {
 						        Handles.EndGUI();
 						        if (GUI.Button(position, holders[i], style) == true) {
 							        
-							        EditorGUIUtility.PingObject(holdersObjs[i - 1]);
+							        EditorGUIUtility.PingObject((Component)holdersObjs[i - 1]);
 							        
 						        }
 

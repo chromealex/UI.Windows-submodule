@@ -13,7 +13,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
     public class LayoutItem {
 
         [System.Serializable]
-        public struct LayoutComponentItem {
+        public struct LayoutComponentItem : System.IEquatable<LayoutComponentItem> {
 
             public WindowLayout windowLayout;
             public int tag;
@@ -23,6 +23,25 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             
             [System.NonSerialized]
             internal WindowComponent componentInstance;
+
+            public bool Equals(LayoutComponentItem other) {
+                return Equals(this.windowLayout, other.windowLayout) && this.tag == other.tag && this.localTag == other.localTag && this.component.Equals(other.component) && Equals(this.componentInstance, other.componentInstance);
+            }
+
+            public override bool Equals(object obj) {
+                return obj is LayoutComponentItem other && Equals(other);
+            }
+
+            public override int GetHashCode() {
+                unchecked {
+                    var hashCode = (this.windowLayout != null ? this.windowLayout.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ this.tag;
+                    hashCode = (hashCode * 397) ^ this.localTag;
+                    hashCode = (hashCode * 397) ^ this.component.GetHashCode();
+                    hashCode = (hashCode * 397) ^ (this.componentInstance != null ? this.componentInstance.GetHashCode() : 0);
+                    return hashCode;
+                }
+            }
 
         }
 
@@ -76,9 +95,9 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
-        public void Validate() {
+        public void Validate(DirtyHelper helper) {
 
-            this.localTag = 0;
+            helper.Set(ref this.localTag, 0);
 
         }
 
@@ -331,7 +350,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
-        public void Add(int tag, WindowLayout windowLayout) {
+        public void Add(DirtyHelper helper, int tag, WindowLayout windowLayout) {
 
             for (int i = 0; i < this.components.Length; ++i) {
 
@@ -351,11 +370,11 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                 localTag = ++this.localTag,
                 windowLayout = windowLayout,
             });
-            this.components = list.ToArray();
+            helper.Set(ref this.components, list.ToArray());
 
         }
 
-        public void Remove(int tag, WindowLayout windowLayout) {
+        public void Remove(DirtyHelper helper, int tag, WindowLayout windowLayout) {
 
             for (int i = 0; i < this.components.Length; ++i) {
 
@@ -363,7 +382,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                     var list = this.components.ToList();
                     list.RemoveAt(i);
-                    this.components = list.ToArray();
+                    helper.Set(ref this.components, list.ToArray());
 
                 }
 
@@ -615,7 +634,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
-        private void ValidateLayout(ref LayoutItem layoutItem, WindowLayout windowLayout, HashSet<WindowLayout> used) {
+        private void ValidateLayout(DirtyHelper helper, ref LayoutItem layoutItem, WindowLayout windowLayout, HashSet<WindowLayout> used) {
 
             used.Add(windowLayout);
 
@@ -625,7 +644,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                 var com = layoutItem.components[j];
                 if (com.localTag == 0 || layoutItem.components.Count(x => x.localTag == com.localTag) > 1) {
 
-                    com.localTag = this.GetNextLocalTagId(layoutItem);
+                    helper.Set(ref com.localTag, this.GetNextLocalTagId(layoutItem));
 
                 }
 
@@ -647,7 +666,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                     var tag = layoutItem.components[j].tag;
                     if (windowLayout.HasLayoutElementByTagId(tag) == false) {
 
-                        layoutItem.Remove(tag, windowLayout);
+                        layoutItem.Remove(helper, tag, windowLayout);
 
                     }
 
@@ -666,14 +685,14 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                 }
                 if (layoutElement.hideInScreen == true) {
                 
-                    layoutItem.Remove(layoutElement.tagId, windowLayout);
+                    layoutItem.Remove(helper, layoutElement.tagId, windowLayout);
                     continue;
                     
                 }
                 
                 if (layoutItem.GetLayoutComponentItemByTagId(layoutElement.tagId, windowLayout, out var layoutComponentItem) == false) {
 
-                    layoutItem.Add(layoutElement.tagId, windowLayout);
+                    layoutItem.Add(helper, layoutElement.tagId, windowLayout);
 
                 }
 
@@ -681,12 +700,11 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                     if (used.Contains(layoutElement.innerLayout) == false) {
 
-                        this.ValidateLayout(ref layoutItem, layoutElement.innerLayout, used);
+                        this.ValidateLayout(helper, ref layoutItem, layoutElement.innerLayout, used);
 
                     } else {
 
-                        Debug.LogWarning("Ignoring inner layout `" + layoutElement.innerLayout + "` because of a cycle. Remove innerLayout reference from " + layoutElement,
-                                         layoutElement);
+                        Debug.LogWarning($"Ignoring inner layout `{layoutElement.innerLayout}` because of a cycle. Remove innerLayout reference from {layoutElement}", layoutElement);
 
                     }
 
@@ -703,13 +721,14 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             var items = this.layouts.items;
             if (items == null) return;
             
+            var helper = new UnityEngine.UI.Windows.Utilities.DirtyHelper(this);
             for (int i = 0; i < items.Length; ++i) {
 
                 ref var layoutItem = ref items[i];
                 if (layoutItem == null) {
-                    layoutItem = new LayoutItem();
+                    helper.SetObj(ref layoutItem, new LayoutItem());
                 }
-                layoutItem.Validate();
+                layoutItem.Validate(helper);
 
                 var windowLayout = layoutItem.windowLayout;
                 if (windowLayout != null) {
@@ -728,7 +747,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                                 var list = layoutItem.components.ToList();
                                 list.RemoveAt(c);
-                                layoutItem.components = list.ToArray();
+                                helper.SetObj(ref layoutItem.components, list.ToArray());
                                 --c;
 
                             }
@@ -738,16 +757,17 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                     }
 
                     var used = new HashSet<WindowLayout>();
-                    this.ValidateLayout(ref layoutItem, windowLayout, used);
+                    this.ValidateLayout(helper, ref layoutItem, windowLayout, used);
 
                     used.Clear();
-                    this.ValidateLayout(ref layoutItem, windowLayout, used);
+                    this.ValidateLayout(helper, ref layoutItem, windowLayout, used);
 
                 }
 
             }
 
             this.layouts.items = items;
+            helper.Apply();
 
         }
 

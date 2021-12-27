@@ -347,7 +347,7 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        public static void UpdateLayoutWindow(UnityEngine.UI.Windows.WindowTypes.LayoutWindowType layoutWindowType) {
+        public static void UpdateLayoutWindow(UnityEngine.UI.Windows.Utilities.DirtyHelper helper, UnityEngine.UI.Windows.WindowTypes.LayoutWindowType layoutWindowType) {
         
             var itemsLayout = layoutWindowType.layouts.items;
             if (itemsLayout != null) {
@@ -359,7 +359,7 @@ namespace UnityEditor.UI.Windows {
                         layoutItem = new UnityEngine.UI.Windows.WindowTypes.LayoutItem();
                     }
 
-                    layoutItem.Validate();
+                    layoutItem.Validate(helper);
 
                     var windowLayoutType = layoutItem.windowLayout;
                     if (windowLayoutType != null) {

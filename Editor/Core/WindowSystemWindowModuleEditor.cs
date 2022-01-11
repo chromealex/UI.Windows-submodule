@@ -14,7 +14,6 @@ namespace UnityEditor.UI.Windows {
 
         private SerializedProperty createPool;
         
-        private SerializedProperty objectState;
         private SerializedProperty animationParameters;
         private SerializedProperty subObjects;
 
@@ -24,7 +23,10 @@ namespace UnityEditor.UI.Windows {
         private SerializedProperty autoRegisterSubObjects;
         private SerializedProperty hiddenByDefault;
 
-        private SerializedProperty defaultOrder;
+        private SerializedProperty parameters;
+
+        private SerializedProperty useSafeZone;
+        private SerializedProperty safeZone;
 
         private int selectedTab {
             get {
@@ -64,7 +66,6 @@ namespace UnityEditor.UI.Windows {
 
             this.createPool = this.serializedObject.FindProperty("createPool");
             
-            this.objectState = this.serializedObject.FindProperty("objectState");
             this.animationParameters = this.serializedObject.FindProperty("animationParameters");
             this.renderBehaviourOnHidden = this.serializedObject.FindProperty("renderBehaviourOnHidden");
 
@@ -74,9 +75,46 @@ namespace UnityEditor.UI.Windows {
             this.autoRegisterSubObjects = this.serializedObject.FindProperty("autoRegisterSubObjects");
             this.hiddenByDefault = this.serializedObject.FindProperty("hiddenByDefault");
             
-            this.defaultOrder = this.serializedObject.FindProperty("defaultOrder");
+            this.parameters = this.serializedObject.FindProperty("parameters");
+            this.ValidateParameters();
         
+            this.useSafeZone = this.serializedObject.FindProperty("useSafeZone");
+            this.safeZone = this.serializedObject.FindProperty("safeZone");
+
             EditorHelpers.SetFirstSibling(this.targets);
+
+        }
+
+        private void ValidateParameters() {
+            
+            if (string.IsNullOrEmpty(this.parameters.managedReferenceFullTypename) == true) {
+                
+                this.parameters.managedReferenceValue = new WindowModule.Parameters();
+                
+            }
+            
+        }
+
+        private void DrawParameters() {
+
+            this.ValidateParameters();
+            
+            var p = this.parameters.Copy();
+            if (p.hasVisibleChildren == true) {
+
+                GUILayoutExt.DrawHeader("Module Options (Default)");
+
+                var px = this.parameters.Copy();
+                px.NextVisible(true);
+                var depth = px.depth;
+                while (px.depth >= depth) {
+                    
+                    EditorGUILayout.PropertyField(px, true);
+                    if (px.NextVisible(false) == false) break;
+                    
+                }
+
+            }
 
         }
 
@@ -86,7 +124,7 @@ namespace UnityEditor.UI.Windows {
             
             GUILayoutExt.DrawComponentHeader(this.serializedObject, "M", () => {
                 
-                GUILayoutExt.DrawComponentHeaderItem("State", GUILayoutExt.GetPropertyToString(this.objectState));
+                GUILayoutExt.DrawComponentHeaderItem("State", ((WindowObject)this.target).GetState().ToString());
 
             }, new Color(1f, 0.6f, 1f, 0.4f));
             
@@ -106,8 +144,7 @@ namespace UnityEditor.UI.Windows {
                     GUILayoutExt.DrawHeader("Performance Options");
                     EditorGUILayout.PropertyField(this.createPool);
                     
-                    GUILayoutExt.DrawHeader("Module Options");
-                    EditorGUILayout.PropertyField(this.defaultOrder);
+                    this.DrawParameters();
 
                 }),
                 new GUITab("Advanced", () => {
@@ -127,30 +164,43 @@ namespace UnityEditor.UI.Windows {
                     GUILayoutExt.DrawHeader("Performance Options");
                     EditorGUILayout.PropertyField(this.createPool);
 
-                    GUILayoutExt.DrawHeader("Module Options");
-                    EditorGUILayout.PropertyField(this.defaultOrder);
+                    this.DrawParameters();
 
+                }),
+                new GUITab("Tools", () => {
+
+                    GUILayoutExt.Box(4f, 4f, () => {
+                        
+                        if (GUILayout.Button("Collect Images", GUILayout.Height(30f)) == true) {
+
+                            var images = new List<ImageCollectionItem>();
+                            this.lastImagesPreview = EditorHelpers.CollectImages(this.target, images);
+                            this.lastImages = images;
+
+                        }
+
+                        GUILayoutExt.DrawImages(this.lastImagesPreview, this.lastImages);
+                        
+                    });
+                    
                 })
                 );
             this.tabScrollPosition = scroll;
             
             GUILayout.Space(10f);
-        
-            var iter = this.serializedObject.GetIterator();
-            iter.NextVisible(true);
-            do {
-
-                if (EditorHelpers.IsFieldOfTypeBeneath(this.serializedObject.targetObject.GetType(), typeof(WindowModule), iter.propertyPath) == true) {
-
-                    EditorGUILayout.PropertyField(iter);
-
-                }
-
-            } while (iter.NextVisible(false) == true);
+            
+            if (this.targets.Length == 1) GUILayoutExt.DrawSafeAreaFields(this.target, this.useSafeZone, this.safeZone);
+            
+            GUILayout.Space(10f);
+            
+            GUILayoutExt.DrawFieldsBeneath(this.serializedObject, typeof(WindowModule));
 
             this.serializedObject.ApplyModifiedProperties();
 
         }
+
+        private Texture2D lastImagesPreview;
+        private List<ImageCollectionItem> lastImages;
 
     }
 

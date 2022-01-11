@@ -1,13 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 namespace UnityEngine.UI.Windows {
     
     using Utilities;
     
     [ComponentModuleDisplayName("Arrangement")]
-    public class ListArrangementComponentModule : ListComponentModule {
+    public class ListArrangementComponentModule : ListComponentDraggableModule {
 
         public enum Type {
 
@@ -102,23 +100,17 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public override void OnDragBegin(UnityEngine.EventSystems.PointerEventData data) {
+        public override void OnBeginDrag(UnityEngine.EventSystems.PointerEventData data) {
 	        
-	        base.OnDragBegin(data);
-
 	        this.isDragging = true;
 
         }
 
-        public override void OnDragMove(UnityEngine.EventSystems.PointerEventData data) {
-	        
-	        base.OnDragMove(data);
+        public override void OnDrag(UnityEngine.EventSystems.PointerEventData data) {
 	        
         }
 
-        public override void OnDragEnd(UnityEngine.EventSystems.PointerEventData data) {
-	        
-	        base.OnDragEnd(data);
+        public override void OnEndDrag(UnityEngine.EventSystems.PointerEventData data) {
 	        
 	        this.isDragging = false;
 
@@ -237,7 +229,7 @@ namespace UnityEngine.UI.Windows {
 
 		            if (c == 1) {
 
-			            var middle = center / count;
+			            var middle = (count > 1 ? center / count : Vector2.zero);
 			            tr.rectTransform.anchoredPosition = new Vector2(p.x - middle.x, p.y - middle.y);
 			            this.tracker.Add(this, tr.rectTransform, DrivenTransformProperties.AnchoredPosition);
 			            

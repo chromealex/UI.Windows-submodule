@@ -140,7 +140,7 @@ namespace UnityEditor.UI.Windows {
                     EditorGUILayout.PropertyField(layoutPreferences);
                     if (layoutPreferences.objectReferenceValue == null) {
                         
-                        EditorGUILayout.HelpBox("Layout Preferences are CanvasScaler override parameters. It's highly recommended to use override here.", MessageType.Info);
+                        EditorGUILayout.HelpBox("Layout Preferences are CanvasScaler override parameters. It's highly recommended to use override here.", MessageType.Warning);
                         
                     }
 
@@ -244,10 +244,18 @@ namespace UnityEditor.UI.Windows {
                             GUI.Label(rect, "Components");
                             var buttonRect = rect;
                             var width = 80f;
-                            buttonRect.x = rect.width - width;
+                            buttonRect.x = rect.width - width + 40f;
                             buttonRect.width = width;
                             if (GUI.Button(buttonRect, "Refresh") == true) {
-                                
+
+                                if (componentsProp.serializedObject.targetObject is LayoutWindowType layoutWindowType) {
+
+                                    var helper = new UnityEngine.UI.Windows.Utilities.DirtyHelper(layoutWindowType);
+                                    EditorHelpers.UpdateLayoutWindow(helper, layoutWindowType);
+                                    helper.Apply();
+                                    
+                                }
+
                                 (componentsProp.serializedObject.targetObject as WindowObject).ValidateEditor();
                                 EditorHelpers.SetDirtyAndValidate(property);
                                 

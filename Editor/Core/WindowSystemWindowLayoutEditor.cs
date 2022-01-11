@@ -14,7 +14,6 @@ namespace UnityEditor.UI.Windows {
 
         private SerializedProperty createPool;
         
-        private SerializedProperty objectState;
         private SerializedProperty animationParameters;
         private SerializedProperty subObjects;
 
@@ -65,7 +64,6 @@ namespace UnityEditor.UI.Windows {
 
             this.createPool = this.serializedObject.FindProperty("createPool");
             
-            this.objectState = this.serializedObject.FindProperty("objectState");
             this.animationParameters = this.serializedObject.FindProperty("animationParameters");
             this.renderBehaviourOnHidden = this.serializedObject.FindProperty("renderBehaviourOnHidden");
 
@@ -129,7 +127,7 @@ namespace UnityEditor.UI.Windows {
             
             GUILayoutExt.DrawComponentHeader(this.serializedObject, "L", () => {
                 
-                GUILayoutExt.DrawComponentHeaderItem("State", GUILayoutExt.GetPropertyToString(this.objectState));
+                GUILayoutExt.DrawComponentHeaderItem("State", ((WindowObject)this.target).GetState().ToString());
 
             }, new Color(1f, 0.6f, 0f, 0.4f));
             
@@ -169,72 +167,41 @@ namespace UnityEditor.UI.Windows {
                     GUILayoutExt.DrawHeader("Performance Options");
                     EditorGUILayout.PropertyField(this.createPool);
 
+                }),
+                new GUITab("Tools", () => {
+
+                    GUILayoutExt.Box(4f, 4f, () => {
+                        
+                        if (GUILayout.Button("Collect Images", GUILayout.Height(30f)) == true) {
+
+                            var images = new List<ImageCollectionItem>();
+                            this.lastImagesPreview = EditorHelpers.CollectImages(this.target, images);
+                            this.lastImages = images;
+
+                        }
+
+                        GUILayoutExt.DrawImages(this.lastImagesPreview, this.lastImages);
+                        
+                    });
+                    
                 })
-                );
+            );
             this.tabScrollPosition = scroll;
             
             GUILayout.Space(10f);
 
-            EditorGUILayout.PropertyField(this.useSafeZone);
-            if (this.useSafeZone.boolValue == true) {
-                
-                GUILayoutExt.Box(6f, 2f, () => {
-                    
-                    EditorGUILayout.PropertyField(this.safeZone);
-                    if (this.safeZone.objectReferenceValue == null && this.targets.Length == 1) {
-
-                        GUILayoutExt.Box(2f, 2f, () => {
-                            
-                            GUILayout.BeginHorizontal();
-                            GUILayout.FlexibleSpace();
-                            if (GUILayout.Button("Generate", GUILayout.Width(80f), GUILayout.Height(30f)) == true) {
-
-                                var obj = (Component)this.target;
-                                if (PrefabUtility.IsPartOfAnyPrefab(obj) == true) {
-
-                                    var path = AssetDatabase.GetAssetPath(obj.gameObject);
-                                    using (var edit = new EditPrefabAssetScope(path)) {
-
-                                        EditorHelpers.AddSafeZone(edit.prefabRoot.transform);
-                                
-                                    }
-                            
-                                } else {
-
-                                    var root = obj.gameObject;
-                                    EditorHelpers.AddSafeZone(root.transform);
-                            
-                                }
-                        
-                            }
-                            GUILayout.FlexibleSpace();
-                            GUILayout.EndHorizontal();
-                            
-                        }, GUIStyle.none);
-                        
-                    }
-
-                });
-                
-            }
+            if (this.targets.Length == 1) GUILayoutExt.DrawSafeAreaFields(this.target, this.useSafeZone, this.safeZone);
             
             GUILayout.Space(10f);
-        
-            var iter = this.serializedObject.GetIterator();
-            iter.NextVisible(true);
-            do {
 
-                if (EditorHelpers.IsFieldOfTypeBeneath(this.serializedObject.targetObject.GetType(), typeof(WindowLayout), iter.propertyPath) == true) {
-
-                    EditorGUILayout.PropertyField(iter);
-
-                }
-
-            } while (iter.NextVisible(false) == true);
+            GUILayoutExt.DrawFieldsBeneath(this.serializedObject, typeof(WindowLayout));
 
             this.serializedObject.ApplyModifiedProperties();
 
         }
+        
+        private Texture2D lastImagesPreview;
+        private List<ImageCollectionItem> lastImages;
 
     }
 

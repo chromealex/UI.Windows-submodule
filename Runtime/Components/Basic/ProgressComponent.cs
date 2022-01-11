@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace UnityEngine.UI.Windows.Components {
     
@@ -18,9 +16,9 @@ namespace UnityEngine.UI.Windows.Components {
         private System.Action<ProgressComponent, float> callbackWithInstance;
         private bool ignoreCallbacks;
 
-        public override void OnInit() {
+        internal override void OnInitInternal() {
             
-            base.OnInit();
+            base.OnInitInternal();
             
             this.slider.onValueChanged.AddListener(this.OnValueChanged);
             
@@ -31,14 +29,6 @@ namespace UnityEngine.UI.Windows.Components {
             base.OnDeInitInternal();
             
             this.ResetInstance();
-
-        }
-
-        public override void OnPoolAdd() {
-            
-            base.OnPoolAdd();
-
-            this.RemoveCallbacks();
 
         }
 
@@ -64,6 +54,12 @@ namespace UnityEngine.UI.Windows.Components {
         public float GetMaxValue() {
 
             return this.slider.maxValue;
+
+        }
+
+        public void SetWholeNumbers(bool state) {
+
+            this.slider.wholeNumbers = state;
 
         }
 
@@ -161,7 +157,7 @@ namespace UnityEngine.UI.Windows.Components {
             
             base.ValidateEditor();
 
-            this.slider = this.GetComponent<Slider>();
+			if (this.slider == null) this.slider = this.GetComponent<Slider>();
 
         }
 

@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace UnityEngine.UI.Windows.Components {
     
@@ -12,20 +10,128 @@ namespace UnityEngine.UI.Windows.Components {
         IList ISearchComponentByTypeSingleEditor.GetSearchTypeArray() { return this.componentModules.modules;}
 
         [RequiredReference]
-        public InputField inputField;
+        public Selectable inputField;
         public TextComponent placeholder;
         
         private System.Action<string> callbackOnEditEnd;
         private System.Action<string> callbackOnChanged;
         private System.Func<string, int, char, char> callbackValidateChar;
 
-        public override void OnInit() {
+        private void AddValueChangedListener(UnityEngine.Events.UnityAction<string> action) {
+
+            if (this.inputField is InputField inputField) {
+                
+                inputField.onValueChanged.AddListener(action);
+                
+            }
             
-            base.OnInit();
+            #if TEXTMESHPRO_SUPPORT
+            if (this.inputField is TMPro.TMP_InputField tmpInputField) {
+                
+                tmpInputField.onValueChanged.AddListener(action);
+                
+            }
+            #endif
             
-            this.inputField.onValueChanged.AddListener(this.OnValueChanged);
-            this.inputField.onEndEdit.AddListener(this.OnEndEdit);
-            this.inputField.onValidateInput += this.OnValidateChar;
+        }
+
+        private void AddEndEditListener(UnityEngine.Events.UnityAction<string> action) {
+
+            if (this.inputField is InputField inputField) {
+                
+                inputField.onEndEdit.AddListener(action);
+                
+            }
+            
+            #if TEXTMESHPRO_SUPPORT
+            if (this.inputField is TMPro.TMP_InputField tmpInputField) {
+                
+                tmpInputField.onEndEdit.AddListener(action);
+                
+            }
+            #endif
+            
+        }
+
+        private void AddValidateCharListener() {
+
+            if (this.inputField is InputField inputField) {
+                
+                inputField.onValidateInput += this.OnValidateChar;
+                
+            }
+            
+            #if TEXTMESHPRO_SUPPORT
+            if (this.inputField is TMPro.TMP_InputField tmpInputField) {
+                
+                tmpInputField.onValidateInput += this.OnValidateChar;
+                
+            }
+            #endif
+            
+        }
+
+        private void RemoveValueChangedListener(UnityEngine.Events.UnityAction<string> action) {
+
+            if (this.inputField is InputField inputField) {
+                
+                inputField.onValueChanged.RemoveListener(action);
+                
+            }
+            
+            #if TEXTMESHPRO_SUPPORT
+            if (this.inputField is TMPro.TMP_InputField tmpInputField) {
+                
+                tmpInputField.onValueChanged.RemoveListener(action);
+                
+            }
+            #endif
+            
+        }
+
+        private void RemoveEndEditListener(UnityEngine.Events.UnityAction<string> action) {
+
+            if (this.inputField is InputField inputField) {
+                
+                inputField.onEndEdit.RemoveListener(action);
+                
+            }
+            
+            #if TEXTMESHPRO_SUPPORT
+            if (this.inputField is TMPro.TMP_InputField tmpInputField) {
+                
+                tmpInputField.onEndEdit.RemoveListener(action);
+                
+            }
+            #endif
+            
+        }
+
+        private void RemoveValidateCharListener() {
+
+            if (this.inputField is InputField inputField) {
+                
+                inputField.onValidateInput -= this.OnValidateChar;
+                
+            }
+            
+            #if TEXTMESHPRO_SUPPORT
+            if (this.inputField is TMPro.TMP_InputField tmpInputField) {
+                
+                tmpInputField.onValidateInput -= this.OnValidateChar;
+                
+            }
+            #endif
+            
+        }
+
+        internal override void OnInitInternal() {
+            
+            base.OnInitInternal();
+
+            this.AddValueChangedListener(this.OnValueChanged);
+            this.AddEndEditListener(this.OnEndEdit);
+            this.AddValidateCharListener();
             
         }
 
@@ -33,23 +139,9 @@ namespace UnityEngine.UI.Windows.Components {
             
             base.OnDeInitInternal();
 
-            this.ResetInstance();
-
-        }
-
-        public override void OnPoolAdd() {
-            
-            base.OnPoolAdd();
-
-            this.RemoveCallbacks();
-
-        }
-
-        private void ResetInstance() {
-            
-            this.inputField.onValueChanged.RemoveListener(this.OnValueChanged);
-            this.inputField.onEndEdit.RemoveListener(this.OnEndEdit);
-            this.inputField.onValidateInput -= this.OnValidateChar;
+            this.RemoveValueChangedListener(this.OnValueChanged);
+            this.RemoveEndEditListener(this.OnEndEdit);
+            this.RemoveValidateCharListener();
             
             this.RemoveCallbacks();
 
@@ -57,26 +149,52 @@ namespace UnityEngine.UI.Windows.Components {
 
         public void Clear() {
 
-            this.inputField.text = string.Empty;
-
+            this.SetText(string.Empty);
+            
         }
 
         public bool IsFocused() {
 
-            return this.inputField.isFocused;
+            if (this.inputField is InputField inputField) {
+                
+                return inputField.isFocused;
+                
+            }
+            
+            #if TEXTMESHPRO_SUPPORT
+            if (this.inputField is TMPro.TMP_InputField tmpInputField) {
+
+                return tmpInputField.isFocused;
+
+            }
+            #endif
+
+            return false;
 
         }
 
         public void SetFocus() {
             
             this.inputField.Select();
-            this.inputField.ActivateInputField();
+            if (this.inputField is InputField inputField) {
+                
+                inputField.ActivateInputField();
+                
+            }
+            
+            #if TEXTMESHPRO_SUPPORT
+            if (this.inputField is TMPro.TMP_InputField tmpInputField) {
+
+                tmpInputField.ActivateInputField();
+
+            }
+            #endif
             
         }
 
-        public InputField GetSource() {
+        public T GetSource<T>() where T : Selectable {
 
-            return this.inputField;
+            return (T)this.inputField;
 
         }
 
@@ -101,14 +219,42 @@ namespace UnityEngine.UI.Windows.Components {
         }
         
         public string GetText() {
+            
+            if (this.inputField is InputField inputField) {
+                
+                return inputField.text;
+                
+            }
+            
+            #if TEXTMESHPRO_SUPPORT
+            if (this.inputField is TMPro.TMP_InputField tmpInputField) {
 
-            return this.inputField.text;
+                return tmpInputField.text;
+
+            }
+            #endif
+            
+            return null;
 
         }
 
         public void SetText(string text) {
 
-            this.inputField.text = text;
+            if (text == null) text = string.Empty;
+            
+            if (this.inputField is InputField inputField) {
+                
+                inputField.text = text;
+                
+            }
+            
+            #if TEXTMESHPRO_SUPPORT
+            if (this.inputField is TMPro.TMP_InputField tmpInputField) {
+
+                tmpInputField.text = text;
+
+            }
+            #endif
 
         }
 
@@ -225,7 +371,10 @@ namespace UnityEngine.UI.Windows.Components {
             
             base.ValidateEditor();
 
-            this.inputField = this.GetComponent<InputField>();
+            if (this.inputField == null) this.inputField = this.GetComponent<InputField>();
+            #if TEXTMESHPRO_SUPPORT
+            if (this.inputField == null) this.inputField = this.GetComponent<TMPro.TMP_InputField>();
+            #endif
 
         }
 

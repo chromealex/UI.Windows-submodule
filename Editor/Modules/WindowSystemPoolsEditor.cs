@@ -11,6 +11,12 @@ namespace UnityEditor.UI.Windows {
     [CustomEditor(typeof(WindowSystemPools))]
     public class WindowSystemPoolsEditor : Editor {
 
+        public void OnEnable() {
+
+            EditorApplication.update += this.Repaint;
+
+        }
+
         public override void OnInspectorGUI() {
 
             GUILayoutExt.DrawComponentHeader(this.serializedObject, "EXT", () => {

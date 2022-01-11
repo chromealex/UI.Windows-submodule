@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace UnityEngine.UI.Windows {
+﻿namespace UnityEngine.UI.Windows {
 
     public class HoverComponentModule : ButtonComponentModule, UnityEngine.EventSystems.IPointerEnterHandler, UnityEngine.EventSystems.IPointerExitHandler {
 
@@ -15,12 +11,34 @@ namespace UnityEngine.UI.Windows {
 
             if (this.content != null) {
 
-                this.content.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry() {
-                    holder = this.windowComponent,
-                    hiddenByDefault = true, hiddenByDefaultDescription = "Value is hold by HoverComponentModule",
+                this.content.hiddenByDefault = true;
+                this.content.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                    holdHiddenByDefault = true,
                 });
 
             }
+
+        }
+
+        public override void OnInit() {
+            
+            base.OnInit();
+
+            WindowSystem.onPointerUp += this.OnPointerUp;
+
+        }
+
+        public override void OnDeInit() {
+            
+            WindowSystem.onPointerUp -= this.OnPointerUp;
+            
+            base.OnDeInit();
+            
+        }
+
+        private void OnPointerUp() {
+            
+            if (this.content != null) this.content.Hide();
 
         }
 

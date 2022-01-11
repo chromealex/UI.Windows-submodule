@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
-
-namespace UnityEngine.UI.Windows.Components {
+﻿namespace UnityEngine.UI.Windows.Components {
 
     public interface ICheckboxGroup {
 
@@ -28,8 +25,8 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.checkedContainer != null) {
 
                 this.checkedContainer.hiddenByDefault = true;
-                this.checkedContainer.AddEditorParametersRegistry(new EditorParametersRegistry() {
-                    holder = this, hiddenByDefault = true, hiddenByDefaultDescription = "Value is hold by CheckboxButtonComponent"
+                this.checkedContainer.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
+                    holdHiddenByDefault = true,
                 });
 
             }
@@ -37,8 +34,8 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.uncheckedContainer != null) {
 
                 this.uncheckedContainer.hiddenByDefault = true;
-                this.uncheckedContainer.AddEditorParametersRegistry(new EditorParametersRegistry() {
-                    holder = this, hiddenByDefault = true, hiddenByDefaultDescription = "Value is hold by CheckboxButtonComponent"
+                this.uncheckedContainer.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
+                    holdHiddenByDefault = true,
                 });
 
             }
@@ -53,7 +50,7 @@ namespace UnityEngine.UI.Windows.Components {
 
             if (this.autoToggle == true) {
 
-                this.button.onClick.AddListener(this.Toggle);
+                this.button.onClick.AddListener(this.ToggleInternal);
 
             }
 
@@ -61,15 +58,9 @@ namespace UnityEngine.UI.Windows.Components {
 
         internal override void OnDeInitInternal() {
             
-            this.button.onClick.RemoveListener(this.Toggle);
+            this.button.onClick.RemoveAllListeners();
 
             base.OnDeInitInternal();
-
-        }
-
-        public override void OnPoolAdd() {
-            
-            base.OnPoolAdd();
 
         }
 
@@ -87,17 +78,36 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public void SetCheckedState(bool state, bool call = true) {
+        internal void ToggleInternal() {
+
+            this.SetCheckedStateInternal(!this.isChecked);
+
+        }
+
+        internal void SetCheckedStateInternal(bool state, bool call = true, bool checkGroup = true) {
+
+            if (this.CanClick() == false) return;
+
+            WindowSystem.InteractWith(this);
+            
+            this.SetCheckedState(state, call, checkGroup);
+            
+        }
+
+        public void SetCheckedState(bool state, bool call = true, bool checkGroup = true) {
 
             var stateChanged = this.isChecked != state;
             this.isChecked = state;
-            if (this.group != null) {
-                if (state == false && this.group.CanBeUnchecked(this) == false) {
-                    this.isChecked = true;
-                    stateChanged = false;
-                }
-
-                if (this.isChecked) {
+            if (checkGroup == true && this.group != null) {
+                if (state == false) {
+                    if (this.group.CanBeUnchecked(this) == false) {
+                        this.isChecked = true;
+                        state = true;
+                        if (stateChanged == true) {
+                            stateChanged = false;
+                        }
+                    }
+                } else {
                     this.group.OnChecked(this);
                 }
             }

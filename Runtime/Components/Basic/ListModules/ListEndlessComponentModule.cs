@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 namespace UnityEngine.UI.Windows {
-    
+
     using Utilities;
 
     public interface IEndlessElement {
@@ -37,6 +35,10 @@ namespace UnityEngine.UI.Windows {
             private int loadingCount;
             private bool isDirty;
             private bool forceRebuild;
+            private int fromIndex = -1;
+            private int toIndex = -1;
+            private int prevFromIndex;
+            private int prevToIndex;
 
             public override void Clear() {
                 
@@ -67,37 +69,53 @@ namespace UnityEngine.UI.Windows {
                 var fromIndex = this.module.fromIndex;
                 var toIndex = this.module.toIndex;
                 var contentSize = this.module.contentSize;
+                if (this.fromIndex != fromIndex ||
+                    this.toIndex != toIndex) {
+
+                    this.prevFromIndex = this.fromIndex;
+                    this.prevToIndex = this.toIndex;
+                    this.fromIndex = fromIndex;
+                    this.toIndex = toIndex;
+                    this.isDirty = true;
+
+                }
 
                 var delta = requiredVisibleCount - currentVisibleCount;
                 if (delta > 0) {
 
-                    if (this.loadingCount > 0) return;
-                    
-                    for (int i = 0; i < delta; ++i) {
+                    if (this.loadingCount == 0) {
 
-                        var k = i + fromIndex;
-                        var item = this.items[k];
-                        ++currentVisibleCount;
-                        ++this.loadingCount;
-                        this.module.listComponent.AddItemInternal<T, InnerClosure>(item.source, new InnerClosure() { closure = item.closure, registry = this, item = item }, (obj, closure) => {
-                            --closure.registry.loadingCount;
-                            closure.item.onItem.Invoke(obj, closure.closure);
-                            closure.registry.isDirty = true;
-                            closure.registry.forceRebuild = true;
-                        });
-                        this.isDirty = true;
+                        for (int i = 0; i < delta; ++i) {
+
+                            var k = i + fromIndex;
+                            var item = this.items[k];
+                            //item.closure.index = k;
+                            ++currentVisibleCount;
+                            ++this.loadingCount;
+                            this.module.listComponent.AddItemInternal<T, InnerClosure>(item.source, new InnerClosure() { closure = item.closure, registry = this, item = item, },
+                                                                                       (obj, closure) => {
+                                                                                           --closure.registry.loadingCount;
+                                                                                           //closure.item.onItem.Invoke(obj, closure.closure);
+                                                                                           closure.registry.isDirty = true;
+                                                                                           closure.registry.forceRebuild = true;
+                                                                                       });
+                            this.isDirty = true;
+
+                        }
 
                     }
 
                 } else if (delta < 0) {
 
-                    if (this.loadingCount > 0) return;
-                    
-                    //Debug.Log("REMOVE ITEMS: " + delta);
-                    currentVisibleCount += delta;
-                    this.module.listComponent.RemoveRange(this.module.listComponent.items.Count + delta, this.module.listComponent.items.Count);
-                    this.isDirty = true;
-                    
+                    if (this.loadingCount == 0) {
+
+                        //Debug.Log("REMOVE ITEMS: " + delta);
+                        currentVisibleCount += delta;
+                        this.module.listComponent.RemoveRange(this.module.listComponent.items.Count + delta, this.module.listComponent.items.Count);
+                        this.isDirty = true;
+
+                    }
+
                 }
 
                 if (this.isDirty == true || forceRebuild == true) {
@@ -110,56 +128,94 @@ namespace UnityEngine.UI.Windows {
 
                         var instance = this.module.listComponent.items[k];
                         var item = this.items[i];
-                        var data = this.module.items[i];
+                        ref var data = ref this.module.items[i];
+                        if (forceRebuild == true) data.size = this.module.dataSource.GetSize(i);
                         
                         var isLocalDirty = false;
                         var pos = instance.rectTransform.anchoredPosition;
-                        var posOffset = contentSize - data.accumulatedSize - data.size;
 
-                        if (this.module.direction == Direction.Vertical) {
-
-                            if (UnityEngine.Mathf.Abs(pos.y - posOffset) >= Mathf.Epsilon) {
-
-                                pos.y = posOffset;
-                                pos.x = 0f;
-                                instance.rectTransform.anchoredPosition = pos;
-                                isLocalDirty = true;
-
-                            }
-
-                            var newSize = new Vector2(0f, data.size);
-                            if (instance.rectTransform.sizeDelta != newSize) {
-
-                                instance.rectTransform.sizeDelta = newSize;
-                                isLocalDirty = true;
-
-                            }
-
-                        } else if (this.module.direction == Direction.Horizontal) {
+                        var axis = new Vector2(0f, 0f);
+                        switch (this.module.direction) {
                             
-                            if (UnityEngine.Mathf.Abs(pos.x - posOffset) >= Mathf.Epsilon) {
+                            case Direction.Horizontal: {
+                                axis = new Vector2(1f, 0f);
+                                var posOffset = data.accumulatedSize;
+                                if (UnityEngine.Mathf.Abs(pos.x - posOffset) >= Mathf.Epsilon) {
 
-                                pos.x = posOffset;
-                                pos.y = 0f;
-                                instance.rectTransform.anchoredPosition = pos;
-                                isLocalDirty = true;
+                                    pos.x = posOffset;
+                                    pos.y = 0f;
+                                    instance.rectTransform.anchoredPosition = pos;
+                                    isLocalDirty = true;
 
+                                }
                             }
+                                break;
 
-                            var newSize = new Vector2(data.size, 0f);
-                            if (instance.rectTransform.sizeDelta != newSize) {
+                            case Direction.HorizontalUpside: {
+                                axis = new Vector2(1f, 0f);
+                                var posOffset = contentSize - data.accumulatedSize - data.size;
+                                if (UnityEngine.Mathf.Abs(pos.x - posOffset) >= Mathf.Epsilon) {
 
-                                instance.rectTransform.sizeDelta = newSize;
-                                isLocalDirty = true;
+                                    pos.x = -posOffset;
+                                    pos.y = 0f;
+                                    instance.rectTransform.anchoredPosition = pos;
+                                    isLocalDirty = true;
 
+                                }
                             }
+                                break;
+
+                            case Direction.Vertical: {
+                                axis = new Vector2(0f, 1f);
+                                var posOffset = data.accumulatedSize;
+                                if (UnityEngine.Mathf.Abs(pos.y - posOffset) >= Mathf.Epsilon) {
+
+                                    pos.y = -posOffset;
+                                    pos.x = 0f;
+                                    instance.rectTransform.anchoredPosition = pos;
+                                    isLocalDirty = true;
+
+                                }
+                            }
+                                break;
+
+                            case Direction.VerticalUpside: {
+                                axis = new Vector2(0f, 1f);
+                                var posOffset = contentSize - data.accumulatedSize - data.size;
+                                if (UnityEngine.Mathf.Abs(pos.y - posOffset) >= Mathf.Epsilon) {
+
+                                    pos.y = posOffset;
+                                    pos.x = 0f;
+                                    instance.rectTransform.anchoredPosition = pos;
+                                    isLocalDirty = true;
+
+                                }
+                            }
+                                break;
+
+                        }
+                        
+                        var newSize = new Vector2(data.size * axis.x, data.size * axis.y);
+                        if (instance.rectTransform.sizeDelta != newSize) {
+
+                            instance.rectTransform.sizeDelta = newSize;
+                            isLocalDirty = true;
 
                         }
 
                         if (isLocalDirty == true || this.forceRebuild == true || forceRebuild == true) LayoutRebuilder.ForceRebuildLayoutImmediate(instance.rectTransform);
 
-                        item.closure.index = i;
-                        item.onItem.Invoke((T)instance, item.closure);
+                        {
+
+                            //if (item.closure.index != i || item.initialized == false)
+                            {
+                                item.closure.index = i;
+                                item.onItem.Invoke((T)instance, item.closure);
+                            }
+                            
+
+                        }
+
                         ++k;
 
                     }
@@ -177,7 +233,8 @@ namespace UnityEngine.UI.Windows {
             public Resource source;
             public System.Action<T, TClosure> onItem;
             public TClosure closure;
-
+            public bool initialized;
+            
         }
 
         [System.Serializable]
@@ -192,6 +249,8 @@ namespace UnityEngine.UI.Windows {
 
             Vertical,
             Horizontal,
+            VerticalUpside,
+            HorizontalUpside,
 
         }
         
@@ -201,7 +260,7 @@ namespace UnityEngine.UI.Windows {
         public Direction direction;
 
         [Space(10f)]
-        public LayoutGroup layoutGroup;
+        public HorizontalOrVerticalLayoutGroup layoutGroup;
         public List<RegistryBase> registries = new List<RegistryBase>();
         public float createOffset = 50f;
 
@@ -214,7 +273,8 @@ namespace UnityEngine.UI.Windows {
         private IDataSource dataSource;
         private Item[] items;
         private bool forceRebuild;
-        
+        private float contentRectExtend = 0f;
+
         public override void ValidateEditor() {
             
             base.ValidateEditor();
@@ -227,14 +287,14 @@ namespace UnityEngine.UI.Windows {
 
             if (this.scrollRect != null) {
 
-                this.scrollRect.vertical = (this.direction == Direction.Vertical);
-                this.scrollRect.horizontal = (this.direction == Direction.Horizontal);
+                this.scrollRect.vertical = (this.direction == Direction.Vertical || this.direction == Direction.VerticalUpside);
+                this.scrollRect.horizontal = (this.direction == Direction.Horizontal || this.direction == Direction.HorizontalUpside);
 
             }
 
             if (this.scrollRect != null && this.scrollRect.content != null && this.layoutGroup == null) {
 
-                this.layoutGroup = this.scrollRect.content.GetComponent<LayoutGroup>();
+                this.layoutGroup = this.scrollRect.content.GetComponent<HorizontalOrVerticalLayoutGroup>();
 
             }
             
@@ -254,6 +314,15 @@ namespace UnityEngine.UI.Windows {
                 
                 this.scrollRect.onValueChanged.AddListener(this.OnScrollValueChanged);
                 this.OnScrollValueChanged(this.scrollRect.normalizedPosition);
+
+                var contentLayoutGroup = this.layoutGroup;
+                if (contentLayoutGroup != null) {
+                    if (this.direction == Direction.Horizontal || this.direction == Direction.HorizontalUpside) {
+                        this.contentRectExtend = contentLayoutGroup.padding.horizontal;
+                    } else {
+                        this.contentRectExtend = contentLayoutGroup.padding.vertical;
+                    }
+                }
                 
             }
             
@@ -333,7 +402,7 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        public override void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action onComplete) {
+        public override void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) {
 
             foreach (var reg in this.registries) {
 
@@ -343,6 +412,7 @@ namespace UnityEngine.UI.Windows {
             }
             this.registries.Clear();
 
+            this.forceRebuild = (this.allCount != count);
             this.allCount = count;
             System.Array.Resize(ref this.items, count);
             var registry = this.GetRegistry<T, TClosure>();
@@ -353,15 +423,16 @@ namespace UnityEngine.UI.Windows {
                     source = source,
                     onItem = onItem,
                     closure = closure,
+                    initialized = false
                 };
 
                 registry.Add(item);
 
             }
             this.registries.Add(registry);
-            this.forceRebuild = true;
+            //this.forceRebuild = true;
 
-            if (onComplete != null) onComplete.Invoke();
+            if (onComplete != null) onComplete.Invoke(closure);
             
         }
 
@@ -388,30 +459,125 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public int GetCount() {
+            
+            return this.items.Length;
+
+        }
+
+        public Item GetItemByIndex(int index) {
+            
+            return this.items[index];
+            
+        }
+
+        private Vector2 listSize;
+        private int prevCount;
+        private float invOffset;
+        private float offset;
+        private float visibleContentHeight;
         public void CalculateBounds() {
 
-            var accumulatedSize = 0f;
-            for (int i = 0; i < this.allCount; ++i) {
-                
-                ref var item = ref this.items[i];
-                item.size = this.dataSource.GetSize(i);
-                item.accumulatedSize = accumulatedSize;
-                accumulatedSize += item.size;
-                
+            var forceRebuild = false;
+            var size = this.listComponent.rectTransform.rect.size;
+            if (this.listSize != size) {
+
+                this.listSize = size;
+                this.prevCount = 0;
+                forceRebuild = true;
+
             }
 
-            var contentSize = accumulatedSize;
-            var scrollRect = this.scrollRect.transform as RectTransform;
+            if (this.prevCount != this.allCount) {
+
+                forceRebuild = true;
+
+            }
+            
+            var padding = this.layoutGroup.padding;
+
+            float accumulatedSize = 0f;
+            if (forceRebuild == true) {
+
+                switch (this.direction) {
+                    case Direction.Horizontal:
+                        accumulatedSize = padding.left;
+                        break;
+                    case Direction.Vertical:
+                        accumulatedSize = padding.bottom;
+                        break;
+                    case Direction.HorizontalUpside:
+                        accumulatedSize = padding.right;
+                        break;
+                    case Direction.VerticalUpside:
+                        accumulatedSize = padding.top;
+                        break;
+                }
+                if (this.prevCount > 0 && this.prevCount - 1 < this.items.Length) {
+                    
+                    accumulatedSize = this.items[this.prevCount - 1].accumulatedSize + this.items[this.prevCount - 1].size;
+                    
+                }
+                for (int i = this.prevCount; i < this.allCount; ++i) {
+
+                    ref var item = ref this.items[i];
+                    item.size = this.dataSource.GetSize(i);
+                    item.accumulatedSize = accumulatedSize;
+                    accumulatedSize += item.size + this.layoutGroup.spacing;
+
+                }
+                
+                this.prevCount = this.allCount;
+
+            } else {
+
+                if (this.allCount > 0) {
+                    
+                    accumulatedSize = this.items[this.allCount - 1].accumulatedSize + this.items[this.allCount - 1].size;
+                    
+                }
+
+            }
+
+            var scrollRect = (RectTransform)this.scrollRect.transform;
             var contentRect = this.scrollRect.content;
-            var viewSize = (this.direction == Direction.Vertical ? scrollRect.rect.height + this.createOffset : scrollRect.rect.width + this.createOffset);
+            var viewSize = 0f;
+            var contentSize = accumulatedSize;
+            var axis = new Vector2(0f, 0f);
+            var posOffset = 0f;
+            switch (this.direction) {
+                case Direction.Horizontal:
+                    contentSize += padding.right;
+                    posOffset = 1f - this.scrollRect.normalizedPosition.x;
+                    axis.x = 1f;
+                    viewSize = scrollRect.rect.width;
+                    break;
+                case Direction.Vertical:
+                    contentSize += padding.top;
+                    posOffset = this.scrollRect.normalizedPosition.y;
+                    axis.y = 1f;
+                    viewSize = scrollRect.rect.height;
+                    break;
+                case Direction.HorizontalUpside:
+                    contentSize += padding.left;
+                    posOffset = 1f - this.scrollRect.normalizedPosition.x;
+                    axis.x = 1f;
+                    viewSize = scrollRect.rect.width;
+                    break;
+                case Direction.VerticalUpside:
+                    contentSize += padding.bottom;
+                    posOffset = this.scrollRect.normalizedPosition.y;
+                    axis.y = 1f;
+                    viewSize = scrollRect.rect.height;
+                    break;
+            }
+            
             this.contentSize = contentSize;
+            contentRect.sizeDelta = new Vector2((accumulatedSize + this.contentRectExtend) * axis.x, (accumulatedSize + this.contentRectExtend) * axis.y);
             
-            contentRect.sizeDelta = (this.direction == Direction.Vertical ? new Vector2(0f, accumulatedSize) : new Vector2(accumulatedSize, 0f));
-            
-            var posOffset = (this.direction == Direction.Vertical ? this.scrollRect.normalizedPosition.y : 1f - this.scrollRect.normalizedPosition.x);
             var offInv = 1f - posOffset;
-            var offset = offInv * contentSize - offInv * viewSize;
-            
+            this.invOffset = offInv;
+            var offset = offInv * (contentSize - viewSize);
             if (contentSize <= viewSize) {
                 
                 offset = 0f;
@@ -419,8 +585,9 @@ namespace UnityEngine.UI.Windows {
             }
 
             var visibleContentHeight = Mathf.Min(viewSize, contentSize);
-
-            var fromIndex = this.GetIndexByOffset(offset);
+            this.offset = offset;
+            this.visibleContentHeight = visibleContentHeight;
+            var fromIndex = this.GetIndexByOffset(offset - this.createOffset);
             if (fromIndex == -1) {
                 
                 fromIndex = 0;
@@ -431,7 +598,7 @@ namespace UnityEngine.UI.Windows {
 
             }
             
-            var toIndex = this.GetIndexByOffset(offset + visibleContentHeight);
+            var toIndex = this.GetIndexByOffset(offset + visibleContentHeight + this.createOffset);
             if (toIndex == -1) {
                 
                 toIndex = this.allCount;

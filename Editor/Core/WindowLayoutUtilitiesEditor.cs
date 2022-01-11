@@ -383,7 +383,8 @@ namespace UnityEditor.UI.Windows {
         }
         
         public static bool DrawLayout(float aspect, WindowLayout windowLayout, Rect r, float offset = 20f, HashSet<WindowLayout> used = null, DeviceInfo.ScreenData screenData = default, DeviceInfo.OrientationData orientationData = default, UnityEngine.UI.Windows.WindowTypes.LayoutWindowType drawComponents = null) {
-
+            
+            if (used == null) used = new HashSet<WindowLayout>();
             if (used.Contains(windowLayout) == true) return false;
             used.Add(windowLayout);
 
@@ -432,6 +433,7 @@ namespace UnityEditor.UI.Windows {
             windowLayout.rectTransform.localRotation = Quaternion.identity;
             windowLayout.rectTransform.localScale = Vector3.one;*/
 
+            var prevSize = windowLayout.rectTransform.sizeDelta;
             r = rectOffset;
             
             {
@@ -472,7 +474,7 @@ namespace UnityEditor.UI.Windows {
                     if (scaleFactor > 0f) {
 
                         sizeDelta = new Vector2(screenSize.x / scaleFactor, screenSize.y / scaleFactor);
-                        //windowLayout.rectTransform.sizeDelta = sizeDelta;
+                        windowLayout.rectTransform.sizeDelta = sizeDelta;
                         windowLayout.rectTransform.pivot = new Vector2(0.5f, 0.5f);
                         windowLayout.rectTransform.localScale = Vector3.one;
                         resolution = sizeDelta; //windowLayout.rectTransform.sizeDelta;
@@ -495,6 +497,7 @@ namespace UnityEditor.UI.Windows {
                 if (element == null) {
 
                     windowLayout.ValidateEditor();
+                    windowLayout.rectTransform.sizeDelta = prevSize;
                     return false;
 
                 }
@@ -616,6 +619,8 @@ namespace UnityEditor.UI.Windows {
                 }
                 
             }
+
+            windowLayout.rectTransform.sizeDelta = prevSize;
 
             return isHighlighted;
 

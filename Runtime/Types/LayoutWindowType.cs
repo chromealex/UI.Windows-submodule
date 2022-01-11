@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace UnityEngine.UI.Windows.WindowTypes {
 
@@ -14,7 +13,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
     public class LayoutItem {
 
         [System.Serializable]
-        public struct LayoutComponentItem {
+        public struct LayoutComponentItem : System.IEquatable<LayoutComponentItem> {
 
             public WindowLayout windowLayout;
             public int tag;
@@ -24,6 +23,25 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             
             [System.NonSerialized]
             internal WindowComponent componentInstance;
+
+            public bool Equals(LayoutComponentItem other) {
+                return Equals(this.windowLayout, other.windowLayout) && this.tag == other.tag && this.localTag == other.localTag && this.component.Equals(other.component) && Equals(this.componentInstance, other.componentInstance);
+            }
+
+            public override bool Equals(object obj) {
+                return obj is LayoutComponentItem other && Equals(other);
+            }
+
+            public override int GetHashCode() {
+                unchecked {
+                    var hashCode = (this.windowLayout != null ? this.windowLayout.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ this.tag;
+                    hashCode = (hashCode * 397) ^ this.localTag;
+                    hashCode = (hashCode * 397) ^ this.component.GetHashCode();
+                    hashCode = (hashCode * 397) ^ (this.componentInstance != null ? this.componentInstance.GetHashCode() : 0);
+                    return hashCode;
+                }
+            }
 
         }
 
@@ -38,6 +56,23 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         internal WindowLayout windowLayoutInstance;
         private int localTag;
 
+        public void Unload() {
+
+            this.windowLayoutInstance = null;
+            for (int i = 0; i < this.components.Length; ++i) {
+
+                this.components[i].componentInstance = null;
+
+            }
+
+        }
+        
+        public T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowComponent {
+
+            return this.windowLayoutInstance.FindComponent<T>(filter);
+            
+        }
+
         public int GetCanvasOrder() {
 
             if (this.windowLayoutInstance == null) return 0;
@@ -47,14 +82,22 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         public Canvas GetCanvas() {
 
+            #if UNITY_EDITOR
+            if (Application.isPlaying == false) {
+                
+                return this.windowLayout.GetCanvas();
+                
+            }
+            #endif
+            
             if (this.windowLayoutInstance == null) return null;
             return this.windowLayoutInstance.GetCanvas();
 
         }
 
-        public void Validate() {
+        public void Validate(DirtyHelper helper) {
 
-            this.localTag = 0;
+            helper.Set(ref this.localTag, 0);
 
         }
 
@@ -169,13 +212,13 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
-        public void LoadAsync(LayoutWindowType windowInstance, System.Action onComplete) {
+        public void LoadAsync(InitialParameters initialParameters, LayoutWindowType windowInstance, System.Action onComplete) {
 
             windowInstance.Setup(windowInstance);
             
             var used = new HashSet<WindowLayout>();
             var layoutItem = this;
-            Coroutines.Run(layoutItem.InitLayoutInstance(windowInstance, windowInstance, layoutItem.windowLayout, used, onComplete));
+            Coroutines.Run(layoutItem.InitLayoutInstance(initialParameters, windowInstance, windowInstance, layoutItem.windowLayout, used, onComplete));
 
         }
 
@@ -192,13 +235,14 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             public WindowLayout windowLayoutInstance;
             public LayoutComponentItem[] layoutComponentItems;
             public LayoutItem instance;
+            public InitialParameters initialParameters;
 
         }
 
         private int loadingCount;
-        private IEnumerator InitLayoutInstance(LayoutWindowType windowInstance, WindowObject root, WindowLayout windowLayout, HashSet<WindowLayout> used, System.Action onComplete, bool isInner = false) {
+        private IEnumerator InitLayoutInstance(InitialParameters initialParameters, LayoutWindowType windowInstance, WindowObject root, WindowLayout windowLayout, HashSet<WindowLayout> used, System.Action onComplete, bool isInner = false) {
 
-            if (((ILayoutInstance)root).windowLayoutInstance != null) {
+            if (((ILayoutInstance)root).windowLayoutInstance != null || windowLayout == null) {
                 
                 if (onComplete != null) onComplete.Invoke();
                 yield break;
@@ -216,7 +260,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             }
 
             windowLayoutInstance.Setup(windowInstance);
-            windowLayoutInstance.SetCanvasOrder(0);
+            windowLayoutInstance.SetCanvasOrder(windowInstance.GetCanvasDepth());
             root.RegisterSubObject(windowLayoutInstance);
             ((ILayoutInstance)root).windowLayoutInstance = windowLayoutInstance;
             this.ApplyLayoutPreferences(this.layoutPreferences);
@@ -248,13 +292,15 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                             windowLayoutInstance = windowLayoutInstance,
                             layoutComponentItems = arr,
                             instance = this,
+                            initialParameters = initialParameters,
                         };
                         ++this.loadingCount;
-                        yield return resources.LoadAsync<WindowComponent, LoadingClosure>(windowInstance, data, layoutComponent.component, (asset, closure) => {
+                        Coroutines.Run(resources.LoadAsync<WindowComponent, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, layoutElement, data, layoutComponent.component, (asset, closure) => {
 
                             if (asset == null) {
 
                                 Debug.LogWarning("Component is null while component resource is not empty. Skipped.");
+                                --closure.instance.loadingCount;
                                 return;
 
                             }
@@ -266,21 +312,29 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                             closure.windowLayoutInstance.SetLoadedComponent(item.tag, instance);
                             item.componentInstance = instance;
 
-                            instance.DoLoadScreenAsync(() => { --closure.instance.loadingCount; });
+                            instance.DoLoadScreenAsync(closure.initialParameters, () => { --closure.instance.loadingCount; });
                             
-                        });
+                        }));
 
                     }
 
                 }
 
-                while (this.loadingCount > 0) yield return null;
+            }
 
+            while (this.loadingCount > 0) yield return null;
+            
+            for (int i = 0; i < arr.Length; ++i) {
+
+                var layoutComponent = arr[i];
+                if (layoutComponent.windowLayout != windowLayout) continue;
+
+                var layoutElement = windowLayoutInstance.GetLayoutElementByTagId(layoutComponent.tag);
                 if (layoutElement.innerLayout != null) {
 
                     if (used.Contains(layoutElement.innerLayout) == false) {
 
-                        yield return this.InitLayoutInstance(windowInstance, layoutElement, layoutElement.innerLayout, used, null, isInner: true);
+                        yield return this.InitLayoutInstance(initialParameters, windowInstance, layoutElement, layoutElement.innerLayout, used, null, isInner: true);
 
                     } else {
 
@@ -296,7 +350,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
-        public void Add(int tag, WindowLayout windowLayout) {
+        public void Add(DirtyHelper helper, int tag, WindowLayout windowLayout) {
 
             for (int i = 0; i < this.components.Length; ++i) {
 
@@ -316,11 +370,11 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                 localTag = ++this.localTag,
                 windowLayout = windowLayout,
             });
-            this.components = list.ToArray();
+            helper.Set(ref this.components, list.ToArray());
 
         }
 
-        public void Remove(int tag, WindowLayout windowLayout) {
+        public void Remove(DirtyHelper helper, int tag, WindowLayout windowLayout) {
 
             for (int i = 0; i < this.components.Length; ++i) {
 
@@ -328,7 +382,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                     var list = this.components.ToList();
                     list.RemoveAt(i);
-                    this.components = list.ToArray();
+                    helper.Set(ref this.components, list.ToArray());
 
                 }
 
@@ -362,8 +416,28 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         public LayoutItem[] items;
 
         private int activeIndex;
+        private bool forcedIndex;
+
+        public void Unload() {
+            
+            for (int i = this.items.Length - 1; i >= 0; --i) {
+                
+                this.items[i].Unload();
+                
+            }
+            
+        }
+
+        public void SetActive(int index) {
+
+            this.activeIndex = index;
+            this.forcedIndex = true;
+
+        }
 
         public void SetActive() {
+
+            if (this.forcedIndex == true) return;
 
             var targetData = WindowSystem.GetTargetData();
             for (int i = this.items.Length - 1; i >= 0; --i) {
@@ -413,10 +487,22 @@ namespace UnityEngine.UI.Windows.WindowTypes {
     public abstract class LayoutWindowType : WindowBase, ILayoutInstance {
 
         public Layouts layouts = new Layouts() {
-            items = new LayoutItem[1]
+            items = new LayoutItem[1],
         };
 
         private Dictionary<int, int> requestedIndexes = new Dictionary<int, int>();
+
+        internal override void OnDeInitInternal() {
+            
+            var currentItem = this.layouts.GetActive();
+            currentItem.Unload(this);
+            
+            this.layouts.Unload();
+            this.requestedIndexes.Clear();
+            
+            base.OnDeInitInternal();
+            
+        }
 
         WindowLayout ILayoutInstance.windowLayoutInstance {
             get {
@@ -513,21 +599,12 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
-        public override void OnDeInit() {
-
-            base.OnDeInit();
-
-            var currentItem = this.layouts.GetActive();
-            currentItem.Unload(this);
-
-        }
-
-        public override void LoadAsync(System.Action onComplete) {
+        public override void LoadAsync(InitialParameters initialParameters, System.Action onComplete) {
 
             this.layouts.SetActive();
 
             var currentItem = this.layouts.GetActive();
-            currentItem.LoadAsync(this, () => { base.LoadAsync(onComplete); });
+            currentItem.LoadAsync(initialParameters, this, () => { base.LoadAsync(initialParameters, onComplete); });
 
         }
 
@@ -557,7 +634,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
-        private void ValidateLayout(ref LayoutItem layoutItem, WindowLayout windowLayout, HashSet<WindowLayout> used) {
+        private void ValidateLayout(DirtyHelper helper, ref LayoutItem layoutItem, WindowLayout windowLayout, HashSet<WindowLayout> used) {
 
             used.Add(windowLayout);
 
@@ -567,7 +644,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                 var com = layoutItem.components[j];
                 if (com.localTag == 0 || layoutItem.components.Count(x => x.localTag == com.localTag) > 1) {
 
-                    com.localTag = this.GetNextLocalTagId(layoutItem);
+                    helper.Set(ref com.localTag, this.GetNextLocalTagId(layoutItem));
 
                 }
 
@@ -589,7 +666,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                     var tag = layoutItem.components[j].tag;
                     if (windowLayout.HasLayoutElementByTagId(tag) == false) {
 
-                        layoutItem.Remove(tag, windowLayout);
+                        layoutItem.Remove(helper, tag, windowLayout);
 
                     }
 
@@ -608,14 +685,14 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                 }
                 if (layoutElement.hideInScreen == true) {
                 
-                    layoutItem.Remove(layoutElement.tagId, windowLayout);
+                    layoutItem.Remove(helper, layoutElement.tagId, windowLayout);
                     continue;
                     
                 }
                 
                 if (layoutItem.GetLayoutComponentItemByTagId(layoutElement.tagId, windowLayout, out var layoutComponentItem) == false) {
 
-                    layoutItem.Add(layoutElement.tagId, windowLayout);
+                    layoutItem.Add(helper, layoutElement.tagId, windowLayout);
 
                 }
 
@@ -623,12 +700,11 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                     if (used.Contains(layoutElement.innerLayout) == false) {
 
-                        this.ValidateLayout(ref layoutItem, layoutElement.innerLayout, used);
+                        this.ValidateLayout(helper, ref layoutItem, layoutElement.innerLayout, used);
 
                     } else {
 
-                        Debug.LogWarning("Ignoring inner layout `" + layoutElement.innerLayout + "` because of a cycle. Remove innerLayout reference from " + layoutElement,
-                                         layoutElement);
+                        Debug.LogWarning($"Ignoring inner layout `{layoutElement.innerLayout}` because of a cycle. Remove innerLayout reference from {layoutElement}", layoutElement);
 
                     }
 
@@ -645,13 +721,14 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             var items = this.layouts.items;
             if (items == null) return;
             
+            var helper = new UnityEngine.UI.Windows.Utilities.DirtyHelper(this);
             for (int i = 0; i < items.Length; ++i) {
 
                 ref var layoutItem = ref items[i];
                 if (layoutItem == null) {
-                    layoutItem = new LayoutItem();
+                    helper.SetObj(ref layoutItem, new LayoutItem());
                 }
-                layoutItem.Validate();
+                layoutItem.Validate(helper);
 
                 var windowLayout = layoutItem.windowLayout;
                 if (windowLayout != null) {
@@ -662,14 +739,15 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                         for (int c = 0; c < layoutItem.components.Length; ++c) {
 
-                            var com = layoutItem.components[c];
+                            ref var com = ref layoutItem.components[c];
+                            var comLock = com;
                             if ((windowLayout != com.windowLayout || windowLayout.HasLayoutElementByTagId(com.tag) == false) && windowLayout.layoutElements.Any(x => {
-                                return x.innerLayout == com.windowLayout && x.innerLayout.HasLayoutElementByTagId(com.tag);
+                                return x.innerLayout == comLock.windowLayout && x.innerLayout.HasLayoutElementByTagId(comLock.tag);
                             }) == false) {
 
                                 var list = layoutItem.components.ToList();
                                 list.RemoveAt(c);
-                                layoutItem.components = list.ToArray();
+                                helper.SetObj(ref layoutItem.components, list.ToArray());
                                 --c;
 
                             }
@@ -679,16 +757,17 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                     }
 
                     var used = new HashSet<WindowLayout>();
-                    this.ValidateLayout(ref layoutItem, windowLayout, used);
+                    this.ValidateLayout(helper, ref layoutItem, windowLayout, used);
 
                     used.Clear();
-                    this.ValidateLayout(ref layoutItem, windowLayout, used);
+                    this.ValidateLayout(helper, ref layoutItem, windowLayout, used);
 
                 }
 
             }
 
             this.layouts.items = items;
+            helper.Apply();
 
         }
 

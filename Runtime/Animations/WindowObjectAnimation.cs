@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace UnityEngine.UI.Windows.Modules {
+﻿namespace UnityEngine.UI.Windows.Modules {
 
     public static class WindowObjectAnimation {
 
@@ -36,6 +32,42 @@ namespace UnityEngine.UI.Windows.Modules {
                     
                     var state = anim.GetResetState();
                     anim.ApplyState(state);
+
+                }
+
+            }
+            
+        }
+
+        public static void BreakState(WindowObject instance) {
+            
+            if (instance.animationParameters.items == null) return;
+
+            var tweener = WindowSystem.GetTweener();
+            for (int i = 0; i < instance.animationParameters.items.Length; ++i) {
+
+                var anim = instance.animationParameters.items[i];
+                if (anim != null) {
+                    
+                    tweener.Stop(anim, ignoreEvents: false);
+
+                }
+
+            }
+            
+        }
+
+        public static void SetState(WindowObject instance, AnimationState state) {
+            
+            if (instance.animationParameters.items == null) return;
+
+            for (int i = 0; i < instance.animationParameters.items.Length; ++i) {
+
+                var anim = instance.animationParameters.items[i];
+                if (anim != null) {
+                    
+                    var stateData = anim.GetState(state);
+                    anim.ApplyState(stateData);
 
                 }
 
@@ -125,7 +157,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     var tweener = WindowSystem.GetTweener();
                     tweener.Stop(anim);
                     tweener.Add(animationInfo, anim.GetDuration(state.animationState), 0f, 1f)
-                           .Delay(anim.GetDelay(state.animationState))
+                           .Delay(state.transitionParameters.data.replaceDelay == true ? state.transitionParameters.data.delay : anim.GetDelay(state.animationState))
                            .Tag(anim)
                            .Ease(ease)
                            .OnUpdate((obj, value) => {

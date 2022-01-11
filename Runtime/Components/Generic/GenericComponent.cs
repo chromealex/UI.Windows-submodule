@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace UnityEngine.UI.Windows.Components {
+﻿namespace UnityEngine.UI.Windows.Components {
 
     public class GenericComponent : WindowComponent {
 
@@ -16,6 +12,25 @@ namespace UnityEngine.UI.Windows.Components {
                 if (comp is T c) {
 
                     return c;
+
+                }
+
+            }
+
+            return default;
+
+        }
+
+        public T GetStrong<T>() where T : WindowComponent {
+
+            var type = typeof(T);
+
+            for (int i = 0; i < this.components.Length; ++i) {
+
+                var comp = this.components[i];
+                if (comp != null && comp.GetType() == type) {
+
+                    return comp as T;
 
                 }
 

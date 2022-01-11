@@ -1,49 +1,38 @@
-﻿using System.Collections.Generic;
-using UnityEngine.UI.Windows.Components;
+﻿using UnityEngine.UI.Windows.Components;
 
 namespace UnityEngine.UI.Windows {
-    
+
     [ComponentModuleDisplayName("Checkbox Group")]
     public class ListCheckboxGroupModule : ListComponentModule, ICheckboxGroup {
-        
+
         public bool allowSwitchOff;
-        
-        private HashSet<CheckboxComponent> checkboxes = new HashSet<CheckboxComponent>();
-        
+
+        private CheckboxComponent currentSelected;
+
         public override void OnComponentAdded(WindowComponent windowComponent) {
             base.OnComponentAdded(windowComponent);
-            if (windowComponent is CheckboxComponent checkbox && this.checkboxes.Add(checkbox) == true) {
+            if (windowComponent is CheckboxComponent checkbox) {
                 checkbox.SetGroup(this);
             }
         }
-        
+
         public override void OnComponentRemoved(WindowComponent windowComponent) {
-            base.OnComponentAdded(windowComponent);
-            if (windowComponent is CheckboxComponent checkbox && this.checkboxes.Remove(checkbox) == true) {
+            base.OnComponentRemoved(windowComponent);
+            if (windowComponent is CheckboxComponent checkbox) {
                 checkbox.SetGroup(null);
             }
         }
-        
+
         public void OnChecked(CheckboxComponent checkbox) {
-            foreach (var current in this.checkboxes) {
-                if (current.isChecked == true && current != checkbox) {
-                    current.SetCheckedState(false);
-                }
+            if (this.currentSelected != null && this.currentSelected != checkbox) {
+                this.currentSelected.SetCheckedState(false, true, false);
             }
+
+            this.currentSelected = checkbox;
         }
 
         public bool CanBeUnchecked(CheckboxComponent checkbox) {
-        
-            if (this.allowSwitchOff == true) return true;
-            
-            foreach (var current in this.checkboxes) {
-                if (current.isChecked == true && current != checkbox) {
-                    return true;
-                }
-            }
-
-            return false;
-            
+            return this.currentSelected == null || this.allowSwitchOff || checkbox != this.currentSelected;
         }
 
     }

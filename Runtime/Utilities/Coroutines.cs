@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace UnityEngine.UI.Windows.Utilities {
 
@@ -15,12 +14,74 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
+        public static void NextFrame<T>(T state, System.Action<T> callback) {
+	        
+	        Coroutines.instance.StartCoroutine(Coroutines.WaitFrames_INTERNAL(state, callback, 1));
+	        
+        }
+
+        private static IEnumerator WaitFrames_INTERNAL<T>(T state, System.Action<T> callback, int frames) {
+
+	        while (frames > 0) {
+		        
+		        yield return null;
+		        --frames;
+
+	        }
+	        callback.Invoke(state);
+
+        }
+        
+        public static void NextFrame(System.Action callback) {
+	        
+	        Coroutines.instance.StartCoroutine(Coroutines.WaitFrames_INTERNAL(callback, 1));
+	        
+        }
+
+        private static IEnumerator WaitFrames_INTERNAL(System.Action callback, int frames) {
+
+	        while (frames > 0) {
+		        
+		        yield return null;
+		        --frames;
+
+	        }
+	        callback.Invoke();
+
+        }
+        
+        public static void WaitTime(float time, System.Action callback) {
+	        
+	        Coroutines.instance.StartCoroutine(Coroutines.TimeWaiter_INTERNAL(time, callback));
+	        
+        }
+
+        private static IEnumerator TimeWaiter_INTERNAL(float time, System.Action callback) {
+
+	        yield return new WaitForSecondsRealtime(time);
+	        callback.Invoke();
+
+        }
+
         public static void Wait(System.Func<bool> waitFor, System.Action callback) {
 	        
 	        Coroutines.instance.StartCoroutine(Coroutines.Waiter_INTERNAL(waitFor, callback));
 	        
         }
 
+        public static void Wait<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+	        
+	        Coroutines.instance.StartCoroutine(Coroutines.Waiter_INTERNAL(state, waitFor, callback));
+	        
+        }
+
+        private static IEnumerator Waiter_INTERNAL<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+
+	        while (waitFor.Invoke(state) == false) yield return null;
+	        callback.Invoke(state);
+
+        }
+        
         private static IEnumerator Waiter_INTERNAL(System.Func<bool> waitFor, System.Action callback) {
 
 	        while (waitFor.Invoke() == false) yield return null;
@@ -28,9 +89,21 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
         
-        public static void Run(IEnumerator coroutine) {
+        public static Coroutine Run(IEnumerator coroutine) {
 
-	        Coroutines.instance.StartCoroutine(coroutine);
+	        return Coroutines.instance.StartCoroutine(coroutine);
+
+        }
+
+        public static void Cancel(IEnumerator coroutine) {
+
+	        Coroutines.instance.StopCoroutine(coroutine);
+
+        }
+
+        public static void Cancel(Coroutine coroutine) {
+
+	        if (Coroutines.instance != null && coroutine != null) Coroutines.instance.StopCoroutine(coroutine);
 
         }
 

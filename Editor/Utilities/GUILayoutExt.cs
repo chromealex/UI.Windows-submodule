@@ -7,6 +7,61 @@ using System.CodeDom.Compiler;
 
 namespace UnityEditor.UI.Windows {
     
+	
+	public static class SplitterGUI {
+	
+		public static readonly GUIStyle splitter;
+	
+		static SplitterGUI() {
+			//GUISkin skin = GUI.skin;
+		
+			SplitterGUI.splitter = new GUIStyle();
+			SplitterGUI.splitter.normal.background = EditorGUIUtility.whiteTexture;
+			SplitterGUI.splitter.stretchWidth = true;
+			SplitterGUI.splitter.margin = new RectOffset(0, 0, 7, 7);
+		}
+	
+		private static readonly Color splitterColor = EditorGUIUtility.isProSkin ? new Color(0.3f, 0.3f, 0.3f) : new Color(0.5f, 0.5f, 0.5f);
+	
+		// GUILayout Style
+		public static void Splitter(Color rgb, float thickness = 1) {
+			Rect position = GUILayoutUtility.GetRect(GUIContent.none, SplitterGUI.splitter, GUILayout.Height(thickness));
+		
+			if (Event.current.type == EventType.Repaint) {
+				Color restoreColor = GUI.color;
+				GUI.color = rgb;
+				SplitterGUI.splitter.Draw(position, false, false, false, false);
+				GUI.color = restoreColor;
+			}
+		}
+	
+		public static void Splitter(float thickness, GUIStyle splitterStyle) {
+			Rect position = GUILayoutUtility.GetRect(GUIContent.none, splitterStyle, GUILayout.Height(thickness));
+		
+			if (Event.current.type == EventType.Repaint) {
+				Color restoreColor = GUI.color;
+				GUI.color = SplitterGUI.splitterColor;
+				splitterStyle.Draw(position, false, false, false, false);
+				GUI.color = restoreColor;
+			}
+		}
+	
+		public static void Splitter(float thickness = 1) {
+			SplitterGUI.Splitter(thickness, SplitterGUI.splitter);
+		}
+	
+		// GUI Style
+		public static void Splitter(Rect position) {
+			if (Event.current.type == EventType.Repaint) {
+				Color restoreColor = GUI.color;
+				GUI.color = SplitterGUI.splitterColor;
+				SplitterGUI.splitter.Draw(position, false, false, false, false);
+				GUI.color = restoreColor;
+			}
+		}
+	
+	}
+
     public abstract class CustomEditorAttribute : System.Attribute {
 
         public System.Type type;
@@ -49,6 +104,44 @@ namespace UnityEditor.UI.Windows {
     
     public static class GUILayoutExt {
 
+	    public struct GUIBackgroundColorUsing : IDisposable {
+
+		    private Color oldColor;
+
+		    public GUIBackgroundColorUsing(Color color) {
+
+			    this.oldColor = GUI.backgroundColor;
+			    GUI.backgroundColor = color;
+
+		    }
+		    
+		    public void Dispose() {
+
+			    GUI.backgroundColor = this.oldColor;
+
+		    }
+
+	    }
+
+	    public struct GUIAlphaUsing : IDisposable {
+
+		    private Color oldColor;
+
+		    public GUIAlphaUsing(float alpha) {
+
+			    this.oldColor = GUI.color;
+			    GUI.color = new Color(this.oldColor.r, this.oldColor.g, this.oldColor.b, alpha);
+
+		    }
+		    
+		    public void Dispose() {
+
+			    GUI.color = this.oldColor;
+
+		    }
+
+	    }
+
 	    public struct GUIColorUsing : IDisposable {
 
 		    private Color oldColor;
@@ -68,10 +161,143 @@ namespace UnityEditor.UI.Windows {
 
 	    }
 	    
+	    public static GUIBackgroundColorUsing GUIBackgroundColor(Color color) {
+		    
+		    return new GUIBackgroundColorUsing(color);
+		    
+	    }
+
 	    public static GUIColorUsing GUIColor(Color color) {
 		    
 		    return new GUIColorUsing(color);
 		    
+	    }
+
+	    public static void DrawImages(Texture2D preview, System.Collections.Generic.List<ImageCollectionItem> images) {
+		    
+		    if (images != null) {
+
+			    GUILayoutExt.Box(4f, 4f, () => {
+
+				    if (preview != null) {
+                                    
+					    var labelStyle = new GUIStyle(EditorStyles.label);
+					    labelStyle.fontStyle = FontStyle.Bold;
+					    labelStyle.alignment = TextAnchor.LowerCenter;
+					    var w = EditorGUIUtility.currentViewWidth - 80f;
+					    var h = w / preview.width * preview.height;
+					    GUILayout.Label(string.Empty, GUILayout.MinWidth(w), GUILayout.MinHeight(h), GUILayout.Width(w), GUILayout.Height(h));
+					    var lastRect = GUILayoutUtility.GetLastRect();
+					    lastRect.width = w;
+					    lastRect.height = h;
+					    EditorGUI.DrawTextureTransparent(lastRect, preview);
+					    EditorGUI.DropShadowLabel(lastRect, preview.width + "x" + preview.height, labelStyle);
+                                    
+				    }
+
+				    foreach (var img in images) {
+
+					    EditorGUI.BeginDisabledGroup(true);
+					    EditorGUILayout.ObjectField(img.holder, typeof(Component), allowSceneObjects: true);
+					    EditorGUILayout.ObjectField(img.obj, typeof(UnityEngine.Object), allowSceneObjects: true);
+					    GUILayoutExt.Separator();
+					    EditorGUI.EndDisabledGroup();
+
+				    }
+
+			    });
+
+		    }
+
+	    }
+
+	    public static void DrawFieldsBeneath(SerializedObject serializedObject, System.Type baseType) {
+		    
+		    var iter = serializedObject.GetIterator();
+		    iter.NextVisible(true);
+		    System.Type baseClassType = null;
+		    do {
+
+			    if (EditorHelpers.IsFieldOfTypeBeneath(serializedObject.targetObject.GetType(), baseType, iter.propertyPath) == true) {
+
+				    var newBaseClassType = EditorHelpers.GetFieldViaPath(serializedObject.targetObject.GetType(), iter.propertyPath).DeclaringType;
+				    if (newBaseClassType != null && newBaseClassType != baseClassType) {
+                        
+					    GUILayoutExt.DrawSplitter(newBaseClassType.Name);
+					    baseClassType = newBaseClassType;
+                        
+				    }
+				    EditorGUILayout.PropertyField(iter);
+
+			    }
+
+		    } while (iter.NextVisible(false) == true);
+		    
+	    }
+	    
+	    public static void DrawSplitter(string label) {
+
+		    var splitted = label.Split('`');
+		    if (splitted.Length > 1) {
+
+			    label = splitted[0];
+
+		    }
+
+		    var labelStyle = EditorStyles.centeredGreyMiniLabel;
+		    var size = labelStyle.CalcSize(new GUIContent(label.ToSentenceCase()));
+		    GUILayout.Label(label.ToSentenceCase().UppercaseWords(), labelStyle);
+		    var lastRect = GUILayoutUtility.GetLastRect();
+		    SplitterGUI.Splitter(new Rect(lastRect.x, lastRect.y + lastRect.height * 0.5f, lastRect.width * 0.5f - size.x * 0.5f, 1f));
+		    SplitterGUI.Splitter(new Rect(lastRect.x + lastRect.width * 0.5f + size.x * 0.5f, lastRect.y + lastRect.height * 0.5f, lastRect.width * 0.5f - size.x * 0.5f, 1f));
+
+	    }
+	    
+	    public static void DrawSafeAreaFields(UnityEngine.Object target, SerializedProperty useSafeZone, SerializedProperty safeZone) {
+		    
+		    EditorGUILayout.PropertyField(useSafeZone);
+		    if (useSafeZone.boolValue == true) {
+                
+			    GUILayoutExt.Box(6f, 2f, () => {
+                    
+				    EditorGUILayout.PropertyField(safeZone);
+				    if (safeZone.objectReferenceValue == null) {
+
+					    GUILayoutExt.Box(2f, 2f, () => {
+                            
+						    GUILayout.BeginHorizontal();
+						    GUILayout.FlexibleSpace();
+						    if (GUILayout.Button("Generate", GUILayout.Width(80f), GUILayout.Height(30f)) == true) {
+
+							    var obj = (Component)target;
+							    if (PrefabUtility.IsPartOfAnyPrefab(obj) == true) {
+
+								    var path = AssetDatabase.GetAssetPath(obj.gameObject);
+								    using (var edit = new EditPrefabAssetScope(path)) {
+
+									    EditorHelpers.AddSafeZone(edit.prefabRoot.transform);
+                                
+								    }
+                            
+							    } else {
+
+								    var root = obj.gameObject;
+								    EditorHelpers.AddSafeZone(root.transform);
+                            
+							    }
+                        
+						    }
+						    GUILayout.FlexibleSpace();
+						    GUILayout.EndHorizontal();
+                            
+					    }, GUIStyle.none);
+                        
+				    }
+
+			    });
+                
+		    }
+            
 	    }
 
 	    public static string GetPropertyToString(SerializedProperty property) {
@@ -397,16 +623,16 @@ namespace UnityEditor.UI.Windows {
 		    
 	    }
 
-	    public static void ProgressBar(float value, float max, bool drawLabel = false) {
+	    public static Rect ProgressBar(float value, float max, bool drawLabel = false, float height = 4f) {
 		    
-		    GUILayoutExt.ProgressBar(value, max, new Color(0f, 0f, 0f, 0.3f), new Color32(104, 148, 192, 255), drawLabel);
+		    return GUILayoutExt.ProgressBar(value, max, new Color(0f, 0f, 0f, 0.3f), new Color32(104, 148, 192, 255), drawLabel, height);
 		    
 	    }
 
-	    public static void ProgressBar(float value, float max, Color back, Color fill, bool drawLabel = false) {
+	    public static Rect ProgressBar(float value, float max, Color back, Color fill, bool drawLabel = false, float height = 4f) {
 
 		    var progress = value / max;
-		    var lineHeight = (drawLabel == true ? 8f : 4f);
+		    var lineHeight = (drawLabel == true ? height * 2f : height);
 		    Rect rect = EditorGUILayout.GetControlRect(false, lineHeight);
 		    rect.height = lineHeight;
 		    var fillRect = rect;
@@ -419,6 +645,8 @@ namespace UnityEditor.UI.Windows {
 			    EditorGUI.LabelField(rect, string.Format("{0}/{1}", value, max), EditorStyles.centeredGreyMiniLabel);
 			    
 		    }
+
+		    return rect;
 
 	    }
 
@@ -471,12 +699,17 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        public static void PropertyField(SerializedProperty property, System.Func<UnityEngine.UI.Windows.WindowObject.EditorParametersRegistry, string> regCheck = null) {
+        public static void PropertyField(SerializedProperty property, System.Func<UnityEngine.UI.Windows.WindowObject.EditorParametersRegistry, bool> regCheck = null) {
 
 	        var hasAnyReg = false;
 	        var description = string.Empty;
+	        var holders = new System.Collections.Generic.List<string>();
+	        var holdersObjs = new System.Collections.Generic.List<UnityEngine.UI.Windows.IHolder>();
 	        if (regCheck != null) {
 
+		        description = $"Value is hold by "; //{string.Join(", ", holders)}";
+
+		        holders.Add(description);
 		        foreach (var target in property.serializedObject.targetObjects) {
 
 			        if (target is UnityEngine.UI.Windows.WindowObject windowObject) {
@@ -485,14 +718,12 @@ namespace UnityEditor.UI.Windows {
 
 					        foreach (var reg in windowObject.registry) {
 
-						        var descr = regCheck.Invoke(reg);
-						        if (string.IsNullOrEmpty(descr) == false) {
-
-							        hasAnyReg = true;
-							        description = descr;
-							        break;
-
-						        }
+						        if (reg.GetHolder() == null) continue;
+						        if (regCheck.Invoke(reg) == false) continue;
+						        
+						        holders.Add(reg.GetHolderName());
+						        holdersObjs.Add(reg.GetHolder());
+						        hasAnyReg = true;
 
 					        }
 
@@ -512,8 +743,52 @@ namespace UnityEditor.UI.Windows {
 		        
 		        EditorGUI.BeginDisabledGroup(true);
 		        EditorGUILayout.PropertyField(property);
-		        EditorGUILayout.HelpBox(new GUIContent(description), wide: true);
 		        EditorGUI.EndDisabledGroup();
+		        
+		        GUILayoutExt.Box(4f, 2f, () => {
+
+			        var rect = new Rect(0f, 0f, EditorGUIUtility.currentViewWidth, 1000f);
+			        var style = new GUIStyle(EditorStyles.miniLabel);
+			        style.normal.textColor = new Color(0x00 / 255f, 0x98 / 255f, 0xDA / 255f, 1f);
+			        style.onNormal.textColor = style.active.textColor = style.onActive.textColor = style.hover.textColor = style.onHover.textColor = style.focused.textColor = style.onFocused.textColor = new Color(0x00 / 255f, 0xAA / 255f, 0xDA / 255f, 1f);
+			        var buttonRects = EditorGUIUtility.GetFlowLayoutedRects(rect, style, 1f, 1f, holders);
+			        
+			        GUILayout.BeginHorizontal();
+			        GUILayout.EndHorizontal();
+			        var areaRect = GUILayoutUtility.GetLastRect();
+			        for (int i = 0; i < buttonRects.Count; ++i) areaRect.height = Mathf.Max(0f, buttonRects[i].yMax);
+			        
+			        GUILayoutUtility.GetRect(areaRect.width, areaRect.height);
+			        GUI.BeginGroup(areaRect);
+			        {
+				        for (int i = 0; i < buttonRects.Count; ++i) {
+
+					        if (i == 0) {
+						        
+						        GUI.Label(buttonRects[i], holders[i], EditorStyles.miniLabel);
+						        
+					        } else {
+
+						        var position = buttonRects[i];
+
+						        Handles.BeginGUI();
+						        Handles.color = style.normal.textColor;
+						        Handles.DrawLine(new Vector3(position.xMin, position.yMax), new Vector3(position.xMax, position.yMax));
+						        Handles.color = Color.white;
+						        Handles.EndGUI();
+						        if (GUI.Button(position, holders[i], style) == true) {
+							        
+							        EditorGUIUtility.PingObject((Component)holdersObjs[i - 1]);
+							        
+						        }
+
+					        }
+
+				        }
+			        }
+			        GUI.EndGroup();
+			        
+		        }, EditorStyles.helpBox);
 		        
 	        }
 
@@ -521,19 +796,19 @@ namespace UnityEditor.UI.Windows {
         
         public static void DrawHeader(string caption) {
 
-            var style = GUIStyle.none;//new GUIStyle("In BigTitle");
-            //new Editor().DrawHeader();
+	        var style = GUIStyle.none;//new GUIStyle("In BigTitle");
+	        //new Editor().DrawHeader();
             
-            GUILayout.Space(4f);
-            GUILayoutExt.Separator();
-            GUILayoutExt.Padding(
-                16f, 4f,
-                () => {
+	        GUILayout.Space(4f);
+	        GUILayoutExt.Separator();
+	        GUILayoutExt.Padding(
+		        16f, 4f,
+		        () => {
                     
-                    GUILayout.Label(caption, EditorStyles.boldLabel);
+			        GUILayout.Label(caption, EditorStyles.boldLabel);
                     
-                }, style);
-            GUILayoutExt.Separator(new Color(0.2f, 0.2f, 0.2f, 1f));
+		        }, style);
+	        GUILayoutExt.Separator(new Color(0.2f, 0.2f, 0.2f, 1f));
             
         }
 
@@ -933,6 +1208,28 @@ namespace UnityEditor.UI.Windows {
                 GUILayout.Space(paddingY);
             }
             GUILayout.EndVertical();
+
+        }
+
+        public static bool DrawDropdown(Rect position, GUIContent content, FocusType focusType, UnityEngine.Object selectButton = null) {
+
+	        if (selectButton != null) {
+
+		        var selectButtonWidth = 80f;
+		        var space = 4f;
+		        var rect = new Rect(position.x, position.y, position.width - selectButtonWidth - space, position.height);
+		        var result = EditorGUI.DropdownButton(rect, content, focusType);
+		        if (GUI.Button(new Rect(position.x + rect.width + space, position.y, selectButtonWidth, position.height), "Select") == true) {
+
+			        Selection.activeObject = selectButton;
+
+		        }
+				
+		        return result;
+				
+	        }
+			
+	        return EditorGUI.DropdownButton(position, content, focusType);
 
         }
 

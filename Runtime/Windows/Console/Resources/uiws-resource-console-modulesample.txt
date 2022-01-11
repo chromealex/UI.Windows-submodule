@@ -1,4 +1,5 @@
 [Help("Sample Console Module")]
+[Alias("s")]
 public class Sample : ConsoleModule {
 
     [Help("Prints test bool")]
@@ -15,6 +16,7 @@ public class Sample : ConsoleModule {
     }
 
     [Help("Prints test string with int a")]
+    [FastLink("Samples/Test1")]
     public void Test(int a) {
 
         Debug.Log("Test: " + a);
@@ -22,6 +24,7 @@ public class Sample : ConsoleModule {
     }
 
     [Help("Prints test string with int a and float b")]
+    [FastLink("Samples/Test2")]
     public void Test(int a, float b) {
 
         Debug.Log("Test: " + a + " :: " + b);

@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace UnityEngine.UI.Windows.Components {
+﻿namespace UnityEngine.UI.Windows.Components {
 
     using Modules;
     
@@ -14,7 +10,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         private WindowObject loadedAsset;
 
-        protected override void OnLoadScreenAsync(System.Action onComplete) {
+        protected override void OnLoadScreenAsync(InitialParameters initialParameters, System.Action onComplete) {
 
             if (this.autoLoad == true) {
                 
@@ -22,9 +18,9 @@ namespace UnityEngine.UI.Windows.Components {
 
                     if (instance != null) {
                         
-                        instance.DoLoadScreenAsync(() => {
+                        instance.DoLoadScreenAsync(initialParameters, () => {
                             
-                            base.OnLoadScreenAsync(onComplete);
+                            base.OnLoadScreenAsync(initialParameters, onComplete);
 
                         });
 
@@ -32,24 +28,40 @@ namespace UnityEngine.UI.Windows.Components {
 
                     } else {
 
-                        base.OnLoadScreenAsync(onComplete);
+                        base.OnLoadScreenAsync(initialParameters, onComplete);
 
                     }
 
-                });
+                }, !initialParameters.showSync);
 
                 return;
 
             }
             
-            base.OnLoadScreenAsync(onComplete);
+            base.OnLoadScreenAsync(initialParameters, onComplete);
             
         }
 
-        public void LoadAsync<T>() where T : WindowObject {
+        public void LoadAsync<T>(System.Action<T> onComplete = null) where T : WindowObject {
             
-            this.LoadAsync<T>(this.prefab);
+            this.LoadAsync<T>(this.prefab, (asset) => {
+
+                this.loadedAsset = asset;
+                onComplete?.Invoke(asset);
+
+            });
             
+        }
+
+        public T LoadSync<T>() where T : WindowObject {
+            
+            this.LoadAsync<T>(this.prefab, (asset) => {
+
+                this.loadedAsset = asset;
+                
+            }, async: false);
+            return this.loadedAsset as T;
+
         }
 
         public T Get<T>() where T : WindowObject {

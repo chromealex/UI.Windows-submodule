@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace UnityEngine.UI.Windows {
+﻿namespace UnityEngine.UI.Windows {
 
     [CreateAssetMenu(menuName = "UI.Windows/Window System Settings")]
     public class WindowSystemSettings : ScriptableObject {
@@ -15,7 +11,7 @@ namespace UnityEngine.UI.Windows {
             public float maxDepth;
             public float minZDepth;
             public float maxZDepth;
-
+            
         }
 
         public int windowsPerLayer = 1000;

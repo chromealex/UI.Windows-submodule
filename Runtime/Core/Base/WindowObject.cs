@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace UnityEngine.UI.Windows {
 
@@ -46,6 +45,13 @@ namespace UnityEngine.UI.Windows {
     }
 
     [System.Serializable]
+    public struct EditorRefLocks {
+
+        public string[] directories;
+        
+    }
+
+    [System.Serializable]
     public struct DebugStateLog {
 
         [System.Serializable]
@@ -70,13 +76,19 @@ namespace UnityEngine.UI.Windows {
         }
 
     }
+
+    public interface IHolder {
+
+        void ValidateEditor();
+
+    }
     
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
-    public abstract class WindowObject : MonoBehaviour, IOnPoolGet, IOnPoolAdd, ISearchComponentByTypeSingleEditor {
+    public abstract class WindowObject : MonoBehaviour, IOnPoolGet, IOnPoolAdd, ISearchComponentByTypeSingleEditor, IHolder {
 
         [System.Serializable]
-        public struct RenderItem {
+        public struct RenderItem : System.IEquatable<RenderItem> {
 
             public CanvasRenderer canvasRenderer;
             public Graphic graphics;
@@ -102,6 +114,23 @@ namespace UnityEngine.UI.Windows {
 
                 if (this.canvasRenderer != null) this.canvasRenderer.cullTransparentMesh = state;
 
+            }
+
+            public bool Equals(RenderItem other) {
+                return Equals(this.canvasRenderer, other.canvasRenderer) && Equals(this.graphics, other.graphics) && Equals(this.rectMask, other.rectMask);
+            }
+
+            public override bool Equals(object obj) {
+                return obj is RenderItem other && Equals(other);
+            }
+
+            public override int GetHashCode() {
+                unchecked {
+                    var hashCode = (this.canvasRenderer != null ? this.canvasRenderer.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (this.graphics != null ? this.graphics.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (this.rectMask != null ? this.rectMask.GetHashCode() : 0);
+                    return hashCode;
+                }
             }
 
         }
@@ -131,7 +160,7 @@ namespace UnityEngine.UI.Windows {
         public Canvas objectCanvas;
         public int canvasSortingOrderDelta;
         public RenderItem[] canvasRenderers;
-        public bool isActiveSelf;
+        
         //public CanvasGroup canvasGroupRender;
 
         [Tooltip("Should this object return in pool when window is hidden? Object will returns into pool only if parent object is not mark as `createPool`.")]
@@ -140,7 +169,6 @@ namespace UnityEngine.UI.Windows {
         [AnimationParameters]
         public AnimationParametersContainer animationParameters;
         
-        public ObjectState objectState;
         [Tooltip("Render behaviour when hidden state set or if hiddenByDefault is true.")]
         public RenderBehaviourSettings renderBehaviourOnHidden = RenderBehaviourSettings.UseSettings;
         
@@ -151,15 +179,34 @@ namespace UnityEngine.UI.Windows {
         [Tooltip("Make this object is hidden by default.\nWorks only on window showing state, check if this object must be hidden by default it breaks branch graph on this node. After it works current object state will be Initialized.")]
         public bool hiddenByDefault = false;
 
+        public EditorRefLocks editorRefLocks;
         public DebugStateLog debugStateLog;
         
         public bool isObjectRoot;
         public WindowObject rootObject;
         public List<WindowObject> subObjects = new List<WindowObject>();
 
+        public ComponentAudio audioEvents;
+        
         internal bool internalManualShow;
         internal bool internalManualHide;
+        private bool readyToHide = true;
+
+        private bool isActiveSelf;
+        private ObjectState objectState;
         
+        public bool IsReadyToHide() {
+
+            return this.readyToHide;
+
+        }
+
+        public void SetReadyToHide(bool state) {
+            
+            this.readyToHide = state;
+            
+        }
+
         public void SetState(ObjectState state) {
 
             var isDebug = WindowSystem.GetSettings().collectDebugInfo;
@@ -169,30 +216,80 @@ namespace UnityEngine.UI.Windows {
         }
         
         [System.Serializable]
-        public struct EditorParametersRegistry {
+        public struct EditorParametersRegistry : System.IEquatable<EditorParametersRegistry> {
 
-            public WindowObject holder;
+            [SerializeField]
+            private WindowObject holder;
+            [SerializeField]
+            private WindowComponentModule moduleHolder;
             
-            public bool hiddenByDefault;
-            public string hiddenByDefaultDescription;
+            public bool holdHiddenByDefault;
+            public bool holdAllowRegisterInRoot;
 
-            public bool allowRegisterInRoot;
-            public string allowRegisterInRootDescription;
+            public IHolder GetHolder() {
+
+                if (this.holder == null) return this.moduleHolder;
+                return this.holder;
+                
+            }
+
+            public string GetHolderName() {
+                if (this.moduleHolder != null) return this.moduleHolder.name;
+                return this.holder.name;
+            }
+
+            public EditorParametersRegistry(WindowObject holder) {
+
+                this.holder = holder;
+                this.moduleHolder = null;
+                
+                this.holdHiddenByDefault = default;
+                this.holdAllowRegisterInRoot = default;
+
+            }
+
+            public EditorParametersRegistry(WindowComponentModule holder) {
+
+                this.holder = holder.windowComponent;
+                this.moduleHolder = holder;
+                
+                this.holdHiddenByDefault = default;
+                this.holdAllowRegisterInRoot = default;
+
+            }
 
             public bool IsEquals(EditorParametersRegistry other) {
 
                 return this.holder == other.holder &&
-                       this.hiddenByDefault == other.hiddenByDefault &&
-                       this.allowRegisterInRoot == other.allowRegisterInRoot;
+                       this.holdHiddenByDefault == other.holdHiddenByDefault &&
+                       this.holdAllowRegisterInRoot == other.holdAllowRegisterInRoot;
 
             }
-            
+
+            public bool Equals(EditorParametersRegistry other) {
+                return Equals(this.holder, other.holder) && Equals(this.moduleHolder, other.moduleHolder) && this.holdHiddenByDefault == other.holdHiddenByDefault && this.holdAllowRegisterInRoot == other.holdAllowRegisterInRoot;
+            }
+
+            public override bool Equals(object obj) {
+                return obj is EditorParametersRegistry other && Equals(other);
+            }
+
+            public override int GetHashCode() {
+                unchecked {
+                    var hashCode = (this.holder != null ? this.holder.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (this.moduleHolder != null ? this.moduleHolder.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ this.holdHiddenByDefault.GetHashCode();
+                    hashCode = (hashCode * 397) ^ this.holdAllowRegisterInRoot.GetHashCode();
+                    return hashCode;
+                }
+            }
+
         }
         
         public List<EditorParametersRegistry> registry = null;
         
         public void AddEditorParametersRegistry(EditorParametersRegistry param) {
-            
+
             if (this.registry == null) this.registry = new List<EditorParametersRegistry>();
 
             if (this.registry.Any(x => x.IsEquals(param)) == false) {
@@ -201,6 +298,37 @@ namespace UnityEngine.UI.Windows {
 
             }
 
+        }
+
+        private void ValidateRegistry(DirtyHelper dirtyHelper) {
+            
+            if (this.registry != null && this.registry.Count > 0) {
+
+                var holders = new List<IHolder>();
+                foreach (var reg in this.registry) {
+
+                    if (reg.GetHolder() != null) {
+                        
+                        holders.Add(reg.GetHolder());
+                        
+                    }
+                    
+                }
+                
+                var prevRegistry = this.registry.ToList();
+                this.registry.Clear();
+                foreach (var holder in holders) {
+                    
+                    if ((MonoBehaviour)holder != this) holder.ValidateEditor();
+                    
+                }
+
+                var newRegistry = this.registry;
+                this.registry = prevRegistry;
+                dirtyHelper.Set(ref this.registry, newRegistry);
+
+            }
+            
         }
 
         #if UNITY_EDITOR
@@ -236,11 +364,28 @@ namespace UnityEngine.UI.Windows {
             
             this.OnPoolGet();
             
+            for (int i = 0; i < this.subObjects.Count; ++i) {
+                
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
+                ((IOnPoolGet)this.subObjects[i]).OnPoolGet();
+                
+            }
+
         }
 
         void IOnPoolAdd.OnPoolAdd() {
             
             this.OnPoolAdd();
+            
+            this.internalManualHide = false;
+            this.internalManualShow = false;
+               
+            for (int i = 0; i < this.subObjects.Count; ++i) {
+                
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
+                ((IOnPoolAdd)this.subObjects[i]).OnPoolAdd();
+                
+            }
             
         }
         
@@ -271,6 +416,24 @@ namespace UnityEngine.UI.Windows {
             
         }
 
+        public virtual void BreakState() {
+            
+            WindowObjectAnimation.BreakState(this);
+            
+        }
+
+        public virtual void BreakStateHierarchy() {
+            
+            this.BreakState();
+            for (int i = 0; i < this.subObjects.Count; ++i) {
+                
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
+                this.subObjects[i].BreakState();
+                
+            }
+            
+        }
+
         public bool IsVisible() {
 
             return this.IsVisibleSelf() == true && (this.rootObject != null ? this.rootObject.IsVisible() == true : true);
@@ -283,52 +446,52 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public virtual T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowComponent {
+
+            if (this is T instance) {
+
+                if (filter == null || filter.Invoke(instance) == true) return instance;
+
+            }
+
+            for (int i = 0; i < this.subObjects.Count; ++i) {
+
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
+                var obj = this.subObjects[i];
+                var comp = obj.FindComponent<T>(filter);
+                if (comp != null) return comp;
+
+            }
+            
+            return null;
+            
+        }
+
         [ContextMenu("Validate")]
         public virtual void ValidateEditor() {
             
             this.rectTransform = this.GetComponent<RectTransform>();
 
-            this.ValidateEditor(updateParentObjects: true);
+            this.ValidateEditor(updateParentObjects: false, updateChildObjects: false);
+
+        }
+
+        public void ValidateEditor(bool updateParentObjects, bool updateChildObjects = false) {
+            
+            var helper = new DirtyHelper(this);
+            this.ValidateEditor(helper, updateParentObjects: false, updateChildObjects: false);
+            helper.Apply();
             
         }
 
-        public void ValidateEditor(bool updateParentObjects) {
+        public void ValidateEditor(DirtyHelper dirtyHelper, bool updateParentObjects, bool updateChildObjects = false) {
 
-            if (updateParentObjects == true) {
+            this.ValidateRegistry(dirtyHelper);
 
-                var topObjects = this.GetComponentsInParent<WindowObject>(true);
-                foreach (var obj in topObjects) {
-
-                    if (obj != this) obj.ValidateEditor();
-
-                }
-
-            }
-
-            if (this.registry != null) {
-
-                var holders = new List<WindowObject>();
-                foreach (var reg in this.registry) {
-
-                    if (reg.holder != null) {
-                        
-                        holders.Add(reg.holder);
-                        
-                    }
-                    
-                }
-                this.registry.Clear();
-                foreach (var holder in holders) {
-                    
-                    if (holder != this) holder.ValidateEditor(updateParentObjects: false);
-                    
-                }
-                
-            }
-            
-            this.isObjectRoot = (this.transform.parent == null);
-            this.objectCanvas = this.GetComponent<Canvas>();
-            this.hasObjectCanvas = (this.objectCanvas != null);
+            dirtyHelper.SetEnum(ref this.objectState, ObjectState.NotInitialized);
+            dirtyHelper.Set(ref this.isObjectRoot, (this.transform.parent == null));
+            dirtyHelper.SetObj(ref this.objectCanvas, this.GetComponent<Canvas>());
+            dirtyHelper.Set(ref this.hasObjectCanvas, (this.objectCanvas != null));
 
             { // Collect render items
 
@@ -364,21 +527,21 @@ namespace UnityEngine.UI.Windows {
 
                 canvasRenderers = canvasRenderers.Where(x => x != null).ToArray();
                 var rectMasks = this.GetComponentsInChildren<RectMask2D>().Where(x => x.GetComponentsInParent<WindowObject>(true)[0] == this).ToArray();
-                this.canvasRenderers = new RenderItem[canvasRenderers.Length + rectMasks.Length];
+                var newCanvasRenderers = new RenderItem[canvasRenderers.Length + rectMasks.Length];
                 var k = 0;
-                for (int i = 0; i < this.canvasRenderers.Length; ++i) {
+                for (int i = 0; i < newCanvasRenderers.Length; ++i) {
 
                     if (i < rectMasks.Length) {
 
-                        this.canvasRenderers[i] = new RenderItem() {
-                            rectMask = rectMasks[i]
+                        newCanvasRenderers[i] = new RenderItem() {
+                            rectMask = rectMasks[i],
                         };
 
                     } else {
 
-                        this.canvasRenderers[i] = new RenderItem() {
+                        newCanvasRenderers[i] = new RenderItem() {
                             canvasRenderer = canvasRenderers[k],
-                            graphics = canvasRenderers[k].GetComponent<UnityEngine.UI.Graphic>()
+                            graphics = canvasRenderers[k].GetComponent<UnityEngine.UI.Graphic>(),
                         };
 
                         ++k;
@@ -387,13 +550,15 @@ namespace UnityEngine.UI.Windows {
 
                 }
                 
+                dirtyHelper.Set(ref this.canvasRenderers, newCanvasRenderers);
+
             }
 
             var roots = this.GetComponentsInParent<WindowObject>(true);
-            if (roots.Length >= 2) this.rootObject = roots[1];
+            if (roots.Length >= 2) dirtyHelper.SetObj(ref this.rootObject, roots[1]);
             if (this.autoRegisterSubObjects == true) {
 
-                this.subObjects = this.GetComponentsInChildren<WindowObject>(true).Where(x => {
+                var newSubObjects = this.GetComponentsInChildren<WindowObject>(true).Where(x => {
 
                     if (x.allowRegisterInRoot == false) return false;
                     
@@ -404,8 +569,35 @@ namespace UnityEngine.UI.Windows {
                     return x != this && c == this;
 
                 }).ToList();
+                dirtyHelper.SetObj(ref this.subObjects, newSubObjects);
 
             }
+
+            if (updateChildObjects == true) {
+
+                var childObjects = this.GetComponentsInChildren<WindowObject>(true);
+                foreach (var obj in childObjects) {
+
+                    if (obj != this) obj.ValidateEditor(updateParentObjects: false, updateChildObjects: false);
+
+                }
+
+            }
+
+            if (updateParentObjects == true) {
+
+                var topObjects = this.GetComponentsInParent<WindowObject>(true);
+                foreach (var obj in topObjects) {
+
+                    if (obj != this) obj.ValidateEditor(updateParentObjects: false, updateChildObjects: false);
+
+                }
+
+            }
+
+            #if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this.gameObject);
+            #endif
 
         }
 
@@ -415,6 +607,7 @@ namespace UnityEngine.UI.Windows {
 
                 for (int i = this.subObjects.Count - 1; i >= 0; --i) {
 
+                    if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                     this.subObjects[i].PushToPool();
 
                 }
@@ -425,29 +618,34 @@ namespace UnityEngine.UI.Windows {
 
                 if (this.rootObject != null) this.rootObject.RemoveSubObject(this);
                 
-                if (this.createPool == false) {
+                this.window = null;
+                this.rootObject = null;
+                WindowSystem.GetPools().Despawn(this, (obj) => {
+                    
+                    obj.DoDeInit();
+                    
+                });
 
-                    this.DoDeInit();
-
-                }
-
-                WindowSystem.GetPools().Despawn(this);
-
+            } else {
+                
+                this.window = null;
+                this.rootObject = null;
+                
             }
 
         }
 
-        internal void DoLoadScreenAsync(System.Action onComplete) {
+        internal void DoLoadScreenAsync(InitialParameters initialParameters, System.Action onComplete) {
             
-            Utilities.Coroutines.CallInSequence(() => {
+            Utilities.Coroutines.CallInSequence((closure) => {
                 
-                this.OnLoadScreenAsync(onComplete);
+                this.OnLoadScreenAsync(closure, onComplete);
 
-            }, this.subObjects, (x, cb) => x.OnLoadScreenAsync(cb));
+            }, initialParameters, this.subObjects, (x, cb, closure) => x.OnLoadScreenAsync(closure, cb));
             
         }
         
-        protected virtual void OnLoadScreenAsync(System.Action onComplete) {
+        protected virtual void OnLoadScreenAsync(InitialParameters initialParameters, System.Action onComplete) {
             
             if (onComplete != null) onComplete.Invoke();
             
@@ -462,7 +660,7 @@ namespace UnityEngine.UI.Windows {
         /// <summary>
         /// Just turn off all canvases
         /// </summary>
-        public void TurnOffRender() {
+        public virtual void TurnOffRender() {
 
             if (this.hasObjectCanvas == true) {
 
@@ -472,6 +670,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].TurnOffRender();
 
             }
@@ -481,7 +680,7 @@ namespace UnityEngine.UI.Windows {
         /// <summary>
         /// Just turn on all canvases
         /// </summary>
-        public void TurnOnRender() {
+        public virtual void TurnOnRender() {
 
             if (this.hasObjectCanvas == true) {
 
@@ -491,6 +690,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].TurnOnRender();
 
             }
@@ -509,6 +709,7 @@ namespace UnityEngine.UI.Windows {
             
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].SetVisible();
 
             }
@@ -563,6 +764,7 @@ namespace UnityEngine.UI.Windows {
             
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].SetVisible();
 
             }
@@ -571,6 +773,8 @@ namespace UnityEngine.UI.Windows {
 
         public void SetInvisible() {
 
+            if (this == null || this.gameObject == null) return;
+            
             this.isActiveSelf = false;
 
             var renderBehaviourOnHidden = RenderBehaviour.Nothing; 
@@ -607,6 +811,30 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public void SetSortingOrderDelta(int value) {
+            
+            if (this.hasObjectCanvas == true) {
+                
+                var windowCanvas = this.window.GetCanvas();
+                if (windowCanvas != null) {
+                    
+                    this.objectCanvas.overrideSorting = true;
+                    this.objectCanvas.sortingOrder = windowCanvas.sortingOrder + value;
+                    this.objectCanvas.sortingLayerName = windowCanvas.sortingLayerName;
+                    this.objectCanvas.sortingLayerID = windowCanvas.sortingLayerID;
+                    
+                }
+
+            }
+            
+        }
+
+        public void Setup(WindowComponent component) {
+
+            this.Setup(component.GetWindow());
+
+        }
+
         internal virtual void Setup(WindowBase source) {
 
             if (this.hasObjectCanvas == true) {
@@ -624,7 +852,8 @@ namespace UnityEngine.UI.Windows {
             }
             
             for (int i = 0; i < this.subObjects.Count; ++i) {
-                
+
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].Setup(source);
                 
             }
@@ -637,6 +866,21 @@ namespace UnityEngine.UI.Windows {
 
             this.windowId = source.windowId;
             this.window = source;
+
+        }
+
+        private bool CheckSubObject(List<WindowObject> subObjects, ref int index) {
+            
+            if (subObjects[index] == null) {
+                
+                Debug.LogError($"Null subObject encountered on window [{(this.window == null ? "Null" : this.window.name)}], object [{this.name}], index [{index}] (previous subObject is [{(index > 0 ? subObjects[index - 1].name : "Empty")}], next subObject is [{(index < subObjects.Count - 1 ? subObjects[index + 1].name : "Empty")}])");
+                this.subObjects.RemoveAt(index);
+                --index;
+                return false;
+                    
+            }
+            
+            return true;
 
         }
 
@@ -833,12 +1077,13 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public void SendEvent<T>(T data) {
+        protected internal virtual void SendEvent<T>(T data) {
             
             this.OnEvent(data);
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].SendEvent(data);
 
             }
@@ -856,6 +1101,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].DoSendFocusLost();
 
             }
@@ -869,6 +1115,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].DoSendFocusTook();
 
             }
@@ -879,6 +1126,8 @@ namespace UnityEngine.UI.Windows {
 
             if (this.objectState < ObjectState.Initializing) {
 
+                this.audioEvents.Initialize(this);
+                
                 this.SetState(ObjectState.Initializing);
 
                 this.OnInitInternal();
@@ -891,6 +1140,7 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].DoInit();
 
             }
@@ -909,40 +1159,46 @@ namespace UnityEngine.UI.Windows {
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].DoDeInit();
 
             }
+
+            var resources = WindowSystem.GetResources();
+            resources.DeleteAll(this);
 
             WindowSystem.RaiseEvent(this, WindowEvent.OnDeInitialize);
             this.OnDeInit();
             this.OnDeInitInternal();
 
+            this.audioEvents.DeInitialize(this);
+            
             this.SetState(ObjectState.DeInitialized);
 
             WindowSystem.ClearEvents(this);
+            
+            this.SetState(ObjectState.NotInitialized);
 
         }
+        
+        private bool IsInternalManualTouch(TransitionParameters parameters) {
 
-        public void ShowHide(bool state, TransitionParameters parameters = default) {
+            if (parameters.data.replaceIgnoreTouch == true) {
 
-            if (state == true) {
-                
-                this.Show(parameters);
-                
-            } else {
-                
-                this.Hide(parameters);
-                
+                if (parameters.data.ignoreTouch == true) return false;
+
             }
             
+            return this.internalManualHide == true || this.internalManualShow == true;
+
         }
 
         internal void ShowInternal(TransitionParameters parameters = default) {
             
-            if (this.hiddenByDefault == true /*&& this.window.GetState() == ObjectState.Showing*/) {
+            if (this.hiddenByDefault == true || this.IsInternalManualTouch(parameters) == true) {
 
                 if (this.internalManualShow == false) {
-                    
+
                     this.Hide(TransitionParameters.Default.ReplaceImmediately(true));
                     this.SetInvisible();
                     
@@ -966,17 +1222,65 @@ namespace UnityEngine.UI.Windows {
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
-        
-        public void Show(TransitionParameters parameters = default) {
 
-            if (this.objectState <= ObjectState.Initializing) {
-                
-                Debug.LogWarning("Object is out of state: " + this, this);
+        internal void HideInternal(TransitionParameters parameters = default) {
+            
+            if (this.IsInternalManualTouch(parameters) == true) {
+
+                parameters.RaiseCallback();
                 return;
+
+            }
+            
+            var cObj = this;
+            var cParams = parameters;
+            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetHidden, cObj, cParams);
+            WindowSystem.HideInstance(this, cbParameters, internalCall: true);
+
+        }
+
+        public void ShowHide(bool state) {
+
+            this.ShowHide(state, default);
+            
+        }
+
+        public void ShowHide(bool state, TransitionParameters parameters) {
+
+            if (state == true) {
+                
+                this.Show(parameters);
+                
+            } else {
+                
+                this.Hide(parameters);
                 
             }
+            
+        }
 
-            this.internalManualShow = true;
+        public void Show() {
+            
+            this.Show(default);
+            
+        }
+
+        public virtual void Show(TransitionParameters parameters) {
+
+            if (this.objectState <= ObjectState.Initializing) {
+
+                if (this.objectState == ObjectState.NotInitialized) {
+                    
+                    this.DoInit();
+                    
+                } else {
+
+                    Debug.LogWarning("Object is out of state: " + this, this);
+                    return;
+
+                }
+
+            }
 
             if (this.objectState == ObjectState.Showing || this.objectState == ObjectState.Shown) {
                 
@@ -985,6 +1289,8 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
+            this.internalManualShow = true;
+
             var cObj = this;
             var cParams = parameters;
             var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetShown, cObj, cParams);
@@ -992,16 +1298,28 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public virtual void Hide(TransitionParameters parameters = default) {
+        public void Hide() {
+            
+            this.Hide(default);
+            
+        }
+
+        public virtual void Hide(TransitionParameters parameters) {
 
             if (this.objectState <= ObjectState.Initializing) {
                 
-                Debug.LogWarning("Object is out of state: " + this, this);
-                return;
+                if (this.objectState == ObjectState.NotInitialized) {
+                    
+                    this.DoInit();
+                    
+                } else {
+
+                    Debug.LogWarning("Object is out of state: " + this, this);
+                    return;
+
+                }
                 
             }
-
-            this.internalManualHide = true;
 
             if (this.objectState == ObjectState.Hiding || this.objectState == ObjectState.Hidden) {
                 
@@ -1010,10 +1328,12 @@ namespace UnityEngine.UI.Windows {
                 
             }
             
+            this.internalManualHide = true;
+
             var cObj = this;
             var cParams = parameters;
             var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetHidden, cObj, cParams);
-            WindowSystem.HideInstance(this, cbParameters);
+            WindowSystem.HideInstance(this, cbParameters, internalCall: true);
 
         }
 
@@ -1023,9 +1343,9 @@ namespace UnityEngine.UI.Windows {
             
         }
         
-        public void LoadAsync<T>(Resource resource, System.Action<T> onComplete = null) where T : WindowObject {
+        public void LoadAsync<T>(Resource resource, System.Action<T> onComplete = null, bool async = true) where T : WindowObject {
             
-            Coroutines.Run(this.LoadAsync_YIELD(resource, onComplete));
+            Coroutines.Run(this.LoadAsync_YIELD(resource, onComplete, async));
             
         }
 
@@ -1036,14 +1356,14 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private IEnumerator LoadAsync_YIELD<T>(Resource resource, System.Action<T> onComplete = null) where T : WindowObject {
+        private IEnumerator LoadAsync_YIELD<T>(Resource resource, System.Action<T> onComplete = null, bool async = true) where T : WindowObject {
             
             var resources = WindowSystem.GetResources();
             var data = new LoadAsyncClosure<T>() {
                 component = this,
                 onComplete = onComplete,
             };
-            yield return resources.LoadAsync<T, LoadAsyncClosure<T>>(this.GetWindow(), data, resource, (asset, closure) => {
+            yield return resources.LoadAsync<T, LoadAsyncClosure<T>>(new WindowSystemResources.LoadParameters() { async = async },this.GetWindow(), data, resource, (asset, closure) => {
 
                 if (asset != null) {
 
@@ -1072,6 +1392,20 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public void DoLayoutReady() {
+
+            this.OnLayoutReady();
+            WindowSystem.RaiseEvent(this, WindowEvent.OnLayoutReady);
+
+            for (int i = 0; i < this.subObjects.Count; ++i) {
+
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
+                this.subObjects[i].DoLayoutReady();
+
+            }
+
+        }
+
         internal virtual void OnInitInternal() { }
 
         internal virtual void OnDeInitInternal() { }
@@ -1085,6 +1419,8 @@ namespace UnityEngine.UI.Windows {
         internal virtual void OnHideEndInternal() { }
 
         #region Public Override Events
+        public virtual void OnLayoutReady() { }
+        
         public virtual void OnInit() { }
 
         public virtual void OnDeInit() { }

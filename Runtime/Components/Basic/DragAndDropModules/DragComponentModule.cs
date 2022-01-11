@@ -3,24 +3,11 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI.Windows.Components.DragAndDropModules {
 
-	[RequireComponent(typeof(CanvasGroup))]
 	public class DragComponentModule : WindowComponentModule, IBeginDragHandler, IEndDragHandler, IDragHandler {
-
-		private GameObject dragObject;
-		private RectTransform rectTransform;
-		private CanvasGroup canvasGroup;
-
-		[Tooltip("Prefab for dragging object preview")]
-		public GameObject dragObjectPrefab;
-
-		[Tooltip("Dragging object icon")]
-		public Image icon;
 
 		private Action<PointerEventData> onDragCallback;
 		private Action<PointerEventData> onBeginDragCallback;
 		private Action<PointerEventData> onEndDragCallback;
-
-		private float scaleFactor = 1;
 
 		public void SetDragCallback(System.Action<PointerEventData> callback) {
 
@@ -76,44 +63,27 @@ namespace UnityEngine.UI.Windows.Components.DragAndDropModules {
 
 		}
 
-		public void RemoveAllDragCallbacks(System.Action<PointerEventData> callback) {
+		public void RemoveAllDragCallbacks() {
 
 			this.onDragCallback = null;
 
 		}
 
-		public void RemoveAllBeginDragCallbacks(System.Action<PointerEventData> callback) {
+		public void RemoveAllBeginDragCallbacks() {
 
 			this.onBeginDragCallback = null;
 
 		}
 
-		public void RemoveAllEndDragCallbacks(System.Action<PointerEventData> callback) {
+		public void RemoveAllEndDragCallbacks() {
 
 			this.onEndDragCallback = null;
 
 		}
 
-		private void Awake() {
+		public virtual void OnBeginDrag(PointerEventData eventData) {
 
-			this.canvasGroup = GetComponent<CanvasGroup>();
-
-		}
-
-		public void OnBeginDrag(PointerEventData eventData) {
-
-			var canvas = GetParentCanvasTransform();
-			this.scaleFactor = canvas.gameObject.GetComponent<Canvas>().scaleFactor;
-			this.dragObject = Instantiate(dragObjectPrefab, GetParentCanvasTransform());
-			this.dragObject.GetComponent<ImageComponent>().SetImage(icon.sprite);
-
-			this.canvasGroup.alpha = .6f;
-			this.canvasGroup.blocksRaycasts = false;
-
-			this.rectTransform = dragObject.transform as RectTransform;
-			this.rectTransform.position = transform.position;
-
-			onBeginDragCallback?.Invoke(eventData);
+			this.onBeginDragCallback?.Invoke(eventData);
 
 		}
 
@@ -131,19 +101,14 @@ namespace UnityEngine.UI.Windows.Components.DragAndDropModules {
 
 		}
 
-		public void OnDrag(PointerEventData eventData) {
+		public virtual void OnDrag(PointerEventData eventData) {
 
-			this.rectTransform.anchoredPosition += eventData.delta / this.scaleFactor;
 			onDragCallback?.Invoke(eventData);
 
 		}
 
-		public void OnEndDrag(PointerEventData eventData) {
+		public virtual void OnEndDrag(PointerEventData eventData) {
 
-			this.canvasGroup.alpha = 1f;
-			this.canvasGroup.blocksRaycasts = true;
-
-			Destroy(dragObject);
 			onEndDragCallback?.Invoke(eventData);
 
 		}

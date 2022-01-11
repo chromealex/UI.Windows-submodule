@@ -1,137 +1,19 @@
 using System.Linq;
-using UnityEngine.UI.Windows;
 using UnityEngine.UI.Windows.Components;
 using UnityEngine.UI.Windows.WindowTypes;
 using System.Collections.Generic;
 
 namespace UnityEngine.UI.Windows.Runtime.Windows {
 
-    public interface IConsoleModule {}
-
-    public abstract class ConsoleModule : IConsoleModule {
-
-        public ConsoleScreen screen;
-        
-        public void Help() {
-
-            this.screen.PrintHelp(this);
-
-        }
-
-    }
-
-    public class HelpAttribute : System.Attribute {
-
-        public string text;
-
-        public HelpAttribute(string text) {
-            
-            this.text = text;
-            
-        }
-
-    }
-
-    public class AliasAttribute : System.Attribute {
-
-        public string text;
-
-        public AliasAttribute(string text) {
-            
-            this.text = text;
-            
-        }
-
-    }
-
-    public class FastLinkAttribute : System.Attribute {
-
-        public string text;
-
-        public FastLinkAttribute(string text) {
-            
-            this.text = text;
-            
-        }
-
-    }
-
-    [Help("Test module")][Alias("T")]
-    public class Test : ConsoleModule {
-
-        [Help("Prints help bool")]
-        public void Z(bool a) {
-
-            Debug.Log("Z: " + a);
-
-        }
-
-        [Help("Prints help string")][Alias("A")][FastLink("T HELP1")]
-        public void Help1() {
-
-            Debug.Log("Help");
-
-        }
-
-        [Help("Prints help string with a")][FastLink("T HELP2")]
-        public void Help2(int a) {
-
-            Debug.Log("Help2: " + a);
-
-        }
-
-        [Help("Prints help string with a and b")]
-        public void Help3(int a, float b) {
-
-            Debug.Log("Help3: " + a + " :: " + b);
-
-        }
-
-    }
-
     public class ConsoleScreen : LayoutWindowType, IDataSource {
 
-        public struct FastLink {
-
-            public string cmd;
-            public bool run;
-            public string caption;
-
-        }
-
-        [System.Serializable]
-        public struct CommandItem {
-
-            public string str;
-            public string moduleName;
-            public string methodName;
-            public int argsCount;
-            public string[] args;
-
-        }
-
-        [System.Serializable]
-        public struct DrawItem {
-
-            public string line;
-            public LogType logType;
-            public bool isCommand;
-
-        }
-        
         private ListComponent list;
         private ListComponent fastLinks;
         private InputFieldComponent inputField;
+        private LogsCounterComponent logsCounterComponent;
         
-        private readonly List<FastLink> fastLinkItems = new List<FastLink>();
-        private readonly List<CommandItem> commands = new List<CommandItem>();
-        private readonly List<IConsoleModule> moduleItems = new List<IConsoleModule>();
-        private readonly List<DrawItem> drawItems = new List<DrawItem>();
         private char openCloseChar;
         private int currentIndex;
-
-        public bool autoConnectLogs = true;
-        private string helpInitPrint;
         
         public void OnParametersPass(char openCloseChar) {
 
@@ -152,19 +34,11 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             this.GetLayoutComponent(out this.list);
             this.GetLayoutComponent(out this.fastLinks);
             this.GetLayoutComponent(out this.inputField);
+            this.GetLayoutComponent(out this.logsCounterComponent);
             
             this.inputField.SetCallbackValidateChar(this.OnChar);
             this.inputField.SetCallbackEditEnd(this.OnEditEnd);
-
-            this.CollectModules();
-
-            if (this.autoConnectLogs == true) {
-
-                Application.logMessageReceived += this.OnAddLog;
-
-            }
-
-            this.helpInitPrint = this.GetInitHelp();
+            this.inputField.Get<ButtonComponent>().SetCallback(this.EndEdit);
 
         }
 
@@ -172,80 +46,49 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
             base.OnShowBegin();
 
-            if (string.IsNullOrEmpty(this.helpInitPrint) == false) this.AddLine(this.helpInitPrint);
-            this.helpInitPrint = string.Empty;
-
-        }
-
-        public override void OnDeInit() {
-            
-            base.OnDeInit();
-            
-            Application.logMessageReceived -= this.OnAddLog;
-            
-        }
-
-        private string GetInitHelp() {
-
-            var welcomeMessage = "<color=#0f0>Welcome to UI.Windows Console</color>\n" +
-                                 "------------------------------------\n" +
-                                 "\t<color=#3af>help</color>\t\t\t\t\t\t\t\t\tshow all modules.\n" +
-                                 "\t<color=#3af>[module] help</color>\t\t\t\t\t\tshow module's help.\n" +
-                                 "\t<color=#3af>[module] [method] arg1 arg2 ...</color>\t\tcall method of the module.\n" +
-                                 "\t<color=#3af>modulesample</color>\t\t\t\t\t\t\tshow module sample text.\n" +
-                                 "------------------------------------\n";
-            
-            return welcomeMessage;
+            this.logsCounterComponent.SetInfo();
 
         }
 
         public void PrintModuleSample() {
             
-            this.AddLine("Check console log for more details.");
-            var file = Resources.Load<TextAsset>("uiws-resource-console-modulesample");
-            if (file != null) {
-
-                var text = file.text;
-                Debug.Log(text);
-
-            }
+            var console = WindowSystem.GetConsole();
+            console.PrintModuleSample();
 
         }
 
-        private void OnAddLog(string condition, string trace, LogType type) {
-            
-            this.AddLine(condition, type);
-            if (type == LogType.Exception) this.AddLine(trace);
+        public bool HasLogFilterType(LogType logType) {
+
+            var console = WindowSystem.GetConsole();
+            return console.HasLogFilterType(logType);
 
         }
 
-        public void CollectModules() {
+        public void SetLogFilterType(LogType logType, bool state) {
             
-            var types = System.AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes().Where(y => y.IsAbstract == false && y.GetInterfaces().Contains(typeof(IConsoleModule)) == true)).ToArray();
-            foreach (var type in types) {
-
-                var module = (IConsoleModule)System.Activator.CreateInstance(type);
-                this.moduleItems.Add(module);
-                
-                var methods = module.GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-                foreach (var method in methods) {
-
-                    if (this.IsValidMethod(method) == false) continue;
-
-                    if (this.GetFastLink(method, out var caption) == true) {
-
-                        this.fastLinkItems.Add(new FastLink() {
-                            run = method.GetParameters().Length == 0,
-                            cmd = module.GetType().Name.ToLower() + " " + method.Name.ToLower(),
-                            caption = caption
-                        });
-
-                    }
-
-                }
-                
-            }
+            var console = WindowSystem.GetConsole();
+            console.SetLogFilterType(logType, state);
             
+        }
+
+        public int GetCounter(LogType logType) {
+
+            var console = WindowSystem.GetConsole();
+            return console.GetCounter(logType);
+            
+        }
+
+        private void AddLog(string text, LogType type = LogType.Log, string trace = null) {
+
+            var console = WindowSystem.GetConsole();
+            console.AddLog(text, type, trace);
+
+        }
+
+        public void ScrollDown() {
+
+            this.list.GetComponent<ScrollRect>().verticalNormalizedPosition = 0f;
+
         }
 
         public void ClearInput() {
@@ -260,31 +103,48 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
         }
 
+        private void EndEdit() {
+            
+            this.ApplyCommand(this.inputField.GetText());
+            this.inputField.Get<ButtonComponent>().SetInteractable(false);
+            
+        }
+
         private void OnEditEnd(string text) {
 
+            #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+            this.ApplyCommand(text);
+            #else
             if (Input.GetKeyDown(KeyCode.KeypadEnter) == true || Input.GetKeyDown(KeyCode.Return)) {
 
                 this.ApplyCommand(text);
 
             }
+            #endif
 
         }
 
         private void MoveUp() {
 
-            if (this.commands.Count == 0) return;
+            var console = WindowSystem.GetConsole();
+            var commands = console.GetCommands();
+            
+            if (commands.Count == 0) return;
             --this.currentIndex;
             if (this.currentIndex < 0) this.currentIndex = 0;
-            this.inputField.SetText(this.commands[this.currentIndex].str);
+            this.inputField.SetText(commands[this.currentIndex].str);
 
         }
 
         private void MoveDown() {
 
-            if (this.commands.Count == 0) return;
+            var console = WindowSystem.GetConsole();
+            var commands = console.GetCommands();
+
+            if (commands.Count == 0) return;
             ++this.currentIndex;
-            if (this.currentIndex >= this.commands.Count) this.currentIndex = this.commands.Count - 1;
-            this.inputField.SetText(this.commands[this.currentIndex].str);
+            if (this.currentIndex >= commands.Count) this.currentIndex = commands.Count - 1;
+            this.inputField.SetText(commands[this.currentIndex].str);
 
         }
 
@@ -306,379 +166,56 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
-        public void AddModule(IConsoleModule module) {
-            
-            this.moduleItems.Add(module);
-            
-        }
+        public void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false, bool canCopy = false) {
 
-        public void AddHR() {
-
-            this.AddLine("<color=#777>--------------------------------------</color>");
-
-        }
-        
-        public void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false) {
-            
-            this.drawItems.Add(new DrawItem() {
-                line = text,
-                logType = logType,
-                isCommand = isCommand,
-            });
+            var console = WindowSystem.GetConsole();
+            console.AddLine(text, logType, isCommand, canCopy);
             
         }
 
-        private bool GetFastLink(System.Reflection.ICustomAttributeProvider methodInfo, out string text) {
-            
-            text = string.Empty;
-            
-            var aliasAttrs = methodInfo.GetCustomAttributes(typeof(FastLinkAttribute), false);
-            if (aliasAttrs.Length == 0) return false;
-            text = (aliasAttrs[0] as FastLinkAttribute)?.text.ToLower();
-            return true;
+        public void RunCommand(WindowSystemConsole.CommandItem command) {
+
+            var console = WindowSystem.GetConsole();
+            console.RunCommand(command, this);
+            this.currentIndex = console.GetCommands().Count;
             
         }
 
-        private string GetAlias(System.Reflection.ICustomAttributeProvider methodInfo) {
-
-            var aliasAttrs = methodInfo.GetCustomAttributes(typeof(AliasAttribute), false);
-            if (aliasAttrs.Length == 0) return string.Empty;
-            return (aliasAttrs[0] as AliasAttribute)?.text.ToLower();
-
-        }
-
-        public void RunCommand(CommandItem command) {
-
-            this.AddLine(command.str, isCommand: true);
-
-            var run = false;
-            var module = this.GetModule(command);
-            if (module != null) {
-
-                if (module is ConsoleModule consoleModule) {
-
-                    consoleModule.screen = this;
-
-                }
-
-                var methodName = command.methodName.ToLower();
-                var methods = module.GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-                System.Reflection.MethodInfo methodFound = null;
-                foreach (var method in methods) {
-
-                    if (this.IsValidMethod(method) == false) continue;
-
-                    var alias = this.GetAlias(method);
-                    
-                    if (method.Name.ToLower() == methodName || alias == methodName) {
-
-                        methodFound = method;
-
-                        var pars = method.GetParameters();
-                        if (pars.Length == command.argsCount) {
-
-                            try {
-
-                                var objs = new object[command.argsCount];
-                                for (int i = 0; i < command.argsCount; ++i) {
-
-                                    objs[i] = this.ConvertArg(command.args[i], pars[i].ParameterType);
-
-                                }
-
-                                method.Invoke(module, objs);
-                                run = true;
-
-                            } catch (System.Exception ex) {
-                                
-                                this.AddLine(ex.Message, LogType.Error);
-                                
-                            }
-
-                            break;
-
-                        }
-
-                    }
-                    
-                }
-
-                if (run == false) {
-
-                    if (methodFound == null) {
-                        
-                        this.AddLine($"Module `{command.moduleName}` has no method `{methodName}`.", LogType.Warning);
-
-                    } else {
-
-                        this.AddLine($"Module `{command.moduleName}` has no method `{methodName}` with parameters length = {command.argsCount} (Required length {methodFound.GetParameters().Length})", LogType.Warning);
-                        this.AddLine(this.GetMethodCallString(methodFound));
-
-                    }
-
-                }
-
-            } else {
-                
-                this.AddLine($"Module `{command.moduleName}` not found", LogType.Warning);
-
-            }
-            
-            this.currentIndex = this.commands.Count;
-            
-        }
-
-        private bool IsValidMethod(System.Reflection.MethodInfo methodInfo) {
-
-            var name = methodInfo.Name;
-            if (name == "GetHashCode" || name == "ToString" || name == "Equals" || name == "GetType") return false;
-
-            return true;
-
-        }
-
-        private string TypeToString(System.Type type) {
-
-            if (type == typeof(int)) return "int";
-            if (type == typeof(uint)) return "uint";
-            if (type == typeof(short)) return "short";
-            if (type == typeof(ushort)) return "ushort";
-            if (type == typeof(long)) return "long";
-            if (type == typeof(ulong)) return "ulong";
-            if (type == typeof(float)) return "float";
-            if (type == typeof(double)) return "double";
-            if (type == typeof(bool)) return "bool";
-            
-            return type.ToString();
-            
-        }
-        
-        private object ConvertArg(string arg, System.Type targetType) {
-
-            if (targetType == typeof(bool)) {
-
-                if (arg.Trim().ToLower() == "true" || arg.Trim().ToLower() == "1") {
-
-                    return true;
-
-                }
-                
-                return false;
-
-            }
-            
-            return System.Convert.ChangeType(arg, targetType);
-            
-        }
-
-        public void PrintHelp(IConsoleModule module) {
-            
-            this.AddLine(this.GetHelpString(string.Empty, module.GetType()).Trim());
-            this.AddLine("Module methods:");
-            this.AddHR();
-            var methods = module.GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-            foreach (var method in methods) {
-                
-                if (this.IsValidMethod(method) == false) continue;
-
-                var str = this.GetMethodCallString(method);
-                this.AddLine(this.GetSpace(4) + str);
-
-            }
-            this.AddHR();
-
-        }
-
-        private string GetMethodCallString(System.Reflection.MethodInfo methodInfo) {
-
-            var pars = methodInfo.GetParameters();
-            var parameters = pars.Select(x => this.TypeToString(x.ParameterType) + " " + x.Name).ToArray();
-            var parsStr = string.Join(", ", parameters);
-            return "<color=#3af>" + methodInfo.Name.ToLower() + "</color>(" + parsStr + ")" + this.GetHelpString(this.GetSpace(4) + methodInfo.Name.ToLower() + "(" + parsStr + ")", methodInfo);
-            
-        }
-
-        public void PrintHelp(List<IConsoleModule> modules) {
-            
-            this.AddLine("Modules:");
-            this.AddHR();
-            foreach (var module in modules) {
-                
-                this.AddLine(this.GetSpace(4) + "<color=#3af>" + module.GetType().Name.ToLower() + "</color>" + this.GetHelpString(this.GetSpace(4) + module.GetType().Name.ToLower(), module.GetType()));
-                
-            }
-            this.AddHR();
-            
-        }
-
-        public void PrintHelp(string moduleName, List<System.Reflection.MethodInfo> methods) {
-            
-            this.AddLine("Module " + moduleName);
-            this.AddLine("Methods:");
-            this.AddHR();
-            foreach (var methodInfo in methods) {
-                
-                this.AddLine(this.GetSpace(4) + "<color=#3af>" + methodInfo.Name.ToLower() + "</color>" + this.GetHelpString(this.GetSpace(4) + methodInfo.Name.ToLower(), methodInfo));
-                
-            }
-            this.AddHR();
-            
-        }
-
-        private string GetHelpString(string callStr, System.Reflection.ICustomAttributeProvider type) {
-
-            var length = callStr.Length;
-            var str = string.Empty;
-            
-            var attrs = type.GetCustomAttributes(typeof(HelpAttribute), false);
-            if (attrs.Length > 0) {
-
-                str += this.GetSpace(4) + "<color=#999>" + ((HelpAttribute)attrs[0]).text + "</color>";
-
-            }
-
-            var attrsAlias = type.GetCustomAttributes(typeof(AliasAttribute), false);
-            if (attrsAlias.Length > 0) {
-
-                str += "\n" + this.GetSpace(length + 4) + "Alias: <color=#3af>" + ((AliasAttribute)attrsAlias[0]).text + "</color>";
-
-            }
-
-            return str;
-
-        }
-
-        private string GetSpace(int length) {
-
-            var str = string.Empty;
-            for (int i = 0; i < length; ++i) str += " ";
-            return str;
-
-        }
-
-        private IConsoleModule GetModule(CommandItem command) {
-
-            return this.GetModule(command.moduleName);
-
-        }
-
-        private IConsoleModule GetModule(string moduleName) {
-
-            moduleName = moduleName.ToLower();
-            foreach (var module in this.moduleItems) {
-
-                var alias = this.GetAlias(module.GetType());
-                if (module.GetType().Name.ToLower() == moduleName || alias == moduleName) {
-
-                    return module;
-
-                }
-                
-            }
-            
-            return null;
-
-        }
-
-        private List<System.Reflection.MethodInfo> GetMethodsByPart(string moduleName, string methodNamePart, out string first) {
-
-            first = methodNamePart;
-
-            var list = new List<System.Reflection.MethodInfo>();
-            var module = this.GetModule(moduleName);
-            if (module != null) {
-
-                var methods = module.GetType().GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-                foreach (var method in methods) {
-                    
-                    if (this.IsValidMethod(method) == false) continue;
-
-                    var alias = this.GetAlias(method);
-                    if (method.Name.ToLower().StartsWith(methodNamePart) == true) {
-
-                        if (list.Contains(method) == false) list.Add(method);
-                        first = method.Name.ToLower();
-
-                    }
-                    
-                    if (alias.StartsWith(methodNamePart) == true) {
-
-                        if (list.Contains(method) == false) list.Add(method);
-                        first = alias;
-
-                    }
-
-                }
-                
-            }
-            
-            return list;
-
-        }
-        
-        private List<IConsoleModule> GetModulesByPart(string moduleNamePart, out string first) {
-
-            moduleNamePart = moduleNamePart.ToLower();
-            first = moduleNamePart;
-            
-            var list = new List<IConsoleModule>();
-            foreach (var module in this.moduleItems) {
-
-                var alias = this.GetAlias(module.GetType());
-                var name = module.GetType().Name.ToLower();
-                if (name.StartsWith(moduleNamePart) == true) {
-                    
-                    if (list.Contains(module) == false) list.Add(module);
-                    first = name;
-
-                }
-                
-                if (alias.StartsWith(moduleNamePart) == true) {
-
-                    if (list.Contains(module) == false) list.Add(module);
-                    first = alias;
-
-                }
-                
-            }
-            
-            return list;
-
-        }
-        
         public void ApplyCommand(string command, bool autoComplete = false) {
 
             var cmd = command.Trim();
+            var console = WindowSystem.GetConsole();
 
-            if (cmd == "modulesample") {
+            if (cmd.ToLower() == "modulesample") {
                 
                 this.AddLine(cmd, isCommand: true);
-                var itemHelp = new CommandItem() {
+                var itemHelp = new WindowSystemConsole.CommandItem() {
                     str = cmd,
                     moduleName = null,
                     methodName = null,
                     argsCount = 0,
                     args = null,
                 };
-                this.commands.Add(itemHelp);
+                console.AddCommand(itemHelp);
+                
                 this.PrintModuleSample();
                 this.ClearInput();
                 return;
 
             }
             
-            if (cmd == "help" || (string.IsNullOrEmpty(cmd) == true && autoComplete == true)) {
+            if (cmd.ToLower() == "help" || (string.IsNullOrEmpty(cmd) == true && autoComplete == true)) {
 
                 this.AddLine(cmd, isCommand: true);
-                var itemHelp = new CommandItem() {
+                var itemHelp = new WindowSystemConsole.CommandItem() {
                     str = cmd,
                     moduleName = null,
                     methodName = null,
                     argsCount = 0,
                     args = null,
                 };
-                this.commands.Add(itemHelp);
-                this.PrintHelp(this.moduleItems);
+                console.AddCommand(itemHelp);
+                console.PrintHelpAllModules();
                 this.ClearInput();
                 return;
                 
@@ -692,16 +229,16 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 if (autoComplete == true) {
                     
                     var moduleNamePart = splitted[0];
-                    var modules = this.GetModulesByPart(moduleNamePart, out var first);
+                    var modules = console.GetModulesByPart(moduleNamePart, out var first);
                     if (modules.Count == 1) {
                         
                         // Auto complete
-                        this.ReplaceInput(first + " ");
+                        this.ReplaceInput($"{first} ");
                         
                     } else {
                         
                         // Print all variants
-                        this.PrintHelp(modules);
+                        console.PrintHelp(modules);
                         
                     }
                     
@@ -715,16 +252,16 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             if (autoComplete == true) {
 
                 var methodNamePart = methodName;
-                var methods = this.GetMethodsByPart(moduleName, methodNamePart, out var first);
+                var methods = console.GetMethodsByPart(moduleName, methodNamePart, out var first);
                 if (methods.Count == 1) {
                         
                     // Auto complete
-                    this.ReplaceInput(moduleName + " " + first + " ");
+                    this.ReplaceInput($"{moduleName} {first} ");
                         
                 } else {
                         
                     // Print all variants
-                    this.PrintHelp(moduleName, methods);
+                    console.PrintHelp(moduleName, methods);
                         
                 }
                 return;
@@ -735,17 +272,45 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             var args = new string[argsCount];
             System.Array.Copy(splitted, 2, args, 0, argsCount);
 
-            var item = new CommandItem() {
+            var item = new WindowSystemConsole.CommandItem() {
                 str = cmd,
                 moduleName = moduleName,
                 methodName = methodName,
                 argsCount = argsCount,
                 args = args,
             };
-            this.commands.Add(item);
+            console.AddCommand(item);
             this.RunCommand(item);
 
             this.ClearInput();
+            this.ScrollDown();
+
+        }
+
+        public static Color GetColorByFastLinkStyle(FastLinkType style) {
+
+            var color = Color.white;
+            switch (style) {
+                
+                case FastLinkType.Notice:
+                    color = new Color(0.15f, 0.6f, 1f);
+                    break;
+
+                case FastLinkType.Warning:
+                    color = new Color(1f, 0.8f, 0.4f);
+                    break;
+
+                case FastLinkType.Alarm:
+                    color = new Color(1f, 0.15f, 0.4f);
+                    break;
+
+                case FastLinkType.Directory:
+                    color = new Color(0f, 0f, 0f, 0f);
+                    break;
+
+            }
+
+            return color;
 
         }
 
@@ -758,6 +323,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                     color = Color.yellow;
                     break;
 
+                case LogType.Assert:
+                case LogType.Exception:
                 case LogType.Error:
                     color = Color.red;
                     break;
@@ -768,8 +335,31 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        public static Color GetScrollbarColorByLogType(LogType logType) {
+
+            var color = Color.white;
+            switch (logType) {
+                
+                case LogType.Warning:
+                    color = Color.yellow;
+                    break;
+
+                case LogType.Assert:
+                case LogType.Exception:
+                case LogType.Error:
+                    color = Color.red;
+                    break;
+
+            }
+            color.a = 0.3f;
+            
+            return color;
+
+        }
+
         float IDataSource.GetSize(int index) {
 
+            var canvas = this.GetWindow().GetCanvas();
             var button = (this.list.source.directRef as ButtonComponent);
             var layoutGroupPadding = button.GetComponent<LayoutGroup>().padding;
             var size = this.list.rectTransform.rect.size;
@@ -777,24 +367,119 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             var text = (button.Get<TextComponent>().graphics as Text);
             var gen = text.GetGenerationSettings(size);
             var textGen = text.cachedTextGenerator;
-            return textGen.GetPreferredHeight(this.drawItems[index].line, gen) + layoutGroupPadding.top + layoutGroupPadding.bottom;
+            var scaleFactor = canvas.scaleFactor;
+            return (textGen.GetPreferredHeight(this.GetDrawItem(index).line, gen) + layoutGroupPadding.top + layoutGroupPadding.bottom) / scaleFactor;
             
         }
         
         private struct ClosureParameters : IListClosureParameters {
 
             public int index { get; set; }
-            public List<DrawItem> data;
+            public ConsoleScreen data;
+
+        }
+
+        private struct ClosureParametersItem : System.IEquatable<ClosureParametersItem> {
+
+            public ClosureParameters parameters;
+            public WindowSystemConsole.DrawItem data;
+
+            public bool Equals(ClosureParametersItem other) {
+
+                return this.data.line == other.data.line;
+
+            }
+
+        }
+
+        private struct ClosureParametersScrollbar : IListClosureParameters {
+
+            public int index { get; set; }
+            public ListEndlessComponentModule.Item lastItem;
+            public ConsoleScreen data;
 
         }
 
         private struct ClosureFastLinksParameters : IListClosureParameters {
 
             public int index { get; set; }
-            public List<FastLink> data;
+            public List<WindowSystemConsole.FastLink> data;
+            public ConsoleScreen screen;
 
         }
 
+        private struct ClosureFastLinksParametersButtonCallback : System.IEquatable<ClosureFastLinksParametersButtonCallback> {
+
+            public ClosureFastLinksParameters parameters;
+            public WindowSystemConsole.FastLink data;
+
+            public bool Equals(ClosureFastLinksParametersButtonCallback other) {
+
+                return this.data.cmd == other.data.cmd;
+
+            }
+
+        }
+
+        public static void AOT() {
+            
+            new ListEndlessComponentModule().SetItems<ButtonComponent, ClosureParameters>(0, default, null, default, null);
+
+        }
+
+        private int GetDrawItemsCount() {
+
+            var console = WindowSystem.GetConsole();
+            var items = console.GetItems();
+            var cnt = 0;
+            foreach (var item in items) {
+
+                if (item.isCommand == true || this.HasLogFilterType(item.logType) == true) {
+
+                    ++cnt;
+
+                }
+                
+            }
+            
+            return cnt;
+
+        }
+
+        private WindowSystemConsole.DrawItem GetDrawItem(int index) {
+
+            var console = WindowSystem.GetConsole();
+            var items = console.GetItems();
+            var k = 0;
+            lock (items) {
+                
+                foreach (var item in items) {
+    
+                    if (item.isCommand == true || this.HasLogFilterType(item.logType) == true) {
+    
+                        if (k == index) return item;
+                        ++k;
+    
+                    }
+    
+                }
+                
+            }
+            
+            return default;
+
+        }
+
+        public struct ScrollbarItem {
+
+            public LogType logType;
+            public ListEndlessComponentModule.Item item;
+
+        }
+
+        private readonly List<WindowSystemConsole.FastLink> fastLinkCache = new List<WindowSystemConsole.FastLink>();
+        private int currentDirectoryId = -1;
+        private readonly List<ScrollbarItem> scrollbarItems = new List<ScrollbarItem>();
         public void LateUpdate() {
 
             if (this.GetState() != ObjectState.Shown) return;
@@ -817,54 +502,170 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             }
 
-            if (this.inputField.IsFocused() == false) {
-                
-                this.inputField.SetFocus();
-                
+            if (Application.isMobilePlatform == false) {
+
+                if (this.inputField.IsFocused() == false) {
+
+                    this.inputField.SetFocus();
+
+                }
+
             }
 
-            this.fastLinks.SetItems<ButtonComponent, ClosureFastLinksParameters>(this.fastLinkItems.Count, (button, parameters) => {
+            this.inputField.Get<ButtonComponent>().SetInteractable(this.inputField.GetText().Length > 0);
+
+            var console = WindowSystem.GetConsole();
+            console.GetFastLinks(this.currentDirectoryId, this.fastLinkCache);
+            this.fastLinks.Get<TextComponent>().SetText(console.GetDirectoryPath(this.currentDirectoryId));
+            this.fastLinks.SetItems<FastLinkButtonComponent, ClosureFastLinksParameters>(this.fastLinkCache.Count, (button, parameters) => {
 
                 var item = parameters.data[parameters.index];
-                button.Get<TextComponent>().SetText(item.caption);
-                button.SetCallback(() => {
-
-                    if (item.run == true) {
-
-                        this.ApplyCommand(item.cmd);
-
-                    } else {
-                        
-                        this.ReplaceInput(item.cmd + " ");
-                        
-                    }
+                button.SetInfo(item);
+                
+                if (item.style == FastLinkType.Directory) {
                     
-                });
-                button.Show();
+                    button.SetInteractable(true);
 
+                    // Draw directory
+                    button.SetCallback(new ClosureFastLinksParametersButtonCallback() { parameters = parameters, data = item, }, (innerData) => {
+
+                        innerData.parameters.screen.currentDirectoryId = innerData.data.id;
+
+                    });
+                    button.Show();
+                    
+                } else {
+                    
+                    button.SetInteractable(WindowSystem.GetConsole().ValidateFastLink(item));
+
+                    button.SetCallback(new ClosureFastLinksParametersButtonCallback() { parameters = parameters, data = item, }, (innerData) => {
+
+                        if (innerData.data.run == true) {
+
+                            innerData.parameters.screen.ApplyCommand(innerData.data.cmd);
+
+                        } else {
+                        
+                            innerData.parameters.screen.ReplaceInput($"{innerData.data.cmd} ");
+                        
+                        }
+                    
+                    });
+                    button.ShowHide(WindowSystem.GetConsole().ValidateFastLinkVisibility(item));
+
+                }
+                
             }, new ClosureFastLinksParameters() {
-                data = this.fastLinkItems
+                data = this.fastLinkCache,
+                screen = this,
             });
-            
-            this.list.SetDataSource(this);
-            this.list.SetItems<ButtonComponent, ClosureParameters>(this.drawItems.Count, (component, parameters) => {
 
-                var item = parameters.data[parameters.index];
+            this.list.SetDataSource(this);
+            this.list.SetItems<ButtonComponent, ClosureParameters>(this.GetDrawItemsCount(), (component, parameters) => {
+
+                var item = parameters.data.GetDrawItem(parameters.index);
                 var text = component.Get<TextComponent>();
-                text.SetText(item.isCommand == true ? "<color=#777><b>></b></color> " : string.Empty, item.line);
+                ConsoleScreen.SetText(text, item.isCommand == true ? "<color=#777><b>></b></color> " : string.Empty, item.line);
                 text.SetColor(item.isCommand == true ? new Color(0.15f, 0.6f, 1f) : ConsoleScreen.GetColorByLogType(item.logType));
-                component.SetCallback(() => {
-                    this.ReplaceInput(item.line);
+                component.SetCallback(new ClosureParametersItem() { parameters = parameters, data = item, },(innerData) => {
+                    innerData.parameters.data.ReplaceInput(innerData.data.line);
                 });
+                {
+                    var copyButton = component.Get<ButtonComponent>();
+                    copyButton.SetCallback(new ClosureParametersItem() { parameters = parameters, data = item, }, (innerData) => {
+                        GUIUtility.systemCopyBuffer = System.Text.RegularExpressions.Regex.Replace(innerData.data.line, "<.*?>", System.String.Empty);
+                    });
+                    copyButton.ShowHide(item.canCopy);
+                }
                 component.SetInteractable(item.isCommand);
                 component.Show();
                 
             }, new ClosureParameters() {
-                data = this.drawItems
+                data = this,
             });
+
+            if (console.isDirty == true) {
+
+                this.logsCounterComponent.SetInfo();
+                console.isDirty = false;
+
+                /*{
+                    var module = this.list.GetModule<ListEndlessComponentModule>();
+                    this.scrollbarItems.Clear();
+                    var i = 0;
+                    var prevLog = LogType.Log;
+                    var prevRectItem = new ListEndlessComponentModule.Item();
+                    foreach (var item in this.drawItems) {
+
+                        if (this.HasLogFilterType(item.logType) == true) {
+
+                            if (i < this.drawItems.Count - 1 && item.logType != LogType.Log && item.logType != prevLog) {
+
+                                prevLog = item.logType;
+                                prevRectItem = module.GetItemByIndex(i);
+
+                            } else if ((i == this.drawItems.Count - 1 && item.logType != LogType.Log) || (item.logType == LogType.Log && item.logType != prevLog)) {
+
+                                if (i == this.drawItems.Count - 1) {
+
+                                    if (prevLog == LogType.Log) {
+
+                                        prevRectItem = module.GetItemByIndex(i);
+                                        prevRectItem.accumulatedSize -= prevRectItem.size;
+                                        prevLog = item.logType;
+
+                                    }
+
+                                }
+                                
+                                var rectItem = module.GetItemByIndex(i);
+                                prevRectItem.size = rectItem.accumulatedSize - prevRectItem.accumulatedSize;
+                                this.scrollbarItems.Add(new ScrollbarItem() {
+                                    logType = prevLog,
+                                    item = prevRectItem,
+                                });
+                                
+                                prevRectItem = rectItem;
+                                prevLog = item.logType;
+                                
+                            }
+                            
+                            ++i;
+
+                        }
+                        
+                    }
+
+                    var lastItem = new ListEndlessComponentModule.Item() {
+                        accumulatedSize = 10f,
+                    };
+                    if (this.scrollbarItems.Count > 0 && i > 1 && i < module.GetCount()) {
+
+                        lastItem = module.GetItemByIndex(i - 1);
+
+                    }
+
+                    var scrollbarList = this.list.Get<ListComponent>();
+                    scrollbarList.SetItems<LogScrollbarRectComponent, ClosureParametersScrollbar>(this.scrollbarItems.Count, (item, data) => {
+                        
+                        item.SetInfo(data.data.scrollbarItems[data.index], data.lastItem.accumulatedSize);
+                        
+                    }, new ClosureParametersScrollbar() {
+                        data = this,
+                        lastItem = lastItem,
+                    });
+                }*/
+
+            }
+
+        }
+
+        private static void SetText(TextComponent component, string text1, string text2) {
+
+            component.SetText(text1, text2);
 
         }
 
     }
-    
+
 }

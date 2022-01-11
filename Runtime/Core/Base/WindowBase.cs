@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace UnityEngine.UI.Windows {
+﻿namespace UnityEngine.UI.Windows {
 
     using Modules;
     
@@ -18,29 +14,33 @@ namespace UnityEngine.UI.Windows {
 
         public WindowPreferences preferences = WindowPreferences.Default;
         public WindowModules modules = new WindowModules();
-        public Breadcrumb breadcrumb;
 
         public int identifier;
         public int windowSourceId;
         
-        public FocusState focusState;
-
         [HideInInspector] public Camera workCamera;
 
         private float currentDepth;
         private float currentZDepth;
+        private int currentCanvasDepth;
+        
+        private FocusState focusState;
 
         public virtual void OnParametersPass() {
         }
         
         public virtual void OnEmptyPass() {}
 
-        public WindowSystem.WindowItem GetBreadcrumbPrevious() {
+        public FocusState GetFocusState() => this.focusState;
 
-            return this.breadcrumb.GetPreviousWindow(this);
+        internal override void OnDeInitInternal() {
 
+            this.modules.Unload();
+            
+            base.OnDeInitInternal();
+            
         }
-        
+
         public void SetAsPerspective() {
 
             this.preferences.cameraMode = UIWSCameraMode.Perspective;
@@ -55,16 +55,30 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public override void Hide(TransitionParameters parameters = default) {
+        public override void Hide(TransitionParameters parameters) {
 
+            parameters = parameters.ReplaceIgnoreTouch(true);
             var cbParameters = parameters.ReplaceCallback(() => {
-                
+
                 this.PushToPool();
                 parameters.RaiseCallback();
-                
+
             });
-            
-            base.Hide(cbParameters);
+
+            if (cbParameters.data.replaceDelay == true) {
+
+                var tweener = WindowSystem.GetTweener();
+                tweener.Add(this, cbParameters.data.delay, 0f, 0f).Tag(this).OnComplete((obj) => {
+                    
+                    base.Hide(cbParameters.ReplaceDelay(0f));
+
+                });
+
+            } else {
+
+                base.Hide(cbParameters);
+
+            }
 
         }
 
@@ -157,20 +171,48 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public int GetCanvasDepth() {
+
+            return this.currentCanvasDepth;
+
+        }
+
         internal void ApplyCamera() {
 
             var settings = WindowSystem.GetSettings();
-            switch (this.preferences.cameraMode) {
+            if (this.preferences.cameraMode == UIWSCameraMode.UseSettings) {
+            
+                if (settings.camera.orthographicDefault == true) {
+                    
+                    this.ApplyCameraSettings(UIWSCameraMode.Orthographic);
+                    
+                } else {
+                    
+                    this.ApplyCameraSettings(UIWSCameraMode.Perspective);
+                    
+                }
+                
+                return;
+                
+            }
 
-                case UIWSCameraMode.UseSettings:
-                    this.workCamera.orthographic = settings.camera.orthographicDefault;
-                    break;
+            this.ApplyCameraSettings(this.preferences.cameraMode);
+
+        }
+
+        private void ApplyCameraSettings(UIWSCameraMode mode) {
+            
+            var settings = WindowSystem.GetSettings();
+            switch (mode) {
 
                 case UIWSCameraMode.Orthographic:
                     this.workCamera.orthographic = true;
                     this.workCamera.orthographicSize = settings.camera.orthographicSize;
                     this.workCamera.nearClipPlane = settings.camera.orthographicNearClippingPlane;
                     this.workCamera.farClipPlane = settings.camera.orthographicFarClippingPlane;
+                    if (settings.canvas.renderMode == RenderMode.ScreenSpaceOverlay) {
+                        this.workCamera.enabled = false;
+                    }
                     break;
 
                 case UIWSCameraMode.Perspective:
@@ -181,23 +223,46 @@ namespace UnityEngine.UI.Windows {
                     break;
 
             }
+            
+        }
 
+        public override void TurnOffRender() {
+            
+            base.TurnOffRender();
+            
+            this.workCamera.enabled = false;
+            
+        }
+
+        public override void TurnOnRender() {
+            
+            base.TurnOnRender();
+            
+            var settings = WindowSystem.GetSettings();
+            if (settings.canvas.renderMode == RenderMode.ScreenSpaceOverlay) {
+                this.workCamera.enabled = false;
+            } else {
+                this.workCamera.enabled = true;
+            }
+            
         }
 
         internal void ApplyDepth() {
 
             var depth = WindowSystem.GetNextDepth(this.preferences.layer);
+            var canvasDepth = WindowSystem.GetNextCanvasDepth(this.preferences.layer);
             var zDepth = WindowSystem.GetNextZDepth(this.preferences.layer);
 
             this.currentDepth = depth;
             this.currentZDepth = zDepth;
+            this.currentCanvasDepth = canvasDepth;
 
             var tr = this.transform;
             this.workCamera.depth = depth;
             var pos = tr.position;
             pos.z = zDepth;
             tr.position = pos;
-
+            
         }
 
         #if UNITY_EDITOR
@@ -205,20 +270,26 @@ namespace UnityEngine.UI.Windows {
             
             base.ValidateEditor();
 
-            if (this.workCamera == null) this.workCamera = this.GetComponent<Camera>();
-            if (this.workCamera == null) this.workCamera = this.GetComponentInChildren<Camera>(true);
+            var helper = new UnityEngine.UI.Windows.Utilities.DirtyHelper(this);
+            if (this.workCamera == null) helper.SetObj(ref this.workCamera, this.GetComponent<Camera>());
+            if (this.workCamera == null) helper.SetObj(ref this.workCamera, this.GetComponentInChildren<Camera>(true));
             if (this.workCamera != null) {
 
-                this.workCamera.clearFlags = CameraClearFlags.Depth;
-                
+                var workCameraClearFlags = this.workCamera.clearFlags;
+                if (helper.SetEnum(ref workCameraClearFlags, CameraClearFlags.Depth) == true) {
+                    this.workCamera.clearFlags = workCameraClearFlags;
+                }
+
             }
+
+            helper.Apply();
 
         }
         #endif
 
-        public virtual void LoadAsync(System.Action onComplete) {
+        public virtual void LoadAsync(InitialParameters initialParameters, System.Action onComplete) {
 
-            this.modules.LoadAsync(this, onComplete);
+            this.modules.LoadAsync(initialParameters, this, onComplete);
 
         }
 

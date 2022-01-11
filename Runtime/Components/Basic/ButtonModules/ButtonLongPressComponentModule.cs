@@ -1,9 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.EventSystems;
-
-namespace UnityEngine.UI.Windows {
+﻿namespace UnityEngine.UI.Windows {
 
     public class ButtonLongPressComponentModule : ButtonComponentModule, UnityEngine.EventSystems.IPointerDownHandler, UnityEngine.EventSystems.IPointerUpHandler {
 
@@ -103,7 +98,9 @@ namespace UnityEngine.UI.Windows {
 
 		public void OnPointerDown(UnityEngine.EventSystems.PointerEventData eventData) {
 
-            this.isPressed = true;
+            if (this.isActiveAndEnabled == false) return;
+
+			this.isPressed = true;
             this.pressTimer = Time.realtimeSinceStartup;
 
             if (this.progressComponent != null) {

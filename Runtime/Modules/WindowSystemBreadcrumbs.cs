@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 namespace UnityEngine.UI.Windows {
 
@@ -76,7 +74,7 @@ namespace UnityEngine.UI.Windows {
 
                 if (breadcrumb.history[i].instance == instance) {
 
-                    idx = i;
+                    idx = i - 1;
                     break;
 
                 }

@@ -26,7 +26,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4879640342833938341}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -305.28494}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -34,7 +34,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1434.3507, y: 826.48724}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1124736939702713608
@@ -54,28 +54,41 @@ MonoBehaviour:
   rectTransform: {fileID: 1960064754754543746}
   hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
+  canvasSortingOrderDelta: 0
   canvasRenderers: []
-  isActiveSelf: 0
   createPool: 1
   animationParameters:
     items: []
-  objectState: 0
   renderBehaviourOnHidden: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
+  editorRefLocks:
+    directories: []
   debugStateLog:
     items: []
   isObjectRoot: 1
   rootObject: {fileID: 0}
   subObjects: []
+  audioEvents:
+    play: 0
+    stop: 0
+    fmodAudioComponent:
+      audioEvent: 
+      stopOthersOnPlay: 0
+      parameters: []
+      autoStopOnceParameters: 0
+      autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
   registry: []
   preferences:
     layer:
       value: 10
     singleInstance: 1
+    forceSyncLoad: 0
     addInHistory: 0
-    takeFocus: 1
+    takeFocus: 0
     dontDestroy: 1
     renderMode: 0
     cameraMode: 0
@@ -84,11 +97,8 @@ MonoBehaviour:
     fullCoverage: 0
   modules:
     modules: []
-  breadcrumb:
-    history: []
   identifier: 0
   windowSourceId: 0
-  focusState: 0
   workCamera: {fileID: 2012446584845969934}
   layouts:
     items:
@@ -106,10 +116,12 @@ MonoBehaviour:
         component:
           type: 1
           objectType: 2
+          address: 
           guid: 19f3e1d84486d41eb8a64f9ff768e4f1
           subObjectName: 
           directRef: {fileID: 5590231133715331329, guid: 19f3e1d84486d41eb8a64f9ff768e4f1,
             type: 3}
+          validationRequired: 0
       - windowLayout: {fileID: 9075030843538608721, guid: 4baf35e159b6b432d9f70f2917f07783,
           type: 3}
         tag: 5
@@ -117,10 +129,12 @@ MonoBehaviour:
         component:
           type: 1
           objectType: 2
+          address: 
           guid: 957852f283c92495cadd753b12847282
           subObjectName: 
           directRef: {fileID: 7157483974793182015, guid: 957852f283c92495cadd753b12847282,
             type: 3}
+          validationRequired: 0
       - windowLayout: {fileID: 9075030843538608721, guid: 4baf35e159b6b432d9f70f2917f07783,
           type: 3}
         tag: 7
@@ -128,11 +142,27 @@ MonoBehaviour:
         component:
           type: 1
           objectType: 2
+          address: 
           guid: b525f1dcb523b4a6290e5518b5cbb118
           subObjectName: 
           directRef: {fileID: 1068094537600266531, guid: b525f1dcb523b4a6290e5518b5cbb118,
             type: 3}
-  autoConnectLogs: 1
+          validationRequired: 0
+      - windowLayout: {fileID: 9075030843538608721, guid: 4baf35e159b6b432d9f70f2917f07783,
+          type: 3}
+        tag: 8
+        localTag: 4
+        component:
+          type: 1
+          objectType: 2
+          address: 
+          guid: 1c10b7c4270a3436aa31517c54f8fe05
+          subObjectName: 
+          directRef: {fileID: 5124798591967899215, guid: 1c10b7c4270a3436aa31517c54f8fe05,
+            type: 3}
+          validationRequired: 0
+  references:
+    version: 1
 --- !u!20 &2012446584845969934
 Camera:
   m_ObjectHideFlags: 0
@@ -169,10 +199,10 @@ Camera:
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
-  m_HDR: 1
-  m_AllowMSAA: 1
+  m_HDR: 0
+  m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
+  m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022

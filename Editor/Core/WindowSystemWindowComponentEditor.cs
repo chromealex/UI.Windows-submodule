@@ -13,7 +13,6 @@ namespace UnityEditor.UI.Windows {
 
         private SerializedProperty createPool;
         
-        private SerializedProperty objectState;
         private SerializedProperty animationParameters;
         private SerializedProperty subObjects;
         private SerializedProperty componentModules;
@@ -26,6 +25,10 @@ namespace UnityEditor.UI.Windows {
         
         private SerializedProperty objectCanvas;
         private SerializedProperty canvasSortingOrderDelta;
+
+        private SerializedProperty audioEvents;
+
+        private SerializedProperty editorRefLocks;
 
         private UnityEditorInternal.ReorderableList listModules;
 
@@ -67,7 +70,6 @@ namespace UnityEditor.UI.Windows {
             
             this.createPool = this.serializedObject.FindProperty("createPool");
 
-            this.objectState = this.serializedObject.FindProperty("objectState");
             this.animationParameters = this.serializedObject.FindProperty("animationParameters");
             this.renderBehaviourOnHidden = this.serializedObject.FindProperty("renderBehaviourOnHidden");
 
@@ -80,6 +82,10 @@ namespace UnityEditor.UI.Windows {
             
             this.objectCanvas = this.serializedObject.FindProperty("objectCanvas");
             this.canvasSortingOrderDelta = this.serializedObject.FindProperty("canvasSortingOrderDelta");
+            
+            this.audioEvents = this.serializedObject.FindProperty("audioEvents");
+            
+            this.editorRefLocks = this.serializedObject.FindProperty("editorRefLocks");
 
             if (this.listModules == null) {
                 
@@ -276,7 +282,7 @@ namespace UnityEditor.UI.Windows {
             
             GUILayoutExt.DrawComponentHeader(this.serializedObject, "C", () => {
                 
-                GUILayoutExt.DrawComponentHeaderItem("State", GUILayoutExt.GetPropertyToString(this.objectState));
+                GUILayoutExt.DrawComponentHeaderItem("State", ((WindowObject)this.target).GetState().ToString());
 
             });
             
@@ -289,7 +295,7 @@ namespace UnityEditor.UI.Windows {
                 new GUITab("Basic", () => {
                     
                     GUILayoutExt.DrawHeader("Main");
-                    GUILayoutExt.PropertyField(this.hiddenByDefault, (reg) => reg.hiddenByDefault == true ? reg.hiddenByDefaultDescription : string.Empty);
+                    GUILayoutExt.PropertyField(this.hiddenByDefault, (reg) => reg.holdHiddenByDefault);
                     EditorGUILayout.PropertyField(this.subObjects);
                     
                     GUILayoutExt.DrawHeader("Animations");
@@ -310,9 +316,9 @@ namespace UnityEditor.UI.Windows {
                     EditorGUILayout.PropertyField(this.animationParameters);
 
                     GUILayoutExt.DrawHeader("Graph");
-                    GUILayoutExt.PropertyField(this.allowRegisterInRoot, (reg) => reg.allowRegisterInRoot == true ? reg.allowRegisterInRootDescription : string.Empty);
+                    GUILayoutExt.PropertyField(this.allowRegisterInRoot, (reg) => reg.holdAllowRegisterInRoot);
                     EditorGUILayout.PropertyField(this.autoRegisterSubObjects);
-                    GUILayoutExt.PropertyField(this.hiddenByDefault, (reg) => reg.hiddenByDefault == true ? reg.hiddenByDefaultDescription : string.Empty);
+                    GUILayoutExt.PropertyField(this.hiddenByDefault, (reg) => reg.holdHiddenByDefault);
                     EditorGUILayout.PropertyField(this.subObjects);
 
                     GUILayoutExt.DrawHeader("Performance Options");
@@ -325,27 +331,57 @@ namespace UnityEditor.UI.Windows {
                     
                     this.listModules.DoLayoutList();
 
+                }),
+                new GUITab("Audio", () => {
+                    
+                    GUILayoutExt.DrawHeader("Events");
+                    var enterChildren = true;
+                    var prop = this.audioEvents.Copy();
+                    var depth = prop.depth + 1;
+                    while (prop.NextVisible(enterChildren) == true && prop.depth >= depth) {
+                    
+                        EditorGUILayout.PropertyField(prop, true);
+                        enterChildren = false;
+
+                    }
+
+                }),
+                new GUITab("Tools", () => {
+
+                    GUILayoutExt.Box(4f, 4f, () => {
+
+                        EditorGUILayout.PropertyField(this.editorRefLocks);
+                        
+                    });
+
+                    GUILayoutExt.Box(4f, 4f, () => {
+                        
+                        if (GUILayout.Button("Collect Images", GUILayout.Height(30f)) == true) {
+
+                            var images = new List<ImageCollectionItem>();
+                            this.lastImagesPreview = EditorHelpers.CollectImages(this.target, images);
+                            this.lastImages = images;
+
+                        }
+
+                        GUILayoutExt.DrawImages(this.lastImagesPreview, this.lastImages);
+                        
+                    });
+                    
                 })
                 );
             this.tabScrollPosition = scroll;
 
             GUILayout.Space(10f);
 
-            var iter = this.serializedObject.GetIterator();
-            iter.NextVisible(true);
-            do {
-
-                if (EditorHelpers.IsFieldOfTypeBeneath(this.serializedObject.targetObject.GetType(), typeof(WindowComponent), iter.propertyPath) == true) {
-
-                    EditorGUILayout.PropertyField(iter);
-
-                }
-
-            } while (iter.NextVisible(false) == true);
+            GUILayoutExt.DrawFieldsBeneath(this.serializedObject, typeof(WindowComponent));
             
             this.serializedObject.ApplyModifiedProperties();
 
         }
+
+        private List<ImageCollectionItem> lastImages;
+        private Texture2D lastImagesPreview;
 
     }
 

@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace UnityEngine.UI.Windows.Modules {
+﻿namespace UnityEngine.UI.Windows.Modules {
 
     using Utilities;
     

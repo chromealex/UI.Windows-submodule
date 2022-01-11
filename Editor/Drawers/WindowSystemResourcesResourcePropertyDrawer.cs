@@ -8,7 +8,26 @@ namespace UnityEditor.UI.Windows {
 
     using UnityEngine.UI.Windows;
     using UnityEngine.UI.Windows.Modules;
-    
+
+    [CustomPropertyDrawer(typeof(Resource<>))]
+    public class WindowSystemResourcesResourceGenericPropertyDrawer : PropertyDrawer {
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+
+            System.Type type = null;
+            if (this.fieldInfo.FieldType.IsArray == true) {
+                type = this.fieldInfo.FieldType.GetElementType().GetGenericArguments()[0];
+            } else {
+                type = this.fieldInfo.FieldType.GetGenericArguments()[0];
+            }
+
+            var res = property.FindPropertyRelative("data");
+            WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, res, label, type, UnityEngine.UI.Windows.Utilities.RequiredType.None);
+            
+        }
+
+    }
+
     [CustomPropertyDrawer(typeof(Resource))]
     public class WindowSystemResourcesResourcePropertyDrawer : PropertyDrawer {
 
@@ -18,29 +37,36 @@ namespace UnityEditor.UI.Windows {
             public bool changed;
 
         }
-        
-        public static Result DrawGUI(Rect position, GUIContent label, System.Reflection.FieldInfo field, Resource value, bool hasMultipleDifferentValues) {
 
-            var result = new Result() {
-                resource = value,
-                changed = false
-            };
-            
-            var requiredType = UnityEngine.UI.Windows.Utilities.RequiredType.None;
-            var type = typeof(Object);
+        public static System.Type GetTypeByAttr(System.Reflection.FieldInfo field, out UnityEngine.UI.Windows.Utilities.RequiredType requiredType) {
+
+            requiredType = UnityEngine.UI.Windows.Utilities.RequiredType.None;
             if (field != null) {
 
                 var attrs = field.GetCustomAttributes(typeof(ResourceTypeAttribute), inherit: false);
                 if (attrs.Length > 0) {
 
                     var attr = (ResourceTypeAttribute)attrs[0];
-                    type = attr.type;
                     requiredType = attr.required;
+                    return attr.type;
 
                 }
 
             }
 
+            return null;
+
+        }
+        
+        public static Result DrawGUI(Rect position, GUIContent label, Resource value, bool hasMultipleDifferentValues, System.Type type = null, UnityEngine.UI.Windows.Utilities.RequiredType requiredType = UnityEngine.UI.Windows.Utilities.RequiredType.None) {
+
+            var result = new Result() {
+                resource = value,
+                changed = false,
+            };
+            
+            if (type == null) type = typeof(Object);
+            
             var labelSize = 40f;
 
             var objRect = position;
@@ -53,94 +79,39 @@ namespace UnityEditor.UI.Windows {
             labelRect.y += labelPadding;
             labelRect.height -= labelPadding * 2f;
 
+            if (type == typeof(Sprite)) {
+
+                if (value.objectType != Resource.ObjectType.Sprite) value.validationRequired = true;
+                
+            } else if (type == typeof(Texture) ||
+                       type == typeof(Texture2D) ||
+                       type == typeof(RenderTexture)) {
+
+                if (value.objectType != Resource.ObjectType.Texture) value.validationRequired = true;
+
+            }
+
             var obj = Resource.GetEditorRef(value.guid, value.subObjectName, type, value.objectType, value.directRef);
             var oldValue = EditorGUI.showMixedValue;
             EditorGUI.showMixedValue = hasMultipleDifferentValues;
             var newObj = EditorGUI.ObjectField(objRect, label, obj, type, allowSceneObjects: true);
             EditorGUI.showMixedValue = oldValue;
             if (newObj == null) WindowSystemRequiredReferenceDrawer.DrawRequired(objRect, requiredType);
-            if (newObj != obj) {
+            if (newObj != obj || value.validationRequired == true) {
 
                 result.changed = true;
                 {
                     var assetPath = AssetDatabase.GetAssetPath(newObj);
                     result.resource.guid = AssetDatabase.AssetPathToGUID(assetPath);
                     result.resource.subObjectName = (newObj != null && AssetDatabase.IsSubAsset(newObj) == true ? AssetDatabase.LoadAllAssetsAtPath(assetPath).FirstOrDefault(x => x.name == newObj.name).name : string.Empty);
-                }
-                
-                if (newObj != null) {
-                
-                    // Apply objectType
-                    var val = 0;
-                    switch (newObj) {
-                    
-                        case GameObject objType:
-                            val = (int)Resource.ObjectType.GameObject;
-                            break;
-
-                        case Component objType:
-                            val = (int)Resource.ObjectType.Component;
-                            break;
-
-                        case ScriptableObject objType:
-                            val = (int)Resource.ObjectType.ScriptableObject;
-                            break;
-
-                        case Sprite objType:
-                            val = (int)Resource.ObjectType.Sprite;
-                            break;
-
-                        case Texture objType:
-                            val = (int)Resource.ObjectType.Texture;
-                            break;
-                    
-                        default:
-                            val = (int)Resource.ObjectType.Unknown;
-                            break;
-
-                    }
-                    result.resource.objectType = (Resource.ObjectType)val;
-
-                }
-                
-                if (newObj == null) {
-
-                    result.resource.type = Resource.Type.Manual;
                     result.resource.directRef = null;
-
-                } else {
-
-                    if (UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(result.resource.guid) != null) {
-
-                        //if (loadType.enumValueIndex != (int)Resource.Type.Addressables)
-                        {
-
-                            // addressables
-                            {
-                                result.resource.type = Resource.Type.Addressables; //AssetDatabase.AssetPathToGUID(assetPath);
-                                result.resource.directRef = null;
-                                newObj.SetAddressableID(result.resource.guid);
-                            }
-
-                        }
-
-                    } else {
-
-                        //if (loadType.enumValueIndex != (int)Resource.Type.Direct)
-                        {
-
-                            // direct
-                            {
-                                result.resource.type = Resource.Type.Direct;
-                                result.resource.directRef = newObj;
-                            }
-
-                        }
-
+                    if (string.IsNullOrEmpty(assetPath) == true) {
+                        result.resource.directRef = newObj;
                     }
-
                 }
-
+                
+                WindowSystemResourcesResourcePropertyDrawer.Validate(ref result.resource, type);
+                
             }
 
             var tooltip = "This object will be stored through GUID link.";
@@ -174,34 +145,45 @@ namespace UnityEditor.UI.Windows {
             return result;
 
         }
-        
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
 
-            var field = UnityEditor.UI.Windows.EditorHelpers.GetFieldViaPath(property.serializedObject.targetObject.GetType(), property.propertyPath);
+        public static void DrawGUI(Rect position, SerializedProperty property, GUIContent label, System.Type type, UnityEngine.UI.Windows.Utilities.RequiredType requiredType) {
+            
+            var address = property.FindPropertyRelative("address");
             var guid = property.FindPropertyRelative("guid");
             var loadType = property.FindPropertyRelative("type");
             var objectType = property.FindPropertyRelative("objectType");
             var directRef = property.FindPropertyRelative("directRef");
+            var validationRequired = property.FindPropertyRelative("validationRequired");
 
-            var newRes = WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, label, field, new Resource() {
+            var newRes = WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, label, new Resource() {
                 guid = guid.stringValue,
                 type = (Resource.Type)loadType.enumValueIndex,
                 objectType = (Resource.ObjectType)objectType.enumValueIndex,
-                directRef = directRef.objectReferenceValue
-            }, hasMultipleDifferentValues: property.hasMultipleDifferentValues);
+                directRef = directRef.objectReferenceValue,
+                validationRequired = validationRequired.boolValue,
+            }, hasMultipleDifferentValues: property.hasMultipleDifferentValues, type: type, requiredType: requiredType);
 
-            if (newRes.changed == true) {
+            if (validationRequired.boolValue == true || newRes.changed == true) {
 
                 property.serializedObject.Update();
                 {
                     guid.stringValue = newRes.resource.guid;
+                    address.stringValue = newRes.resource.address;
                     loadType.enumValueIndex = (int)newRes.resource.type;
                     objectType.enumValueIndex = (int)newRes.resource.objectType;
                     directRef.objectReferenceValue = newRes.resource.directRef;
+                    validationRequired.boolValue = false;
                 }
                 property.serializedObject.ApplyModifiedProperties();
 
             }
+
+        }
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+
+            var type = WindowSystemResourcesResourcePropertyDrawer.GetTypeByAttr(this.fieldInfo, out var requiredType);
+            WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, property, label, type, requiredType);
 
         }
 
@@ -217,6 +199,127 @@ namespace UnityEditor.UI.Windows {
             style.alignment = TextAnchor.MiddleCenter;
             GUI.Label(rect, label, style);
             GUI.color = c;
+
+        }
+
+        public static void SetValue(Object value, ref Resource resource, System.Type type = null) {
+            
+            {
+                var assetPath = AssetDatabase.GetAssetPath(value);
+                resource.guid = AssetDatabase.AssetPathToGUID(assetPath);
+                resource.subObjectName = (value != null && AssetDatabase.IsSubAsset(value) == true ? AssetDatabase.LoadAllAssetsAtPath(assetPath).FirstOrDefault(x => x.name == value.name).name : string.Empty);
+                resource.directRef = null;
+                if (string.IsNullOrEmpty(assetPath) == true) {
+                    resource.directRef = value;
+                }
+            }
+                
+            WindowSystemResourcesResourcePropertyDrawer.Validate(ref resource, type);
+            
+        }
+
+        public static void Validate(ref Resource resource, System.Type type = null) {
+            
+            if (type == null) type = typeof(Object);
+            if (type == typeof(Sprite)) {
+                
+                var objType = resource.objectType;
+                if (objType == Resource.ObjectType.Texture) {
+                    
+                    resource.objectType = Resource.ObjectType.Sprite;
+                    
+                }
+
+            }
+
+            var newObj = Resource.GetEditorRef(resource.guid, resource.subObjectName, type, resource.objectType, resource.directRef);
+
+            if (newObj != null) {
+
+                // Apply objectType
+                var val = 0;
+                switch (newObj) {
+
+                    case GameObject objType:
+                        val = (int)Resource.ObjectType.GameObject;
+                        break;
+
+                    case Component objType:
+                        val = (int)Resource.ObjectType.Component;
+                        break;
+
+                    case ScriptableObject objType:
+                        val = (int)Resource.ObjectType.ScriptableObject;
+                        break;
+
+                    case Sprite objType:
+                        val = (int)Resource.ObjectType.Sprite;
+                        break;
+
+                    case Texture objType:
+                        val = (int)Resource.ObjectType.Texture;
+                        break;
+
+                    default:
+                        val = (int)Resource.ObjectType.Unknown;
+                        break;
+
+                }
+
+                resource.objectType = (Resource.ObjectType)val;
+
+            }
+
+            if (newObj == null) {
+
+                resource.type = Resource.Type.Manual;
+                resource.directRef = null;
+
+            } else {
+
+                var entry = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(resource.guid, includeImplicit: true);
+                if (entry != null) {
+
+                    //if (loadType.enumValueIndex != (int)Resource.Type.Addressables)
+                    {
+
+                        // addressables
+                        {
+                            resource.type = Resource.Type.Addressables; //AssetDatabase.AssetPathToGUID(assetPath);
+                            resource.directRef = null;
+                            resource.address = entry.address;
+                            //newObj.SetAddressableID(resource.guid);
+                        }
+
+                    }
+
+                } else {
+
+                    //if (loadType.enumValueIndex != (int)Resource.Type.Direct)
+                    {
+
+                        // direct
+                        {
+                            resource.type = Resource.Type.Direct;
+                            resource.directRef = newObj;
+                        }
+
+                    }
+
+                }
+
+            }
+            
+            if (type == typeof(Sprite)) {
+                
+                var objType = resource.objectType;
+                if (objType == Resource.ObjectType.Texture) {
+                    
+                    resource.objectType = Resource.ObjectType.Sprite;
+                    
+                }
+
+            }
 
         }
 

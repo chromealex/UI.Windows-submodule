@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 namespace UnityEngine.UI.Windows.Components {
 
@@ -12,7 +10,13 @@ namespace UnityEngine.UI.Windows.Components {
 
     }
 
-    public abstract class ListBaseComponent : WindowComponent, ILayoutSelfController, UnityEngine.EventSystems.IBeginDragHandler, UnityEngine.EventSystems.IDragHandler, UnityEngine.EventSystems.IEndDragHandler {
+    public interface IListItemClosureParameters<T> : IListClosureParameters {
+
+        T data { get; set; }
+
+    }
+
+    public abstract partial class ListBaseComponent : GenericComponent, ILayoutSelfController {
 
         [UnityEngine.UI.Windows.Modules.ResourceTypeAttribute(typeof(WindowComponent), RequiredType.Warning)]
         public Resource source;
@@ -73,10 +77,8 @@ namespace UnityEngine.UI.Windows.Components {
                 if (UnityEditor.PrefabUtility.IsPartOfPrefabAsset(editorObj) == false) {
 
                     editorObj.allowRegisterInRoot = false;
-                    editorObj.AddEditorParametersRegistry(new EditorParametersRegistry() {
-                        holder = this,
-                        allowRegisterInRoot = true,
-                        allowRegisterInRootDescription = "Hold by ListComponent"
+                    editorObj.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
+                        holdAllowRegisterInRoot = true,
                     });
 
                     editorObj.gameObject.SetActive(false);
@@ -131,14 +133,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
         
-        public override void OnInit() {
-            
-            base.OnInit();
-
-            WindowSystem.onPointerUp += this.OnPointerUp;
-
-        }
-
         public override void OnDeInit() {
             
             base.OnDeInit();
@@ -147,14 +141,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
         
-        public override void OnPoolAdd() {
-            
-            base.OnPoolAdd();
-
-            this.ResetInstance();
-
-        }
-
         public virtual void LateUpdate() {
 
             if (this.layoutHasChanged == true) {
@@ -171,8 +157,6 @@ namespace UnityEngine.UI.Windows.Components {
             this.onElementsChangedCallback = null;
             this.onLayoutChangedCallback = null;
             
-            WindowSystem.onPointerUp -= this.OnPointerUp;
-            
             var resources = WindowSystem.GetResources();
             foreach (var asset in this.loadedAssets) {
             
@@ -180,59 +164,6 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
             this.loadedAssets.Clear();
-
-        }
-
-        private void OnPointerUp() {
-            
-            var eventData = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current);
-            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
-
-                var module = this.componentModules.modules[i] as ListComponentModule;
-                if (module == null) continue;
-                
-                module.OnDragEnd(eventData);
-
-            }
-
-        }
-        
-        void UnityEngine.EventSystems.IBeginDragHandler.OnBeginDrag(UnityEngine.EventSystems.PointerEventData eventData) {
-            
-            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
-
-                var module = this.componentModules.modules[i] as ListComponentModule;
-                if (module == null) continue;
-                
-                module.OnDragBegin(eventData);
-
-            }
-            
-        }
-
-        void UnityEngine.EventSystems.IDragHandler.OnDrag(UnityEngine.EventSystems.PointerEventData eventData) {
-            
-            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
-
-                var module = this.componentModules.modules[i] as ListComponentModule;
-                if (module == null) continue;
-                
-                module.OnDragMove(eventData);
-
-            }
-
-        }
-
-        void UnityEngine.EventSystems.IEndDragHandler.OnEndDrag(UnityEngine.EventSystems.PointerEventData eventData) {
-            
-            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
-
-                var module = this.componentModules.modules[i] as ListComponentModule;
-                if (module == null) continue;
-                
-                module.OnDragEnd(eventData);
-
-            }
 
         }
 
@@ -310,6 +241,24 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        public virtual WindowComponent AddItemSync() {
+            
+            return this.AddItemSyncInternal<WindowComponent>(this.source);
+            
+        }
+
+        public virtual T AddItemSync<T>() where T : WindowComponent {
+
+            return this.AddItemSyncInternal<T>(this.source);
+
+        }
+
+        public virtual T AddItemSync<T>(Resource source) where T : WindowComponent {
+
+            return this.AddItemSyncInternal<T>(source);
+
+        }
+
         private struct AddItemClosure<T, TClosure> {
 
             public TClosure data;
@@ -317,6 +266,55 @@ namespace UnityEngine.UI.Windows.Components {
             public ListBaseComponent component;
 
         }
+
+        private static T SetupLoadedAsset<T, TClosure>(T asset, AddItemClosure<T, TClosure> innerClosure) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
+            
+            if (innerClosure.component == null ||
+                innerClosure.component.GetState() >= ObjectState.DeInitialized) {
+                
+                WindowSystem.GetResources().DeleteAll(innerClosure.component);
+                return null;
+                
+            }
+            
+            if (innerClosure.component.loadedAssets.Contains(asset) == false) {
+                
+                if (asset.createPool == true) WindowSystem.GetPools().CreatePool(asset);
+                innerClosure.component.loadedAssets.Add(asset);
+                
+            }
+            
+            var pools = WindowSystem.GetPools();
+            var instance = pools.Spawn(asset, innerClosure.component.GetRoot());
+            innerClosure.data.index = innerClosure.component.items.Count;
+            #if UNITY_EDITOR
+            var profileMarker = new Unity.Profiling.ProfilerMarker("ListComponentBase::AddItemInternal::SetItemName (Editor Only)");
+            profileMarker.Begin();
+            instance.name = $"{asset.name}_{innerClosure.data.index}";
+            profileMarker.End();
+            #endif
+            innerClosure.component.RegisterSubObject(instance);
+            innerClosure.component.items.Add(instance);
+            innerClosure.component.NotifyModulesComponentAdded(instance);
+            innerClosure.component.OnElementsChanged();
+            if (innerClosure.onComplete != null) innerClosure.onComplete.Invoke(instance, innerClosure.data);
+            
+            return instance;
+
+        }
+
+        internal T AddItemSyncInternal<T>(Resource source) where T : WindowComponent {
+            
+            var resources = WindowSystem.GetResources();
+            var data = new AddItemClosure<T, DefaultParameters>() {
+                data = new DefaultParameters(),
+                component = this,
+            };
+            var asset = resources.Load<T>(this, source);
+            return ListBaseComponent.SetupLoadedAsset(asset, data);
+            
+        }
+
         internal void AddItemInternal<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
             
             var resources = WindowSystem.GetResources();
@@ -327,21 +325,8 @@ namespace UnityEngine.UI.Windows.Components {
             };
             Coroutines.Run(resources.LoadAsync<T, AddItemClosure<T, TClosure>>(this, data, source, (asset, innerClosure) => {
 
-                if (innerClosure.component.loadedAssets.Contains(asset) == false) {
-                    
-                    if (asset.createPool == true) WindowSystem.GetPools().CreatePool(asset);
-                    innerClosure.component.loadedAssets.Add(asset);
-                    
-                }
+                ListBaseComponent.SetupLoadedAsset(asset, innerClosure);
                 
-                var pools = WindowSystem.GetPools();
-                var instance = pools.Spawn(asset, innerClosure.component.GetRoot());
-                innerClosure.component.RegisterSubObject(instance);
-                innerClosure.component.items.Add(instance);
-                innerClosure.component.NotifyModulesComponentAdded(instance);
-                innerClosure.component.OnElementsChanged();
-                if (innerClosure.onComplete != null) innerClosure.onComplete.Invoke(instance, innerClosure.data);
-
             }));
 
         }
@@ -379,6 +364,13 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        public struct DefaultItemParameters<T> : IListItemClosureParameters<T> {
+
+            public int index { get; set; }
+            public T data { get; set; }
+
+        }
+
         public virtual void ForEach<T>(System.Action<T, DefaultParameters> onItem) where T : WindowComponent {
             
             this.ForEach(onItem, new DefaultParameters());
@@ -390,26 +382,26 @@ namespace UnityEngine.UI.Windows.Components {
             for (int i = 0; i < this.Count; ++i) {
 
                 closure.index = i;
-                onItem.Invoke((T)this.items[i], closure);
-                    
+                if (this.items[i] is T item) onItem.Invoke(item, closure);
+                
             }
             
         }
 
-        public virtual void SetItems<T>(int count, System.Action<T, DefaultParameters> onItem, System.Action onComplete = null) where T : WindowComponent {
+        public virtual void SetItems<T>(int count, System.Action<T, DefaultParameters> onItem, System.Action<DefaultParameters> onComplete = null) where T : WindowComponent {
             
             this.SetItems(count, this.source, onItem, new DefaultParameters(), onComplete);
             
         }
 
-        public virtual void SetItems<T, TClosure>(int count, System.Action<T, TClosure> onItem, TClosure closure, System.Action onComplete = null) where T : WindowComponent where TClosure : IListClosureParameters {
+        public virtual void SetItems<T, TClosure>(int count, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete = null) where T : WindowComponent where TClosure : IListClosureParameters {
             
             this.SetItems(count, this.source, onItem, closure, onComplete);
             
         }
 
         private bool isLoadingRequest = false;
-        public virtual void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action onComplete) where T : WindowComponent where TClosure : IListClosureParameters {
+        public virtual void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListClosureParameters {
 
             if (this.isLoadingRequest == true) {
 
@@ -426,7 +418,7 @@ namespace UnityEngine.UI.Windows.Components {
                     
                 }
 
-                if (onComplete != null) onComplete.Invoke();
+                if (onComplete != null) onComplete.Invoke(closure);
 
             } else {
 
@@ -450,11 +442,26 @@ namespace UnityEngine.UI.Windows.Components {
                         onItem.Invoke((T)this.items[i], closure);
                     
                     }
-                    if (onComplete != null) onComplete.Invoke();
+                    if (onComplete != null) onComplete.Invoke(closure);
                     
                 }
 
             }
+
+            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
+
+                var module = this.componentModules.modules[i] as ListComponentModule;
+                if (module == null) continue;
+                
+                module.OnSetItems();
+
+            }
+
+        }
+
+        private class EmitLoaded {
+
+            public int loaded;
 
         }
 
@@ -464,30 +471,35 @@ namespace UnityEngine.UI.Windows.Components {
             public ListBaseComponent list;
             public int requiredCount;
             public System.Action<T, TClosure> onItem;
-            public System.Action onComplete;
+            public System.Action<TClosure> onComplete;
             public TClosure data;
+            public System.Func<TClosure, TClosure> onClosure;
+            public EmitLoaded loadedCounter;
 
         }
-        private void Emit<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action onComplete = null) where T : WindowComponent where TClosure : IListClosureParameters {
+        private void Emit<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete = null, System.Func<TClosure, TClosure> onClosure = null) where T : WindowComponent where TClosure : IListClosureParameters {
 
             if (count == 0) {
                 
-                if (onComplete != null) onComplete.Invoke();
+                if (onComplete != null) onComplete.Invoke(closure);
                 this.isLoadingRequest = false;
                 return;
 
             }
             
+            var loadedCounter = PoolClass<EmitLoaded>.Spawn();
+            loadedCounter.loaded = 0;
             var closureInner = new EmitClosure<T, TClosure>();
             closureInner.data = closure;
             closureInner.onItem = onItem;
             closureInner.onComplete = onComplete;
             closureInner.list = this;
+            closureInner.onClosure = onClosure;
             closureInner.requiredCount = count;
+            closureInner.loadedCounter = loadedCounter;
             
             this.isLoadingRequest = true;
             var offset = this.Count;
-            var loaded = 0;
             for (int i = 0; i < count; ++i) {
 
                 var index = i + offset;
@@ -496,13 +508,15 @@ namespace UnityEngine.UI.Windows.Components {
                 this.AddItemInternal<T, EmitClosure<T, TClosure>>(source, closureInner, (item, c) => {
 
                     c.data.index = c.index;
+                    if (c.onClosure != null) c.data = c.onClosure.Invoke(c.data);
                     c.onItem.Invoke(item, c.data);
                     
-                    ++loaded;
-                    if (loaded == c.requiredCount) {
+                    ++c.loadedCounter.loaded;
+                    if (c.loadedCounter.loaded == c.requiredCount) {
                         
-                        if (c.onComplete != null) c.onComplete.Invoke();
+                        if (c.onComplete != null) c.onComplete.Invoke(c.data);
                         c.list.isLoadingRequest = false;
+                        PoolClass<EmitLoaded>.Recycle(ref c.loadedCounter);
                         
                     }
                     

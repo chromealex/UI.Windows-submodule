@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace UnityEngine.UI.Windows.Components {
 
@@ -51,6 +49,8 @@ namespace UnityEngine.UI.Windows.Components {
         [RequiredReference]
         public ScrollRect scrollRect;
 
+        public InputFieldComponent searchField;
+
         public Side anchor;
         public Side dropSide;
         public Vector2 minMaxSizeX = new Vector2(-1f, -1f);
@@ -64,14 +64,21 @@ namespace UnityEngine.UI.Windows.Components {
 
         private DrivenRectTransformTracker drivenRectTransformTracker;
         
-        public override void OnInit() {
+        internal override void OnInitInternal() {
             
-            base.OnInit();
+            base.OnInitInternal();
 
             this.list.SetOnLayoutChangedCallback(this.OnElementsChanged);
             this.list.SetOnElementsCallback(this.OnElementsChanged);
             this.label.SetCallback(this.DoToggleDropdown);
             WindowSystem.onPointerUp += this.OnPointerUp;
+            WindowSystem.onPointerDown += this.OnPointerDown;
+
+            if (this.searchField != null) {
+                
+                this.searchField.SetCallbackValueChanged(this.OnSearch);
+                
+            }
 
         }
 
@@ -80,36 +87,92 @@ namespace UnityEngine.UI.Windows.Components {
             base.OnDeInitInternal();
 
             WindowSystem.onPointerUp -= this.OnPointerUp;
+            WindowSystem.onPointerDown -= this.OnPointerDown;
             this.RemoveCallbacks();
 
         }
 
-        public override void OnPoolAdd() {
+        private void ValidateSearch() {
+
+            if (this.searchField != null) {
+
+                this.OnSearch(this.searchField.GetText());
+
+            }
             
-            base.OnPoolAdd();
+        }
+        
+        private void OnSearch(string value) {
 
-            this.RemoveCallbacks();
+            var lowerValue = value.ToLower();
+            this.list.ForEach<GenericComponent>((item, data) => {
 
+                var text = item.Get<TextComponent>();
+                if (text != null) {
+
+                    item.ShowHide(lowerValue.Length == 0 || text.GetText().ToLower().Contains(lowerValue));
+                    
+                }
+
+            });
+            
         }
 
-        private void OnPointerUp() {
+        private bool IsPointerInside(Vector2 position) {
 
+            if (RectTransformUtility.RectangleContainsScreenPoint(this.label.rectTransform, position, this.GetWindow().workCamera) == false &&
+                RectTransformUtility.RectangleContainsScreenPoint(this.list.rectTransform, position, this.GetWindow().workCamera) == false &&
+                (this.searchField != null && RectTransformUtility.RectangleContainsScreenPoint(this.searchField.rectTransform, position, this.GetWindow().workCamera) == false)) {
+
+                return false;
+
+            }
+            
+            return true;
+            
+        }
+
+        private void OnPointerDown() {
+            
             if (this.autoCloseOnOutClick == false) return;
             
             var position = WindowSystem.GetPointerPosition();
-            if (RectTransformUtility.RectangleContainsScreenPoint(this.label.rectTransform, position, this.GetWindow().workCamera) == false) {
+            if (this.IsPointerInside(position) == false) {
 
-                this.HideDropdown();
+                this.pointerDownInside = false;
+
+            } else {
+                
+                this.pointerDownInside = true;
 
             }
 
         }
-        
-        public override void OnShowBegin() {
+
+        private bool pointerDownInside;
+        private void OnPointerUp() {
+
+            if (this.autoCloseOnOutClick == false) return;
             
-            base.OnShowBegin();
+            if (this.pointerDownInside == false) {
+                
+                var position = WindowSystem.GetPointerPosition();
+                if (this.IsPointerInside(position) == false) {
+
+                    this.HideDropdown();
+
+                }
+                
+            }
+
+        }
+        
+        internal override void OnShowBeginInternal() {
+            
+            base.OnShowBeginInternal();
             
             this.OnElementsChanged();
+            this.ValidateSearch();
             
         }
 
@@ -128,29 +191,61 @@ namespace UnityEngine.UI.Windows.Components {
             var delta = rect.sizeDelta;
             {
                 var contentWidth = contentRect.sizeDelta.x;
-                if (this.minMaxSizeX.x >= 0f && contentWidth < this.minMaxSizeX.x) {
+                if (this.minMaxSizeX.x >= 0f) {
 
-                    delta.x = this.minMaxSizeX.x;
+                    if (contentWidth < this.minMaxSizeX.x) {
+
+                        delta.x = this.minMaxSizeX.x;
+
+                    } else {
+                        
+                        delta.x = contentWidth;
+                        
+                    }
 
                 }
 
                 if (this.minMaxSizeX.y >= 0f && contentWidth > this.minMaxSizeX.y) {
 
-                    delta.x = this.minMaxSizeX.y;
+                    if (contentWidth > this.minMaxSizeX.y) {
+
+                        delta.x = this.minMaxSizeX.y;
+
+                    } else {
+                        
+                        delta.x = contentWidth;
+                        
+                    }
 
                 }
             }
             {
                 var contentHeight = contentRect.sizeDelta.y;
-                if (this.minMaxSizeY.x >= 0f && contentHeight < this.minMaxSizeY.x) {
+                if (this.minMaxSizeY.x >= 0f) {
 
-                    delta.y = this.minMaxSizeY.x;
+                    if (contentHeight < this.minMaxSizeY.x) {
+
+                        delta.y = this.minMaxSizeY.x;
+
+                    } else {
+                        
+                        delta.y = contentHeight;
+                        
+                    }
 
                 }
 
-                if (this.minMaxSizeY.y >= 0f && contentHeight > this.minMaxSizeY.y) {
+                if (this.minMaxSizeY.y >= 0f) {
 
-                    delta.y = this.minMaxSizeY.y;
+                    if (contentHeight > this.minMaxSizeY.y) {
+
+                        delta.y = this.minMaxSizeY.y;
+
+                    } else {
+                        
+                        delta.y = contentHeight;
+                        
+                    }
 
                 }
             }
@@ -193,8 +288,10 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         public void ShowDropdown() {
-            
+
+            this.list.SetSortingOrderDelta(1);
             this.list.Show();
+            this.ValidateSearch();
 
         }
         
@@ -287,11 +384,17 @@ namespace UnityEngine.UI.Windows.Components {
             var textComponent = this.list.GetItem<GenericComponent>(index).Get<TextComponent>();
             if (textComponent != null) {
 
-                var targetText = this.label.Get<TextComponent>();
-                targetText.SetText(textComponent.GetText());
+                this.SetLabelText(textComponent.GetText());
 
             }
             
+        }
+
+        public void SetLabelText(string text) {
+            
+            var targetText = this.label.Get<TextComponent>();
+            targetText.SetText(text);
+
         }
 
         private void TrySetCallbackToInteractable<T>(T instance, int index, System.Action<T> callback) where T : WindowComponent {
@@ -305,13 +408,53 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        private void TrySelectCheckboxButton(int index) {
+
+            var checkbox = this.list.GetItem<CheckboxComponent>(index);
+            if (checkbox != null) {
+
+                this.list.ForEach<CheckboxComponent>((item, data) => {
+
+                    if (data.index != index) {
+                        
+                        item.SetCheckedState(false, false);
+                        
+                    }
+                    
+                });
+                
+                checkbox.SetCheckedState(true, false);
+                
+            }
+
+        }
+
         public void Select(int index) {
+
+            if (index < 0) return;
             
             this.SelectLabel(index);
+            this.TrySelectCheckboxButton(index);
             this.SetSelectedIndex(index);
             
         }
         
+        public virtual WindowComponent AddItemSync() {
+            
+            var item = this.list.AddItemSync();
+            this.TrySetCallbackToInteractable(item, this.list.Count - 1, null);
+            return item;
+
+        }
+
+        public virtual T AddItemSync<T>() where T : WindowComponent {
+            
+            var item = this.list.AddItemSync<T>();
+            this.TrySetCallbackToInteractable(item, this.list.Count - 1, null);
+            return item;
+
+        }
+
         public virtual void AddItem(System.Action<WindowComponent> onComplete = null) {
             
             this.list.AddItem((x, p) => this.TrySetCallbackToInteractable(x, p.index, onComplete));
@@ -341,6 +484,7 @@ namespace UnityEngine.UI.Windows.Components {
             public int index { get; set; }
             public DropdownComponent component;
             public System.Action<T, int> onItem;
+            public System.Action onComplete;
 
         }
         public virtual void SetItems<T>(int count, System.Action<T, int> onItem, System.Action onComplete = null) where T : WindowComponent {
@@ -353,7 +497,12 @@ namespace UnityEngine.UI.Windows.Components {
             }, new DropdownClosureParameters<T>() {
                 component = this,
                 onItem = onItem,
-            }, onComplete);
+                onComplete = onComplete,
+            }, (closure) => {
+                
+                closure.onComplete?.Invoke();
+                
+            });
             
         }
 
@@ -367,7 +516,12 @@ namespace UnityEngine.UI.Windows.Components {
             }, new DropdownClosureParameters<T>() {
                 component = this,
                 onItem = onItem,
-            }, onComplete);
+                onComplete = onComplete,
+            }, (closure) => {
+                
+                closure.onComplete?.Invoke();
+                
+            });
 
         }
 
@@ -378,9 +532,10 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.label == null) this.label = this.GetComponentInChildren<ButtonComponent>(true);
             if (this.list == null) this.list = this.GetComponentInChildren<ListComponent>(true);
 
-            if (this.list != null) {
+            if (this.list != null && this.list.rectTransform != null) {
 
                 this.scrollRect = this.list.GetComponent<ScrollRect>();
+                if (this.scrollRect == null) return;
 
                 this.drivenRectTransformTracker = new DrivenRectTransformTracker();
                 this.drivenRectTransformTracker.Add(this, this.list.rectTransform, DrivenTransformProperties.Anchors | DrivenTransformProperties.Pivot | DrivenTransformProperties.AnchoredPosition);
@@ -388,10 +543,8 @@ namespace UnityEngine.UI.Windows.Components {
                 if (this.minMaxSizeY.x >= 0f || this.minMaxSizeY.y >= 0f) this.drivenRectTransformTracker.Add(this, this.list.rectTransform, DrivenTransformProperties.SizeDeltaY);
 
                 this.list.hiddenByDefault = true;
-                this.list.AddEditorParametersRegistry(new EditorParametersRegistry() {
-                    holder = this,
-                    hiddenByDefault = true,
-                    hiddenByDefaultDescription = "Value is hold by DropdownComponent"
+                this.list.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
+                    holdHiddenByDefault = true,
                 });
                 
                 this.CalculateAnchorsAndPivot();

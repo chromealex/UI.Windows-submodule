@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
- 
-namespace UnityEngine.UI.Windows.Extensions
+﻿namespace UnityEngine.UI.Windows.Extensions
 {
     [AddComponentMenu("Layout/Extensions/Flow Layout Group")]
     public class FlowLayoutGroup : LayoutGroup {

@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace UnityEngine.UI.Windows {
+﻿namespace UnityEngine.UI.Windows {
 
     [DisallowMultipleComponent]
     public class WindowComponent : WindowObject, IHasPreview {
@@ -12,7 +8,7 @@ namespace UnityEngine.UI.Windows {
 
             public WindowComponent windowComponent;
             
-            [UnityEngine.UI.Windows.Utilities.SearchComponentsByTypePopup(typeof(WindowComponentModule), "Window Component Module", allowClassOverrides: true, singleOnly: true)]
+            [UnityEngine.UI.Windows.Utilities.SearchComponentsByTypePopup(typeof(WindowComponentModule), "Window Component Module", allowClassOverrides: true, singleOnly: false)]
             public WindowComponentModule[] modules;
 
             public T GetModule<T>() {
@@ -50,6 +46,18 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
+            public void OnInteractableChanged(bool state) {
+                
+                if (this.modules == null) return;
+
+                for (int i = 0; i < this.modules.Length; ++i) {
+                    
+                    if (this.modules[i] != null) this.modules[i].OnInteractableChanged(state);
+                    
+                }
+
+            }
+            
             public void OnLayoutChanged() {
                 
                 if (this.modules == null) return;
@@ -234,7 +242,7 @@ namespace UnityEngine.UI.Windows {
 
     }
 
-    public abstract class WindowComponentModule : MonoBehaviour {
+    public abstract class WindowComponentModule : MonoBehaviour, IHolder {
 
         public WindowComponent windowComponent;
 
@@ -262,6 +270,10 @@ namespace UnityEngine.UI.Windows {
         }
         
         public virtual void ValidateEditor() {
+            
+        }
+
+        public virtual void OnInteractableChanged(bool state) {
             
         }
 

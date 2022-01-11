@@ -147,13 +147,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         public bool SetObj<T>(ref T fieldValue, T newValue) where T : class {
 
-			if (fieldValue == null && newValue != null) {
-				fieldValue = newValue;
-				this.isDirty = true;
-				return true;
-			} else if (fieldValue == null && newValue == null) {
-				return false;
-			}
             if (fieldValue.Equals(newValue) == false) {
 
                 fieldValue = newValue;

@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace UnityEngine.UI.Windows.Components {
 
@@ -14,16 +12,16 @@ namespace UnityEngine.UI.Windows.Components {
 
         [RequiredReference]
         public UnityEngine.UI.Graphic graphics;
-        private Object currentLoaded;
 
         public bool preserveAspect;
+        public bool useSpriteMesh;
 
         public UnloadResourceEventType autoUnloadResourcesOnEvent;
 
-        private struct Texture2DConstructor : IResourceConstructor<Texture2D> {
+        private readonly struct Texture2DConstructor : IResourceConstructor<Texture2D> {
 
-            public int x;
-            public int y;
+            private readonly int x;
+            private readonly int y;
 
             public Texture2DConstructor(int x, int y) {
 
@@ -37,14 +35,21 @@ namespace UnityEngine.UI.Windows.Components {
                 return new Texture2D(this.x, this.y);
 
             }
+            
+            public void Deconstruct(ref Texture2D obj) {
+
+                Object.DestroyImmediate(obj);
+                obj = null;
+
+            }
 
         }
 
-        private struct SpriteConstructor : IResourceConstructor<Sprite> {
+        private readonly struct SpriteConstructor : IResourceConstructor<Sprite> {
 
-            public Texture2D tex2d;
-            public Rect rect;
-            public Vector2 pivot;
+            private readonly Texture2D tex2d;
+            private readonly Rect rect;
+            private readonly Vector2 pivot;
 
             public SpriteConstructor(Texture2D tex2d, Rect rect, Vector2 pivot) {
 
@@ -60,11 +65,12 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
 
-        }
+            public void Deconstruct(ref Sprite obj) {
 
-        public override void OnPoolAdd() {
-            
-            base.OnPoolAdd();
+                Object.DestroyImmediate(obj);
+                obj = null;
+
+            }
 
         }
 
@@ -105,9 +111,10 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         private void UnloadCurrentResources() {
-            
-            var resources = WindowSystem.GetResources();
 
+            this.prevResourceLoad = default;
+
+            var resources = WindowSystem.GetResources();
             if (this.graphics is UnityEngine.UI.Image image) {
 
                 var obj = image.sprite;
@@ -138,42 +145,40 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        private struct SetImageClosure {
+        private Resource prevResourceLoad;
 
-            public ImageComponent component;
+        public void SetImage<T>(T provider) where T : IResourceProvider {
+
+            if (provider == null) return;
+            this.SetImage(provider.GetResource());
 
         }
-        
+
         public void SetImage(Resource resource) {
 
-            var resources = WindowSystem.GetResources();
-            resources.StopLoadAll(this);
-            resources.Delete(this, ref this.currentLoaded);
-            var data = new SetImageClosure() {
-                component = this,
-            };
-            switch (resource.objectType) {
-                
-                case Resource.ObjectType.Sprite:
-                    Coroutines.Run(resources.LoadAsync<Sprite, SetImageClosure>(this, data, resource, (asset, closure) => {
-                        
-                        closure.component.currentLoaded = asset;
-                        closure.component.SetImage(asset);
-                        
-                    }));
-                    break;
+            if (this.prevResourceLoad.IsEquals(resource) == false) {
 
-                case Resource.ObjectType.Texture:
-                    Coroutines.Run(resources.LoadAsync<Texture, SetImageClosure>(this, data, resource, (asset, closure) => {
-                        
-                        closure.component.currentLoaded = asset;
-                        closure.component.SetImage(asset);
+                var resources = WindowSystem.GetResources();
+                switch (resource.objectType) {
 
-                    }));
-                    break;
+                    case Resource.ObjectType.Sprite: {
+                        var asset = resources.Load<Sprite>(this, resource);
+                        this.SetImage(asset);
+                    }
+                        break;
+
+                    case Resource.ObjectType.Texture: {
+                        var asset = resources.Load<Texture>(this, resource);
+                        this.SetImage(asset);
+                    }
+                        break;
+
+                }
+
+                this.prevResourceLoad = resource;
 
             }
-            
+
         }
 
         public void SetImage(Sprite sprite) {
@@ -184,6 +189,7 @@ namespace UnityEngine.UI.Windows.Components {
 
                 image.sprite = sprite;
                 image.preserveAspect = this.preserveAspect;
+                image.useSpriteMesh = this.useSpriteMesh;
 
             } else if (this.graphics is UnityEngine.UI.RawImage rawImage) {
 
@@ -215,6 +221,7 @@ namespace UnityEngine.UI.Windows.Components {
                 var sprite = resources.New<Sprite, SpriteConstructor>(this, new SpriteConstructor(tex2d, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f)));
                 image.sprite = sprite;
                 image.preserveAspect = this.preserveAspect;
+                image.useSpriteMesh = this.useSpriteMesh;
 
             }
 
@@ -224,7 +231,7 @@ namespace UnityEngine.UI.Windows.Components {
             
             base.ValidateEditor();
 
-            this.graphics = this.GetComponent<Graphic>();
+            if(this.graphics == null) this.graphics = this.GetComponent<Graphic>();
 
         }
 

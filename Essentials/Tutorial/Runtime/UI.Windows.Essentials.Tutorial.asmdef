@@ -1,0 +1,17 @@
+{
+    "name": "UI.Windows.Essentials.Tutorial",
+    "rootNamespace": "",
+    "references": [
+        "GUID:2df4fd010e8cc4ac8ac47736afb07034",
+        "GUID:03a02e6858eef43b383e305cd83babb4"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.Collections;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 namespace UnityEngine.UI.Windows.Utilities {
 
@@ -726,7 +723,8 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             bool Update(float dt);
             bool HasTag(object tag);
-            void Stop();
+            void Stop(bool ignoreEvents = false);
+            void Complete();
 
         }
 
@@ -743,6 +741,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         public class Tween<T> : ITween, ITweenInternal {
 
+	        internal Tweener tweener;
             internal T obj;
             internal float duration;
             internal float from;
@@ -771,7 +770,7 @@ namespace UnityEngine.UI.Windows.Utilities {
             float ITweenInternal.GetTo() { return this.to; }
             object ITweenInternal.GetTag() { return this.tag; }
             
-            public bool Update(float dt) {
+            bool ITween.Update(float dt) {
 
                 this.delay -= dt;
                 if (this.delay <= 0f) {
@@ -780,22 +779,29 @@ namespace UnityEngine.UI.Windows.Utilities {
 
                     try {
 
-                        if (this.onUpdate != null) this.onUpdate.Invoke(this.obj, EaseFunctions.GetEase(this.easeFunction).Invoke(this.timer, this.@from, this.to, 1f));
+	                    if (this.onUpdate != null) {
+		                    
+		                    var val = EaseFunctions.GetEase(this.easeFunction).Invoke(this.timer, this.@from, this.to - this.from, 1f);
+		                    this.onUpdate.Invoke(this.obj, Mathf.Clamp(val, Mathf.Min(this.from, this.to), Mathf.Max(this.from, this.to)));
+		                    
+	                    }
 
                         if (this.timer >= 1f) {
 
-	                        if (this.reflect == true) {
+                            if (this.reflect == true) {
 
-		                        this.direction = -1f;
-		                        return false;
-	                        
-	                        }
+                                this.direction = -1f;
+                                return false;
+
+                            } else {
+
+                                this.timer = 0f;
+
+                            }
 	                        
 	                        --this.loops;
 	                        if (this.loops == 0) {
 
-		                        if (this.onComplete != null) this.onComplete.Invoke(this.obj);
-		                        if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
 		                        return true;
 
 	                        }
@@ -807,8 +813,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 	                        --this.loops;
 	                        if (this.loops == 0) {
 		                        
-		                        if (this.onComplete != null) this.onComplete.Invoke(this.obj);
-		                        if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
 		                        return true;
 
 	                        }
@@ -836,20 +840,46 @@ namespace UnityEngine.UI.Windows.Utilities {
 
                     }
 
+                } else {
+
+                    try {
+                        
+                        if (this.onUpdate != null) {
+
+                            this.onUpdate.Invoke(this.obj, this.from);
+
+                        }
+                        
+                    } catch (System.Exception ex) {
+
+                        Debug.LogException(ex);
+
+                    }
+
                 }
 
                 return false;
 
             }
 
-            void ITween.Stop() {
+            void ITween.Complete() {
 
-                if (this.timer < 1f) {
+	            if (this.onComplete != null) this.onComplete.Invoke(this.obj);
+	            if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
+
+	            this.delay = 0f;
+	            this.timer = this.direction;
+	            this.reflect = false;
+	            this.loops = 1;
+
+            }
+
+            void ITween.Stop(bool ignoreEvents) {
+
+                if (ignoreEvents == false && this.timer < 1f) {
 
 	                if (this.onCancel != null) this.onCancel.Invoke(this.obj);
 	                if (this.onCancelParameterless != null) this.onCancelParameterless.Invoke();
-	                //if (this.onComplete != null) this.onComplete.Invoke(this.obj);
-	                //if (this.onCompleteParameterless != null) this.onCompleteParameterless.Invoke();
 	                
                 }
 
@@ -866,6 +896,8 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             }
 
+            public float GetDirection() => this.direction;
+
             public Tween<T> Loop(int loops = 1) {
 				
 	            this.loops = loops;
@@ -873,9 +905,10 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             }
 
-            public Tween<T> SetValue(float timer) {
+            public Tween<T> SetValue(float timer, float direction) {
 				
 	            this.timer = timer;
+	            this.direction = direction;
 	            return this;
 
             }
@@ -939,6 +972,7 @@ namespace UnityEngine.UI.Windows.Utilities {
             public Tween<T> OnUpdate(System.Action<T, float> onResult) {
 
                 this.onUpdate = onResult;
+                //this.tweener.Step(this, Time.deltaTime);
                 return this;
 
             }
@@ -950,6 +984,7 @@ namespace UnityEngine.UI.Windows.Utilities {
         public Tween<T> Add<T>(T obj, float duration, float from, float to) {
 
             var tween = new Tweener.Tween<T>();
+            tween.tweener = this;
             tween.obj = obj;
             tween.duration = duration;
             tween.from = from;
@@ -962,33 +997,67 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-        public void Stop(object tag) {
+        public void Stop(object tag, bool ignoreEvents = false) {
 
+	        var list = PoolList<ITween>.Spawn();
             for (int i = this.tweens.Count - 1; i >= 0; --i) {
 
-                if (this.tweens[i].HasTag(tag) == true) {
+	            var tw = this.tweens[i];
+                if (tw.HasTag(tag) == true) {
 
-                    this.tweens[i].Stop();
-                    this.tweens.RemoveAt(i);
-
+	                this.tweens.RemoveAt(i);
+	                list.Add(tw);
+                    
                 }
 
             }
+
+            for (int i = 0; i < list.Count; ++i) {
+	            
+	            list[i].Stop(ignoreEvents);
+
+            }
+            PoolList<ITween>.Recycle(ref list);
 
         }
 
+        private bool Step(ITween tween, float dt) {
+	        
+	        if (tween.Update(dt) == true) {
+
+		        this.completeList.Add(tween);
+		        this.tweens.Remove(tween);
+		        return true;
+                    
+	        }
+
+	        return false;
+
+        }
+
+        private List<ITween> completeList = new List<ITween>();
         public void Update() {
             
             var dt = Time.deltaTime;
-            for (int i = this.tweens.Count - 1; i >= 0; --i) {
+            this.completeList.Clear();
+            for (int cnt = this.tweens.Count, i = cnt - 1; i >= 0; --i) {
 
                 if (this.tweens[i].Update(dt) == true) {
 
+	                var tween = this.tweens[i];
+	                this.completeList.Add(tween);
                     this.tweens.RemoveAt(i);
-
+                    
                 }
 
             }
+
+            for (int i = 0, cnt = this.completeList.Count; i < cnt; ++i) {
+            
+	            this.completeList[i].Complete();
+	            
+            }
+            this.completeList.Clear();
 
         }
 

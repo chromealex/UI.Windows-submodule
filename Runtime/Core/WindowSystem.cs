@@ -287,7 +287,8 @@ namespace UnityEngine.UI.Windows {
         private UnityEngine.UI.Windows.Components.IInteractable[] waitInteractables;
         private bool lockInteractables;
         private System.Action<UnityEngine.UI.Windows.Components.IInteractable> callbackOnAnyInteractable;
-        
+        private List<WindowObject> interactablesIgnoreContainers = new List<WindowObject>();
+
         internal static WindowSystem _instance;
 
         internal static WindowSystem instance {
@@ -439,7 +440,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static void AddWaitIntractable(System.Action onComplete, UnityEngine.UI.Windows.Components.IInteractable interactable) {
+        public static void AddWaitInteractable(System.Action onComplete, UnityEngine.UI.Windows.Components.IInteractable interactable) {
             
             WindowSystem.instance.waitInteractableOnComplete = onComplete;
             
@@ -456,7 +457,7 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public static void WaitIntractable(System.Action onComplete, UnityEngine.UI.Windows.Components.IInteractable interactable) {
+        public static void WaitInteractable(System.Action onComplete, UnityEngine.UI.Windows.Components.IInteractable interactable) {
 
             WindowSystem.instance.waitInteractableOnComplete = onComplete;
             WindowSystem.instance.waitInteractable = interactable;
@@ -465,7 +466,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static void WaitIntractable(System.Action onComplete, params UnityEngine.UI.Windows.Components.IInteractable[] interactables) {
+        public static void WaitInteractable(System.Action onComplete, params UnityEngine.UI.Windows.Components.IInteractable[] interactables) {
 
             WindowSystem.instance.waitInteractableOnComplete = onComplete;
             WindowSystem.instance.waitInteractable = null;
@@ -474,7 +475,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static void CancelWaitIntractables() {
+        public static void CancelWaitInteractables() {
 
             WindowSystem.instance.waitInteractable = null;
             WindowSystem.instance.waitInteractables = null;
@@ -483,7 +484,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static void RaiseAndCancelWaitIntractables() {
+        public static void RaiseAndCancelWaitInteractables() {
 
             if (WindowSystem.instance.waitInteractable != null && WindowSystem.InteractWith(WindowSystem.instance.waitInteractable) == true) {
                 
@@ -500,13 +501,43 @@ namespace UnityEngine.UI.Windows {
                 
             }
             
-            WindowSystem.CancelWaitIntractables();
+            WindowSystem.CancelWaitInteractables();
 
+        }
+
+        public static void AddInteractablesIgnoreContainer(WindowObject container) {
+            
+            WindowSystem.instance.interactablesIgnoreContainers.Add(container);
+            
+        }
+
+        public static void RemoveInteractablesIgnoreContainer(WindowObject container) {
+            
+            WindowSystem.instance.interactablesIgnoreContainers.Remove(container);
+            
         }
 
         public static bool CanInteractWith(UnityEngine.UI.Windows.Components.IInteractable interactable) {
 
             if (WindowSystem.instance.lockInteractables == true) return false;
+
+            for (int i = 0; i < WindowSystem.instance.interactablesIgnoreContainers.Count; ++i) {
+
+                var container = WindowSystem.instance.interactablesIgnoreContainers[i];
+                if (container != null) {
+                    
+                    if (interactable is WindowObject interactableObj) {
+
+                        var parent = interactableObj.FindComponentParent<WindowComponent, WindowObject>(container, (obj, x) => {
+                            return x == obj;
+                        });
+                        if (parent != null) return true;
+
+                    }
+                    
+                }
+
+            }
             
             if (WindowSystem.instance.waitInteractables == null) {
 

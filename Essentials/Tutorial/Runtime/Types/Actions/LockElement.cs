@@ -19,7 +19,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         private void OnComplete(in Context context) {
             
-            WindowSystem.CancelWaitIntractables();
+            WindowSystem.CancelWaitInteractibles();
             if (this.nextOnClick != null) context.system.TryToStart(context.window, this.nextOnClick, context.windowEvent);
 
         }
@@ -36,7 +36,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                     var list = element.FindComponent<UnityEngine.UI.Windows.Components.ListComponent>();
                     if (list != null) {
 
-                        WindowSystem.AddWaitIntractable(() => obj.OnComplete(contextData), (UnityEngine.UI.Windows.Components.IInteractable)list.GetItem<WindowComponent>(this.tag.listIndex));
+                        WindowSystem.AddWaitInteractable(() => obj.OnComplete(contextData), (UnityEngine.UI.Windows.Components.IInteractable)list.GetItem<WindowComponent>(this.tag.listIndex));
 
                     }
 
@@ -45,7 +45,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                     var button = element.FindComponent<UnityEngine.UI.Windows.Components.ButtonComponent>();
                     if (button != null) {
 
-                        WindowSystem.AddWaitIntractable(() => obj.OnComplete(contextData), button);
+                        WindowSystem.AddWaitInteractable(() => obj.OnComplete(contextData), button);
 
                     }
 

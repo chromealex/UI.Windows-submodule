@@ -45,9 +45,19 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         public override void OnShowBegin() {
             
             base.OnShowBegin();
+            
+            WindowSystem.AddInteractablesIgnoreContainer(this);
 
             this.logsCounterComponent.SetInfo();
 
+        }
+
+        public override void OnHideBegin() {
+            
+            WindowSystem.RemoveInteractablesIgnoreContainer(this);
+            
+            base.OnHideBegin();
+            
         }
 
         public void PrintModuleSample() {

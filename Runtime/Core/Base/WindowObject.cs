@@ -446,7 +446,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public virtual T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowComponent {
+        public virtual T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowObject {
 
             return this.FindComponent<T, System.Func<T, bool>>(filter, (fn, c) => {
                 if (fn != null) return fn.Invoke(c);
@@ -455,7 +455,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public virtual T FindComponent<T, TState>(TState state, System.Func<TState, T, bool> filter = null) where T : WindowComponent {
+        public virtual T FindComponent<T, TState>(TState state, System.Func<TState, T, bool> filter = null) where T : WindowObject {
 
             if (this is T instance) {
 
@@ -476,7 +476,7 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public virtual T FindComponentParent<T>(System.Func<T, bool> filter = null) where T : WindowComponent {
+        public virtual T FindComponentParent<T>(System.Func<T, bool> filter = null) where T : WindowObject {
 
             return this.FindComponentParent<T, System.Func<T, bool>>(filter, (fn, c) => {
                 if (fn != null) return fn.Invoke(c);
@@ -485,7 +485,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public virtual T FindComponentParent<T, TState>(TState state, System.Func<TState, T, bool> filter = null) where T : WindowComponent {
+        public virtual T FindComponentParent<T, TState>(TState state, System.Func<TState, T, bool> filter = null) where T : WindowObject {
 
             if (this is T instance) {
 

@@ -528,7 +528,7 @@ namespace UnityEngine.UI.Windows {
                     
                     if (interactable is WindowObject interactableObj) {
 
-                        var parent = interactableObj.FindComponentParent<WindowComponent, WindowObject>(container, (obj, x) => {
+                        var parent = interactableObj.FindComponentParent<WindowObject, WindowObject>(container, (obj, x) => {
                             return x == obj;
                         });
                         if (parent != null) return true;

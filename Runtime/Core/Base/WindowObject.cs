@@ -633,7 +633,7 @@ namespace UnityEngine.UI.Windows {
             }
 
             #if UNITY_EDITOR
-            UnityEditor.EditorUtility.SetDirty(this.gameObject);
+            if (dirtyHelper.isDirty == true) UnityEditor.EditorUtility.SetDirty(this.gameObject);
             #endif
 
         }

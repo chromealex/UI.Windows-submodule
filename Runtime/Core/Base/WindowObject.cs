@@ -526,7 +526,7 @@ namespace UnityEngine.UI.Windows {
             this.ValidateRegistry(dirtyHelper);
 
             dirtyHelper.SetEnum(ref this.objectState, ObjectState.NotInitialized);
-            dirtyHelper.Set(ref this.isObjectRoot, (this.transform.parent == null));
+            dirtyHelper.Set(ref this.isObjectRoot, (this.GetComponentInParent<WindowObject>() == null));
             dirtyHelper.SetObj(ref this.objectCanvas, this.GetComponent<Canvas>());
             dirtyHelper.Set(ref this.hasObjectCanvas, (this.objectCanvas != null));
 

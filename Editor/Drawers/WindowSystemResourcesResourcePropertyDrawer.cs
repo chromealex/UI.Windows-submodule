@@ -70,7 +70,8 @@ namespace UnityEditor.UI.Windows {
             var labelSize = 40f;
 
             var objRect = position;
-            objRect.width -= labelSize;
+            objRect.x -= EditorGUI.indentLevel * 14f;
+            objRect.width += -labelSize + EditorGUI.indentLevel * 14f;
 
             var labelPadding = 3f;
             var labelRect = position;

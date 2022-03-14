@@ -131,9 +131,9 @@
 
                                 if (item.getDescription(out var descr) == FMOD.RESULT.OK) {
 
-                                    if (descr.getPath(out var path) == FMOD.RESULT.OK) {
+                                    if (descr.getID(out var guid) == FMOD.RESULT.OK) {
 
-                                        if (path == audioEvent.Path) {
+                                        if (guid == audioEvent.Guid) {
 
                                             return item;
 

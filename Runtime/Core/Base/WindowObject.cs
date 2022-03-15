@@ -506,7 +506,12 @@ namespace UnityEngine.UI.Windows {
 
         [ContextMenu("Validate")]
         public virtual void ValidateEditor() {
-            
+
+            #if UNITY_EDITOR
+            var path = UnityEditor.AssetDatabase.GetAssetPath(this.gameObject);
+            if (path.Contains("Packages/") == true) return;
+            #endif
+
             this.rectTransform = this.GetComponent<RectTransform>();
 
             this.ValidateEditor(updateParentObjects: false, updateChildObjects: false);

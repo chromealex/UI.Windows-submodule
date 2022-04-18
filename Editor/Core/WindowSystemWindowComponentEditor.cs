@@ -133,29 +133,33 @@ namespace UnityEditor.UI.Windows {
                     };
                     this.listModules.elementHeightCallback = (index) => {
 
-                        var prop = componentsProp.GetArrayElementAtIndex(index);
-                        if (prop.objectReferenceValue != null) {
+                        if (componentsProp.arraySize > 0) {
 
-                            var height = 0f;
-                            var so = new SerializedObject(prop.objectReferenceValue);
-                            var iterator = so.GetIterator();
-                            iterator.NextVisible(true);
+                            var prop = componentsProp.GetArrayElementAtIndex(index);
+                            if (prop.objectReferenceValue != null) {
 
-                            while (true) {
+                                var height = 0f;
+                                var so = new SerializedObject(prop.objectReferenceValue);
+                                var iterator = so.GetIterator();
+                                iterator.NextVisible(true);
 
-                                if (EditorHelpers.IsFieldOfTypeBeneath(prop.objectReferenceValue.GetType(), typeof(WindowComponentModule), iterator.propertyPath) == true) {
+                                while (true) {
 
-                                    height += EditorGUI.GetPropertyHeight(iterator, new GUIContent(iterator.displayName), false);
+                                    if (EditorHelpers.IsFieldOfTypeBeneath(prop.objectReferenceValue.GetType(), typeof(WindowComponentModule), iterator.propertyPath) == true) {
+
+                                        height += EditorGUI.GetPropertyHeight(iterator, new GUIContent(iterator.displayName), false);
+
+                                    }
+
+                                    if (!iterator.NextVisible(iterator.isExpanded)) {
+                                        break;
+                                    }
 
                                 }
 
-                                if (!iterator.NextVisible(iterator.isExpanded)) {
-                                    break;
-                                }
-                                
+                                return 40f + height;
+
                             }
-                            
-                            return 40f + height;
 
                         }
 

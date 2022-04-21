@@ -1,5 +1,11 @@
 namespace UnityEditor.UI.Windows {
     
+    #if UNITY_2021_2_OR_NEWER
+    using EditorSceneManagement = UnityEditor.SceneManagement;
+    #else
+    using EditorSceneManagement = UnityEditor.Experimental.SceneManagement;
+    #endif
+    
     using UnityEngine;
     using UnityEngine.UI.Windows;
 
@@ -18,12 +24,6 @@ namespace UnityEditor.UI.Windows {
     public class MaterialDrawer : ObjDrawer {
 
     }
-    #endif
-    
-    #if UNITY_2021_2_OR_NEWER
-    using EditorSceneManagement = UnityEditor.SceneManagement;
-    #else
-    using EditorSceneManagement = UnityEditor.Experimental.SceneManagement;
     #endif
 
     public class ObjDrawer : PropertyDrawer {

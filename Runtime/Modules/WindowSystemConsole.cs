@@ -120,6 +120,18 @@ namespace UnityEngine.UI.Windows {
 
         private const int MAX_TEXT_LENGTH = 2000;
 
+        public enum LogsFilter {
+
+            Any = -1,
+            All = LogsFilter.Assert | LogsFilter.Error | LogsFilter.Warning | LogsFilter.Log | LogsFilter.Exception,
+            Error = 1 << 1,
+            Assert = 1 << 2,
+            Warning = 1 << 3,
+            Log = 1 << 4,
+            Exception = 1 << 5,
+
+        }
+        
         [System.Serializable]
         public struct DrawItem {
 
@@ -161,12 +173,12 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private Queue<DrawItem> drawItems = new Queue<DrawItem>();
+        private List<DrawItem> drawItems = new List<DrawItem>();
         private readonly List<FastLink> fastLinkItems = new List<FastLink>();
         private readonly List<CommandItem> commands = new List<CommandItem>();
         private readonly List<IConsoleModule> moduleItems = new List<IConsoleModule>();
         private Dictionary<LogType, int> logsCounter = new Dictionary<LogType, int>();
-        private int logsFilter;
+        private LogsFilter logsFilter;
         
         private string helpInitPrint;
         private System.Threading.Thread unityThread;
@@ -254,7 +266,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public Queue<DrawItem> GetItems() {
+        public List<DrawItem> GetItems() {
 
             return this.drawItems;
 
@@ -823,13 +835,13 @@ namespace UnityEngine.UI.Windows {
 
             lock (this.drawItems) {
 
-                if (text.Length > MAX_TEXT_LENGTH) {
+                if (text.Length > WindowSystemConsole.MAX_TEXT_LENGTH) {
 
-                    text = text.Substring(0, MAX_TEXT_LENGTH) + "<truncate message>";
+                    text = text.Substring(0, WindowSystemConsole.MAX_TEXT_LENGTH) + "<truncate message>";
 
                 }
 
-                this.drawItems.Enqueue(new DrawItem() {
+                this.drawItems.Add(new DrawItem() {
                     line = text,
                     logType = logType,
                     isCommand = isCommand,
@@ -915,12 +927,14 @@ namespace UnityEngine.UI.Windows {
 
         public bool HasLogFilterType(LogType logType) {
 
-            var mask = 1 << (int)(logType + 1);
+            var mask = (LogsFilter)(1 << (int)(logType + 1));
             if ((this.logsFilter & mask) != 0) return true;
             
             return false;
             
         }
+
+        public LogsFilter GetLogFilterType() => this.logsFilter;
 
         public void SetLogFilterType(LogType logType, bool state) {
             
@@ -933,9 +947,9 @@ namespace UnityEngine.UI.Windows {
 
             var mask = 1 << (int)(logType + 1);
             if (state == true) {
-                this.logsFilter |= mask;
+                this.logsFilter |= (LogsFilter)mask;
             } else {
-                this.logsFilter &= ~mask;
+                this.logsFilter &= ~(LogsFilter)mask;
             }
             
             this.isDirty = true;

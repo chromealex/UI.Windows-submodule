@@ -975,7 +975,7 @@ namespace UnityEngine.UI.Windows {
                                     windowObject,
                                     TransitionParameters.Default.ReplaceImmediately(true).ReplaceCallback(() => {
                                         
-                                        WindowSystem.SetShown(windowObject, TransitionParameters.Default.ReplaceImmediately(true));
+                                        WindowSystem.SetShown(windowObject, TransitionParameters.Default.ReplaceImmediately(true), true);
                                         
                                     }), internalCall: true);
 
@@ -1063,7 +1063,7 @@ namespace UnityEngine.UI.Windows {
                     case ObjectState.Hiding:
 
                         // after OnHideBegin
-                        WindowSystem.SetHidden(windowObject, TransitionParameters.Default.ReplaceImmediately(true));
+                        WindowSystem.SetHidden(windowObject, TransitionParameters.Default.ReplaceImmediately(true), true);
                         windowObject.DoDeInit();
                         break;
 
@@ -1261,7 +1261,7 @@ namespace UnityEngine.UI.Windows {
 
             var cObj = this;
             var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetShown, cObj, cParams);
+            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetShown, cObj, cParams, true);
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
@@ -1277,7 +1277,7 @@ namespace UnityEngine.UI.Windows {
             
             var cObj = this;
             var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetHidden, cObj, cParams);
+            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetHidden, cObj, cParams, true);
             WindowSystem.HideInstance(this, cbParameters, internalCall: true);
 
         }
@@ -1336,7 +1336,7 @@ namespace UnityEngine.UI.Windows {
 
             var cObj = this;
             var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetShown, cObj, cParams);
+            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetShown, cObj, cParams, false);
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
@@ -1375,7 +1375,7 @@ namespace UnityEngine.UI.Windows {
 
             var cObj = this;
             var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetHidden, cObj, cParams);
+            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetHidden, cObj, cParams, false);
             WindowSystem.HideInstance(this, cbParameters, internalCall: true);
 
         }

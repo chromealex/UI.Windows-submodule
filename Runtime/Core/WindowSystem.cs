@@ -130,6 +130,7 @@ namespace UnityEngine.UI.Windows {
 
         public WindowObject context;
         public TransitionParametersData data;
+        public bool internalCall;
 
     }
 
@@ -138,7 +139,7 @@ namespace UnityEngine.UI.Windows {
 
         internal TransitionParametersData data;
 
-        private System.Action<WindowObject, TransitionParameters> contextCallback;
+        private System.Action<WindowObject, TransitionParameters, bool> contextCallback;
         private TransitionInternalData internalData;
 
         public static TransitionParameters Default => new TransitionParameters() {
@@ -147,7 +148,7 @@ namespace UnityEngine.UI.Windows {
 
         public void RaiseCallback() {
 
-            if (this.contextCallback != null) this.contextCallback.Invoke(this.internalData.context, new TransitionParameters() { data = this.internalData.data });
+            if (this.contextCallback != null) this.contextCallback.Invoke(this.internalData.context, new TransitionParameters() { data = this.internalData.data }, this.internalData.internalCall);
             if (this.data.callback != null) this.data.callback.Invoke();
 
         }
@@ -204,12 +205,12 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public TransitionParameters ReplaceCallbackWithContext(System.Action<WindowObject, TransitionParameters> callback, WindowObject context, TransitionParameters other) {
+        public TransitionParameters ReplaceCallbackWithContext(System.Action<WindowObject, TransitionParameters, bool> callback, WindowObject context, TransitionParameters other, bool internalCall) {
 
             var instance = this;
             instance.data.callback = null;
             instance.contextCallback = callback;
-            instance.internalData = new TransitionInternalData() { context = context, data = other.data };
+            instance.internalData = new TransitionInternalData() { context = context, data = other.data, internalCall = internalCall };
             return instance;
 
         }
@@ -1093,7 +1094,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        internal static void SetShown(WindowObject instance, TransitionParameters parameters) {
+        internal static void SetShown(WindowObject instance, TransitionParameters parameters, bool internalCall) {
 
             if (instance.GetState() != ObjectState.Showing) {
                 
@@ -1102,12 +1103,23 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
+            if (internalCall == true) {
+                
+                if (instance.hiddenByDefault == true) {
+                    
+                    parameters.RaiseCallback();
+                    return;
+                    
+                }
+                
+            }
+
             WindowObjectAnimation.SetState(instance, AnimationState.Show);
             
             var innerParameters = parameters.ReplaceCallback(null);
             for (int i = 0; i < instance.subObjects.Count; ++i) {
                 
-                WindowSystem.SetShown(instance.subObjects[i], innerParameters);
+                WindowSystem.SetShown(instance.subObjects[i], innerParameters, internalCall);
                 
             }
             
@@ -1121,7 +1133,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        internal static void SetHidden(WindowObject instance, TransitionParameters parameters) {
+        internal static void SetHidden(WindowObject instance, TransitionParameters parameters, bool internalCall) {
 
             if (instance.GetState() != ObjectState.Hiding) {
                 
@@ -1135,7 +1147,7 @@ namespace UnityEngine.UI.Windows {
             var innerParameters = parameters.ReplaceCallback(null);
             for (int i = 0; i < instance.subObjects.Count; ++i) {
                 
-                WindowSystem.SetHidden(instance.subObjects[i], innerParameters);
+                WindowSystem.SetHidden(instance.subObjects[i], innerParameters, internalCall);
                 
             }
 

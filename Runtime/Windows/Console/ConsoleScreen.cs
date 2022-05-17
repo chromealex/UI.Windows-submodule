@@ -74,6 +74,13 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        public WindowSystemConsole.LogsFilter GetLogFilterType() {
+            
+            var console = WindowSystem.GetConsole();
+            return console.GetLogFilterType();
+            
+        }
+
         public void SetLogFilterType(LogType logType, bool state) {
             
             var console = WindowSystem.GetConsole();
@@ -378,7 +385,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             var gen = text.GetGenerationSettings(size);
             var textGen = text.cachedTextGenerator;
             var scaleFactor = canvas.scaleFactor;
-            return (textGen.GetPreferredHeight(this.GetDrawItem(index).line, gen) + layoutGroupPadding.top + layoutGroupPadding.bottom) / scaleFactor;
+            return (textGen.GetPreferredHeight(this.GetDrawItem(index, ignoreFilters: true).line, gen) + layoutGroupPadding.top + layoutGroupPadding.bottom) / scaleFactor;
             
         }
         
@@ -442,30 +449,44 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             var console = WindowSystem.GetConsole();
             var items = console.GetItems();
             var cnt = 0;
-            foreach (var item in items) {
+            var logsFilterType = console.GetLogFilterType();
+            lock (items) {
 
-                if (item.isCommand == true || this.HasLogFilterType(item.logType) == true) {
+                foreach (var item in items) {
 
-                    ++cnt;
+                    var mask = (WindowSystemConsole.LogsFilter)(1 << (int)(item.logType + 1));
+                    if (item.isCommand == true || ((logsFilterType & mask) != 0) == true) {
+
+                        ++cnt;
+
+                    }
 
                 }
-                
+
             }
-            
+
             return cnt;
 
         }
 
-        private WindowSystemConsole.DrawItem GetDrawItem(int index) {
+        private WindowSystemConsole.DrawItem GetDrawItem(int index, bool ignoreFilters) {
 
             var console = WindowSystem.GetConsole();
+            var logsFilterType = console.GetLogFilterType();
             var items = console.GetItems();
+            if (ignoreFilters == true || logsFilterType == WindowSystemConsole.LogsFilter.All) {
+
+                return items[index];
+
+            }
+            
             var k = 0;
             lock (items) {
                 
                 foreach (var item in items) {
     
-                    if (item.isCommand == true || this.HasLogFilterType(item.logType) == true) {
+                    var mask = (WindowSystemConsole.LogsFilter)(1 << (int)(item.logType + 1));
+                    if (item.isCommand == true || ((logsFilterType & mask) != 0) == true) {
     
                         if (k == index) return item;
                         ++k;
@@ -573,7 +594,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             this.list.SetDataSource(this);
             this.list.SetItems<ButtonComponent, ClosureParameters>(this.GetDrawItemsCount(), (component, parameters) => {
 
-                var item = parameters.data.GetDrawItem(parameters.index);
+                var item = parameters.data.GetDrawItem(parameters.index, false);
                 var text = component.Get<TextComponent>();
                 ConsoleScreen.SetText(text, item.isCommand == true ? "<color=#777><b>></b></color> " : string.Empty, item.line);
                 text.SetColor(item.isCommand == true ? new Color(0.15f, 0.6f, 1f) : ConsoleScreen.GetColorByLogType(item.logType));

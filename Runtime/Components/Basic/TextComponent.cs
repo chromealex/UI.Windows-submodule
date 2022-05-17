@@ -85,6 +85,7 @@ namespace UnityEngine.UI.Windows.Components {
             public TimeShort(double value, TimeResultStrings timeResultStrings, SourceValue sourceValue) {
 
                 this.timeResultStrings = timeResultStrings;
+                this.timeSpan = default;
 
                 switch (sourceValue) {
 

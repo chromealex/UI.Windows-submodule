@@ -1,5 +1,11 @@
 namespace UnityEditor.UI.Windows {
     
+    #if UNITY_2021_2_OR_NEWER
+    using EditorSceneManagement = UnityEditor.SceneManagement;
+    #else
+    using EditorSceneManagement = UnityEditor.Experimental.SceneManagement;
+    #endif
+    
     using UnityEngine;
     using UnityEngine.UI.Windows;
 
@@ -122,7 +128,7 @@ namespace UnityEditor.UI.Windows {
             var activeObject = Selection.activeObject as GameObject;
             var usePrefabMode = true;
             if (activeObject == null ||
-                (UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null &&
+                (EditorSceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null &&
                  activeObject != null &&
                  activeObject.scene.IsValid() == true)) {
                 activeObject = (property.serializedObject.targetObject as Component)?.gameObject;
@@ -139,7 +145,7 @@ namespace UnityEditor.UI.Windows {
                 var path = string.Empty;
                 if (usePrefabMode == true) {
 
-                    var prefabMode = UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+                    var prefabMode = EditorSceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
                     if (prefabMode != null && prefabMode.IsPartOfPrefabContents(activeObject) == true) {
 
                         path = prefabMode.assetPath;

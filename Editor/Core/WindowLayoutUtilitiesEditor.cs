@@ -320,8 +320,7 @@ namespace UnityEditor.UI.Windows {
                                     screenData = hData
                                 };
                                 
-                            } else if (oris[j].orientation == ScreenOrientation.Landscape ||
-                                       oris[j].orientation == ScreenOrientation.LandscapeLeft) {
+                            } else if (oris[j].orientation == ScreenOrientation.LandscapeLeft) {
                                 
                                 var hData = screens[i];
                                 var w = hData.width;

@@ -593,6 +593,16 @@ namespace UnityEngine.UI.Windows {
 
                 }
                 
+                for (int i = 0; i < this.canvasRenderers.Length; ++i) {
+
+                    if (this.canvasRenderers[i].canvasRenderer == null) {
+      
+                        this.canvasRenderers[i].canvasRenderer = null;
+      
+                    }
+                    
+                }
+                
                 dirtyHelper.Set(ref this.canvasRenderers, newCanvasRenderers);
 
             }

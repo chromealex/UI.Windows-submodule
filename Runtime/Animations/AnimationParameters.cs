@@ -4,10 +4,10 @@
     
     public enum AnimationState {
 
-        Current,
-        Reset,
-        Show,
-        Hide,
+        Current = 0,
+        Reset = 1,
+        Show = 2,
+        Hide = 3,
 
     }
 

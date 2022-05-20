@@ -17,17 +17,34 @@
             public TransitionParameters transitionParameters;
             public AnimationState animationState;
             public System.Action<T> onComplete;
+            public System.Action<T, float> onUpdate;
+            public System.Action<T> onCancel;
             public T closureParameters;
+            public TweenerCustomParameters customParameters;
+
+        }
+
+        [System.Serializable]
+        public struct TweenerCustomParameters {
+
+            public int loops;
+            public bool reflect;
 
         }
 
         public static void SetResetState(WindowObject instance) {
 
-            if (instance.animationParameters.items == null) return;
+            WindowObjectAnimation.SetResetState(instance.animationParameters.items);
 
-            for (int i = 0; i < instance.animationParameters.items.Length; ++i) {
+        }
 
-                var anim = instance.animationParameters.items[i];
+        public static void SetResetState(AnimationParameters[] animationParameters) {
+
+            if (animationParameters == null) return;
+
+            for (int i = 0; i < animationParameters.Length; ++i) {
+
+                var anim = animationParameters[i];
                 if (anim != null) {
                     
                     var state = anim.GetResetState();
@@ -40,13 +57,19 @@
         }
 
         public static void BreakState(WindowObject instance) {
+
+            WindowObjectAnimation.BreakState(instance.animationParameters.items);
+
+        }
+
+        public static void BreakState(AnimationParameters[] animationParameters) {
             
-            if (instance.animationParameters.items == null) return;
+            if (animationParameters == null) return;
 
             var tweener = WindowSystem.GetTweener();
-            for (int i = 0; i < instance.animationParameters.items.Length; ++i) {
+            for (int i = 0; i < animationParameters.Length; ++i) {
 
-                var anim = instance.animationParameters.items[i];
+                var anim = animationParameters[i];
                 if (anim != null) {
                     
                     tweener.Stop(anim, ignoreEvents: false);
@@ -77,18 +100,24 @@
 
         public static void Show<T>(T closureParameters, WindowObject instance, TransitionParameters parameters, System.Action<T> onComplete) {
 
-            WindowObjectAnimation.Play(closureParameters, AnimationState.Show, instance.animationParameters.items, parameters, onComplete);
+            WindowObjectAnimation.Play(closureParameters, AnimationState.Show, instance.animationParameters.items, parameters, default, onComplete);
 
         }
 
         public static void Hide<T>(T closureParameters, WindowObject instance, TransitionParameters parameters, System.Action<T> onComplete) {
 
-            WindowObjectAnimation.Play(closureParameters, AnimationState.Hide, instance.animationParameters.items, parameters, onComplete);
+            WindowObjectAnimation.Play(closureParameters, AnimationState.Hide, instance.animationParameters.items, parameters, default, onComplete);
 
         }
 
-        private static void Play<T>(T closureParameters, AnimationState animationState, AnimationParameters[] animationParameters, TransitionParameters parameters,
-                                    System.Action<T> onComplete) {
+        internal static void Play<T>(T closureParameters,
+                                     AnimationState animationState,
+                                     AnimationParameters[] animationParameters,
+                                     TransitionParameters parameters,
+                                     TweenerCustomParameters customParameters,
+                                     System.Action<T> onComplete,
+                                     System.Action<T, float> onUpdate = null,
+                                     System.Action<T> onCancel = null) {
 
             if (animationParameters == null || animationParameters.Length == 0) {
 
@@ -122,6 +151,9 @@
                 transitionParameters = parameters,
                 animationState = animationState,
                 closureParameters = closureParameters,
+                customParameters = customParameters,
+                onUpdate = onUpdate,
+                onCancel = onCancel,
                 onComplete = onComplete,
             };
             UnityEngine.UI.Windows.Utilities.Coroutines.CallInSequence((x) => {
@@ -156,28 +188,42 @@
                     var ease = (state.animationState == AnimationState.Show ? anim.easeShow : anim.easeHide);
                     var tweener = WindowSystem.GetTweener();
                     tweener.Stop(anim);
-                    tweener.Add(animationInfo, anim.GetDuration(state.animationState), 0f, 1f)
-                           .Delay(state.transitionParameters.data.replaceDelay == true ? state.transitionParameters.data.delay : anim.GetDelay(state.animationState))
-                           .Tag(anim)
-                           .Ease(ease)
-                           .OnUpdate((obj, value) => {
-                               
-                               obj.animationParameters.ApplyState(obj.animationParameters.LerpState(obj.fromState, obj.toState, value));
-                               
-                           })
-                           .OnComplete((obj) => {
+                    var tween = tweener.Add(animationInfo, anim.GetDuration(state.animationState), 0f, 1f);
+                    tween.Delay(state.transitionParameters.data.replaceDelay == true ? state.transitionParameters.data.delay : anim.GetDelay(state.animationState))
+                    .Tag(anim)
+                    .Ease(ease)
+                    .OnUpdate((obj, value) => {
+                        
+                        if (obj.closureParameters.onUpdate != null) obj.closureParameters.onUpdate.Invoke(obj.closureParameters.closureParameters, value); 
+                        obj.animationParameters.ApplyState(obj.animationParameters.LerpState(obj.fromState, obj.toState, value));
+                       
+                    })
+                    .OnComplete((obj) => {
 
-                               obj.fromState.Recycle();
-                               obj.onComplete.Invoke();
-                               
-                           })
-                           .OnCancel((obj) => {
-                               
-                               obj.fromState.Recycle();
-                               obj.onComplete.Invoke();
-                               
-                           });
+                        obj.fromState.Recycle(); 
+                        obj.onComplete.Invoke();
+                       
+                    })
+                    .OnCancel((obj) => {
+                       
+                        if (obj.closureParameters.onCancel != null) obj.closureParameters.onCancel.Invoke(obj.closureParameters.closureParameters);
+                        obj.fromState.Recycle();
+                        obj.onComplete.Invoke();
+                       
+                    });
 
+                    if (customParameters.loops != 0) {
+
+                        tween.Loop(customParameters.loops);
+
+                    }
+
+                    if (customParameters.reflect == true) {
+                        
+                        tween.Reflect();
+
+                    }
+                    
                 } else {
                     
                     cb.Invoke();

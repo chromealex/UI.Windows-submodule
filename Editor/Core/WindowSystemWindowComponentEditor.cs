@@ -90,159 +90,141 @@ namespace UnityEditor.UI.Windows {
             if (this.listModules == null) {
                 
                 var componentsProp = this.componentModules.FindPropertyRelative("modules");
-                //if (componentsProp.arraySize != 0) {
-
+                
+                if (this.componentModules.FindPropertyRelative("windowComponent").objectReferenceValue != this.componentModules.serializedObject.targetObject) {
                     this.serializedObject.Update();
                     this.componentModules.FindPropertyRelative("windowComponent").objectReferenceValue = this.componentModules.serializedObject.targetObject;
                     this.serializedObject.ApplyModifiedProperties();
-                    this.listModules = new UnityEditorInternal.ReorderableList(componentsProp.serializedObject, componentsProp, true, true, true, true);
-                    this.listModules.elementHeight = 40f;
-                    this.listModules.onAddCallback = (rList) => {
+                }
+                
+                this.listModules = new UnityEditorInternal.ReorderableList(componentsProp.serializedObject, componentsProp, true, true, true, true);
+                this.listModules.elementHeight = 40f;
+                this.listModules.onAddCallback = (rList) => {
 
-                        if (rList.serializedProperty != null) {
+                    if (rList.serializedProperty != null) {
 
-                            ++rList.serializedProperty.arraySize;
-                            rList.index = rList.serializedProperty.arraySize - 1;
-                            var idx = rList.index;
-                            var prop = componentsProp.GetArrayElementAtIndex(idx);
-                            prop.objectReferenceValue = null;
-                            
-                        }
-
-                    };
-                    this.listModules.onRemoveCallback = (rList) => {
-
-                        var idx = this.listModules.index;
+                        ++rList.serializedProperty.arraySize;
+                        rList.index = rList.serializedProperty.arraySize - 1;
+                        var idx = rList.index;
                         var prop = componentsProp.GetArrayElementAtIndex(idx);
-                        if (prop.objectReferenceValue != null) Object.DestroyImmediate(prop.objectReferenceValue, true);
-                        componentsProp.DeleteArrayElementAtIndex(idx);
+                        prop.objectReferenceValue = null;
+                        
+                    }
 
-                    };
-                    this.listModules.drawElementBackgroundCallback = (rect, index, active, focused) => {
+                };
+                this.listModules.onRemoveCallback = (rList) => {
 
-                        if (focused == true || active == true) {
+                    var idx = this.listModules.index;
+                    var prop = componentsProp.GetArrayElementAtIndex(idx);
+                    if (prop.objectReferenceValue != null) Object.DestroyImmediate(prop.objectReferenceValue, true);
+                    componentsProp.DeleteArrayElementAtIndex(idx);
 
-                            GUILayoutExt.DrawRect(rect, new Color(0.1f, 0.4f, 0.7f, 1f));
+                };
+                this.listModules.drawElementBackgroundCallback = (rect, index, active, focused) => {
 
-                        } else {
+                    if (focused == true || active == true) {
 
-                            GUILayoutExt.DrawRect(rect, new Color(1f, 1f, 1f, index % 2 == 0 ? 0.05f : 0f));
+                        GUILayoutExt.DrawRect(rect, new Color(0.1f, 0.4f, 0.7f, 1f));
 
-                        }
+                    } else {
 
-                    };
-                    this.listModules.elementHeightCallback = (index) => {
+                        GUILayoutExt.DrawRect(rect, new Color(1f, 1f, 1f, index % 2 == 0 ? 0.05f : 0f));
 
-                        if (componentsProp.arraySize > 0) {
+                    }
 
-                            var prop = componentsProp.GetArrayElementAtIndex(index);
-                            if (prop.objectReferenceValue != null) {
+                };
+                this.listModules.elementHeightCallback = (index) => {
 
-                                var height = 0f;
-                                var so = new SerializedObject(prop.objectReferenceValue);
-                                var iterator = so.GetIterator();
-                                iterator.NextVisible(true);
-
-                                while (true) {
-
-                                    if (EditorHelpers.IsFieldOfTypeBeneath(prop.objectReferenceValue.GetType(), typeof(WindowComponentModule), iterator.propertyPath) == true) {
-
-                                        height += EditorGUI.GetPropertyHeight(iterator, new GUIContent(iterator.displayName), false);
-
-                                    }
-
-                                    if (!iterator.NextVisible(iterator.isExpanded)) {
-                                        break;
-                                    }
-
-                                }
-
-                                return 40f + height;
-
-                            }
-
-                        }
-
-                        return 40f;
-
-                    };
-                    this.listModules.drawElementCallback = (rect, index, active, focused) => {
-
-                        var padding = 10f;
-                        rect.x += padding;
-                        rect.y += padding;
-                        rect.width -= padding * 2f;
-                        rect.height = 18f;
-                        EditorGUI.PropertyField(rect, componentsProp.GetArrayElementAtIndex(index), new GUIContent("Module"));
-                        rect.y += 18f;
-                        rect.y += padding;
+                    if (componentsProp.arraySize > 0) {
 
                         var prop = componentsProp.GetArrayElementAtIndex(index);
                         if (prop.objectReferenceValue != null) {
-                            
-                            var so = new SerializedObject(prop.objectReferenceValue);
-                            so.Update();
-                            
-                            so.FindProperty("windowComponent").objectReferenceValue = this.serializedObject.targetObject;
 
+                            var height = 0f;
+                            var so = new SerializedObject(prop.objectReferenceValue);
                             var iterator = so.GetIterator();
                             iterator.NextVisible(true);
 
                             EditorGUI.indentLevel += 1;
                             int indent = EditorGUI.indentLevel;
+
                             while (true) {
 
                                 if (EditorHelpers.IsFieldOfTypeBeneath(prop.objectReferenceValue.GetType(), typeof(WindowComponentModule), iterator.propertyPath) == true) {
 
-                                    rect.height = EditorGUI.GetPropertyHeight(iterator, new GUIContent(iterator.displayName), false);
-
-                                    //totalHeight += rect.height;
-                                    EditorGUI.indentLevel = indent + iterator.depth;
-                                    EditorGUI.PropertyField(rect, iterator);
-                                    rect.y += rect.height;
-
+                                    height += EditorGUI.GetPropertyHeight(iterator, true);
+                                    
                                 }
 
-                                if (!iterator.NextVisible(iterator.isExpanded)) {
+                                if (!iterator.NextVisible(false)) {//iterator.isExpanded)) {
                                     break;
                                 }
-                                
+
                             }
 
                             EditorGUI.indentLevel = indent;
                             EditorGUI.indentLevel -= 1;
-                            
-                            /*
-                            var iter = so.GetIterator();
-                            while (iter.NextVisible(true) == true) {
 
-                                if (iter.hasVisibleChildren == true) {
-
-                                    iter.isExpanded = EditorGUI.Foldout(rect, iter.isExpanded, iter.displayName);
-
-                                    if (iter.isExpanded == false) continue;
-
-                                }
-                                
-                                if (EditorHelpers.IsFieldOfTypeBeneath(prop.objectReferenceValue.GetType(), typeof(WindowComponentModule), iter.propertyPath) == true) {
-
-                                    rect.height = EditorGUI.GetPropertyHeight(iter);
-                                    EditorGUI.PropertyField(rect, iter);
-                                    rect.y += rect.height;
-
-                                }
-
-                            }*/
-
-                            so.ApplyModifiedProperties();
+                            return 40f + height;
 
                         }
 
-                    };
-                    this.listModules.drawHeaderCallback = (rect) => { GUI.Label(rect, "Modules"); };
+                    }
 
-                //}
+                    return 40f;
 
+                };
+                this.listModules.drawElementCallback = (rect, index, active, focused) => {
+
+                    var padding = 10f;
+                    rect.x += padding;
+                    rect.y += padding;
+                    rect.width -= padding * 2f;
+                    rect.height = 18f;
+                    EditorGUI.PropertyField(rect, componentsProp.GetArrayElementAtIndex(index), new GUIContent("Module"));
+                    rect.y += 18f;
+                    rect.y += padding;
+
+                    var prop = componentsProp.GetArrayElementAtIndex(index);
+                    if (prop.objectReferenceValue != null) {
+                        
+                        var so = new SerializedObject(prop.objectReferenceValue);
+                        so.Update();
+                        
+                        so.FindProperty("windowComponent").objectReferenceValue = this.serializedObject.targetObject;
+
+                        var iterator = so.GetIterator();
+                        iterator.NextVisible(true);
+
+                        EditorGUI.indentLevel += 1;
+                        
+                        while (true) {
+
+                            if (EditorHelpers.IsFieldOfTypeBeneath(prop.objectReferenceValue.GetType(), typeof(WindowComponentModule), iterator.propertyPath) == true) {
+
+                                rect.height = EditorGUI.GetPropertyHeight(iterator, true);
+
+                                //totalHeight += rect.height;
+                                EditorGUI.PropertyField(rect, iterator, true);
+                                rect.y += rect.height;
+
+                            }
+
+                            if (!iterator.NextVisible(false)) {//iterator.isExpanded)) {
+                                break;
+                            }
+                            
+                        }
+
+                        EditorGUI.indentLevel -= 1;
+                        
+                        so.ApplyModifiedProperties();
+
+                    }
+
+                };
+                this.listModules.drawHeaderCallback = (rect) => { GUI.Label(rect, "Modules"); };
+                
             }
     
             EditorHelpers.SetFirstSibling(this.targets);
@@ -331,7 +313,7 @@ namespace UnityEditor.UI.Windows {
                     this.DrawCanvas();
 
                 }),
-                this.listModules == null ? GUITab.none : new GUITab("Modules (" + this.listModules.count + ")", () => {
+                new GUITab("Modules (" + this.componentModules.FindPropertyRelative("modules").arraySize + ")", () => {
                     
                     this.listModules.DoLayoutList();
 

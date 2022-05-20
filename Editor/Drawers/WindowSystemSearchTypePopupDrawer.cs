@@ -231,7 +231,8 @@ namespace UnityEditor.UI.Windows {
                         
                         popup.Item(displayName, () => {
                         
-                            property.serializedObject.Update();
+                            target.serializedObject.ApplyModifiedProperties();
+                            target.serializedObject.Update();
                             if (target.propertyType == SerializedPropertyType.ObjectReference) {
                                 
                                 var go = (target.serializedObject.targetObject as Component).gameObject;
@@ -255,7 +256,7 @@ namespace UnityEditor.UI.Windows {
 
                             }
 
-                            property.serializedObject.ApplyModifiedProperties();
+                            target.serializedObject.ApplyModifiedProperties();
                         
                         });
                         

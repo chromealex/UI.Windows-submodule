@@ -53,22 +53,50 @@
 
         public bool Play(int stateId,
                          AnimationTarget animationTarget,
+                         TransitionParameters transitionParameters = default,
                          System.Action onComplete = null,
                          System.Action<float> onUpdate = null,
                          System.Action onCancel = null) {
 
-            return this.Play_INTERNAL(stateId, animationTarget, onComplete, onUpdate, onCancel, default, false);
+            return this.Play_INTERNAL(stateId, animationTarget, onComplete, onUpdate, onCancel, default, transitionParameters, false);
 
         }
 
         public bool Play(int stateId,
                          AnimationTarget animationTarget,
                          UnityEngine.UI.Windows.Modules.WindowObjectAnimation.TweenerCustomParameters tweenerCustomParameters,
+                         TransitionParameters transitionParameters = default,
                          System.Action onComplete = null,
                          System.Action<float> onUpdate = null,
                          System.Action onCancel = null) {
 
-            return this.Play_INTERNAL(stateId, animationTarget, onComplete, onUpdate, onCancel, tweenerCustomParameters, true);
+            return this.Play_INTERNAL(stateId, animationTarget, onComplete, onUpdate, onCancel, tweenerCustomParameters, transitionParameters, true);
+
+        }
+
+        public bool Break(int stateId) {
+
+            if (this.TryGetState(stateId, out var state) == true) {
+
+                UnityEngine.UI.Windows.Modules.WindowObjectAnimation.BreakState(state.parameters.items);
+                return true;
+
+            }
+
+            return false;
+
+        }
+
+        public bool SetResetState(int stateId) {
+
+            if (this.TryGetState(stateId, out var state) == true) {
+
+                UnityEngine.UI.Windows.Modules.WindowObjectAnimation.SetResetState(state.parameters.items);
+                return true;
+
+            }
+
+            return false;
 
         }
 
@@ -78,6 +106,7 @@
                          System.Action<float> onUpdate = null,
                          System.Action onCancel = null,
                          UnityEngine.UI.Windows.Modules.WindowObjectAnimation.TweenerCustomParameters tweenerCustomParameters = default,
+                         TransitionParameters transitionParameters = default,
                          bool overrideTweenerParameters = false) {
 
             if (this.TryGetState(stateId, out var state) == true) {
@@ -96,7 +125,7 @@
                     closure,
                     (UnityEngine.UI.Windows.Modules.AnimationState)animationTarget,
                     state.parameters.items,
-                    TransitionParameters.Default,
+                    transitionParameters,
                     tweenerCustomParameters,
                     (c) => {
                       

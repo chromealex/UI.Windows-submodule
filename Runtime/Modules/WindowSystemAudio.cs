@@ -362,8 +362,13 @@
             
             if (string.IsNullOrEmpty(this.audioEvent) == true) return;
 
-            var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
-            if (eventDescription.isValid() == false) return;
+            FMOD.Studio.EventDescription eventDescription;
+            try {
+                eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
+                if (eventDescription.isValid() == false) return;
+            } catch (System.Exception) {
+                return;
+            }
 
             //Debug.Log("SetParameterOnce: " + name + ", value: " + value + " (" + this.audioEvent + ")");
 
@@ -392,9 +397,13 @@
             
             if (string.IsNullOrEmpty(this.audioEvent) == true) return;
 
-            var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
-            if (eventDescription.isValid() == false) return;
-
+            FMOD.Studio.EventDescription eventDescription;
+            try {
+                eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
+                if (eventDescription.isValid() == false) return;
+            } catch (System.Exception) {
+                return;
+            }
             //Debug.Log("SetParameter: " + name + ", value: " + value + " (" + this.audioEvent + ")");
 
             var instance = FMODAudioComponent.GetInstance(this.audioEvent, eventDescription, this.stopOthersOnPlay);
@@ -418,8 +427,13 @@
 
             if (string.IsNullOrEmpty(this.audioEvent) == true) return;
 
-            var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
-            if (eventDescription.isValid() == false) return;
+            FMOD.Studio.EventDescription eventDescription;
+            try {
+                eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
+                if (eventDescription.isValid() == false) return;
+            } catch (System.Exception) {
+                return;
+            }
 
             var setPlay = false;
             var instance = FMODAudioComponent.GetInstance(this.audioEvent, eventDescription, this.stopOthersOnPlay);
@@ -469,8 +483,13 @@
 
             if (string.IsNullOrEmpty(this.audioEvent) == true) return;
 
-            var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
-            if (eventDescription.isValid() == false) return;
+            FMOD.Studio.EventDescription eventDescription;
+            try {
+                eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
+                if (eventDescription.isValid() == false) return;
+            } catch (System.Exception) {
+                return;
+            }
 
             var instance = FMODAudioComponent.GetInstance(this.audioEvent, eventDescription, this.stopOthersOnPlay);
             foreach (var p in this.parameters) {
@@ -483,8 +502,13 @@
             
             if (string.IsNullOrEmpty(this.audioEvent) == true) return;
 
-            var eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
-            if (eventDescription.isValid() == false) return;
+            FMOD.Studio.EventDescription eventDescription;
+            try {
+                eventDescription = FMODUnity.RuntimeManager.GetEventDescription(this.audioEvent);
+                if (eventDescription.isValid() == false) return;
+            } catch (System.Exception) {
+                return;
+            }
 
             var instance = FMODAudioComponent.GetInstance(this.audioEvent, eventDescription, this.stopOthersOnPlay);
             instance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);

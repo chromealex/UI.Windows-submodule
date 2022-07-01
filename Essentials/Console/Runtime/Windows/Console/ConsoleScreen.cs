@@ -7,6 +7,10 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
     public class ConsoleScreen : LayoutWindowType, IDataSource {
 
+        public Font consoleFont;
+        private int fixedCharWidth;
+        private int fixedCharHeight;
+        
         private ListComponent list;
         private ListComponent fastLinks;
         private InputFieldComponent inputField;
@@ -14,6 +18,21 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         
         private char openCloseChar;
         private int currentIndex;
+
+        private WindowSystemConsoleModule consoleModule;
+        private WindowSystemConsole GetConsole() {
+
+            if (this.consoleModule is null == false) return this.consoleModule.console;
+            
+            var module = WindowSystem.GetWindowSystemModule<WindowSystemConsoleModule>();
+            if (module != null) {
+
+                this.consoleModule = module;
+
+            }
+            return module.console;
+
+        }
         
         public void OnParametersPass(char openCloseChar) {
 
@@ -40,6 +59,11 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             this.inputField.SetCallbackEditEnd(this.OnEditEnd);
             this.inputField.Get<ButtonComponent>().SetCallback(this.EndEdit);
 
+            this.consoleFont.RequestCharactersInTexture("A", 16, FontStyle.Normal);
+            this.consoleFont.GetCharacterInfo('A', out var charInfo);
+            this.fixedCharWidth = charInfo.glyphWidth;
+            this.fixedCharHeight = charInfo.glyphHeight;
+
         }
 
         public override void OnShowBegin() {
@@ -62,42 +86,42 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         public void PrintModuleSample() {
             
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
             console.PrintModuleSample();
 
         }
 
         public bool HasLogFilterType(LogType logType) {
 
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
             return console.HasLogFilterType(logType);
 
         }
 
         public WindowSystemConsole.LogsFilter GetLogFilterType() {
             
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
             return console.GetLogFilterType();
             
         }
 
         public void SetLogFilterType(LogType logType, bool state) {
             
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
             console.SetLogFilterType(logType, state);
             
         }
 
         public int GetCounter(LogType logType) {
 
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
             return console.GetCounter(logType);
             
         }
 
         private void AddLog(string text, LogType type = LogType.Log, string trace = null) {
 
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
             console.AddLog(text, type, trace);
 
         }
@@ -143,7 +167,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         private void MoveUp() {
 
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
             var commands = console.GetCommands();
             
             if (commands.Count == 0) return;
@@ -155,7 +179,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         private void MoveDown() {
 
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
             var commands = console.GetCommands();
 
             if (commands.Count == 0) return;
@@ -185,14 +209,14 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         public void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false, bool canCopy = false) {
 
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
             console.AddLine(text, logType, isCommand, canCopy);
             
         }
 
         public void RunCommand(WindowSystemConsole.CommandItem command) {
 
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
             console.RunCommand(command, this);
             this.currentIndex = console.GetCommands().Count;
             
@@ -201,7 +225,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         public void ApplyCommand(string command, bool autoComplete = false) {
 
             var cmd = command.Trim();
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
 
             if (cmd.ToLower() == "modulesample") {
                 
@@ -381,11 +405,16 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             var layoutGroupPadding = button.GetComponent<LayoutGroup>().padding;
             var size = this.list.rectTransform.rect.size;
             size.x -= layoutGroupPadding.left + layoutGroupPadding.right;
-            var text = (button.Get<TextComponent>().graphics as Text);
-            var gen = text.GetGenerationSettings(size);
-            var textGen = text.cachedTextGenerator;
+            //var text = (button.Get<TextComponent>().graphics as Text);
+            //var gen = text.GetGenerationSettings(size);
+            //var textGen = text.cachedTextGenerator;
             var scaleFactor = canvas.scaleFactor;
-            return (textGen.GetPreferredHeight(this.GetDrawItem(index, ignoreFilters: true).line, gen) + layoutGroupPadding.top + layoutGroupPadding.bottom) / scaleFactor;
+            var w = this.fixedCharWidth;//textGen.characters[0].charWidth;
+            var len = this.GetDrawItem(index, ignoreFilters: true).line.Length;
+            var linesCount = size.x > 0f ? Mathf.CeilToInt(len * w / size.x) : 1;
+            var charHeight = this.fixedCharHeight;
+            var h = linesCount * charHeight;//textGen.GetPreferredHeight(this.GetDrawItem(index, ignoreFilters: true).line, gen);
+            return (h + layoutGroupPadding.top + layoutGroupPadding.bottom) / scaleFactor;
             
         }
         
@@ -409,13 +438,13 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
-        private struct ClosureParametersScrollbar : IListClosureParameters {
+        /*private struct ClosureParametersScrollbar : IListClosureParameters {
 
             public int index { get; set; }
             public ListEndlessComponentModule.Item lastItem;
             public ConsoleScreen data;
 
-        }
+        }*/
 
         private struct ClosureFastLinksParameters : IListClosureParameters {
 
@@ -446,7 +475,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         private int GetDrawItemsCount() {
 
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
             var items = console.GetItems();
             var cnt = 0;
             var logsFilterType = console.GetLogFilterType();
@@ -471,7 +500,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         private WindowSystemConsole.DrawItem GetDrawItem(int index, bool ignoreFilters) {
 
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
             var logsFilterType = console.GetLogFilterType();
             var items = console.GetItems();
             if (ignoreFilters == true || logsFilterType == WindowSystemConsole.LogsFilter.All) {
@@ -545,7 +574,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             this.inputField.Get<ButtonComponent>().SetInteractable(this.inputField.GetText().Length > 0);
 
-            var console = WindowSystem.GetConsole();
+            var console = this.GetConsole();
             console.GetFastLinks(this.currentDirectoryId, this.fastLinkCache);
             this.fastLinks.Get<TextComponent>().SetText(console.GetDirectoryPath(this.currentDirectoryId));
             this.fastLinks.SetItems<FastLinkButtonComponent, ClosureFastLinksParameters>(this.fastLinkCache.Count, (button, parameters) => {
@@ -567,7 +596,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                     
                 } else {
                     
-                    button.SetInteractable(WindowSystem.GetConsole().ValidateFastLink(item));
+                    button.SetInteractable(this.GetConsole().ValidateFastLink(item));
 
                     button.SetCallback(new ClosureFastLinksParametersButtonCallback() { parameters = parameters, data = item, }, (innerData) => {
 
@@ -582,7 +611,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                         }
                     
                     });
-                    button.ShowHide(WindowSystem.GetConsole().ValidateFastLinkVisibility(item));
+                    button.ShowHide(this.GetConsole().ValidateFastLinkVisibility(item));
 
                 }
                 

@@ -49,7 +49,7 @@ namespace UnityEngine.UI.Windows {
         [Help("Prints available methods for this module")]
         public void Help() {
 
-            var console = WindowSystem.GetConsole();
+            var console = WindowSystem.GetWindowSystemModule<WindowSystemConsoleModule>().console;
             console.PrintHelp(this);
 
         }

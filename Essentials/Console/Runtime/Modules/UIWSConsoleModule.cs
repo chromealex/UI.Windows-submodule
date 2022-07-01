@@ -10,15 +10,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
     public class UIWSConsoleModule : ConsoleModule {
 
         [UnityEngine.Scripting.PreserveAttribute]
-        [Help("Destroy UIWS with all submodules")]
-        public void Destroy() {
-
-            var instance = WindowSystem.instance;
-            GameObject.Destroy(instance.gameObject);
-
-        }
-
-        [UnityEngine.Scripting.PreserveAttribute]
         [Help("Prints all currently opened windows")]
         public void List() {
 

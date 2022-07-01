@@ -263,7 +263,7 @@ namespace UnityEngine.UI.Windows {
         public HorizontalOrVerticalLayoutGroup layoutGroup;
         public List<RegistryBase> registries = new List<RegistryBase>();
         public float createOffset = 50f;
-
+        
         private int allCount;
         private int currentVisibleCount;
         private int requiredVisibleCount;

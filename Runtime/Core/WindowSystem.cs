@@ -250,7 +250,7 @@ namespace UnityEngine.UI.Windows {
 
         public static System.Action onPointerUp;
         public static System.Action onPointerDown;
-        
+
         [Tooltip("Automatically show `Root Screen` on Start.")]
         public bool showRootOnStart;
         public WindowBase rootScreen;
@@ -269,11 +269,10 @@ namespace UnityEngine.UI.Windows {
         public WindowSystemSettings settings;
         public WindowSystemResources resources;
         public WindowSystemPools pools;
-        public WindowSystemConsole console;
         public Tweener tweener;
 
         [SearchAssetsByTypePopupAttribute(typeof(WindowSystemModule), menuName: "Modules")]
-        public WindowSystemModule[] modules;
+        public List<WindowSystemModule> modules = new List<WindowSystemModule>();
 
         private List<WindowItem> currentWindows = new List<WindowItem>();
         private Dictionary<int, int> windowsCountByLayer = new Dictionary<int, int>();
@@ -305,6 +304,32 @@ namespace UnityEngine.UI.Windows {
 
                 return WindowSystem._instance;
             }
+        }
+
+        public static T GetWindowSystemModule<T>() where T : WindowSystemModule {
+
+            if (WindowSystem.instance.modules != null) {
+
+                for (int i = 0; i < WindowSystem.instance.modules.Count; ++i) {
+
+                    var module = WindowSystem.instance.modules[i];
+                    if (module != null && module is T moduleT) {
+                        return moduleT;
+                    }
+
+                }
+
+            }
+
+            return null;
+
+        }
+
+        public static void AddModule<T>(T module) where T : WindowSystemModule {
+
+            if (WindowSystem.instance.modules == null) WindowSystem.instance.modules = new List<WindowSystemModule>();
+            WindowSystem.instance.modules.Add(module);
+            
         }
 
         public static T FindOpened<T>() where T : WindowBase {
@@ -375,11 +400,9 @@ namespace UnityEngine.UI.Windows {
 
         public void Start() {
 
-            this.console = new WindowSystemConsole();
-
             if (this.modules != null) {
 
-                for (int i = 0; i < this.modules.Length; ++i) {
+                for (int i = 0; i < this.modules.Count; ++i) {
 
                     this.modules[i]?.OnStart();
 
@@ -395,7 +418,7 @@ namespace UnityEngine.UI.Windows {
             
             if (this.modules != null) {
 
-                for (int i = this.modules.Length - 1; i >= 0; --i) {
+                for (int i = this.modules.Count - 1; i >= 0; --i) {
 
                     this.modules[i]?.OnDestroy();
 
@@ -403,8 +426,6 @@ namespace UnityEngine.UI.Windows {
 
             }
 
-            this.console?.Dispose();
-            this.console = null;
             WindowSystem._instance = null;
 
             WindowSystem.onPointerUp = null;
@@ -605,7 +626,15 @@ namespace UnityEngine.UI.Windows {
 
         public void Update() {
 
-            if (this.console != null) this.console.Update();
+            if (this.modules != null) {
+
+                for (int i = 0; i < this.modules.Count; ++i) {
+
+                    this.modules[i]?.OnUpdate();
+
+                }
+
+            }
             
             #if ENABLE_INPUT_SYSTEM
             if (UnityEngine.InputSystem.Mouse.current.leftButton.wasReleasedThisFrame == true ||
@@ -908,12 +937,6 @@ namespace UnityEngine.UI.Windows {
 
             var events = WindowSystem.GetEvents();
             events.UnRegister(instance, windowEvent, callback);
-
-        }
-
-        public static WindowSystemConsole GetConsole() {
-
-            return WindowSystem.instance.console;
 
         }
 

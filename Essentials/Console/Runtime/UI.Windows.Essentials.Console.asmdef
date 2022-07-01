@@ -1,0 +1,17 @@
+{
+    "name": "UI.Windows.Essentials.Console",
+    "rootNamespace": "",
+    "references": [
+        "UI.Windows",
+        "Unity.Localization"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

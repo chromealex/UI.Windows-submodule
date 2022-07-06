@@ -203,11 +203,11 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         private readonly List<WindowSystemConsole.FastLink> fastLinkCache = new List<WindowSystemConsole.FastLink>();
         private int currentDirectoryId = -1;
 
-        private void SetInfoToFastLinkButton(Button button, WindowSystemConsole.FastLink data) {
+        private void SetInfoToFastLinkButton(Button button, WindowSystemConsole.FastLink data, int index) {
             
             if (data.style == FastLinkType.Directory) {
                 
-                if (data.parentId > data.id) {
+                if (this.currentDirectoryId != -1 && index == 0) {
                  
                     button.AddToClassList("fastlink-dir-up");
    
@@ -235,7 +235,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
                 
                 var button = this.fastLinkButtonElement.Instantiate();
                 this.fastLinksContainer.Add(button);
-                this.SetInfoToFastLinkButton(button.Q<Button>("Button"), item);
+                this.SetInfoToFastLinkButton(button.Q<Button>("Button"), item, i);
                 
                 if (item.style == FastLinkType.Directory) {
                     

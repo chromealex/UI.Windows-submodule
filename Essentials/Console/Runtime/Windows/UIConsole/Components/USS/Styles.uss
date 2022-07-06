@@ -396,9 +396,11 @@
 .line-popup-container ScrollView TextField {
     -unity-font: resource('UIWS.UIConsole/Fonts/Font');
     -unity-font-definition: resource('UIWS.UIConsole/Fonts/RobotoMono-Regular SDF');
-    background-color: rgba(0, 0, 0, 0);
     white-space: normal;
     color: white;
+}
+.line-popup-container ScrollView TextField TextInput {
+    background-color: rgba(0, 0, 0, 0);
 }
 
 .line-popup-buttons {

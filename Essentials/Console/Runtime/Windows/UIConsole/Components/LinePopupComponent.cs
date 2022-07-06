@@ -49,7 +49,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             var allItems = this.uiConsole.console.GetItems();
             var item = allItems[lineInfo.filteredItems[lineInfo.localIndex]];
 
-            this.text.value = item.line;
+            this.text.value = System.Text.RegularExpressions.Regex.Replace(item.line, "<.*?>", System.String.Empty);
             this.text.style.color = new StyleColor(UIConsoleComponent.GetColorByLogType(item.logType));
             this.copy.UnregisterCallback<ClickEvent>(this.Copy);
             this.copy.RegisterCallback<ClickEvent>(this.Copy);

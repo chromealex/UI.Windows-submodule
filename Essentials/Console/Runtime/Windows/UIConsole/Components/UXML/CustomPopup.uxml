@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="/Assets/UI.Windows-submodule/Essentials/Console/Runtime/Windows/UIConsole/Components/USS/Styles.uss" />
+    <ui:VisualElement name="Container" class="popup-container">
+        <ui:VisualElement name="Content-Container" class="line-popup-container content">
+            <ui:ScrollView>
+                <ui:VisualElement name="Content" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:Button text="X" display-tooltip-when-elided="true" name="CloseButton" class="close-button" />
+</ui:UXML>

@@ -8,16 +8,31 @@ namespace UnityEngine.UI.Windows {
     [CreateAssetMenu(menuName = "UI.Windows/Console/System Module")]
     public class WindowSystemConsoleModule : WindowSystemModule {
 
+        public ConsoleDrawType drawType = ConsoleDrawType.DefaultScreen;
+        public bool collapseLines = true;
+        
         internal WindowSystemConsole console;
         
         public override void OnStart() {
             
-            this.console = new WindowSystemConsole();
+            this.console = new WindowSystemConsole(this.drawType, this.collapseLines);
             
-            /*for (int i = 0; i < 100_000; ++i) {
+            /*
+            for (int i = 0; i < 100_000; ++i) {
 
                 var randomString = RandomString(Random.Range(10, 200));
-                Debug.Log("Test update: " + Time.frameCount + " :: " + i + " :: " + randomString);
+                var r = Random.Range(1, 4);
+                var t = Random.Range(1, 4);
+                var str = "Test update: " + Time.frameCount + " :: " + i + " :: " + randomString;
+                for (int j = 0; j < r; ++j) {
+                    if (t == 1) {
+                        Debug.Log(str);
+                    } else if (t == 2) {
+                        Debug.LogWarning(str);
+                    }  else if (t == 3) {
+                        Debug.LogError(str);
+                    }
+                }
 
             }*/
 

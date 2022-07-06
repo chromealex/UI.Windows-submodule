@@ -5,6 +5,13 @@ namespace UnityEngine.UI.Windows {
     using System.Collections.Generic;
     using System.Linq;
 
+    public enum ConsoleDrawType {
+
+        DefaultScreen,
+        UIToolkit,
+
+    }
+    
     public class CaptionComparer : IComparer<WindowSystemConsole.FastLink> {
 
         public int Compare(WindowSystemConsole.FastLink x, WindowSystemConsole.FastLink y) {
@@ -30,16 +37,90 @@ namespace UnityEngine.UI.Windows {
 
     }
 
+    public interface IConsoleScreen {
+
+        void Hide();
+        void CloseCustomPopup();
+
+    }
+
     public interface IConsoleModule {
 
         void OnStart();
 
     }
 
+    public class ConsolePopup {
+
+        internal UnityEngine.UIElements.VisualElement root;
+        
+        public ConsolePopup() {
+            
+            this.root = new UnityEngine.UIElements.VisualElement();
+            
+        }
+
+        public void Close() {
+
+            var win = WindowSystem.FindOpened<IConsoleScreen>();
+            if (win != null) {
+
+                win.CloseCustomPopup();
+
+            }
+
+        }
+
+        public void AddButton(string label, System.Action callback) {
+            
+            var element = new UIElements.Button(callback);
+            element.text = label;
+            this.root.Add(element);
+            
+        }
+
+        public void AddLabel(string label) {
+            
+            this.root.Add(new UIElements.Label(label));
+            
+        }
+
+        public void AddSlider(string label, float from, float to, UnityEngine.UIElements.SliderDirection direction = UnityEngine.UIElements.SliderDirection.Horizontal, System.Action<float> onChanged = null) {
+            
+            var element = new UIElements.Slider(label, from, to, direction);
+            element.RegisterCallback<UnityEngine.UIElements.ChangeEvent<float>>(evt => onChanged?.Invoke(evt.newValue));
+            this.root.Add(element);
+            
+        }
+
+        public void AddSliderInt(string label, int from, int to, UnityEngine.UIElements.SliderDirection direction = UnityEngine.UIElements.SliderDirection.Horizontal, System.Action<int> onChanged = null) {
+            
+            var element = new UIElements.SliderInt(label, from, to, direction);
+            element.RegisterCallback<UnityEngine.UIElements.ChangeEvent<int>>(evt => onChanged?.Invoke(evt.newValue));
+            this.root.Add(element);
+            
+        }
+
+        public void AddTextField(string label, bool multiline = false, int maxLength = 0, System.Action<string> onChanged = null) {
+
+            var element = new UIElements.TextField(label, maxLength, multiline, false, '*');
+            element.RegisterCallback<UnityEngine.UIElements.ChangeEvent<string>>(evt => onChanged?.Invoke(evt.newValue));
+            this.root.Add(element);
+            
+        }
+
+        public void AddCustom(UnityEngine.UIElements.VisualElement visualElement) {
+            
+            this.root.Add(visualElement);
+            
+        }
+
+    }
+
     [UnityEngine.Scripting.PreserveAttribute]
     public abstract class ConsoleModule : IConsoleModule {
 
-        public ConsoleScreen screen;
+        public IConsoleScreen screen;
 
         [Ignore]
         [UnityEngine.Scripting.PreserveAttribute]
@@ -118,8 +199,9 @@ namespace UnityEngine.UI.Windows {
 
     public class WindowSystemConsole {
 
-        private const int MAX_TEXT_LENGTH = 2000;
+        private const int MAX_TEXT_LENGTH = 5000;
 
+        [System.Flags]
         public enum LogsFilter {
 
             Any = -1,
@@ -129,6 +211,7 @@ namespace UnityEngine.UI.Windows {
             Warning = 1 << 3,
             Log = 1 << 4,
             Exception = 1 << 5,
+            AllErrors = LogsFilter.Assert | LogsFilter.Exception | LogsFilter.Error,
 
         }
         
@@ -139,6 +222,7 @@ namespace UnityEngine.UI.Windows {
             public LogType logType;
             public bool isCommand;
             public bool canCopy;
+            public int collapseCount;
 
         }
         
@@ -173,15 +257,32 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        [System.Serializable]
+        public class FilteredItems {
+
+            public LogsFilter mask;
+            public List<int> items;
+
+            public FilteredItems(LogsFilter mask) {
+                this.mask = mask;
+                this.items = new List<int>();
+            }
+            
+        }
+
         private List<DrawItem> drawItems = new List<DrawItem>();
+        private List<FilteredItems> itemsFiltered = new List<FilteredItems>();
+        
         private readonly List<FastLink> fastLinkItems = new List<FastLink>();
         private readonly List<CommandItem> commands = new List<CommandItem>();
         private readonly List<IConsoleModule> moduleItems = new List<IConsoleModule>();
         private Dictionary<LogType, int> logsCounter = new Dictionary<LogType, int>();
         private LogsFilter logsFilter;
-        
+
+        private ConsoleDrawType drawType;
         private string helpInitPrint;
         private System.Threading.Thread unityThread;
+        private bool collapseLines;
 
         private int _isDirty;
         public bool isDirty {
@@ -189,12 +290,22 @@ namespace UnityEngine.UI.Windows {
             set => System.Threading.Interlocked.Exchange(ref this._isDirty, value == true ? 1 : 0);
         }
 
-        public WindowSystemConsole() {
-            
+        public WindowSystemConsole(ConsoleDrawType drawType, bool collapseLines) {
+
+            this.drawType = drawType;
             this.helpInitPrint = this.GetInitHelp();
             this.SetLogFilterType(LogType.Log, true);
             this.SetLogFilterType(LogType.Warning, true);
             this.SetLogFilterType(LogType.Error, true);
+            this.collapseLines = collapseLines;
+            
+            this.itemsFiltered.Add(new FilteredItems(LogsFilter.Log));
+            this.itemsFiltered.Add(new FilteredItems(LogsFilter.Warning));
+            this.itemsFiltered.Add(new FilteredItems(LogsFilter.AllErrors));
+            this.itemsFiltered.Add(new FilteredItems(LogsFilter.Log | LogsFilter.Warning));
+            this.itemsFiltered.Add(new FilteredItems(LogsFilter.Log | LogsFilter.AllErrors));
+            this.itemsFiltered.Add(new FilteredItems(LogsFilter.Warning | LogsFilter.AllErrors));
+            this.itemsFiltered.Add(new FilteredItems(LogsFilter.Log | LogsFilter.Warning | LogsFilter.AllErrors));
 
             this.unityThread = System.Threading.Thread.CurrentThread;
 
@@ -218,7 +329,9 @@ namespace UnityEngine.UI.Windows {
                 if (checkTouch == true) {
 
                     isActive = false;
-                    if (this.consoleWindowInstance == null) {
+                    var hasInstance = (this.consoleWindowInstance != null);
+
+                    if (hasInstance == false) {
                         
                         isActive = (Input.touchCount == 5 && Input.GetTouch(Input.touchCount - 1).phase == TouchPhase.Began);
                         
@@ -232,20 +345,42 @@ namespace UnityEngine.UI.Windows {
 
                 if (isActive == true) {
 
-                    if (this.consoleWindowInstance == null) {
+                    if (this.drawType == ConsoleDrawType.DefaultScreen) {
 
-                        this.consoleWindowInstance = WindowSystem.ShowSync<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(x => {
+                        if (this.consoleWindowInstance == null) {
 
-                            WindowSystem.GetEvents().RegisterOnce(x, WindowEvent.OnHideBegin, () => { this.consoleWindowInstance = null; });
-                            x.OnEmptyPass();
+                            this.consoleWindowInstance = WindowSystem.ShowSync<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(x => {
 
-                        });
+                                WindowSystem.GetEvents().RegisterOnce(x, WindowEvent.OnHideBegin, () => { this.consoleWindowInstance = null; });
+                                x.OnEmptyPass();
 
-                    } else {
+                            });
 
-                        this.consoleWindowInstance.Hide();
-                        this.consoleWindowInstance = null;
+                        } else {
 
+                            this.consoleWindowInstance.Hide();
+                            this.consoleWindowInstance = null;
+
+                        }
+
+                    } else if (this.drawType == ConsoleDrawType.UIToolkit) {
+
+                        if (this.consoleWindowInstance == null) {
+
+                            this.consoleWindowInstance = WindowSystem.ShowSync<UnityEngine.UI.Windows.Runtime.Windows.UIConsoleScreen>(x => {
+
+                                WindowSystem.GetEvents().RegisterOnce(x, WindowEvent.OnHideBegin, () => { this.consoleWindowInstance = null; });
+                                x.OnEmptyPass();
+
+                            });
+
+                        } else {
+
+                            this.consoleWindowInstance.Hide();
+                            this.consoleWindowInstance = null;
+
+                        }
+                        
                     }
 
                 }
@@ -266,9 +401,68 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public void Clear() {
+            
+            this.drawItems.Clear();
+            foreach (var item in this.itemsFiltered) {
+                item.items.Clear();
+            }
+            
+        }
+
         public List<DrawItem> GetItems() {
 
             return this.drawItems;
+
+        }
+
+        public void AddFiltered(int index) {
+
+            var item = this.drawItems[index];
+            var logType = item.logType;
+            switch (logType) {
+                case LogType.Log:
+                    this.AddFiltered_INTERNAL(LogsFilter.Log, index);
+                    break;
+                case LogType.Warning:
+                    this.AddFiltered_INTERNAL(LogsFilter.Warning, index);
+                    break;
+                case LogType.Assert:
+                case LogType.Exception:
+                case LogType.Error:
+                    this.AddFiltered_INTERNAL(LogsFilter.Error, index);
+                    break;
+            }
+
+        }
+
+        private void AddFiltered_INTERNAL(LogsFilter filter, int index) {
+
+            foreach (var items in this.itemsFiltered) {
+
+                if ((items.mask & filter) != 0) {
+
+                    items.items.Add(index);
+             
+                }
+
+            }
+            
+        }
+
+        public FilteredItems GetItemsFiltered(LogsFilter filter) {
+
+            foreach (var filtered in this.itemsFiltered) {
+
+                if (filtered.mask == filter) {
+
+                    return filtered;
+
+                }
+                
+            }
+
+            return this.GetItemsFiltered(LogsFilter.All);
 
         }
 
@@ -716,17 +910,18 @@ namespace UnityEngine.UI.Windows {
             return list;
 
         }
-
+        
         public void AddCommand(CommandItem command) {
             
             this.commands.Add(command);
             
         }
         
-        public void RunCommand(CommandItem command, ConsoleScreen consoleScreen) {
+        public object RunCommand(CommandItem command, IConsoleScreen consoleScreen) {
 
             this.AddLine(command.str, isCommand: true);
 
+            object result = null; 
             var run = false;
             var module = this.GetModule(command);
             if (module != null) {
@@ -757,7 +952,7 @@ namespace UnityEngine.UI.Windows {
 
                                 if (command.argsCount == 0) {
 
-                                    method.Invoke(module, null);
+                                    result = method.Invoke(module, null);
 
                                 } else {
 
@@ -768,7 +963,7 @@ namespace UnityEngine.UI.Windows {
 
                                     }
 
-                                    method.Invoke(module, objs);
+                                    result = method.Invoke(module, objs);
 
                                 }
 
@@ -816,7 +1011,9 @@ namespace UnityEngine.UI.Windows {
                 this.AddLog($"Module `{command.moduleName}` not found", LogType.Warning);
 
             }
-            
+
+            return result;
+
         }
 
         public List<CommandItem> GetCommands() {
@@ -841,13 +1038,30 @@ namespace UnityEngine.UI.Windows {
 
                 }
 
+                if (this.drawItems.Count > 0 && this.collapseLines == true && isCommand == false) {
+
+                    var lastItem = this.drawItems[this.drawItems.Count - 1];
+                    if (lastItem.logType == logType && lastItem.line == text) {
+                        
+                        // previous line is the same as new one
+                        // just collapse it
+                        ++lastItem.collapseCount;
+                        this.drawItems[this.drawItems.Count - 1] = lastItem;
+                        return;
+
+                    }
+
+                }
+
+                var index = this.drawItems.Count;
                 this.drawItems.Add(new DrawItem() {
                     line = text,
                     logType = logType,
                     isCommand = isCommand,
                     canCopy = canCopy,
                 });
-
+                this.AddFiltered(index);
+                
             }
 
         }
@@ -903,7 +1117,6 @@ namespace UnityEngine.UI.Windows {
             var welcomeMessage = "<color=#0f0>Welcome to UI.Windows Console</color>\n" +
                                  "------------------------------------\n" +
                                  "\t<color=#3af>help</color>\t\t\t\t\t\t\t\t\tshow all modules.\n" +
-                                 "\t<color=#3af>[module] help</color>\t\t\t\t\t\tshow module's help.\n" +
                                  "\t<color=#3af>[module] [method] arg1 arg2 ...</color>\t\tcall method of the module.\n" +
                                  "\t<color=#3af>modulesample</color>\t\t\t\t\t\t\tshow module sample text.\n" +
                                  "------------------------------------\n";

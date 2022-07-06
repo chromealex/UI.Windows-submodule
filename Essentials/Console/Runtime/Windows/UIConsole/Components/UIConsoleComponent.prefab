@@ -1,0 +1,303 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &290880054688223691
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5842525115895126097}
+  - component: {fileID: 230474756260362357}
+  - component: {fileID: 3456991060412980787}
+  m_Layer: 0
+  m_Name: LinePopup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &5842525115895126097
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290880054688223691}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 5641810595802921522}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &230474756260362357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290880054688223691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e6e3eef4067448dfa96f376bb582553, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  windowId: 0
+  window: {fileID: 0}
+  rectTransform: {fileID: 5842525115895126097}
+  hasObjectCanvas: 0
+  objectCanvas: {fileID: 0}
+  canvasSortingOrderDelta: 0
+  canvasRenderers: []
+  createPool: 0
+  animationParameters:
+    items: []
+  renderBehaviourOnHidden: 0
+  allowRegisterInRoot: 1
+  autoRegisterSubObjects: 1
+  hiddenByDefault: 1
+  editorRefLocks:
+    directories: []
+  debugStateLog:
+    items: []
+  isObjectRoot: 0
+  rootObject: {fileID: 2085204466533394332}
+  subObjects: []
+  audioEvents:
+    play: 0
+    stop: 0
+    fmodAudioComponent:
+      audioEvent: 
+      stopOthersOnPlay: 0
+      parameters: []
+      autoStopOnceParameters: 0
+      autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
+  registry: []
+  componentModules:
+    windowComponent: {fileID: 230474756260362357}
+    modules: []
+  document: {fileID: 3456991060412980787}
+--- !u!114 &3456991060412980787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290880054688223691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f21c074d86024caca2a0034ce4f53f73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 11400000, guid: d7b00ed76d4c14c958560923e6ad6bb7, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: c5572f0acec914b37969db0373eda30c,
+    type: 3}
+  m_SortingOrder: 1
+--- !u!1 &2085204466533394335
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5641810595802921522}
+  - component: {fileID: 2085204466533394332}
+  m_Layer: 0
+  m_Name: UIConsoleComponent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &5641810595802921522
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2085204466533394335}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 26.80554}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 5842525115895126097}
+  - {fileID: 7205173303462066695}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -26.211306, y: -18.246658}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2085204466533394332
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2085204466533394335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99af0fd4a50e14fac9b52f46d6ef5948, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  windowId: 0
+  window: {fileID: 0}
+  rectTransform: {fileID: 5641810595802921522}
+  hasObjectCanvas: 0
+  objectCanvas: {fileID: 0}
+  canvasSortingOrderDelta: 0
+  canvasRenderers: []
+  createPool: 0
+  animationParameters:
+    items: []
+  renderBehaviourOnHidden: 0
+  allowRegisterInRoot: 1
+  autoRegisterSubObjects: 1
+  hiddenByDefault: 0
+  editorRefLocks:
+    directories: []
+  debugStateLog:
+    items: []
+  isObjectRoot: 1
+  rootObject: {fileID: 0}
+  subObjects:
+  - {fileID: 230474756260362357}
+  - {fileID: 3854052985599495256}
+  audioEvents:
+    play: 0
+    stop: 0
+    fmodAudioComponent:
+      audioEvent: 
+      stopOthersOnPlay: 0
+      parameters: []
+      autoStopOnceParameters: 0
+      autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
+  registry: []
+  componentModules:
+    windowComponent: {fileID: 2085204466533394332}
+    modules: []
+  linePopupComponent: {fileID: 230474756260362357}
+  customPopupComponent: {fileID: 3854052985599495256}
+  lineElement: {fileID: 9197481963319205126, guid: 14b70e92df7014837a91eb2d6d27f2fd,
+    type: 3}
+  fastLinkButtonElement: {fileID: 9197481963319205126, guid: d73f704236e4742a49947880c547c091,
+    type: 3}
+  itemHeight: 25
+--- !u!1 &3152499467265911512
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7205173303462066695}
+  - component: {fileID: 3854052985599495256}
+  - component: {fileID: 6672028754488994970}
+  m_Layer: 0
+  m_Name: CustomPopup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &7205173303462066695
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3152499467265911512}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 5641810595802921522}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &3854052985599495256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3152499467265911512}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47ac226cecb4945ecb90bbc28e31737a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  windowId: 0
+  window: {fileID: 0}
+  rectTransform: {fileID: 7205173303462066695}
+  hasObjectCanvas: 0
+  objectCanvas: {fileID: 0}
+  canvasSortingOrderDelta: 0
+  canvasRenderers: []
+  createPool: 0
+  animationParameters:
+    items: []
+  renderBehaviourOnHidden: 0
+  allowRegisterInRoot: 1
+  autoRegisterSubObjects: 1
+  hiddenByDefault: 1
+  editorRefLocks:
+    directories: []
+  debugStateLog:
+    items: []
+  isObjectRoot: 0
+  rootObject: {fileID: 2085204466533394332}
+  subObjects: []
+  audioEvents:
+    play: 0
+    stop: 0
+    fmodAudioComponent:
+      audioEvent: 
+      stopOthersOnPlay: 0
+      parameters: []
+      autoStopOnceParameters: 0
+      autoStopDuration: 0
+      autoRelease: 0
+      autoReleaseDuration: 0
+  registry: []
+  componentModules:
+    windowComponent: {fileID: 3854052985599495256}
+    modules: []
+  document: {fileID: 6672028754488994970}
+--- !u!114 &6672028754488994970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3152499467265911512}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f21c074d86024caca2a0034ce4f53f73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 11400000, guid: d7b00ed76d4c14c958560923e6ad6bb7, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: ed7cdfe8fbe1e4276a33d6c3bbc6d953,
+    type: 3}
+  m_SortingOrder: 1

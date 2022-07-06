@@ -332,7 +332,7 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public static T FindOpened<T>() where T : WindowBase {
+        public static T FindOpened<T>() {
 
             foreach (var item in WindowSystem.instance.currentWindows) {
 

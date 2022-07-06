@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace UnityEngine.UI.Windows.Runtime.Windows {
 
-    public class ConsoleScreen : LayoutWindowType, IDataSource {
+    public class ConsoleScreen : LayoutWindowType, IDataSource, IConsoleScreen {
 
         public Font consoleFont;
         private int fixedCharWidth;
@@ -60,7 +60,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             this.inputField.Get<ButtonComponent>().SetCallback(this.EndEdit);
 
             this.consoleFont.RequestCharactersInTexture("A", 16, FontStyle.Normal);
-            this.consoleFont.GetCharacterInfo('A', out var charInfo);
+            this.consoleFont.GetCharacterInfo('A', out var charInfo, 16, FontStyle.Normal);
             this.fixedCharWidth = charInfo.glyphWidth;
             this.fixedCharHeight = charInfo.glyphHeight;
 
@@ -400,7 +400,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         float IDataSource.GetSize(int index) {
 
-            var canvas = this.GetWindow().GetCanvas();
+            //var canvas = this.GetWindow().GetCanvas();
             var button = (this.list.source.directRef as ButtonComponent);
             var layoutGroupPadding = button.GetComponent<LayoutGroup>().padding;
             var size = this.list.rectTransform.rect.size;
@@ -408,13 +408,16 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             //var text = (button.Get<TextComponent>().graphics as Text);
             //var gen = text.GetGenerationSettings(size);
             //var textGen = text.cachedTextGenerator;
-            var scaleFactor = canvas.scaleFactor;
-            var w = this.fixedCharWidth;//textGen.characters[0].charWidth;
-            var len = this.GetDrawItem(index, ignoreFilters: true).line.Length;
-            var linesCount = size.x > 0f ? Mathf.CeilToInt(len * w / size.x) : 1;
+            //var scaleFactor = canvas.scaleFactor;
+            int linesCount = 1;
+            if (size.x > 0f) {
+                var w = this.fixedCharWidth; //textGen.characters[0].charWidth;
+                var len = this.GetDrawItem(index, ignoreFilters: true).line.Length;
+                linesCount = Mathf.CeilToInt(len * w / size.x);
+            }
             var charHeight = this.fixedCharHeight;
             var h = linesCount * charHeight;//textGen.GetPreferredHeight(this.GetDrawItem(index, ignoreFilters: true).line, gen);
-            return (h + layoutGroupPadding.top + layoutGroupPadding.bottom) / scaleFactor;
+            return (h + layoutGroupPadding.top + layoutGroupPadding.bottom);// / scaleFactor;
             
         }
         
@@ -422,6 +425,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             public int index { get; set; }
             public ConsoleScreen data;
+            public List<WindowSystemConsole.DrawItem> allItems;
+            public List<int> items;
 
         }
 
@@ -621,9 +626,11 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             });
 
             this.list.SetDataSource(this);
-            this.list.SetItems<ButtonComponent, ClosureParameters>(this.GetDrawItemsCount(), (component, parameters) => {
+            var allItems = console.GetItems();
+            var items = console.GetItemsFiltered(this.GetLogFilterType()).items;
+            this.list.SetItems<ButtonComponent, ClosureParameters>(items.Count, (component, parameters) => {
 
-                var item = parameters.data.GetDrawItem(parameters.index, false);
+                var item = parameters.allItems[parameters.items[parameters.index]];//parameters.data.GetDrawItem(parameters.index, false);
                 var text = component.Get<TextComponent>();
                 ConsoleScreen.SetText(text, item.isCommand == true ? "<color=#777><b>></b></color> " : string.Empty, item.line);
                 text.SetColor(item.isCommand == true ? new Color(0.15f, 0.6f, 1f) : ConsoleScreen.GetColorByLogType(item.logType));
@@ -642,6 +649,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 
             }, new ClosureParameters() {
                 data = this,
+                allItems = allItems,
+                items = items,
             });
 
             if (console.isDirty == true) {
@@ -724,6 +733,10 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             component.SetText(text1, text2);
 
+        }
+
+        public void CloseCustomPopup() {
+            
         }
 
     }

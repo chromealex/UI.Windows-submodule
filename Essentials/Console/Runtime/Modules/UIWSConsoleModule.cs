@@ -9,6 +9,15 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
     [Alias("uiws")]
     public class UIWSConsoleModule : ConsoleModule {
 
+        [FastLink("Open Test")]
+        public ConsolePopup OpenTest() {
+
+            var popup = new ConsolePopup();
+            popup.AddButton("Test", () => { Debug.Log("test"); });
+            return popup;
+
+        }
+        
         [UnityEngine.Scripting.PreserveAttribute]
         [Help("Prints all currently opened windows")]
         public void List() {

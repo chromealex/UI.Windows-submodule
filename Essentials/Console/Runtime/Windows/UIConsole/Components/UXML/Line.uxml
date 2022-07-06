@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="../USS/Styles.uss" />
+    <ui:VisualElement name="Line" class="line">
+        <ui:Button display-tooltip-when-elided="true" name="ButtonCopy" class="copy-button" />
+        <ui:Button class="line-button" text="text" display-tooltip-when-elided="true" name="Button" />
+        <ui:Label class="collapse-counter" name="Counter" />
+    </ui:VisualElement>
+</ui:UXML>

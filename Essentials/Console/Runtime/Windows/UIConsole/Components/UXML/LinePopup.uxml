@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="/Assets/UI.Windows-submodule/Essentials/Console/Runtime/Windows/UIConsole/Components/USS/Styles.uss" />
+    <ui:VisualElement name="Container" class="popup-container">
+        <ui:VisualElement name="Content-Container" class="line-popup-container content">
+            <ui:ScrollView>
+                <ui:TextField picking-mode="Ignore" value="filler text" text="filler text" readonly="true" multiline="true" />
+            </ui:ScrollView>
+            <ui:VisualElement name="Buttons" class="line-popup-buttons">
+                <ui:Button text="&lt;&lt; Prev" display-tooltip-when-elided="true" name="Prev" class="button" />
+                <ui:Button text="Copy" display-tooltip-when-elided="true" name="Copy" class="button" />
+                <ui:Button text="Next &gt;&gt;" display-tooltip-when-elided="true" name="Next" class="button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:Button text="X" display-tooltip-when-elided="true" name="CloseButton" class="close-button" />
+</ui:UXML>

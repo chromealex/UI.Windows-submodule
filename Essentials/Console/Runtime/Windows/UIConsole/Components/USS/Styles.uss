@@ -1,0 +1,484 @@
+.top-panel {
+    margin-left: 6px;
+    margin-right: 6px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.line {
+    font-size: 16px;
+    -unity-font-style: normal;
+    background-color: rgba(255, 255, 255, 0);
+    -unity-slice-left: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    -unity-text-align: upper-left;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    flex-shrink: 1;
+    flex-grow: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    align-items: stretch;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    white-space: normal;
+}
+
+.line .line-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.line .line-button {
+    -unity-font: resource('UIWS.UIConsole/Fonts/Font');
+    -unity-font-definition: resource('UIWS.UIConsole/Fonts/RobotoMono-Regular SDF');
+    font-size: 16px;
+    -unity-font-style: normal;
+    background-color: rgba(255, 255, 255, 0);
+    -unity-slice-left: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    -unity-text-align: upper-left;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    flex-direction: column;
+    flex-shrink: 1;
+    flex-grow: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    align-items: stretch;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    white-space: normal;
+    width: 100%;
+}
+
+.line .copy-button {
+    font-size: 16px;
+    -unity-font-style: normal;
+    background-color: rgba(0, 149, 255, 0);
+    -unity-slice-left: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    -unity-text-align: upper-left;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    flex-direction: column;
+    flex-shrink: 1;
+    flex-grow: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    align-items: stretch;
+    margin-left: 0;
+    margin-right: 4px;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    white-space: normal;
+    background-image: resource('UIWS.UIConsole/Icons/copy');
+    width: 24px;
+    height: 24px;
+    -unity-background-image-tint-color: rgb(0, 149, 255);
+}
+
+.line .copy-button:hover {
+    opacity: 0.7;
+}
+
+.line .copy-button:active {
+    opacity: 0.5;
+}
+
+.unity-listview-item {
+}
+
+.unity-listview-item:hover {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.container {
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+}
+
+.top-panel {
+    margin-bottom: 20px;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.fastlink-button .label {
+    margin: 2px 2px 2px 2px;
+    -unity-font: resource('UIWS.UIConsole/Fonts/Font');
+    -unity-font-definition: resource('UIWS.UIConsole/Fonts/RobotoMono-Regular SDF');
+}
+
+.fastlink-button {
+    background-color: white;
+    color: white;
+    border-width: 0;
+    border-radius: 4px;
+    flex-direction: row;
+    align-items: center;
+    height: 30px;
+    padding: 4px;
+    margin: 3px;
+    padding-left: 4px;
+    opacity: 0.9;
+}
+
+.fastlink-button:hover {
+    opacity: 0.6;
+}
+
+.fastlink-button:active {
+    opacity: 1;
+}
+
+.fastlink-button .icon {
+    width: 24px;
+    height: 24px;
+    display: none;
+}
+
+.fastlink-dir-up .icon {
+    background-image: resource('UIWS.UIConsole/Icons/directory-up-icon');
+    -unity-background-image-tint-color: chocolate;
+    display: flex;
+}
+
+.fastlink-dir .icon {
+    background-image: resource('UIWS.UIConsole/Icons/directory-icon');
+    -unity-background-image-tint-color: rgb(26, 115, 232);
+    display: flex;
+}
+
+.content-container {
+    height: 100%;
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-bottom: 0;
+    margin-right: 10px;
+    padding-top: 4px;
+    padding-left: 4px;
+    padding-bottom: 4px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+}
+
+.content-container .content {
+    height: 100%;
+}
+
+.content .unity-scroller {
+    width: 10px;
+    margin: 0;
+    padding: 0;
+}
+
+.content .unity-slider {
+    margin: 0;
+    padding: 0;
+}
+
+.content .unity-repeat-button {
+    display: none;
+}
+
+.content #unity-drag-container {
+    width: 2px;
+    margin: 0;
+    padding: 0;
+}
+
+.content #unity-tracker {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-width: 0;
+}
+
+.content #unity-dragger {
+    width: 2px;
+    margin: 0;
+    padding: 0;
+    background-color: rgb(26, 115, 232);
+}
+
+.bottom-panel {
+    margin-left: 10px;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    height: 43px;
+    min-height: 43px;
+    max-height: 43px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    flex-shrink: 1;
+    justify-content: flex-end;
+}
+
+.bottom-panel .buttons {
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.bottom-panel .button {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    border-radius: 4px;
+    background-color: rgb(0, 0, 0);
+    border-color: rgb(30, 30, 30);
+    opacity: 0.9;
+    padding: 10px;
+    margin-top: 8px;
+    margin-bottom: 6px;
+}
+
+.bottom-panel .button-send {
+    color: rgb(26, 115, 232);
+    margin-left: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+}
+
+.bottom-panel .button:hover {
+    opacity: 0.7;
+}
+
+.bottom-panel .buttons .button {
+    padding: 6px;
+}
+
+.bottom-panel .buttons .button .selected-item {
+    display: none;
+}
+
+.bottom-panel .buttons .button {
+    opacity: 0.5;
+}
+
+.bottom-panel .buttons .button.selected {
+    opacity: 1;
+}
+
+.bottom-panel .buttons .button.selected .selected-item {
+    display: flex;
+}
+
+.bottom-panel .buttons .button .selected-item {
+    background-color: rgb(105, 165, 91);
+    position: absolute;
+    width: 4px;
+    margin-top: 6px;
+    height: 100%;
+    border-bottom-right-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.bottom-panel .buttons .label {
+    color: white;
+}
+
+.bottom-panel .button .icon {
+    width: 16px;
+    height: 16px;
+}
+
+.bottom-panel .button.button-info {
+    border-right-width: 0;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+    margin-right: 0;
+}
+
+.bottom-panel .button.button-warning {
+    border-radius: 0;
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.bottom-panel .button.button-error {
+    border-left-width: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    margin-left: 0;
+}
+
+.bottom-panel .button.button-info .icon {
+    background-image: resource('UIWS.UIConsole/Icons/Info');
+}
+
+.bottom-panel .button.button-warning .icon {
+    background-image: resource('UIWS.UIConsole/Icons/Warning');
+}
+
+.bottom-panel .button.button-error .icon {
+    background-image: resource('UIWS.UIConsole/Icons/Error');
+}
+
+.bottom-panel .button-send:disabled {
+    opacity: 0.5;
+}
+
+.command-input {
+    -unity-font: resource('UIWS.UIConsole/Fonts/Font');
+    -unity-font-definition: resource('UIWS.UIConsole/Fonts/RobotoMono-Regular SDF');
+    margin-right: 0;
+    padding-right: 0;
+}
+
+.command-input .unity-base-field__input {
+    padding: 10px 4px 10px 4px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    -unity-font-style: normal;
+    white-space: nowrap;
+    -unity-text-align: middle-left;
+    -unity-background-scale-mode: stretch-to-fill;
+    overflow: visible;
+    margin-bottom: 0;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    background-color: rgba(0, 0, 0, 0.9);
+    border-width: 1px;
+    border-color: rgb(30, 30, 30);
+    border-right-width: 0;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    color: rgb(0, 157, 255);
+    font-size: 16px;
+}
+
+.collapse-counter {
+    -unity-font: resource('UIWS.UIConsole/Fonts/Font');
+    -unity-font-definition: resource('UIWS.UIConsole/Fonts/RobotoMono-Regular SDF');
+    background-color: rgba(255, 255, 255, 0.3);
+    font-size: 9px;
+    margin: 4px;
+    border-radius: 6px;
+    padding-left: 6px;
+    padding-right: 6px;
+    color: white;
+    -unity-text-align: middle-center;
+}
+
+.line-popup-container {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+}
+
+.line-popup-container ScrollView {
+    height: 100%;
+}
+
+.line-popup-container ScrollView TextField {
+    -unity-font: resource('UIWS.UIConsole/Fonts/Font');
+    -unity-font-definition: resource('UIWS.UIConsole/Fonts/RobotoMono-Regular SDF');
+    background-color: rgba(0, 0, 0, 0);
+    white-space: normal;
+    color: white;
+}
+
+.line-popup-buttons {
+    align-items: stretch;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 50px;
+    flex-wrap: nowrap;
+    background-color: rgb(0, 0, 0);
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.line-popup-buttons .button {
+    -unity-font: resource('UIWS.UIConsole/Fonts/Font');
+    -unity-font-definition: resource('UIWS.UIConsole/Fonts/RobotoMono-Regular SDF');
+    border-radius: 4px;
+    background-color: rgb(0, 0, 0);
+    border-color: rgb(30, 30, 30);
+    color: white;
+    opacity: 1;
+    padding: 10px;
+    margin-top: 8px;
+    margin-bottom: 6px;
+}
+
+.line-popup-buttons .button:hover {
+    opacity: 0.7;
+}
+
+.line-popup-buttons .button:active {
+    opacity: 0.5;
+}
+
+.line-popup-buttons .button:disabled {
+    opacity: 0.4;
+}
+
+.close-button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    margin: 0;
+    -unity-font-style: bold;
+    font-size: 15px;
+    background-color: rgb(200, 54, 54);
+    opacity: 1;
+    border-width: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 15px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.close-button:hover {
+    opacity: 0.7;
+}
+
+.close-button:active {
+    opacity: 0.5;
+}
+
+.popup-container {
+    height: 100%;
+}
+
+#LinePopup-container, #CustomPopup-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#LinePopup-container #Container, #CustomPopup-container #Container {
+    height: 100%;
+}

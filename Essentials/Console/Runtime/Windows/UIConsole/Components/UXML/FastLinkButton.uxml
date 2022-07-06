@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="../USS/Styles.uss" />
+    <ui:Button name="Button" display-tooltip-when-elided="true" class="fastlink-button">
+        <ui:VisualElement name="Icon" class="icon" />
+        <ui:Label name="Label" class="label" />
+    </ui:Button>
+</ui:UXML>

@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64e31c324157e4b6d90a589089a766c5, type: 3}
   m_Name: WindowSystemConsoleModule
   m_EditorClassIdentifier: 
+  drawType: 1

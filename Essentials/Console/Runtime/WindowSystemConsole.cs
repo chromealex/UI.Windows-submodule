@@ -71,42 +71,49 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public void AddButton(string label, System.Action callback) {
+        public UIElements.Button AddButton(string label, System.Action callback) {
             
             var element = new UIElements.Button(callback);
             element.text = label;
             this.root.Add(element);
-            
+            return element;
+
         }
 
-        public void AddLabel(string label) {
-            
-            this.root.Add(new UIElements.Label(label));
-            
+        public UIElements.Label AddLabel(string label) {
+
+            var element = new UIElements.Label(label);
+            this.root.Add(element);
+            return element;
+
         }
 
-        public void AddSlider(string label, float from, float to, UnityEngine.UIElements.SliderDirection direction = UnityEngine.UIElements.SliderDirection.Horizontal, System.Action<float> onChanged = null) {
+        public UIElements.Slider AddSlider(string label, float from, float to, UnityEngine.UIElements.SliderDirection direction = UnityEngine.UIElements.SliderDirection.Horizontal, System.Action<float> onChanged = null) {
             
             var element = new UIElements.Slider(label, from, to, direction);
-            element.RegisterCallback<UnityEngine.UIElements.ChangeEvent<float>>(evt => onChanged?.Invoke(evt.newValue));
+            element.RegisterCallback<UnityEngine.UIElements.ChangeEvent<float>, System.Action<float>>((evt, c) => c?.Invoke(evt.newValue), onChanged);
             this.root.Add(element);
-            
+            return element;
+
         }
 
-        public void AddSliderInt(string label, int from, int to, UnityEngine.UIElements.SliderDirection direction = UnityEngine.UIElements.SliderDirection.Horizontal, System.Action<int> onChanged = null) {
+        public UIElements.SliderInt AddSliderInt(string label, int from, int to, UnityEngine.UIElements.SliderDirection direction = UnityEngine.UIElements.SliderDirection.Horizontal, System.Action<int> onChanged = null) {
             
             var element = new UIElements.SliderInt(label, from, to, direction);
-            element.RegisterCallback<UnityEngine.UIElements.ChangeEvent<int>>(evt => onChanged?.Invoke(evt.newValue));
+            element.RegisterCallback<UnityEngine.UIElements.ChangeEvent<int>, System.Action<int>>((evt, c) => c?.Invoke(evt.newValue), onChanged);
             this.root.Add(element);
-            
+            return element;
+
         }
 
-        public void AddTextField(string label, bool multiline = false, int maxLength = 0, System.Action<string> onChanged = null) {
+        public UIElements.TextField AddTextField(string label, string value, bool multiline = false, int maxLength = 0, System.Action<string> onChanged = null) {
 
             var element = new UIElements.TextField(label, maxLength, multiline, false, '*');
-            element.RegisterCallback<UnityEngine.UIElements.ChangeEvent<string>>(evt => onChanged?.Invoke(evt.newValue));
+            element.value = value;
+            element.RegisterCallback<UnityEngine.UIElements.ChangeEvent<string>, System.Action<string>>((evt, c) => c?.Invoke(evt.newValue), onChanged);
             this.root.Add(element);
-            
+            return element;
+
         }
 
         public void AddCustom(UnityEngine.UIElements.VisualElement visualElement) {

@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "UI.Windows",
-        "Unity.Localization"
+        "Unity.Localization",
+        "UnityEngine.UIElementsModule"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

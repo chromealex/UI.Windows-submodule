@@ -36,4 +36,4 @@ MonoBehaviour:
   m_RuntimeShader: {fileID: 4800000, guid: 1e5f18a346ed454418f93aa7eaf55791, type: 3}
   m_RuntimeWorldShader: {fileID: 4800000, guid: 7082954141e3ccc43bc3b217cf12e2e0,
     type: 3}
-  textSettings: {fileID: 0}
+  textSettings: {fileID: 11400000, guid: 380829b24aea3480eb47b427e45d98a9, type: 2}

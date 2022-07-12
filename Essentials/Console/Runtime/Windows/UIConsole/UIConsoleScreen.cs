@@ -17,6 +17,12 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
         }
 
+        public void ApplyCommand(string command, bool autoComplete = false) {
+            
+            this.consoleComponent.ApplyCommand(command, autoComplete);
+            
+        }
+
         public override void OnShowBegin() {
             
             base.OnShowBegin();

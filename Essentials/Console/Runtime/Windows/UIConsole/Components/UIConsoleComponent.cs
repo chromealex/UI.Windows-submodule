@@ -486,7 +486,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             
         }
         
-        private void ApplyCommand(string command, bool autoComplete = false) {
+        public void ApplyCommand(string command, bool autoComplete = false) {
 
             var cmd = command.Trim();
             var console = this.console;

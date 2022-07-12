@@ -57,6 +57,7 @@ namespace UnityEngine.UI.Windows {
         public ConsolePopup() {
             
             this.root = new UnityEngine.UIElements.VisualElement();
+            this.root.AddToClassList("console-popup-root");
             
         }
 
@@ -69,6 +70,23 @@ namespace UnityEngine.UI.Windows {
 
             }
 
+        }
+
+        public void RunCommand(string cmd, bool autoComplete = false) {
+
+            var console = WindowSystem.FindOpened<UIConsoleScreen>();
+            if (console != null) {
+
+                console.ApplyCommand(cmd, autoComplete);
+
+            }
+            
+        }
+
+        public void AddStyle(UnityEngine.UIElements.StyleSheet sheet) {
+            
+            this.root.styleSheets.Add(sheet);
+            
         }
 
         public UIElements.Button AddButton(string label, System.Action callback) {

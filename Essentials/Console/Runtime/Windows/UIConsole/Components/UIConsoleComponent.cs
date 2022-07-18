@@ -124,7 +124,9 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
             this.buttonInfoLabel.text = this.console.GetCounter(LogType.Log).ToString();
             this.buttonWarningLabel.text = this.console.GetCounter(LogType.Warning).ToString();
-            this.buttonErrorLabel.text = this.console.GetCounter(LogType.Error).ToString();
+            this.buttonErrorLabel.text = this.console.GetCounter(LogType.Error).ToString()
+				+ this.console.GetCounter(LogType.Exception)
+				+ this.console.GetCounter(LogType.Assert)).ToString();
 
         }
 

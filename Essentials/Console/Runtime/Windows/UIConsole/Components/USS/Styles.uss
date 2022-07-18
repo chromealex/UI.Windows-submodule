@@ -130,7 +130,7 @@
 }
 
 .fastlink-button {
-    background-color: white;
+    background-color: black;
     color: white;
     border-width: 0;
     border-radius: 4px;
@@ -141,6 +141,18 @@
     margin: 3px;
     padding-left: 4px;
     opacity: 0.9;
+}
+
+.fastlink-button#Notice {
+    background-color: rgb(40, 153, 255);
+}
+
+.fastlink-button#Warning {
+    background-color: rgb(50, 200, 100);
+}
+
+.fastlink-button#Alarm {
+    background-color: rgb(255, 40, 100);
 }
 
 .fastlink-button:hover {

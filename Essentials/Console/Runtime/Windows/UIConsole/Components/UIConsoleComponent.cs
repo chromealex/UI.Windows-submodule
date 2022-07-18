@@ -124,7 +124,9 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
             this.buttonInfoLabel.text = this.console.GetCounter(LogType.Log).ToString();
             this.buttonWarningLabel.text = this.console.GetCounter(LogType.Warning).ToString();
-            this.buttonErrorLabel.text = this.console.GetCounter(LogType.Error).ToString();
+            this.buttonErrorLabel.text = this.console.GetCounter(LogType.Error).ToString()
+				+ this.console.GetCounter(LogType.Exception)
+				+ this.console.GetCounter(LogType.Assert)).ToString();
 
         }
 
@@ -220,7 +222,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             }
 
             button.Q<Label>(className: "label").text = data.caption;
-            button.style.backgroundColor = new StyleColor(GetColorByFastLinkStyle(data.style));
+            button.name = data.style.ToString();
             
         }
         
@@ -590,33 +592,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
                 this.customPopupComponent.SetInfo(this, root);
 
             }
-
-        }
-        
-        public static Color GetColorByFastLinkStyle(FastLinkType style) {
-
-            var color = new Color(0f, 0f, 0f, 1f);
-            switch (style) {
-                
-                case FastLinkType.Notice:
-                    color = new Color(0.15f, 0.6f, 1f, 1f);
-                    break;
-
-                case FastLinkType.Warning:
-                    color = new Color(1f, 0.8f, 0.4f, 1f);
-                    break;
-
-                case FastLinkType.Alarm:
-                    color = new Color(1f, 0.15f, 0.4f, 1f);
-                    break;
-
-                case FastLinkType.Directory:
-                    color = new Color(0f, 0f, 0f, 1f);
-                    break;
-
-            }
-
-            return color;
 
         }
         

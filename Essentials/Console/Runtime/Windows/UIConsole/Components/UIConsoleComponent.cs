@@ -366,7 +366,12 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
                 };
 
+                #if UNITY_2021_1_OR_NEWER
+                content.fixedItemHeight = this.itemHeight;
+                content.virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight;
+                #else
                 content.itemHeight = this.itemHeight;
+                #endif
                 content.bindItem = (element, i) => {
                     var items = this.console.GetItemsFiltered(this.console.GetLogFilterType()).items;
                     ((Line)element.userData).SetData(this.console.GetItems()[items[i]], items[i], i, items);

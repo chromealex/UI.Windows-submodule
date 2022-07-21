@@ -109,7 +109,11 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         private void OnDirty() {
 
             lock (this.content.itemsSource) {
+                #if UNITY_2021_1_OR_NEWER
+                this.content.Rebuild();
+                #else
                 this.content.Refresh();
+                #endif
             }
 
             if (this.autoScroll == true) {

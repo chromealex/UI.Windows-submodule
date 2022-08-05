@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5842525115895126097}
   - component: {fileID: 230474756260362357}
-  - component: {fileID: 3456991060412980787}
+  - component: {fileID: 7733266836289562488}
   m_Layer: 0
   m_Name: LinePopup
   m_TagString: Untagged
@@ -85,8 +85,8 @@ MonoBehaviour:
   componentModules:
     windowComponent: {fileID: 230474756260362357}
     modules: []
-  document: {fileID: 3456991060412980787}
---- !u!114 &3456991060412980787
+  document: {fileID: 7733266836289562488}
+--- !u!114 &7733266836289562488
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -98,11 +98,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21c074d86024caca2a0034ce4f53f73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PanelSettings: {fileID: 11400000, guid: d7b00ed76d4c14c958560923e6ad6bb7, type: 2}
+  m_PanelSettings: {fileID: 11400000, guid: aa4a8013409294e7080b5371332a5700, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: c5572f0acec914b37969db0373eda30c,
     type: 3}
-  m_SortingOrder: 1
+  m_SortingOrder: 0
 --- !u!1 &2085204466533394335
 GameObject:
   m_ObjectHideFlags: 0
@@ -208,7 +208,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7205173303462066695}
   - component: {fileID: 3854052985599495256}
-  - component: {fileID: 6672028754488994970}
+  - component: {fileID: 8307840243129309125}
   m_Layer: 0
   m_Name: CustomPopup
   m_TagString: Untagged
@@ -283,8 +283,8 @@ MonoBehaviour:
   componentModules:
     windowComponent: {fileID: 3854052985599495256}
     modules: []
-  document: {fileID: 6672028754488994970}
---- !u!114 &6672028754488994970
+  document: {fileID: 8307840243129309125}
+--- !u!114 &8307840243129309125
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -296,8 +296,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21c074d86024caca2a0034ce4f53f73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PanelSettings: {fileID: 11400000, guid: d7b00ed76d4c14c958560923e6ad6bb7, type: 2}
+  m_PanelSettings: {fileID: 11400000, guid: aa4a8013409294e7080b5371332a5700, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: ed7cdfe8fbe1e4276a33d6c3bbc6d953,
     type: 3}
-  m_SortingOrder: 1
+  m_SortingOrder: 0

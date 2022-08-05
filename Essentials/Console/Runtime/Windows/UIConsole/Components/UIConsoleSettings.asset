@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 782f629a2df6243629ea8fe2873666a4, type: 3}
   m_Name: UIConsoleSettings
   m_EditorClassIdentifier: 
-  themeUss: {fileID: -4733365628477956816, guid: 8ba9bd0128a845c438a749e6e82024e5,
+  themeUss: {fileID: -4733365628477956816, guid: c1820beb231c943979eeed2aab6daa54,
     type: 3}
   m_TargetTexture: {fileID: 0}
-  m_ScaleMode: 1
+  m_ScaleMode: 2
   m_Scale: 1
   m_ReferenceDpi: 264
   m_FallbackDpi: 96

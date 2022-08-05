@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3718762905301394344}
   - component: {fileID: 6587278640734413907}
   - component: {fileID: 3968461440413025550}
-  - component: {fileID: -1575974847400422576}
+  - component: {fileID: 2697797590338593658}
   m_Layer: 0
   m_Name: UIConsoleScreen
   m_TagString: Untagged
@@ -123,7 +123,7 @@ MonoBehaviour:
           directRef: {fileID: 2085204466533394332, guid: 048802b519d9044e5b9590f3af1fc4ef,
             type: 3}
           validationRequired: 0
-  document: {fileID: -1575974847400422576}
+  document: {fileID: 2697797590338593658}
   references:
     version: 1
 --- !u!20 &3968461440413025550
@@ -169,7 +169,7 @@ Camera:
   m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!114 &-1575974847400422576
+--- !u!114 &2697797590338593658
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -181,7 +181,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21c074d86024caca2a0034ce4f53f73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PanelSettings: {fileID: 11400000, guid: d7b00ed76d4c14c958560923e6ad6bb7, type: 2}
+  m_PanelSettings: {fileID: 11400000, guid: aa4a8013409294e7080b5371332a5700, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 64b4f9958c1ee44a6a0b71bff361574f,
     type: 3}

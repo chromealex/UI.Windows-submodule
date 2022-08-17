@@ -119,8 +119,8 @@ namespace UnityEngine.UI.Windows {
 
         public string GetAddress() {
 
-            var result = this.guid;
-            if (string.IsNullOrEmpty(this.address) == false && string.IsNullOrEmpty(this.address.Trim()) == false) result = this.address;
+            var result = this.address;
+            if (string.IsNullOrEmpty(this.guid) == false && string.IsNullOrEmpty(this.guid.Trim()) == false) result = this.guid;
 
             if (string.IsNullOrEmpty(this.subObjectName) == false) {
 

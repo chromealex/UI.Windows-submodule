@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5842525115895126097}
   - component: {fileID: 230474756260362357}
-  - component: {fileID: 7733266836289562488}
+  - component: {fileID: 4808310658361941069}
   m_Layer: 0
   m_Name: LinePopup
   m_TagString: Untagged
@@ -28,6 +28,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5641810595802921522}
   m_RootOrder: 0
@@ -85,8 +86,8 @@ MonoBehaviour:
   componentModules:
     windowComponent: {fileID: 230474756260362357}
     modules: []
-  document: {fileID: 7733266836289562488}
---- !u!114 &7733266836289562488
+  document: {fileID: 4808310658361941069}
+--- !u!114 &4808310658361941069
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -95,7 +96,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 290880054688223691}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f21c074d86024caca2a0034ce4f53f73, type: 3}
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
   m_EditorClassIdentifier: 
   m_PanelSettings: {fileID: 11400000, guid: aa4a8013409294e7080b5371332a5700, type: 2}
@@ -130,6 +131,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 26.80554}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5842525115895126097}
   - {fileID: 7205173303462066695}
@@ -208,7 +210,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7205173303462066695}
   - component: {fileID: 3854052985599495256}
-  - component: {fileID: 8307840243129309125}
+  - component: {fileID: 4090652877925067668}
   m_Layer: 0
   m_Name: CustomPopup
   m_TagString: Untagged
@@ -226,6 +228,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5641810595802921522}
   m_RootOrder: 1
@@ -283,8 +286,8 @@ MonoBehaviour:
   componentModules:
     windowComponent: {fileID: 3854052985599495256}
     modules: []
-  document: {fileID: 8307840243129309125}
---- !u!114 &8307840243129309125
+  document: {fileID: 4090652877925067668}
+--- !u!114 &4090652877925067668
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -293,7 +296,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3152499467265911512}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f21c074d86024caca2a0034ce4f53f73, type: 3}
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
   m_EditorClassIdentifier: 
   m_PanelSettings: {fileID: 11400000, guid: aa4a8013409294e7080b5371332a5700, type: 2}

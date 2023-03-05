@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace UnityEngine.UI.Windows {
 
@@ -11,6 +12,8 @@ namespace UnityEngine.UI.Windows {
 
         NotInitialized,
         Initializing,
+        Loading,
+        Loaded,
         Initialized,
         Showing,
         Shown,
@@ -82,7 +85,13 @@ namespace UnityEngine.UI.Windows {
         void ValidateEditor();
 
     }
-    
+
+    public interface ILoadable {
+
+        void Load(System.Action onComplete);
+
+    }
+
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
     public abstract class WindowObject : MonoBehaviour, IOnPoolGet, IOnPoolAdd, ISearchComponentByTypeSingleEditor, IHolder {
@@ -945,97 +954,83 @@ namespace UnityEngine.UI.Windows {
 
                 this.subObjects.Add(windowObject);
                 windowObject.rootObject = this;
-
-                {
-
-                    switch (this.objectState) {
-                        
-                        case ObjectState.Initializing:
-                        case ObjectState.Initialized:
-                            if (windowObject.GetState() == ObjectState.NotInitialized) {
+                
+                if (windowObject.GetState() == ObjectState.NotInitialized) {
 							    
-                                windowObject.DoInit();
+                    windowObject.DoInit(() => this.AdjustObjectState(windowObject));
                                 
-                            }
-                            break;
-                        
-                        case ObjectState.Showing:
-                            if (windowObject.GetState() == ObjectState.NotInitialized) {
-							    
-                                windowObject.DoInit();
-                                
-                            }
-
-                            if (windowObject.hiddenByDefault == false) {
-
-                                WindowSystem.ShowInstance(windowObject, TransitionParameters.Default.ReplaceImmediately(true), internalCall: true);
-
-                            }
-                            break;
-                        case ObjectState.Shown:
-                            if (windowObject.GetState() == ObjectState.NotInitialized) {
-							    
-                                windowObject.DoInit();
-                                
-                            }
-
-                            if (windowObject.hiddenByDefault == false) {
-
-                                WindowSystem.ShowInstance(
-                                    windowObject,
-                                    TransitionParameters.Default.ReplaceImmediately(true).ReplaceCallback(() => {
-                                        
-                                        WindowSystem.SetShown(windowObject, TransitionParameters.Default.ReplaceImmediately(true), true);
-                                        
-                                    }), internalCall: true);
-
-                            }
-
-                            break;
-                        
-                        case ObjectState.Hiding:
-                            
-                            if (windowObject.GetState() == ObjectState.NotInitialized) {
-
-                                windowObject.DoInit();
-
-                            }
-
-                            windowObject.SetState(this.objectState);
-
-                            break;
-                        case ObjectState.Hidden:
-                            
-                            if (windowObject.GetState() == ObjectState.NotInitialized) {
-
-                                windowObject.DoInit();
-
-                            }
-
-                            windowObject.SetState(this.objectState);
-
-                            break;
-                        
-                        case ObjectState.DeInitializing:
-                        case ObjectState.DeInitialized:
-                            if (windowObject.GetState() == ObjectState.NotInitialized) {
-                                
-                                windowObject.DoInit();
-                                
-                            }
-                            
-                            windowObject.DoDeInit();
-                            break;
-                        
-                    }
+                } else {
+                    
+                    this.AdjustObjectState(windowObject);
                     
                 }
+
                 return true;
 
             }
 
             return false;
 
+        }
+
+        private void AdjustObjectState(WindowObject windowObject) {
+            
+            switch (this.objectState) {
+                        
+                case ObjectState.Initializing:
+                case ObjectState.Initialized:
+
+                    if (windowObject.GetState() != ObjectState.Initialized) {
+                        
+                        Debug.LogError($"WindowObject must be initialized before AdjustObjectState");
+                        
+                    }
+
+                    break;
+                        
+                case ObjectState.Showing:
+
+                    if (windowObject.hiddenByDefault == false) {
+
+                        WindowSystem.ShowInstance(windowObject, TransitionParameters.Default.ReplaceImmediately(true), internalCall: true);
+
+                    }
+                    break;
+                case ObjectState.Shown:
+
+                    if (windowObject.hiddenByDefault == false) {
+
+                        WindowSystem.ShowInstance(
+                            windowObject,
+                            TransitionParameters.Default.ReplaceImmediately(true).ReplaceCallback(() => {
+                                        
+                                WindowSystem.SetShown(windowObject, TransitionParameters.Default.ReplaceImmediately(true), true);
+                                        
+                            }), internalCall: true);
+
+                    }
+
+                    break;
+                        
+                case ObjectState.Hiding:
+
+                    windowObject.SetState(this.objectState);
+
+                    break;
+                case ObjectState.Hidden:
+
+                    windowObject.SetState(this.objectState);
+
+                    break;
+                        
+                case ObjectState.DeInitializing:
+                case ObjectState.DeInitialized:
+
+                    windowObject.DoDeInit();
+                    break;
+                        
+            }
+            
         }
 
         public bool RemoveSubObject(WindowObject windowObject) {
@@ -1174,14 +1169,34 @@ namespace UnityEngine.UI.Windows {
             }
 
         }
+        
+        public void DoInit(System.Action callback = null) {
 
-        public void DoInit() {
+            Coroutines.Run(this.DoInitAsync(callback));
 
+        }
+
+        private IEnumerator DoInitAsync(System.Action callback = null) {
+            
             if (this.objectState < ObjectState.Initializing) {
 
-                this.audioEvents.Initialize(this);
-                
                 this.SetState(ObjectState.Initializing);
+
+                if (this is ILoadable loadable) {
+
+                    this.SetState(ObjectState.Loading);
+
+                    var loaded = false;
+                    
+                    loadable.Load(() => loaded = true);
+
+                    yield return new WaitUntil(() => loaded);
+
+                }
+
+                this.SetState(ObjectState.Loaded);
+
+                this.audioEvents.Initialize(this);
 
                 this.OnInitInternal();
                 this.OnInit();
@@ -1191,12 +1206,30 @@ namespace UnityEngine.UI.Windows {
 
             }
 
+            var coroutines = PoolList<IEnumerator>.Spawn();
+
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
                 if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
-                this.subObjects[i].DoInit();
+                coroutines.Add(this.subObjects[i].DoInitAsync());
 
             }
+            
+            var moveNext = true;
+
+            while (moveNext) {
+
+                moveNext = false;
+
+                foreach (var coroutine in coroutines) {
+                    moveNext = moveNext || coroutine.MoveNext();
+                }
+                
+            }
+            
+            PoolList<IEnumerator>.Recycle(coroutines);
+            
+            callback?.Invoke();
 
         }
 
@@ -1324,8 +1357,9 @@ namespace UnityEngine.UI.Windows {
 
                 if (this.objectState == ObjectState.NotInitialized) {
                     
-                    this.DoInit();
-                    
+                    this.DoInit(() => this.Show(parameters));
+                    return;
+
                 } else {
 
                     Debug.LogWarning("Object is out of state: " + this, this);
@@ -1363,7 +1397,8 @@ namespace UnityEngine.UI.Windows {
                 
                 if (this.objectState == ObjectState.NotInitialized) {
                     
-                    this.DoInit();
+                    this.DoInit(() => this.Hide(parameters));
+                    return;
                     
                 } else {
 

@@ -1006,7 +1006,7 @@ namespace UnityEngine.UI.Windows {
         }
 
         public static void ShowInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
-
+            
             if (instance.GetState() == ObjectState.Showing || instance.GetState() == ObjectState.Shown) {
                 
                 parameters.RaiseCallback();
@@ -1823,8 +1823,8 @@ namespace UnityEngine.UI.Windows {
                     transitionParameters.RaiseCallback();
                     
                 });
-                instance.DoInit();
-                instance.ShowInternal(tr);
+                
+                instance.DoInit(() => instance.ShowInternal(tr));
 
             });
 

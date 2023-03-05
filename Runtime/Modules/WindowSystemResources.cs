@@ -1,8 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
+
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+
 
 namespace UnityEngine.UI.Windows {
+    
+    using UnityEngine.UI.Windows.Utilities;
 
     public enum UnloadResourceEventType {
 
@@ -21,6 +27,13 @@ namespace UnityEngine.UI.Windows {
 
     [System.Serializable]
     public class Resource<T> : IResourceProvider where T : UnityEngine.Object {
+        
+        private struct AsyncClosure {
+
+            public TaskCompletionSource<T> tcs;
+            public Resource<T> resource;
+
+        }
 
         [SerializeField]
         private Resource data;
@@ -58,6 +71,37 @@ namespace UnityEngine.UI.Windows {
             this.loaded = WindowSystem.GetResources().Load<T>(handler, this.data);
             return this.loaded;
 
+        }
+        
+        public Task<T> LoadAsync(object handler) {
+
+            var tcs = new TaskCompletionSource<T>();
+
+            if (this.loaded != null) {
+                tcs.SetResult(this.loaded);
+            } else {
+                var closure = new AsyncClosure {
+                    tcs = tcs,
+                    resource = this,
+                };
+                
+                Coroutines.Run(WindowSystem.GetResources().LoadAsync<T, AsyncClosure>(handler, closure, this.data, (asset, p) => {
+                    this.loaded = asset;
+                    p.tcs.SetResult(this.loaded);
+                }));
+            }
+
+            return tcs.Task;
+
+        }
+
+        public AssetReferenceT<T> AsAssetReference() {
+
+            if (this.data.type == Resource.Type.Addressables) {
+                return new AssetReferenceT<T>(this.data.guid);
+            }
+
+            return null;
         }
 
         public T Get() {
@@ -420,6 +464,15 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
 
+        public Task<T> LoadAsync<T>(object handler, Resource resource) where T : class {
+
+            var tcs = new TaskCompletionSource<T>();
+            
+            Coroutines.Run(this.LoadAsync<T, TaskCompletionSource<T>>(handler, tcs, resource, (asset, s) => s.SetResult(asset)));
+
+            return tcs.Task;
+        }
+
         public T Load<T>(object handler, Resource resource) where T : class {
             
             var closure = PoolClass<ClosureResult<T>>.Spawn();
@@ -515,76 +568,25 @@ namespace UnityEngine.UI.Windows.Modules {
 
                 case Resource.Type.Addressables: {
 
+
+                    IEnumerator loader = null;
+
                     if (resource.objectType == Resource.ObjectType.Component) {
-
-                        var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(resource.GetAddress());
-                        System.Action cancellationTask = () => { if (op.IsValid() == true) UnityEngine.AddressableAssets.Addressables.Release(op); };
-                        this.LoadBegin(handler, cancellationTask);
-                        if (loadParameters.async == false) op.WaitForCompletion();
-                        while (op.IsDone == false) yield return null;
-
-                        if (op.IsValid() == true &&
-                            op.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded) {
-
-                            var asset = op.Result;
-                            if (asset == null) {
-
-                                this.CompleteTask(handler, resource, default);
-
-                            } else {
-
-                                var result = asset.GetComponent<T>();
-                                if (result == null) {
-                                    if (this.showLogs == true) Debug.LogError("[ UIWR ] Failed to load resource: " + resource.GetAddress() + ", gameObject loaded " + asset + ", but component was not found with type " + typeof(T));
-                                }
-                                this.AddObject(handler, result, resource, () => WindowSystemResources.ReleaseAddressableAsset(asset));
-                                this.CompleteTask(handler, resource, result);
-
+                        loader = this.LoadAddressable_INTERNAL<GameObject, T>(loadParameters, handler, resource, go => {
+                            var result = go.GetComponent<T>();
+                            if (result == null && this.showLogs == true) {
+                                Debug.LogError("[ UIWR ] Failed to load resource: " + resource.GetAddress() + ", gameObject loaded " + go +
+                                               ", but component was not found with type " + typeof(T));
                             }
 
-                        } else {
-                            
-                            if (this.showLogs == true) Debug.LogError("[ UIWR ] Resource failed while loading: " + resource + "\nValid: " + op.IsValid());
-                            this.CompleteTask(handler, resource, null);
-                            
-                        }
-
-                        this.LoadEnd(handler, cancellationTask);
-
+                            return result;
+                        });
                     } else {
-
-                        var op = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(resource.GetAddress());
-                        System.Action cancellationTask = () => { if (op.IsValid() == true) UnityEngine.AddressableAssets.Addressables.Release(op); };
-                        this.LoadBegin(handler, cancellationTask);
-                        if (loadParameters.async == false) op.WaitForCompletion();
-                        while (op.IsDone == false) yield return null;
-
-                        if (op.IsValid() == true &&
-                            op.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded) {
-
-                            var asset = op.Result;
-                            if (asset == null) {
-
-                                this.CompleteTask(handler, resource, default);
-
-                            } else {
-
-                                this.AddObject(handler, asset, resource, () => WindowSystemResources.ReleaseAddressableAsset(asset));
-                                this.CompleteTask(handler, resource, asset);
-
-                            }
-
-                        } else {
-                            
-                            if (this.showLogs == true) Debug.LogError("[ UIWR ] Resource failed while loading: " + resource + "\nValid: " + op.IsValid());
-                            this.CompleteTask(handler, resource, null);
-                            
-                        }
-                        
-                        this.LoadEnd(handler, cancellationTask);
-
+                        loader = this.LoadAddressable_INTERNAL<T, T>(loadParameters, handler, resource, r => r);
                     }
-
+                    
+                    while (loader.MoveNext() == true) yield return null;
+                    
                     break;
 
                 }
@@ -592,6 +594,41 @@ namespace UnityEngine.UI.Windows.Modules {
             }
 
         }
+
+        private IEnumerator LoadAddressable_INTERNAL<TResource, TResult>(LoadParameters loadParameters, object handler, Resource resource, System.Func<TResource, TResult> converter) {
+            
+            var op = Addressables.LoadAssetAsync<TResource>(resource.GetAddress());
+            System.Action cancellationTask = () => { if (op.IsValid() == true) Addressables.Release(op); };
+            this.LoadBegin(handler, cancellationTask);
+            if (loadParameters.async == false) op.WaitForCompletion();
+            while (op.IsDone == false) yield return null;
+
+            if (op.IsValid() == true && op.Status == AsyncOperationStatus.Succeeded) {
+
+                var asset = op.Result;
+                if (asset == null) {
+
+                    this.CompleteTask(handler, resource, default);
+
+                } else {
+
+                    var result = converter(asset);
+                    this.AddObject(handler, result, resource, () => WindowSystemResources.ReleaseAddressableAsset(asset));
+                    this.CompleteTask(handler, resource, result);
+
+                }
+
+            } else {
+                            
+                if (this.showLogs == true) Debug.LogError("[ UIWR ] Resource failed while loading: " + resource + "\nValid: " + op.IsValid());
+                this.CompleteTask(handler, resource, null);
+                            
+            }
+                        
+            this.LoadEnd(handler, cancellationTask);
+            
+        }
+
 
         private void LoadBegin(object handler, System.Action cancellationTask) {
 

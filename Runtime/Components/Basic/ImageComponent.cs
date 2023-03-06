@@ -162,14 +162,16 @@ namespace UnityEngine.UI.Windows.Components {
                 switch (resource.objectType) {
 
                     case Resource.ObjectType.Sprite: {
-                        var asset = resources.Load<Sprite>(this, resource);
-                        this.SetImage(asset);
+                        resources.LoadAsync<Sprite>(this, resource, (asset, _) => {
+                            this.SetImage(asset);
+                        });
                     }
                         break;
 
                     case Resource.ObjectType.Texture: {
-                        var asset = resources.Load<Texture>(this, resource);
-                        this.SetImage(asset);
+                        resources.LoadAsync<Texture>(this, resource, (asset, _) => {
+                            this.SetImage(asset);
+                        });
                     }
                         break;
 

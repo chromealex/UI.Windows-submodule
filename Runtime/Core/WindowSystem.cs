@@ -279,6 +279,7 @@ namespace UnityEngine.UI.Windows {
         private Dictionary<int, WindowBase> topWindowsByLayer = new Dictionary<int, WindowBase>();
         private Dictionary<int, WindowBase> hashToPrefabs = new Dictionary<int, WindowBase>();
 
+        private bool loaderShowBegin;
         private WindowBase loaderInstance;
         private int nextWindowId;
 
@@ -1331,12 +1332,16 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public static void ShowLoader(TransitionParameters transitionParameters = default) {
+        public static void ShowLoader(TransitionParameters transitionParameters = default, bool showSync = false) {
 
-            if (WindowSystem.instance.loaderScreen != null && WindowSystem.instance.loaderInstance == null) {
+            if (WindowSystem.instance.loaderScreen != null && WindowSystem.instance.loaderInstance == null && WindowSystem.instance.loaderShowBegin == false) {
 
-                WindowSystem.Show(WindowSystem.instance.loaderScreen, new InitialParameters() { showSync = true },
-                                  onInitialized: (w) => { WindowSystem.instance.loaderInstance = w; }, transitionParameters);
+                WindowSystem.instance.loaderShowBegin = true;
+                WindowSystem.Show(WindowSystem.instance.loaderScreen, new InitialParameters() { showSync = showSync },
+                                  onInitialized: (w) => {
+                                      WindowSystem.instance.loaderInstance = w;
+                                      WindowSystem.instance.loaderShowBegin = false;
+                                  }, transitionParameters);
 
             }
 
@@ -1344,9 +1349,16 @@ namespace UnityEngine.UI.Windows {
 
         public static void HideLoader() {
 
-            if (WindowSystem.instance.loaderInstance != null) WindowSystem.instance.loaderInstance.Hide();
-            WindowSystem.instance.loaderInstance = null;
-
+            if (WindowSystem.instance.loaderShowBegin == true && WindowSystem.instance.loaderInstance == null) {
+                Coroutines.Wait(() => WindowSystem.instance.loaderInstance != null, WindowSystem.HideLoader);
+            } else {
+                if (WindowSystem.instance.loaderInstance != null) {
+                    WindowSystem.instance.loaderInstance.Hide();
+                    WindowSystem.instance.loaderInstance = null;
+                    WindowSystem.instance.loaderShowBegin = false;
+                }
+            }
+            
         }
 
         public static void ShowRoot(TransitionParameters transitionParameters = default) {

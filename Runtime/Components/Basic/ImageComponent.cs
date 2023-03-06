@@ -154,7 +154,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public void SetImage(Resource resource) {
+        public void SetImage(Resource resource, bool async = true) {
 
             if (this.prevResourceLoad.IsEquals(resource) == false) {
 
@@ -162,16 +162,24 @@ namespace UnityEngine.UI.Windows.Components {
                 switch (resource.objectType) {
 
                     case Resource.ObjectType.Sprite: {
-                        resources.LoadAsync<Sprite>(this, resource, (asset, _) => {
-                            this.SetImage(asset);
-                        });
-                    }
+                        if (async == true) {
+                            UnityEngine.UI.Windows.Utilities.Coroutines.Run(resources.LoadAsync<Sprite>(this, resource, (asset, _) => {
+                                this.SetImage(asset);
+                            }));
+                        } else {
+                            this.SetImage(resources.Load<Sprite>(this, resource));
+                        }
+                    } 
                         break;
 
                     case Resource.ObjectType.Texture: {
-                        resources.LoadAsync<Texture>(this, resource, (asset, _) => {
-                            this.SetImage(asset);
-                        });
+                        if (async == true) {
+                            UnityEngine.UI.Windows.Utilities.Coroutines.Run(resources.LoadAsync<Texture>(this, resource, (asset, _) => {
+                                this.SetImage(asset);
+                            }));
+                        } else {
+                            this.SetImage(resources.Load<Texture>(this, resource));
+                        }
                     }
                         break;
 

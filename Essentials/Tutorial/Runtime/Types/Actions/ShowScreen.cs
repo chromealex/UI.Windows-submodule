@@ -12,7 +12,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
             var obj = this;
             var contextData = context;
-            WindowSystem.ShowSync(this.source,
+            WindowSystem.Show(this.source,
                                   default,
                               (x) => x.OnEmptyPass(),
                               TransitionParameters.Default.ReplaceCallback(() => { contextData.system.TryToStart(contextData.window, obj.onShown, contextData.windowEvent); }));

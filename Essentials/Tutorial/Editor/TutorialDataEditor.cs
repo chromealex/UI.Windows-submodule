@@ -82,8 +82,9 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                     var prop = items.GetArrayElementAtIndex(index);
                     WindowSystemSearchComponentsByTypePopupPropertyDrawer.DrawGUI(rect, new GUIContent("Condition"), attr, prop, () => {
                         this.changedConditions = true;
-                        var method = this.conditions.GetType().GetMethod("ClearCache", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                        method.Invoke(this.conditions, null);
+                        //var method = this.conditions.GetType().GetMethod("ClearCache", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                        var method = this.conditions.GetType().GetMethod("InvalidateCacheRecursive", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                        method?.Invoke(this.conditions, null);
                     }, drawLabel: false);
                     rect.y += rect.height;
 
@@ -203,7 +204,7 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                     WindowSystemSearchComponentsByTypePopupPropertyDrawer.DrawGUI(rect, new GUIContent("Action"), attr, prop, () => {
                         this.changedActions = true;
                         var method = this.actions.GetType().GetMethod("ClearCache", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                        method.Invoke(this.actions, null);
+                        method?.Invoke(this.actions, null);
                     }, drawLabel: false);
                     rect.y += rect.height;
                     

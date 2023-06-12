@@ -208,7 +208,10 @@ public static class ScriptTemplates {
             AssetDatabase.MoveAsset(assetPath, newAssetPath);
             AssetDatabase.ImportAsset(newAssetPath, ImportAssetOptions.ForceSynchronousImport);
 
-            var guid = AssetDatabase.AssetPathToGUID(newAssetPath);
+            var asset = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
+            ScriptTemplates.AssignIcon(asset, new GUIContent(Resources.Load<Texture>("EditorAssets/Scripts/window_icon")));
+
+            AssetDatabase.TryGetGUIDAndLocalFileIdentifier(asset, out var guid, out long localId);
             var defs = new Dictionary<string, string>() {
                 { "GUID", guid },
             };
@@ -217,9 +220,6 @@ public static class ScriptTemplates {
             ScriptTemplates.CreateEmptyDirectory(dir, "Components");
             ScriptTemplates.CreateEmptyDirectory(dir, "Layouts");
 
-            var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(newAssetPath);
-            ScriptTemplates.AssignIcon(asset, new GUIContent(Resources.Load<Texture>("EditorAssets/Scripts/window_icon")));
-            
             ScriptTemplates.Create(dir + "/Screens", assetName + "Screen.prefab", "61-ScreenAsset", allowRename: false, customDefines: defs);
 
         }
@@ -282,12 +282,9 @@ public static class ScriptTemplates {
             Debug.LogError ("Invalid Icon format : Not a Texture2D");
             return;
         }
- 
-        System.Type editorgui = typeof(EditorGUIUtility);
-        var flags = System.Reflection.BindingFlags.InvokeMethod | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic;
-        object[] args = new object[] {target, tex};
-        editorgui.InvokeMember ("SetIconForObject", flags, null, null, args);
- 
+        
+        EditorGUIUtility.SetIconForObject(target, tex);
+        
     }
     
 }

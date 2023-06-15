@@ -980,6 +980,7 @@ namespace UnityEngine.UI.Windows.Utilities {
         }
 
         public List<ITween> tweens = new List<ITween>();
+        public List<ITween> frameTweens = new List<ITween>();
 
         public Tween<T> Add<T>(T obj, float duration, float from, float to) {
 
@@ -1040,20 +1041,22 @@ namespace UnityEngine.UI.Windows.Utilities {
             
             var dt = Time.deltaTime;
             this.completeList.Clear();
-            for (int cnt = this.tweens.Count, i = cnt - 1; i >= 0; --i) {
+            this.frameTweens.Clear();
+            this.frameTweens.AddRange(this.tweens);
+            for (int cnt = this.frameTweens.Count, i = cnt - 1; i >= 0; --i) {
 
-                if (this.tweens[i].Update(dt) == true) {
+                if (this.frameTweens[i].Update(dt) == true) {
 
-	                var tween = this.tweens[i];
+	                var tween = this.frameTweens[i];
 	                this.completeList.Add(tween);
-                    this.tweens.RemoveAt(i);
                     
                 }
 
             }
-
-            for (int i = 0, cnt = this.completeList.Count; i < cnt; ++i) {
             
+            for (int i = 0, cnt = this.completeList.Count; i < cnt; ++i) {
+
+                this.tweens.Remove(this.completeList[i]);
 	            this.completeList[i].Complete();
 	            
             }

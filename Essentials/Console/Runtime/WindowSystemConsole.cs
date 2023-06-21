@@ -295,6 +295,15 @@ namespace UnityEngine.UI.Windows {
             
         }
 
+        private struct LineCache {
+
+            public LogType logType;
+            public string text;
+            public string trace;
+
+        }
+
+        private ConcurrentQueue<LineCache> linesCache = new ();
         private List<DrawItem> drawItems = new List<DrawItem>();
         private List<FilteredItems> itemsFiltered = new List<FilteredItems>();
         
@@ -345,6 +354,12 @@ namespace UnityEngine.UI.Windows {
 
         private WindowBase consoleWindowInstance;
         public void Update() {
+
+            while(this.linesCache.TryDequeue(out var item)) {
+                
+                this.AddLog(item.text, item.logType, item.trace);
+                
+            }
             
             if (Input.GetKeyDown(KeyCode.BackQuote) == true ||
                 Input.touchCount >= 3) {
@@ -1106,6 +1121,17 @@ namespace UnityEngine.UI.Windows {
         }
 
         public void AddLog(string text, LogType type = LogType.Log, string trace = null) {
+
+            if (System.Threading.Thread.CurrentThread != this.unityThread) {
+                
+                this.linesCache.Enqueue(new LineCache {
+                    logType = type,
+                    text = text,
+                    trace = trace,
+                });
+                
+                return;
+            }
 
             if (this.logsCounter == null) return;
 

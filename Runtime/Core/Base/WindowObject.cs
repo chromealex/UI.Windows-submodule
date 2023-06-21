@@ -1479,6 +1479,24 @@ namespace UnityEngine.UI.Windows {
             return instance;
 
         }
+        
+        public void UnloadSubObjects()  {
+            
+            if (this.subObjects.Count == 0) return;
+            
+            var pools = WindowSystem.GetPools();
+
+            for (int i = this.subObjects.Count - 1; i >= 0; i--) {
+
+                var subObject = this.subObjects[i];
+                
+                this.UnRegisterSubObject(subObject);
+                pools.Despawn(subObject);
+                
+            }
+            
+
+        }
 
         public void DoLayoutReady() {
 

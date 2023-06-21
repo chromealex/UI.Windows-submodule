@@ -1285,7 +1285,7 @@ namespace UnityEngine.UI.Windows {
 
                 if (this.internalManualShow == false) {
 
-                    this.Hide(TransitionParameters.Default.ReplaceImmediately(true));
+                    this.HideInternal(TransitionParameters.Default.ReplaceImmediately(true));
                     this.SetInvisible();
                     
                 }

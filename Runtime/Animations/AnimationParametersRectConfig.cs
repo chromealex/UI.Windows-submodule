@@ -22,6 +22,8 @@ namespace UnityEngine.UI.Windows.Modules {
         
         public override void Apply(AnimationParameters parameters) {
 
+            base.Apply(parameters);
+            
             var target = parameters as RectAnimationParameters;
             if (target == null) return;
 

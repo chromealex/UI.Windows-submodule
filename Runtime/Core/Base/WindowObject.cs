@@ -221,6 +221,8 @@ namespace UnityEngine.UI.Windows {
             var isDebug = WindowSystem.GetSettings().collectDebugInfo;
             if (isDebug == true) this.debugStateLog.Add(state);
             this.objectState = state;
+            
+            this.SetResetState();
 
         }
         
@@ -1187,9 +1189,7 @@ namespace UnityEngine.UI.Windows {
                     this.SetState(ObjectState.Loading);
 
                     var loaded = false;
-                    
                     loadable.Load(() => loaded = true);
-
                     yield return new WaitUntil(() => loaded);
 
                 }
@@ -1216,13 +1216,11 @@ namespace UnityEngine.UI.Windows {
             }
             
             var moveNext = true;
-
-            while (moveNext) {
+            while (moveNext == true) {
 
                 moveNext = false;
-
                 foreach (var coroutine in coroutines) {
-                    moveNext = moveNext || coroutine.MoveNext();
+                    moveNext = moveNext == true || coroutine.MoveNext() == true;
                 }
                 
             }

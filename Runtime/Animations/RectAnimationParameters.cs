@@ -44,17 +44,17 @@
         public RectState resetState = new RectState() {
             anchorPosition = new Vector2(0f, -100f),
             rotation = Vector3.zero,
-            scale = Vector3.one
+            scale = Vector3.one,
         };
         public RectState shownState = new RectState() {
             anchorPosition = Vector2.zero,
             rotation = Vector3.zero,
-            scale = Vector3.one
+            scale = Vector3.one,
         };
         public RectState hiddenState = new RectState() {
             anchorPosition = new Vector2(0f, 100f),
             rotation = Vector3.zero,
-            scale = Vector3.one
+            scale = Vector3.one,
         };
 
         private readonly RectState currentState = new RectState();

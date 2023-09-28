@@ -41,12 +41,15 @@
         public static void SetResetState(AnimationParameters[] animationParameters) {
 
             if (animationParameters == null) return;
-
+            
             for (int i = 0; i < animationParameters.Length; ++i) {
 
                 var anim = animationParameters[i];
                 if (anim != null) {
-                    
+
+                    if (anim.config != null) {
+                        anim.config.Apply(anim);
+                    }
                     var state = anim.GetResetState();
                     anim.ApplyState(state);
 

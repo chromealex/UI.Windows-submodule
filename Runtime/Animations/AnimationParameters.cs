@@ -13,6 +13,9 @@
 
     public abstract class AnimationParameters : MonoBehaviour {
 
+        [Tooltip("Use config file or parameters at this component")]
+        public AnimationParametersConfig config;
+        
         public float durationShow = 0.3f;
         public float durationHide = 0.3f;
         public float delayShow = 0f;

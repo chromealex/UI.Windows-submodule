@@ -191,6 +191,8 @@ namespace UnityEngine.UI.Windows.Components {
 
                 this.prevResourceLoad = resource;
 
+            } else {
+                onSetImageComplete?.Invoke();
             }
 
         }

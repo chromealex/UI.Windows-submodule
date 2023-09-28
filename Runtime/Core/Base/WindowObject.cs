@@ -222,7 +222,7 @@ namespace UnityEngine.UI.Windows {
             if (isDebug == true) this.debugStateLog.Add(state);
             this.objectState = state;
             
-            this.SetResetState();
+            if (state == ObjectState.Initializing) this.SetResetState();
 
         }
         

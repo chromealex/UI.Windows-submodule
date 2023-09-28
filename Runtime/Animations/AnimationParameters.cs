@@ -16,6 +16,7 @@
         [Tooltip("Use config file or parameters at this component")]
         public AnimationParametersConfig config;
         
+        [Space]
         public float durationShow = 0.3f;
         public float durationHide = 0.3f;
         public float delayShow = 0f;

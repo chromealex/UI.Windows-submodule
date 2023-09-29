@@ -205,13 +205,21 @@ public static class ScriptTemplates {
 
             }
 
-            var asset = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
+            if (assetPath != newAssetPath) {
+                AssetDatabase.MoveAsset(assetPath, newAssetPath);
+                AssetDatabase.ImportAsset(newAssetPath, ImportAssetOptions.ForceSynchronousImport);
+                EditorPrefs.SetBool("Temp.EditorWaitCompilation.UIWindows.CreateScreen", true);
+                EditorPrefs.SetString("Temp.EditorWaitCompilation.UIWindows.CreateScreen.Name.Orig", System.IO.Path.GetFileNameWithoutExtension(newAssetPath));
+                EditorPrefs.SetString("Temp.EditorWaitCompilation.UIWindows.CreateScreen.ScriptPath", newAssetPath);
+                return;
+            }
+            
+            var asset = AssetDatabase.LoadAssetAtPath<MonoScript>(newAssetPath);
             ScriptTemplates.AssignIcon(asset, new GUIContent(Resources.Load<Texture>("EditorAssets/Scripts/window_icon")));
-            AssetDatabase.MoveAsset(assetPath, newAssetPath);
-            AssetDatabase.ImportAsset(newAssetPath, ImportAssetOptions.ForceSynchronousImport);
 
             //var asset = AssetDatabase.LoadAssetAtPath<MonoScript>(newAssetPath);
             var guid = AssetDatabase.AssetPathToGUID(newAssetPath);
+            Debug.Log(newAssetPath + " :: " + guid);
             //AssetDatabase.TryGetGUIDAndLocalFileIdentifier(asset, out var guid, out long localId);
             var defs = new Dictionary<string, string>() {
                 { "GUID", guid },

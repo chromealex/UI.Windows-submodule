@@ -40,7 +40,7 @@ namespace UnityEditor.UI.Windows {
                     var data = (UnityEngine.UI.Windows.Utilities.Tweener.ITweenInternal)tween;
                     EditorGUILayout.ObjectField("Tag", data.GetTag() as Object, typeof(Object), allowSceneObjects: true);
                     if (data.GetDelay() > 0f) EditorGUILayout.LabelField("Delay", System.TimeSpan.FromSeconds(data.GetDelay()).ToString(@"c"));
-                    if (data.GetTimer() > 0f) EditorGUILayout.LabelField("Timer", System.TimeSpan.FromSeconds(data.GetTimer()).ToString(@"c"));
+                    if (data.GetTimer() > 0f) EditorGUILayout.LabelField("Timer", System.TimeSpan.FromSeconds(data.GetTimer() * data.GetDuration()).ToString(@"c"));
                     if (data.GetDuration() > 0f) EditorGUILayout.LabelField("Duration", System.TimeSpan.FromSeconds(data.GetDuration()).ToString(@"c"));
                     
                     var rect = GUILayoutExt.ProgressBar(data.GetTimer() * data.GetDuration(), data.GetDuration(), height: 10f);

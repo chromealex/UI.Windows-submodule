@@ -219,7 +219,6 @@ public static class ScriptTemplates {
 
             //var asset = AssetDatabase.LoadAssetAtPath<MonoScript>(newAssetPath);
             var guid = AssetDatabase.AssetPathToGUID(newAssetPath);
-            Debug.Log(newAssetPath + " :: " + guid);
             //AssetDatabase.TryGetGUIDAndLocalFileIdentifier(asset, out var guid, out long localId);
             var defs = new Dictionary<string, string>() {
                 { "GUID", guid },

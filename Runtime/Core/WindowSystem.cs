@@ -266,6 +266,7 @@ namespace UnityEngine.UI.Windows {
         public WindowSystemBreadcrumbs breadcrumbs;
         new public WindowSystemAudio audio;
         public WindowSystemEvents events;
+        [RequiredReference]
         public WindowSystemSettings settings;
         public WindowSystemResources resources;
         public WindowSystemPools pools;

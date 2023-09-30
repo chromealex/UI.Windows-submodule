@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 19101, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: UIConsoleSettings
   m_EditorClassIdentifier: 
-  themeUss: {fileID: -4733365628477956816, guid: c1820beb231c943979eeed2aab6daa54,
-    type: 3}
+  themeUss: {fileID: -4733365628477956816, guid: 8ba9bd0128a845c438a749e6e82024e5, type: 3}
   m_TargetTexture: {fileID: 0}
   m_ScaleMode: 2
   m_Scale: 1

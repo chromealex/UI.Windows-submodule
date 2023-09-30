@@ -115,7 +115,7 @@ namespace UnityEditor.UI.Windows {
                 } else {
 
                     GUILayoutExt.DrawRect(new Rect(source.x, source.y + source.height - 2f, source.width, 2f), Color.red); 
-                    EditorGUI.PropertyField(position, property, label);
+                    EditorGUI.PropertyField(position, property, new GUIContent(label.text, label.image, "This resource path is invalid. Check `Resource Directories` section."));
                     
                 }
 

@@ -263,13 +263,18 @@ namespace UnityEngine.UI.Windows {
         public bool emulatePlatform;
         public RuntimePlatform emulateRuntimePlatform;
 
+        [RequiredReference]
         public WindowSystemBreadcrumbs breadcrumbs;
         new public WindowSystemAudio audio;
+        [RequiredReference]
         public WindowSystemEvents events;
         [RequiredReference]
         public WindowSystemSettings settings;
+        [RequiredReference]
         public WindowSystemResources resources;
+        [RequiredReference]
         public WindowSystemPools pools;
+        [RequiredReference]
         public Tweener tweener;
 
         [SearchAssetsByTypePopupAttribute(typeof(WindowSystemModule), menuName: "Modules")]

@@ -132,7 +132,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public Conditions conditions;
         public Actions actions;
 
-        public bool IsValid(WindowBase window, in Context context) {
+        public bool IsValid(WindowObject window, in Context context) {
 
             var type = window.GetType().FullName;
             if (this.forWindowType.type == type) {

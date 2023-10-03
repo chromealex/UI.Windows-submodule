@@ -27,7 +27,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public TutorialSystem system;
         public TutorialData data;
         public int index;
-        public UnityEngine.UI.Windows.WindowTypes.LayoutWindowType window;
+        public WindowObject window;
 
     }
 
@@ -56,33 +56,37 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         }
 
-        private void OnWindowInitialized(WindowBase window) {
+        private void OnWindowInitialized(WindowObject window) {
 
             this.OnWindowEvent(window, TutorialWindowEvent.OnInitialize);
 
         }
 
-        private void OnWindowShowBegin(WindowBase window) {
+        private void OnWindowShowBegin(WindowObject window) {
 
             this.OnWindowEvent(window, TutorialWindowEvent.OnShowBegin);
 
         }
 
-        private void OnWindowShowEnd(WindowBase window) {
+        private void OnWindowShowEnd(WindowObject window) {
 
             this.OnWindowEvent(window, TutorialWindowEvent.OnShowEnd);
 
         }
 
-        private void OnWindowFocusTook(WindowBase window) {
+        private void OnWindowFocusTook(WindowObject window) {
 
             this.OnWindowEvent(window, TutorialWindowEvent.OnFocusTook);
 
         }
 
-        private void OnWindowEvent(WindowBase window, TutorialWindowEvent windowEvent) {
+        private void OnWindowEvent(WindowObject window, TutorialWindowEvent windowEvent) {
 
-            var tutorialModule = window.modules.Get<TutorialModule>();
+            TutorialModule tutorialModule = null;
+            if (window is WindowBase windowBase) {
+                tutorialModule = windowBase.modules.Get<TutorialModule>();
+            }
+
             if (tutorialModule != null) {
 
                 var tutorialData = tutorialModule.data.Load(tutorialModule);
@@ -100,7 +104,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         }
 
-        public bool TryToStart(WindowBase window, TutorialData tutorialData, TutorialWindowEvent windowEvent) {
+        public bool TryToStart(WindowObject window, TutorialData tutorialData, TutorialWindowEvent windowEvent) {
 
             if (tutorialData == null) return false;
 
@@ -108,7 +112,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
                 var context = new Context() {
                     system = this,
-                    window = (UnityEngine.UI.Windows.WindowTypes.LayoutWindowType)window,
+                    window = window,
                     windowEvent = windowEvent,
                     data = tutorialData,
                 };

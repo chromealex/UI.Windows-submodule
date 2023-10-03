@@ -26,7 +26,12 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         public void Do(in Context context) {
 
-            var element = context.window.GetLayoutElement(this.tag.id);
+            var window = context.window.GetWindow() as UnityEngine.UI.Windows.WindowTypes.LayoutWindowType;
+            WindowLayoutElement element = null;
+            if (window != null) {
+                element = window.GetLayoutElement(this.tag.id);
+            }
+
             if (element != null) {
 
                 var obj = this;

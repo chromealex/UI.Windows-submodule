@@ -13,8 +13,8 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
 
             var guid = property.FindPropertyRelative("guid");
             var type = property.FindPropertyRelative("type");
-            var obj = AssetDatabase.LoadAssetAtPath<WindowBase>(AssetDatabase.GUIDToAssetPath(guid.stringValue));
-            var newObj = EditorGUI.ObjectField(position, obj, typeof(WindowBase), false);
+            var obj = AssetDatabase.LoadAssetAtPath<WindowObject>(AssetDatabase.GUIDToAssetPath(guid.stringValue));
+            var newObj = EditorGUI.ObjectField(position, obj, typeof(WindowObject), false);
             if (newObj != obj) {
 
                 if (newObj == null) {

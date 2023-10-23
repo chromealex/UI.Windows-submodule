@@ -27,6 +27,11 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                 var conditions = so.FindProperty("conditions");
                 var items = conditions.FindPropertyRelative("items");
                 this.conditions = new UnityEditorInternal.ReorderableList(items.serializedObject, items);
+                
+                this.conditions.onChangedCallback = list => {
+                    items.serializedObject.ApplyModifiedProperties();
+                };
+                
                 this.conditions.drawHeaderCallback = rect => {
                     GUI.Label(rect, "Conditions");
                 }; 
@@ -160,6 +165,11 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                 var actions = so.FindProperty("actions");
                 var items = actions.FindPropertyRelative("items");
                 this.actions = new UnityEditorInternal.ReorderableList(items.serializedObject, items);
+                
+                this.actions.onChangedCallback = list => {
+                    items.serializedObject.ApplyModifiedProperties();
+                };
+                
                 this.actions.drawHeaderCallback = rect => {
                     GUI.Label(rect, "Actions");
                 }; 

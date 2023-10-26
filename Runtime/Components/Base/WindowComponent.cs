@@ -28,6 +28,26 @@
 	            return default;
 
             }
+
+            public T[] GetModules<T>() {
+                
+                var modulesOfGivenType = new System.Collections.Generic.List<T>();
+                
+                if (this.modules == null) return modulesOfGivenType.ToArray();
+                
+                for (int i = 0; i < this.modules.Length; ++i) {
+
+                    if (this.modules[i] is T module) {
+
+                        modulesOfGivenType.Add(module);
+
+                    }
+
+                }
+
+                return modulesOfGivenType.ToArray();
+                
+            }
             
             public void ValidateEditor() {
 
@@ -161,6 +181,12 @@
         public T GetModule<T>() {
 
 	        return this.componentModules.GetModule<T>();
+
+        }
+        
+        public T[] GetModules<T>() {
+
+            return this.componentModules.GetModules<T>();
 
         }
         

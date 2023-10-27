@@ -9,6 +9,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         OnShowBegin,
         OnShowEnd,
         OnFocusTook,
+        OnHideBegin,
 
     }
 
@@ -43,6 +44,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             events.Register(WindowEvent.OnShowBegin, this.OnWindowShowBegin);
             events.Register(WindowEvent.OnShowEnd, this.OnWindowShowEnd);
             events.Register(WindowEvent.OnFocusTook, this.OnWindowFocusTook);
+            events.Register(WindowEvent.OnHideBegin, this.OnWindowHideBegin);
             
         }
 
@@ -53,6 +55,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             events.UnRegister(WindowEvent.OnShowBegin, this.OnWindowShowBegin);
             events.UnRegister(WindowEvent.OnShowEnd, this.OnWindowShowEnd);
             events.UnRegister(WindowEvent.OnFocusTook, this.OnWindowFocusTook);
+            events.UnRegister(WindowEvent.OnHideBegin, this.OnWindowHideBegin);
 
         }
 
@@ -78,6 +81,12 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
             this.OnWindowEvent(window, TutorialWindowEvent.OnFocusTook);
 
+        }
+
+        private void OnWindowHideBegin(WindowObject window) {
+            
+            this.OnWindowEvent(window, TutorialWindowEvent.OnHideBegin);
+            
         }
 
         private void OnWindowEvent(WindowObject window, TutorialWindowEvent windowEvent) {

@@ -51,6 +51,9 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public override void OnDestroy() {
 
             var events = WindowSystem.GetEvents();
+            
+            if (events == null) return;
+            
             events.UnRegister(WindowEvent.OnInitialize, this.OnWindowInitialized);
             events.UnRegister(WindowEvent.OnShowBegin, this.OnWindowShowBegin);
             events.UnRegister(WindowEvent.OnShowEnd, this.OnWindowShowEnd);

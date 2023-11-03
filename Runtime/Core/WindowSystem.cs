@@ -441,7 +441,8 @@ namespace UnityEngine.UI.Windows {
         }
 
         private Vector2 pointerScreenPosition;
-        private bool hasInputActionsThisFrame;
+        private bool hasPointerUpThisFrame;
+        private bool hasPointerDownThisFrame;
 
         public static T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowComponent {
 
@@ -632,9 +633,15 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static bool HasInputActionsThisFrame() {
+        public static bool HasPointerUpThisFrame() {
 
-            return WindowSystem.instance.hasInputActionsThisFrame;
+            return WindowSystem.instance.hasPointerUpThisFrame;
+
+        }
+        
+        public static bool HasPointerDownThisFrame() {
+
+            return WindowSystem.instance.hasPointerDownThisFrame;
 
         }
 
@@ -650,7 +657,8 @@ namespace UnityEngine.UI.Windows {
 
             }
 
-            this.hasInputActionsThisFrame = false;
+            this.hasPointerUpThisFrame = false;
+            this.hasPointerDownThisFrame = false;
             
             #if ENABLE_INPUT_SYSTEM
             if (UnityEngine.InputSystem.Mouse.current.leftButton.wasReleasedThisFrame == true ||
@@ -658,7 +666,7 @@ namespace UnityEngine.UI.Windows {
                 UnityEngine.InputSystem.Mouse.current.middleButton.wasReleasedThisFrame == true) {
                 
                 this.pointerScreenPosition = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
-                this.hasInputActionsThisFrame = true;
+                this.hasPointerUpThisFrame = true;
                 if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
                 
             }
@@ -672,7 +680,7 @@ namespace UnityEngine.UI.Windows {
                     if (touch.phase == UnityEngine.InputSystem.TouchPhase.Ended || touch.phase == UnityEngine.InputSystem.TouchPhase.Canceled) {
 
                         this.pointerScreenPosition = touch.screenPosition;
-                        this.hasInputActionsThisFrame = true;
+                        this.hasPointerUpThisFrame = true;
                         if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
 
                     }
@@ -686,7 +694,7 @@ namespace UnityEngine.UI.Windows {
                 UnityEngine.Input.GetMouseButtonDown(2) == true) {
                 
                 this.pointerScreenPosition = Input.mousePosition;
-                this.hasInputActionsThisFrame = true;
+                this.hasPointerDownThisFrame = true;
                 if (WindowSystem.onPointerDown != null) WindowSystem.onPointerDown.Invoke();
                 
             }
@@ -696,7 +704,7 @@ namespace UnityEngine.UI.Windows {
                 UnityEngine.Input.GetMouseButtonUp(2) == true) {
                 
                 this.pointerScreenPosition = Input.mousePosition;
-                this.hasInputActionsThisFrame = true;
+                this.hasPointerUpThisFrame = true;
                 if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
                 
             }
@@ -709,7 +717,7 @@ namespace UnityEngine.UI.Windows {
                     if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled) {
                         
                         this.pointerScreenPosition = touch.position;
-                        this.hasInputActionsThisFrame = true;
+                        this.hasPointerUpThisFrame = true;
                         if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
 
                     }

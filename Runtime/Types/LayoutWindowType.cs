@@ -742,7 +742,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                             ref var com = ref layoutItem.components[c];
                             var comLock = com;
                             if ((windowLayout != com.windowLayout || windowLayout.HasLayoutElementByTagId(com.tag) == false) && windowLayout.layoutElements.Any(x => {
-                                return x.innerLayout == comLock.windowLayout && x.innerLayout.HasLayoutElementByTagId(comLock.tag);
+                                return x.innerLayout != null && x.innerLayout == comLock.windowLayout && x.innerLayout.HasLayoutElementByTagId(comLock.tag);
                             }) == false) {
 
                                 var list = layoutItem.components.ToList();

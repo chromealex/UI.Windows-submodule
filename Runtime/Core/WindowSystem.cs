@@ -42,7 +42,6 @@ namespace UnityEngine.UI.Windows {
 
     public interface IHasPreview {}
 
-    [System.Flags]
     public enum DontDestroy {
 
         Default = 0x0,

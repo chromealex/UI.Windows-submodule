@@ -370,6 +370,10 @@ namespace UnityEngine.UI.Windows {
         
         public void Awake() {
 
+#if UNITY_2023_1_OR_NEWER && ENABLE_INPUT_SYSTEM
+            UnityEngine.InputSystem.EnhancedTouch.EnhancedTouchSupport.Enable();
+#endif
+
             this.Run();
 
         }

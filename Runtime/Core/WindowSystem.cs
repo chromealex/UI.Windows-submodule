@@ -312,6 +312,15 @@ namespace UnityEngine.UI.Windows {
             }
         }
 
+#if WITHOUT_DOMAIN_RELOAD
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        public static void CleanupInstanceOnRun() {
+
+            WindowSystem._instance = null;
+
+        }
+#endif
+
         public static T GetWindowSystemModule<T>() where T : WindowSystemModule {
 
             if (WindowSystem.instance.modules != null) {

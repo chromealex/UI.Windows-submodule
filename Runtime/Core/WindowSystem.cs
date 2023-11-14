@@ -312,14 +312,14 @@ namespace UnityEngine.UI.Windows {
             }
         }
 
-#if WITHOUT_DOMAIN_RELOAD
+        #if WITHOUT_DOMAIN_RELOAD
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void CleanupInstanceOnRun() {
 
             WindowSystem._instance = null;
 
         }
-#endif
+        #endif
 
         public static T GetWindowSystemModule<T>() where T : WindowSystemModule {
 
@@ -379,9 +379,9 @@ namespace UnityEngine.UI.Windows {
         
         public void Awake() {
 
-#if UNITY_2023_1_OR_NEWER && ENABLE_INPUT_SYSTEM
+            #if ENABLE_INPUT_SYSTEM
             UnityEngine.InputSystem.EnhancedTouch.EnhancedTouchSupport.Enable();
-#endif
+            #endif
 
             this.Run();
 

@@ -20,9 +20,9 @@ namespace UnityEngine.UI.Windows.Modules {
     
     public class WindowSystemPools : MonoBehaviour {
 
-        internal HashSet<int> registeredPrefabs = new HashSet<int>();
-        internal Dictionary<int, Stack<Component>> prefabToPooledInstances = new Dictionary<int, Stack<Component>>();
-        internal Dictionary<Component, int> instanceOnSceneToPrefab = new Dictionary<Component, int>();
+        internal HashSet<Object> registeredPrefabs = new HashSet<Object>();
+        internal Dictionary<Object, Stack<Component>> prefabToPooledInstances = new Dictionary<Object, Stack<Component>>();
+        internal Dictionary<Component, Object> instanceOnSceneToPrefab = new Dictionary<Component, Object>();
 
         public void Clean() {
             
@@ -55,18 +55,11 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
 
-        public static int GetKey(Object obj) {
-
-            return obj.GetHashCode();
-
-        }
-
         public void CreatePool<T>(T prefab) where T : Component {
 
-            var key = WindowSystemPools.GetKey(prefab);
-            if (this.registeredPrefabs.Contains(key) == false) {
+            if (this.registeredPrefabs.Contains(prefab) == false) {
 
-                this.registeredPrefabs.Add(key);
+                this.registeredPrefabs.Add(prefab);
 
             }
 
@@ -120,7 +113,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         private void CleanUpNullInstances() {
 
-            var list = new Dictionary<Component, int>();
+            var list = new Dictionary<Component, Object>();
             foreach (var kv in this.instanceOnSceneToPrefab) {
 
                 var comp = kv.Key;
@@ -143,12 +136,11 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public void RemovePool<T>(T prefab) where T : Component {
 
-            var key = WindowSystemPools.GetKey(prefab);
-            if (this.registeredPrefabs.Contains(key) == true) {
+            if (this.registeredPrefabs.Contains(prefab) == true) {
 
                 this.Clear(prefab);
 
-                this.registeredPrefabs.Remove(key);
+                this.registeredPrefabs.Remove(prefab);
 
             }
 
@@ -156,12 +148,10 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public void Clear<T>(T prefab) where T : Component {
 
-            var key = WindowSystemPools.GetKey(prefab);
-
             var list = new List<Component>();
             foreach (var instance in this.instanceOnSceneToPrefab) {
 
-                if (instance.Value == key) {
+                if (instance.Value == prefab) {
 
                     list.Add(instance.Key);
 
@@ -186,15 +176,15 @@ namespace UnityEngine.UI.Windows.Modules {
         public T Spawn<T>(T prefab, Transform root, out bool fromPool) where T : Component {
 
             T result = null;
-            var key = WindowSystemPools.GetKey(prefab);
-            if (this.registeredPrefabs.Contains(key) == false) {
+
+            if (this.registeredPrefabs.Contains(prefab) == false) {
 
                 fromPool = false;
                 result = Object.Instantiate(prefab, root);
 
             } else {
 
-                if (this.prefabToPooledInstances.TryGetValue(key, out var stack) == true && stack.Count > 0) {
+                if (this.prefabToPooledInstances.TryGetValue(prefab, out var stack) == true && stack.Count > 0) {
 
                     var instance = stack.Pop();
                     if (instance == null) {
@@ -205,7 +195,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                         UIWSUtils.SetParent(instance.transform, root);
                         if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
-                        this.instanceOnSceneToPrefab.Add(instance, key);
+                        this.instanceOnSceneToPrefab.Add(instance, prefab);
                         fromPool = true;
 
                         result = (T)instance;
@@ -216,7 +206,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                     var instance = Object.Instantiate(prefab, root);
                     if (instance.gameObject.activeSelf == false) instance.gameObject.SetActive(true);
-                    this.instanceOnSceneToPrefab.Add(instance, key);
+                    this.instanceOnSceneToPrefab.Add(instance, prefab);
                     fromPool = false;
 
                     result = instance;
@@ -243,11 +233,11 @@ namespace UnityEngine.UI.Windows.Modules {
                 
             }
 
-            if (this.instanceOnSceneToPrefab.TryGetValue(instance, out var prefabKey) == true) {
+            if (this.instanceOnSceneToPrefab.TryGetValue(instance, out var prefab) == true) {
 
                 this.instanceOnSceneToPrefab.Remove(instance);
 
-                if (this.prefabToPooledInstances.TryGetValue(prefabKey, out var stack) == true) {
+                if (this.prefabToPooledInstances.TryGetValue(prefab, out var stack) == true) {
 
                     stack.Push(instance);
 
@@ -255,7 +245,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                     stack = new Stack<Component>();
                     stack.Push(instance);
-                    this.prefabToPooledInstances.Add(prefabKey, stack);
+                    this.prefabToPooledInstances.Add(prefab, stack);
 
                 }
 

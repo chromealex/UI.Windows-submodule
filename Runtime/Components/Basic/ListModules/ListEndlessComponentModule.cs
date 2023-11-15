@@ -504,13 +504,13 @@ namespace UnityEngine.UI.Windows {
                         accumulatedSize = padding.left;
                         break;
                     case Direction.Vertical:
-                        accumulatedSize = padding.bottom;
+                        accumulatedSize = padding.top;
                         break;
                     case Direction.HorizontalUpside:
                         accumulatedSize = padding.right;
                         break;
                     case Direction.VerticalUpside:
-                        accumulatedSize = padding.top;
+                        accumulatedSize = padding.bottom;
                         break;
                 }
                 if (this.prevCount > 0 && this.prevCount - 1 < this.items.Length) {
@@ -522,8 +522,9 @@ namespace UnityEngine.UI.Windows {
 
                     ref var item = ref this.items[i];
                     item.size = this.dataSource.GetSize(i);
+                    accumulatedSize += i == 0 ? 0 : this.layoutGroup.spacing;
                     item.accumulatedSize = accumulatedSize;
-                    accumulatedSize += item.size + this.layoutGroup.spacing;
+                    accumulatedSize += item.size;
 
                 }
                 
@@ -553,7 +554,7 @@ namespace UnityEngine.UI.Windows {
                     viewSize = scrollRect.rect.width;
                     break;
                 case Direction.Vertical:
-                    contentSize += padding.top;
+                    contentSize += padding.bottom;
                     posOffset = this.scrollRect.normalizedPosition.y;
                     axis.y = 1f;
                     viewSize = scrollRect.rect.height;
@@ -565,7 +566,7 @@ namespace UnityEngine.UI.Windows {
                     viewSize = scrollRect.rect.width;
                     break;
                 case Direction.VerticalUpside:
-                    contentSize += padding.bottom;
+                    contentSize += padding.top;
                     posOffset = this.scrollRect.normalizedPosition.y;
                     axis.y = 1f;
                     viewSize = scrollRect.rect.height;

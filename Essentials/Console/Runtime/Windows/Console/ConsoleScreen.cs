@@ -156,11 +156,21 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
             this.ApplyCommand(text);
             #else
+
+            #if ENABLE_INPUT_SYSTEM
+            if (UnityEngine.InputSystem.Keyboard.current.enterKey.wasPressedThisFrame == true) {
+
+                this.ApplyCommand(text);
+
+            }
+            #else
             if (Input.GetKeyDown(KeyCode.KeypadEnter) == true || Input.GetKeyDown(KeyCode.Return)) {
 
                 this.ApplyCommand(text);
 
             }
+            #endif
+
             #endif
 
         }
@@ -549,6 +559,25 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             if (this.GetState() != ObjectState.Shown) return;
             
+            #if ENABLE_INPUT_SYSTEM
+            if (UnityEngine.InputSystem.Keyboard.current.upArrowKey.wasPressedThisFrame == true) {
+
+                this.MoveUp();
+
+            }
+
+            if (UnityEngine.InputSystem.Keyboard.current.downArrowKey.wasPressedThisFrame == true) {
+
+                this.MoveDown();
+
+            }
+
+            if (UnityEngine.InputSystem.Keyboard.current.tabKey.wasPressedThisFrame == true) {
+
+                this.AutoComplete();
+
+            }
+            #else
             if (Input.GetKeyDown(KeyCode.UpArrow) == true) {
 
                 this.MoveUp();
@@ -566,6 +595,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                 this.AutoComplete();
 
             }
+            #endif
 
             if (Application.isMobilePlatform == false) {
 

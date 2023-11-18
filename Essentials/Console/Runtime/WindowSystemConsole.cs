@@ -360,12 +360,28 @@ namespace UnityEngine.UI.Windows {
                 this.AddLog(item.text, item.logType, item.trace);
                 
             }
+
+            #if ENABLE_INPUT_SYSTEM
+            var shouldActivate = (UnityEngine.InputSystem.Keyboard.current != null
+                                  && UnityEngine.InputSystem.Keyboard.current.backquoteKey.wasPressedThisFrame == true)
+                                 || (UnityEngine.InputSystem.Touchscreen.current != null
+                                     &&UnityEngine.InputSystem.Touchscreen.current.touches.Count >= 3);
+            var touchCount = UnityEngine.InputSystem.Touchscreen.current?.touches.Count ?? 0;
+            var lastTouchPhase = touchCount > 0
+                ? UnityEngine.InputSystem.Touchscreen.current?.touches[touchCount - 1].phase.value ?? UnityEngine.InputSystem.TouchPhase.None
+                : UnityEngine.InputSystem.TouchPhase.None;
+            var isLastTouchBegan = lastTouchPhase == UnityEngine.InputSystem.TouchPhase.Began;
+            #else
+            var shouldActivate = Input.GetKeyDown(KeyCode.BackQuote) == true || Input.touchCount >= 3;
+            var touchCount = Input.touchCount;
+            var lastTouchPhase = touchCount > 0 ? Input.GetTouch(Input.touchCount - 1).phase : TouchPhase.Canceled;
+            var isLastTouchBegan = lastTouchPhase == TouchPhase.Began;
+            #endif
             
-            if (Input.GetKeyDown(KeyCode.BackQuote) == true ||
-                Input.touchCount >= 3) {
+            if (shouldActivate) {
 
                 var isActive = true;
-                var checkTouch = Input.touchCount >= 3;
+                var checkTouch = touchCount >= 3;
                 if (checkTouch == true) {
 
                     isActive = false;
@@ -373,11 +389,11 @@ namespace UnityEngine.UI.Windows {
 
                     if (hasInstance == false) {
                         
-                        isActive = (Input.touchCount == 5 && Input.GetTouch(Input.touchCount - 1).phase == TouchPhase.Began);
+                        isActive = (touchCount == 5 && isLastTouchBegan == true);
                         
                     } else {
                         
-                        isActive = (Input.touchCount == 3 && Input.GetTouch(Input.touchCount - 1).phase == TouchPhase.Began);
+                        isActive = (touchCount == 3 && isLastTouchBegan == true);
                         
                     }
 

@@ -443,7 +443,28 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         }
 
         private void UpdateList() {
-            
+
+            #if ENABLE_INPUT_SYSTEM
+
+            if (UnityEngine.InputSystem.Keyboard.current?.upArrowKey.wasPressedThisFrame == true) {
+
+                this.MoveUp();
+
+            }
+
+            if (UnityEngine.InputSystem.Keyboard.current?.downArrowKey.wasPressedThisFrame == true) {
+
+                this.MoveDown();
+
+            }
+
+            if (UnityEngine.InputSystem.Keyboard.current?.tabKey.wasPressedThisFrame == true) {
+
+                this.AutoComplete();
+
+            }
+
+            #else
             if (Input.GetKeyDown(KeyCode.UpArrow) == true) {
 
                 this.MoveUp();
@@ -462,6 +483,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
             }
 
+            #endif
+
             this.TryToFocus();
 
             this.sendButton.SetEnabled(this.commandField.text.Length > 0);
@@ -473,11 +496,19 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
             this.ApplyCommand(text);
             #else
-            if (Input.GetKeyDown(KeyCode.KeypadEnter) == true || Input.GetKeyDown(KeyCode.Return)) {
+
+            #if ENABLE_INPUT_SYSTEM
+            var shouldApply = UnityEngine.InputSystem.Keyboard.current?.enterKey.wasPressedThisFrame == true;
+            #else
+            var shouldApply = Input.GetKeyDown(KeyCode.KeypadEnter) == true || Input.GetKeyDown(KeyCode.Return);
+            #endif
+
+            if (shouldApply == true) {
 
                 this.ApplyCommand(text);
 
             }
+
             #endif
 
         }

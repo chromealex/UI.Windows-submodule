@@ -1354,8 +1354,9 @@ namespace UnityEngine.UI.Windows {
             if (this.objectState <= ObjectState.Initializing) {
 
                 if (this.objectState == ObjectState.NotInitialized) {
-                    
-                    this.DoInit(() => this.Show(parameters));
+
+                    var copy = parameters;
+                    this.DoInit(() => this.Show(copy));
                     return;
 
                 } else {
@@ -1378,7 +1379,7 @@ namespace UnityEngine.UI.Windows {
 
             var cObj = this;
             var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetShown, cObj, cParams, false);
+            var cbParameters = parameters.ReplaceCallbackWithContext(static (obj, tr, internalCall) => WindowSystem.SetShown(obj, tr, internalCall), cObj, cParams, false);
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
@@ -1394,8 +1395,9 @@ namespace UnityEngine.UI.Windows {
             if (this.objectState <= ObjectState.Initializing) {
                 
                 if (this.objectState == ObjectState.NotInitialized) {
-                    
-                    this.DoInit(() => this.Hide(parameters));
+
+                    var copy = parameters;
+                    this.DoInit(() => this.Hide(copy));
                     return;
                     
                 } else {
@@ -1418,7 +1420,7 @@ namespace UnityEngine.UI.Windows {
 
             var cObj = this;
             var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetHidden, cObj, cParams, false);
+            var cbParameters = parameters.ReplaceCallbackWithContext(static (obj, tr, internalCall) => WindowSystem.SetHidden(obj, tr, internalCall), cObj, cParams, false);
             WindowSystem.HideInstance(this, cbParameters, internalCall: true);
 
         }

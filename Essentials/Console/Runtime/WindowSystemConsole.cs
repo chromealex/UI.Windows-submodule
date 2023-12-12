@@ -362,14 +362,11 @@ namespace UnityEngine.UI.Windows {
             }
 
             #if ENABLE_INPUT_SYSTEM
+            var touchCount = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches.Count;
             var shouldActivate = (UnityEngine.InputSystem.Keyboard.current != null
                                   && UnityEngine.InputSystem.Keyboard.current.backquoteKey.wasPressedThisFrame == true)
-                                 || (UnityEngine.InputSystem.Touchscreen.current != null
-                                     &&UnityEngine.InputSystem.Touchscreen.current.touches.Count >= 3);
-            var touchCount = UnityEngine.InputSystem.Touchscreen.current?.touches.Count ?? 0;
-            var lastTouchPhase = touchCount > 0
-                ? UnityEngine.InputSystem.Touchscreen.current?.touches[touchCount - 1].phase.value ?? UnityEngine.InputSystem.TouchPhase.None
-                : UnityEngine.InputSystem.TouchPhase.None;
+                                 || touchCount >= 3;
+            var lastTouchPhase = touchCount > 0 ? UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches[touchCount - 1].phase : UnityEngine.InputSystem.TouchPhase.None;
             var isLastTouchBegan = lastTouchPhase == UnityEngine.InputSystem.TouchPhase.Began;
             #else
             var shouldActivate = Input.GetKeyDown(KeyCode.BackQuote) == true || Input.touchCount >= 3;

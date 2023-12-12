@@ -673,9 +673,10 @@ namespace UnityEngine.UI.Windows {
             this.hasPointerDownThisFrame = false;
             
             #if ENABLE_INPUT_SYSTEM
-            if (UnityEngine.InputSystem.Mouse.current.leftButton.wasReleasedThisFrame == true ||
+            if (UnityEngine.InputSystem.Mouse.current != null &&
+                (UnityEngine.InputSystem.Mouse.current.leftButton.wasReleasedThisFrame == true ||
                 UnityEngine.InputSystem.Mouse.current.rightButton.wasReleasedThisFrame == true ||
-                UnityEngine.InputSystem.Mouse.current.middleButton.wasReleasedThisFrame == true) {
+                UnityEngine.InputSystem.Mouse.current.middleButton.wasReleasedThisFrame == true)) {
                 
                 this.pointerScreenPosition = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
                 this.hasPointerUpThisFrame = true;

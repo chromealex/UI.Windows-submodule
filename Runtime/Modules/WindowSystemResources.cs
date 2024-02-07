@@ -598,6 +598,7 @@ namespace UnityEngine.UI.Windows.Modules {
         private IEnumerator LoadAddressable_INTERNAL<TResource, TResult>(LoadParameters loadParameters, object handler, Resource resource, System.Func<TResource, TResult> converter) {
             
             var op = Addressables.LoadAssetAsync<TResource>(resource.GetAddress());
+            yield return null;
             System.Action cancellationTask = () => { if (op.IsValid() == true) Addressables.Release(op); };
             this.LoadBegin(handler, cancellationTask);
             if (loadParameters.async == false) op.WaitForCompletion();

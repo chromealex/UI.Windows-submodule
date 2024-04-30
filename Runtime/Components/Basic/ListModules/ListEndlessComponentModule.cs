@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace UnityEngine.UI.Windows {
 
@@ -6,7 +7,8 @@ namespace UnityEngine.UI.Windows {
 
     public interface IEndlessElement {
 
-        void GetHeight();
+        // void GetHeight();
+        public int GetIndex();
 
     }
 
@@ -14,6 +16,15 @@ namespace UnityEngine.UI.Windows {
 
         float GetSize(int index);
         
+    }
+    
+    public struct ItemInstanceToRedraw {
+
+        public WindowComponent instance;
+        public int prevIndex;
+        public int reqIndex;
+        public bool shouldToRebuild;
+
     }
     
     [ComponentModuleDisplayName("Endless List")]
@@ -61,6 +72,10 @@ namespace UnityEngine.UI.Windows {
                 public Item<T, TClosure> item;
 
             }
+            
+            private List<Item<T, TClosure>> itemsToRedraw = new List<Item<T, TClosure>>();
+            private List<ItemInstanceToRedraw> instancesToRedraw = new List<ItemInstanceToRedraw>();
+            private Dictionary<int, int> instancePrevIndexToListIndex = new Dictionary<int, int>();
             
             public override void UpdateContent(bool forceRebuild = false) {
 
@@ -119,6 +134,10 @@ namespace UnityEngine.UI.Windows {
                 }
 
                 if (this.isDirty == true || forceRebuild == true) {
+                    
+                    this.instancesToRedraw.Clear();
+                    this.itemsToRedraw.Clear();
+                    this.instancePrevIndexToListIndex.Clear();
                 
                     // Update
                     var k = 0;
@@ -203,23 +222,77 @@ namespace UnityEngine.UI.Windows {
 
                         }
 
-                        if (isLocalDirty == true || this.forceRebuild == true || forceRebuild == true) LayoutRebuilder.ForceRebuildLayoutImmediate(instance.rectTransform);
-
                         {
 
-                            //if (item.closure.index != i || item.initialized == false)
-                            {
-                                item.closure.index = i;
-                                item.onItem.Invoke((T)instance, item.closure);
+                            item.closure.index = i;
+                            var endlessElement = instance as IEndlessElement;
+                            var prevIndex = -1;
+                            if (endlessElement != null) {
+                                prevIndex = endlessElement.GetIndex();
                             }
-                            
+                            this.instancesToRedraw.Add(new ItemInstanceToRedraw() {
+                                instance = instance,
+                                prevIndex = prevIndex,
+                                reqIndex = i,
+                                shouldToRebuild = isLocalDirty == true || this.forceRebuild == true || forceRebuild == true,
+                            });
+                            this.itemsToRedraw.Add(item);
+
+                            this.instancePrevIndexToListIndex.TryAdd(prevIndex, this.instancesToRedraw.Count - 1);
 
                         }
 
                         ++k;
 
                     }
-                    
+
+                    for (var i = 0; i < this.itemsToRedraw.Count; ++i) {
+
+                        var item = this.itemsToRedraw[i];
+                        var itemVisibleIndex = item.closure.index;
+
+                        var actualInstance = this.instancesToRedraw[i];
+
+                        if (this.instancePrevIndexToListIndex.TryGetValue(itemVisibleIndex, out var indexFitInstance) ==
+                            false) continue;
+
+                        var fitInstance = this.instancesToRedraw[indexFitInstance];
+
+                        if (fitInstance.instance == actualInstance.instance) continue;
+
+                        // swap instances
+                        (fitInstance.instance.rectTransform.anchoredPosition,
+                            actualInstance.instance.rectTransform.anchoredPosition) = (
+                            actualInstance.instance.rectTransform.anchoredPosition,
+                            fitInstance.instance.rectTransform.anchoredPosition);
+                        (fitInstance.prevIndex, actualInstance.prevIndex) =
+                            (actualInstance.prevIndex, fitInstance.prevIndex);
+                        (fitInstance.instance, actualInstance.instance) =
+                            (actualInstance.instance, fitInstance.instance);
+
+                        actualInstance.shouldToRebuild = true;
+                        fitInstance.shouldToRebuild = true;
+
+                        this.instancesToRedraw[indexFitInstance] = fitInstance;
+                        this.instancesToRedraw[i] = actualInstance;
+
+                        this.instancePrevIndexToListIndex[fitInstance.prevIndex] = indexFitInstance;
+                        this.instancePrevIndexToListIndex[actualInstance.prevIndex] = i;
+
+                    }
+
+                    for (var i = 0; i < this.itemsToRedraw.Count; ++i) {
+
+                        var item = this.itemsToRedraw[i];
+                        var instanceToRedraw = this.instancesToRedraw[i];
+
+                        if (instanceToRedraw.shouldToRebuild == true) {
+                            item.onItem.Invoke((T) instanceToRedraw.instance, item.closure);
+                            LayoutRebuilder.ForceRebuildLayoutImmediate(instanceToRedraw.instance.rectTransform);
+                        }
+
+                    }
+
                     this.isDirty = false;
                     
                 }

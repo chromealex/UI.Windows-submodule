@@ -164,8 +164,10 @@ namespace UnityEngine.UI.Windows.Components {
                     case Resource.ObjectType.Sprite: {
                         if (async == true) {
                             UnityEngine.UI.Windows.Utilities.Coroutines.Run(resources.LoadAsync<Sprite>(this, resource, (asset, _) => {
-                                this.SetImage(asset);
-                                onSetImageComplete?.Invoke();
+                                if (this != null) {
+                                    this.SetImage(asset);
+                                    onSetImageComplete?.Invoke();
+                                }
                             }));
                         } else {
                             this.SetImage(resources.Load<Sprite>(this, resource));
@@ -177,8 +179,10 @@ namespace UnityEngine.UI.Windows.Components {
                     case Resource.ObjectType.Texture: {
                         if (async == true) {
                             UnityEngine.UI.Windows.Utilities.Coroutines.Run(resources.LoadAsync<Texture>(this, resource, (asset, _) => {
-                                this.SetImage(asset);
-                                onSetImageComplete?.Invoke();
+                                if (this != null) {
+                                    this.SetImage(asset);
+                                    onSetImageComplete?.Invoke();
+                                }
                             }));
                         } else {
                             this.SetImage(resources.Load<Texture>(this, resource));

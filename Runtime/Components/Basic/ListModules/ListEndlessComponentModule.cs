@@ -79,7 +79,6 @@ namespace UnityEngine.UI.Windows {
             
             public override void UpdateContent(bool forceRebuild = false) {
 
-                ref var currentVisibleCount = ref this.module.currentVisibleCount;
                 ref var requiredVisibleCount = ref this.module.requiredVisibleCount;
                 var fromIndex = this.module.fromIndex;
                 var toIndex = this.module.toIndex;
@@ -95,7 +94,7 @@ namespace UnityEngine.UI.Windows {
 
                 }
 
-                var delta = requiredVisibleCount - currentVisibleCount;
+                var delta = requiredVisibleCount - this.module.listComponent.items.Count;
                 if (delta > 0) {
 
                     if (this.loadingCount == 0) {
@@ -104,8 +103,6 @@ namespace UnityEngine.UI.Windows {
 
                             var k = i + fromIndex;
                             var item = this.items[k];
-                            //item.closure.index = k;
-                            ++currentVisibleCount;
                             ++this.loadingCount;
                             this.module.listComponent.AddItemInternal<T, InnerClosure>(item.source, new InnerClosure() { closure = item.closure, registry = this, item = item, },
                                                                                        (obj, closure) => {
@@ -125,7 +122,6 @@ namespace UnityEngine.UI.Windows {
                     if (this.loadingCount == 0) {
 
                         //Debug.Log("REMOVE ITEMS: " + delta);
-                        currentVisibleCount += delta;
                         this.module.listComponent.RemoveRange(this.module.listComponent.items.Count + delta, this.module.listComponent.items.Count);
                         this.isDirty = true;
 
@@ -338,7 +334,6 @@ namespace UnityEngine.UI.Windows {
         public float createOffset = 50f;
         
         private int allCount;
-        private int currentVisibleCount;
         private int requiredVisibleCount;
         private int fromIndex;
         private int toIndex;

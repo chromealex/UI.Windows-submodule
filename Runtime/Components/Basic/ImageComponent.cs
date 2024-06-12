@@ -147,10 +147,10 @@ namespace UnityEngine.UI.Windows.Components {
 
         private Resource prevResourceLoad;
 
-        public void SetImage<T>(T provider) where T : IResourceProvider {
+        public void SetImage<T>(T provider, bool async = true) where T : IResourceProvider {
 
             if (provider == null) return;
-            this.SetImage(provider.GetResource());
+            this.SetImage(provider.GetResource(), async);
 
         }
 

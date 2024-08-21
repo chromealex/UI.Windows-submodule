@@ -362,23 +362,38 @@ namespace UnityEditor.UI.Windows {
                                             
                                                 EditorHelpers.FindType(component, typeof(Resource<>), (fieldInfo, res) => {
 
-                                                    var rField =
-                                                        (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
-                                                    var r = (Resource)rField.GetValue(res);
-                                                    System.Type type = null;
-                                                    var _fieldInfo = (System.Reflection.FieldInfo)fieldInfo;
-                                                    if (_fieldInfo.FieldType.IsArray == true) {
-                                                        type = _fieldInfo.FieldType.GetElementType().GetGenericArguments()[0];
-                                                    } else {
-                                                        type = _fieldInfo.FieldType.GetGenericArguments()[0];
+                                                    try {
+
+                                                        Debug.Log($"Validating reference for asset {path}, {guid}");
+
+                                                        var rField =
+                                                            (res.GetType().GetField("data",
+                                                                System.Reflection.BindingFlags.Instance |
+                                                                System.Reflection.BindingFlags.NonPublic));
+                                                        var r = (Resource) rField.GetValue(res);
+                                                        System.Type type = null;
+                                                        var _fieldInfo = (System.Reflection.FieldInfo) fieldInfo;
+                                                        if (_fieldInfo.FieldType.IsArray == true) {
+                                                            type = _fieldInfo.FieldType.GetElementType()
+                                                                .GetGenericArguments()[0];
+                                                        }
+                                                        else {
+                                                            type = _fieldInfo.FieldType.GetGenericArguments()[0];
+                                                        }
+
+                                                        WindowSystemResourcesResourcePropertyDrawer.Validate(ref r,
+                                                            type);
+                                                        ++markDirtyCount;
+                                                        rField.SetValue(res, r);
+                                                        EditorUtility.SetDirty(component.gameObject);
+                                                        return res;
+
+                                                    }
+                                                    catch (System.Exception ex) {
+                                                        Debug.LogException(ex);
+                                                        throw;
                                                     }
 
-                                                    WindowSystemResourcesResourcePropertyDrawer.Validate(ref r, type);
-                                                    ++markDirtyCount;
-                                                    rField.SetValue(res, r);
-                                                    EditorUtility.SetDirty(component.gameObject);
-                                                    return res;
-                                                    
                                                 }, visitedGeneric);
                                                 
                                             }

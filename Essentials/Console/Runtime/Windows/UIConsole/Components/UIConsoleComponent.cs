@@ -6,6 +6,14 @@ using UnityEngine.UIElements;
 namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
     using Button = UnityEngine.UIElements.Button;
+
+    internal enum EventSource {
+
+        UIButton,
+        Keyboard,
+        Input,
+
+    }
     
     public class UIConsoleComponent : WindowComponent {
 
@@ -341,7 +349,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
                 this.sendButton = this.document.rootVisualElement.Q<Button>(className: "button-send");
                 this.sendButton.RegisterCallback<ClickEvent>(evt => {
                     if (this.commandField == null) return;
-                    this.OnEditEnd(this.commandField.text);
+                    this.OnEditEnd(this.commandField.text, EventSource.UIButton);
                 });
 
                 this.fastLinksContainer = this.document.rootVisualElement.Q<VisualElement>(className: "top-panel");
@@ -391,10 +399,10 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
                     });
                 });
                 
-                this.commandField.RegisterCallback<InputEvent>(evt => { this.OnEditEnd(evt.newData); });
+                this.commandField.RegisterCallback<InputEvent>(evt => { this.OnEditEnd(evt.newData, EventSource.Input); });
                 this.commandField.RegisterCallback<KeyDownEvent>(evt => {
                     if (this.commandField == null) return;
-                    this.OnEditEnd(this.commandField.text);
+                    this.OnEditEnd(this.commandField.text, EventSource.Keyboard);
                 });
 
                 this.GenerateFastLinks();
@@ -491,11 +499,12 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             
         }
 
-        private void OnEditEnd(string text) {
+        private void OnEditEnd(string text, EventSource eventSource) {
 
-            #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-            this.ApplyCommand(text);
-            #else
+            if (eventSource == EventSource.UIButton) {
+                this.ApplyCommand(text);
+                return;
+            }
 
             #if ENABLE_INPUT_SYSTEM
             var shouldApply = UnityEngine.InputSystem.Keyboard.current?.enterKey.wasPressedThisFrame == true;
@@ -508,8 +517,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
                 this.ApplyCommand(text);
 
             }
-
-            #endif
 
         }
         

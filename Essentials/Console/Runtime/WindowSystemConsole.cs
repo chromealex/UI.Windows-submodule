@@ -404,7 +404,7 @@ namespace UnityEngine.UI.Windows {
 
                             this.consoleWindowInstance = WindowSystem.ShowSync<UnityEngine.UI.Windows.Runtime.Windows.ConsoleScreen>(x => {
 
-                                WindowSystem.GetEvents().RegisterOnce(x, WindowEvent.OnHideBegin, () => { this.consoleWindowInstance = null; });
+                                WindowSystem.GetEvents().RegisterOnce(x, WindowEvent.OnHideBegin, (obj) => { this.consoleWindowInstance = null; });
                                 x.OnEmptyPass();
 
                             });
@@ -422,7 +422,7 @@ namespace UnityEngine.UI.Windows {
 
                             this.consoleWindowInstance = WindowSystem.ShowSync<UnityEngine.UI.Windows.Runtime.Windows.UIConsoleScreen>(x => {
 
-                                WindowSystem.GetEvents().RegisterOnce(x, WindowEvent.OnHideBegin, () => { this.consoleWindowInstance = null; });
+                                WindowSystem.GetEvents().RegisterOnce(x, WindowEvent.OnHideBegin, (obj) => { this.consoleWindowInstance = null; });
                                 x.OnEmptyPass();
 
                             });

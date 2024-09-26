@@ -13,9 +13,9 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
 
-        internal Dictionary<int, System.Action<WindowObject>> cacheWindows = new Dictionary<int, System.Action<WindowObject>>();
-        internal Dictionary<long, System.Action> cache = new Dictionary<long, System.Action>();
-        internal Dictionary<long, System.Action> cacheOnce = new Dictionary<long, System.Action>();
+        internal Dictionary<int, System.Action<WindowObject>> cacheUnknown = new Dictionary<int, System.Action<WindowObject>>();
+        internal Dictionary<long, System.Action<WindowObject>> cache = new Dictionary<long, System.Action<WindowObject>>();
+        internal Dictionary<long, System.Action<WindowObject>> cacheOnce = new Dictionary<long, System.Action<WindowObject>>();
         internal Dictionary<long, Info> objects = new Dictionary<long, Info>();
         internal int eventsCount;
 
@@ -33,7 +33,7 @@ namespace UnityEngine.UI.Windows.Modules {
             {
                 if (this.cache.TryGetValue(key, out var actions) == true) {
 
-                    actions?.Invoke();
+                    actions?.Invoke(instance);
 
                 }
             }
@@ -41,17 +41,17 @@ namespace UnityEngine.UI.Windows.Modules {
             {
                 if (this.cacheOnce.TryGetValue(key, out var actions) == true) {
 
-                    actions?.Invoke();
+                    actions?.Invoke(instance);
                     this.cacheOnce.Remove(key);
 
                 }
             }
 
-            if (instance is WindowObject window) {
+            {
                 
-                if (this.cacheWindows.TryGetValue((int)windowEvent, out var actions) == true) {
+                if (this.cacheUnknown.TryGetValue((int)windowEvent, out var actions) == true) {
 
-                    actions?.Invoke(window);
+                    actions?.Invoke(instance);
 
                 }
                 
@@ -64,14 +64,14 @@ namespace UnityEngine.UI.Windows.Modules {
             if (windowEvent == WindowEvent.None) return;
 
             var key = (int)windowEvent;
-            if (this.cacheWindows.TryGetValue(key, out var actions) == true) {
+            if (this.cacheUnknown.TryGetValue(key, out var actions) == true) {
 
                 actions += callback;
-                this.cacheWindows[key] = actions;
+                this.cacheUnknown[key] = actions;
 
             } else {
 
-                this.cacheWindows.Add(key, callback);
+                this.cacheUnknown.Add(key, callback);
 
             }
             
@@ -82,10 +82,10 @@ namespace UnityEngine.UI.Windows.Modules {
             if (windowEvent == WindowEvent.None) return;
 
             var key = (int)windowEvent;
-            if (this.cacheWindows.TryGetValue(key, out var actions) == true) {
+            if (this.cacheUnknown.TryGetValue(key, out var actions) == true) {
 
                 actions -= callback;
-                this.cacheWindows[key] = actions;
+                this.cacheUnknown[key] = actions;
 
             }
             
@@ -124,7 +124,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        public void RegisterOnce(WindowObject instance, WindowEvent windowEvent, System.Action callback) {
+        public void RegisterOnce(WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject> callback) {
 
             if (windowEvent == WindowEvent.None) return;
 
@@ -144,7 +144,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        public void Register(WindowObject instance, WindowEvent windowEvent, System.Action callback) {
+        public void Register(WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject> callback) {
 
             if (windowEvent == WindowEvent.None) return;
 
@@ -164,7 +164,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        public void UnRegister(WindowObject instance, WindowEvent windowEvent, System.Action callback) {
+        public void UnRegister(WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject> callback) {
 
             if (windowEvent == WindowEvent.None) return;
 

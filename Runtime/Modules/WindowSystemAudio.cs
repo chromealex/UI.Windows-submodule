@@ -30,8 +30,8 @@
         public AudioClip clip;
         #endif
 
-        private System.Action onPlayCallback;
-        private System.Action onStopCallback;
+        private System.Action<WindowObject> onPlayCallback;
+        private System.Action<WindowObject> onStopCallback;
         
         public void Initialize(WindowObject handler) {
 
@@ -59,7 +59,7 @@
 
         }
 
-        public void DoPlay() {
+        public void DoPlay(WindowObject obj) {
             
             #if FMOD_SUPPORT
             this.fmodAudioComponent.Play();
@@ -70,7 +70,7 @@
 
         }
 
-        public void DoStop() {
+        public void DoStop(WindowObject obj) {
             
             #if FMOD_SUPPORT
             this.fmodAudioComponent.Stop();

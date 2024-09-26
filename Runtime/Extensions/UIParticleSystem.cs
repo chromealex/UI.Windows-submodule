@@ -17,7 +17,7 @@ namespace UnityEngine.UI.Windows {
 
             if (this.windowObject.GetState() >= ObjectState.Showing) {
                 
-                this.ApplyOrder();
+                this.ApplyOrder(this.windowObject);
                 
             } else {
             
@@ -27,7 +27,7 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        private void ApplyOrder() {
+        private void ApplyOrder(WindowObject obj) {
 
             this.particleSystemRenderer.sortingOrder = this.windowObject.GetWindow().GetCanvasOrder() + this.sortingOrder;
             if (string.IsNullOrEmpty(this.sortingLayerName) == false) this.particleSystemRenderer.sortingLayerName = this.sortingLayerName;

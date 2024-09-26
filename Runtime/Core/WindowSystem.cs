@@ -417,7 +417,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public void Start() {
+        public virtual void Start() {
 
             if (this.modules != null) {
 
@@ -961,21 +961,21 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static void RegisterActionOnce(WindowObject instance, WindowEvent windowEvent, System.Action callback) {
+        public static void RegisterActionOnce(WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject> callback) {
 
             var events = WindowSystem.GetEvents();
             events.RegisterOnce(instance, windowEvent, callback);
 
         }
 
-        public static void RegisterAction(WindowObject instance, WindowEvent windowEvent, System.Action callback) {
+        public static void RegisterAction(WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject> callback) {
 
             var events = WindowSystem.GetEvents();
             events.Register(instance, windowEvent, callback);
 
         }
 
-        public static void UnRegisterAction(WindowObject instance, WindowEvent windowEvent, System.Action callback) {
+        public static void UnRegisterAction(WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject> callback) {
 
             var events = WindowSystem.GetEvents();
             events.UnRegister(instance, windowEvent, callback);
@@ -1802,7 +1802,7 @@ namespace UnityEngine.UI.Windows {
 
                     }
 
-                    WindowSystem.RegisterActionOnce(existInstance, state, () => { this.Show_INTERNAL(existInstance, initialParameters, onInitialized, transitionParameters); });
+                    WindowSystem.RegisterActionOnce(existInstance, state, (obj) => { this.Show_INTERNAL(existInstance, initialParameters, onInitialized, transitionParameters); });
 
                     return;
 

@@ -129,8 +129,11 @@ namespace UnityEditor.UI.Windows {
                         if (loadedBundles.Count == 0) {
                             
                             GUILayout.Space(10f);
-                            if (UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.ActivePlayModeDataBuilder is UnityEditor.AddressableAssets.Build
+                            if (
+                                #if UNITY_2023_OR_NEWER
+                                UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.ActivePlayModeDataBuilder is UnityEditor.AddressableAssets.Build
                                     .DataBuilders.BuildScriptVirtualMode ||
+                                #endif
                                 UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings.ActivePlayModeDataBuilder is UnityEditor.AddressableAssets.Build
                                     .DataBuilders.BuildScriptFastMode) {
                                 

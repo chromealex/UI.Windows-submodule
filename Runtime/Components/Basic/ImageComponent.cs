@@ -254,6 +254,13 @@ namespace UnityEngine.UI.Windows.Components {
             if(this.graphics == null) this.graphics = this.GetComponent<Graphic>();
 
         }
+        
+        public void SetFillAmount(float value) {
+
+            if (this.graphics == null) return;
+            if (this.graphics is Image image) image.fillAmount = value;
+
+        }
 
     }
 

@@ -145,10 +145,28 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public void SetCallback<TState>(TState state, System.Action<TState> callback) where TState : System.IEquatable<TState> {
+        private struct SetCallbackData<T> : System.IEquatable<SetCallbackData<T>> {
+
+            public T data;
+            public System.Action<T> callback;
+
+            public bool Equals(SetCallbackData<T> other) {
+                return System.Collections.Generic.EqualityComparer<T>.Default.Equals(this.data, other.data);
+            }
+
+            public override bool Equals(object obj) {
+                return obj is SetCallbackData<T> other && Equals(other);
+            }
+
+            public override int GetHashCode() {
+                return System.Collections.Generic.EqualityComparer<T>.Default.GetHashCode(this.data);
+            }
+        }
+        
+        public void SetCallback<TState>(TState state, System.Action<TState> callback) {
 
             this.RemoveCallbacks();
-            this.AddCallback(state, callback);
+            this.AddCallback(new SetCallbackData<TState> { data = state, callback = callback }, static (s) => s.callback.Invoke(s.data));
 
         }
 

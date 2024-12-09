@@ -354,6 +354,7 @@ namespace UnityEngine.UI.Windows {
 
         private WindowBase consoleWindowInstance;
         public void Update() {
+            #if !PRODUCTION
 
             while(this.linesCache.TryDequeue(out var item)) {
                 
@@ -439,6 +440,8 @@ namespace UnityEngine.UI.Windows {
                 }
 
             }
+            
+            #endif
 
         }
 

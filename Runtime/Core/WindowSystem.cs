@@ -282,7 +282,7 @@ namespace UnityEngine.UI.Windows {
         private List<WindowItem> currentWindows = new List<WindowItem>();
         private Dictionary<int, int> windowsCountByLayer = new Dictionary<int, int>();
         private Dictionary<int, WindowBase> topWindowsByLayer = new Dictionary<int, WindowBase>();
-        private Dictionary<int, WindowBase> hashToPrefabs = new Dictionary<int, WindowBase>();
+        private Dictionary<System.Type, WindowBase> hashToPrefabs = new Dictionary<System.Type, WindowBase>();
 
         private bool loaderShowBegin;
         private WindowBase loaderInstance;
@@ -404,14 +404,12 @@ namespace UnityEngine.UI.Windows {
 
             foreach (var item in this.registeredPrefabs) {
 
-                var key = item.GetType().GetHashCode();
-                if (this.hashToPrefabs.ContainsKey(key) == true) {
+                var key = item.GetType();
+                if (this.hashToPrefabs.TryAdd(key, item) != true) {
                     
                     Debug.LogWarning($"Window with hash `{key}` already exists in windows hash map!");
-                    continue;
                     
                 }
-                this.hashToPrefabs.Add(key, item);
 
             }
 
@@ -1627,21 +1625,15 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static WindowBase GetSource(int windowSourceId) {
-            
-            if (WindowSystem.instance.hashToPrefabs.TryGetValue(windowSourceId, out var prefab) == true) {
+        public static WindowBase GetSource(System.Type type) {
 
-                return prefab;
-
-            }
-
-            return null;
+            return WindowSystem.instance.hashToPrefabs.GetValueOrDefault(type);
 
         }
 
         private T GetSource<T>() where T : WindowBase {
 
-            var hash = typeof(T).GetHashCode();
+            var hash = typeof(T);
             if (this.hashToPrefabs.TryGetValue(hash, out var prefab) == true) {
 
                 return (T)prefab;

@@ -233,9 +233,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 
             }
 
-            if (this.instanceOnSceneToPrefab.TryGetValue(instance, out var prefab) == true) {
-
-                this.instanceOnSceneToPrefab.Remove(instance);
+            if (this.instanceOnSceneToPrefab.Remove(instance, out var prefab) == true) {
 
                 if (this.prefabToPooledInstances.TryGetValue(prefab, out var stack) == true) {
 

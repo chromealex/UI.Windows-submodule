@@ -901,18 +901,13 @@ namespace UnityEngine.UI.Windows {
 
         internal virtual void Setup(WindowBase source) {
 
+            this.windowId = source.windowId;
+            this.window = source;
+
             if (this.hasObjectCanvas == true) {
                 
-                var windowCanvas = source.GetCanvas();
-                if (windowCanvas != null) {
-                    
-                    this.objectCanvas.overrideSorting = true;
-                    this.objectCanvas.sortingOrder = windowCanvas.sortingOrder + this.canvasSortingOrderDelta;
-                    this.objectCanvas.sortingLayerName = windowCanvas.sortingLayerName;
-                    this.objectCanvas.sortingLayerID = windowCanvas.sortingLayerID;
-                    
-                }
-
+                this.SetSortingOrderDelta(this.canvasSortingOrderDelta);
+                
             }
             
             for (int i = 0; i < this.subObjects.Count; ++i) {
@@ -927,9 +922,6 @@ namespace UnityEngine.UI.Windows {
                 this.canvasRenderers[i].SetCullTransparentMesh(true);
 
             }
-
-            this.windowId = source.windowId;
-            this.window = source;
 
         }
 

@@ -803,10 +803,11 @@ namespace UnityEngine.UI.Windows {
 
         private void TurnRenderBeneath(WindowBase window, bool state) {
 
-            var ordered = this.currentWindows.OrderByDescending(x => x.instance.GetDepth());
+            var ordered = this.currentWindows.OrderByDescending(x => x.instance.GetDepth()).ToList();
             foreach (var item in ordered) {
 
                 var instance = item.instance;
+                if (instance.IsVisible() == false) continue;
 
                 var depth = instance.GetDepth();
                 if (depth < window.GetDepth()) {
@@ -1772,7 +1773,7 @@ namespace UnityEngine.UI.Windows {
             instance.windowSourceId = source.GetType().GetHashCode();
             instance.windowId = instance.identifier;
             #if UNITY_EDITOR
-            instance.name = "[" + instance.identifier.ToString("00") + "] " + source.name;
+            instance.name = $"[{instance.identifier:00}] {source.name}";
             #endif
             instance.SetInitialParameters(initialParameters);
             GameObject.DontDestroyOnLoad(instance.gameObject);

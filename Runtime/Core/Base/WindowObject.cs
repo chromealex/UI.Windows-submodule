@@ -168,7 +168,7 @@ namespace UnityEngine.UI.Windows {
         public bool hasObjectCanvas;
         public Canvas objectCanvas;
         public int canvasSortingOrderDelta;
-        public RenderItem[] canvasRenderers;
+        public RenderItem[] canvasRenderers = System.Array.Empty<RenderItem>();
         
         //public CanvasGroup canvasGroupRender;
 

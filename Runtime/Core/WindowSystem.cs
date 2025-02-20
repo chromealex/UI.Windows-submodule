@@ -239,6 +239,7 @@ namespace UnityEngine.UI.Windows {
     [DefaultExecutionOrder(-1000)]
     public class WindowSystem : MonoBehaviour {
 
+        private const float CLICK_THRESHOLD = 0.125f;
         [System.Serializable]
         public struct WindowItem {
 
@@ -453,6 +454,7 @@ namespace UnityEngine.UI.Windows {
         private Vector2 pointerScreenPosition;
         private bool hasPointerUpThisFrame;
         private bool hasPointerDownThisFrame;
+        private float lastPointerActionTime;
 
         public static T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowComponent {
 
@@ -655,6 +657,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        
         public void Update() {
 
             if (this.modules != null) {
@@ -669,6 +672,7 @@ namespace UnityEngine.UI.Windows {
 
             this.hasPointerUpThisFrame = false;
             this.hasPointerDownThisFrame = false;
+            WindowSystemInput.hasPointerClickThisFrame.Data = false;
             
             #if ENABLE_INPUT_SYSTEM
             if (UnityEngine.InputSystem.Mouse.current != null &&
@@ -678,6 +682,7 @@ namespace UnityEngine.UI.Windows {
                 
                 this.pointerScreenPosition = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
                 this.hasPointerUpThisFrame = true;
+                this.lastPointerActionTime = Time.realtimeSinceStartup;
                 if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
                 
             }
@@ -692,6 +697,8 @@ namespace UnityEngine.UI.Windows {
 
                         this.pointerScreenPosition = touch.screenPosition;
                         this.hasPointerUpThisFrame = true;
+                        WindowSystemInput.hasPointerClickThisFrame.Data = (Time.realtimeSinceStartup - this.lastPointerActionTime) <= CLICK_THRESHOLD;
+                        this.lastPointerActionTime = Time.realtimeSinceStartup;
                         if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
 
                     }
@@ -706,6 +713,7 @@ namespace UnityEngine.UI.Windows {
                 
                 this.pointerScreenPosition = Input.mousePosition;
                 this.hasPointerDownThisFrame = true;
+                this.lastPointerActionTime = Time.realtimeSinceStartup;
                 if (WindowSystem.onPointerDown != null) WindowSystem.onPointerDown.Invoke();
                 
             }
@@ -716,6 +724,8 @@ namespace UnityEngine.UI.Windows {
                 
                 this.pointerScreenPosition = Input.mousePosition;
                 this.hasPointerUpThisFrame = true;
+                WindowSystemInput.hasPointerClickThisFrame.Data = (Time.realtimeSinceStartup - this.lastPointerActionTime) <= CLICK_THRESHOLD;
+                this.lastPointerActionTime = Time.realtimeSinceStartup;
                 if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
                 
             }

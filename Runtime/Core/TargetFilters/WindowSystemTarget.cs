@@ -42,7 +42,7 @@
                     var from = item.aspectFrom.x / item.aspectFrom.y;
                     var to = item.aspectTo.x / item.aspectTo.y;
                     var min = Mathf.Min(from, to);
-                    var max = Mathf.Min(from, to);
+                    var max = Mathf.Max(from, to);
                     if (aspect < min || aspect > max) return false;
 
                 }

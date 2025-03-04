@@ -85,9 +85,9 @@ namespace UnityEngine.UI.Windows {
                     resource = this,
                 };
                 
-                Coroutines.Run(WindowSystem.GetResources().LoadAsync<T, AsyncClosure>(handler, closure, this.data, (asset, p) => {
-                    this.loaded = asset;
-                    p.tcs.SetResult(this.loaded);
+                Coroutines.Run(WindowSystem.GetResources().LoadAsync<T, AsyncClosure>(handler, closure, this.data, static (asset, p) => {
+                    p.resource.loaded = asset;
+                    p.tcs.SetResult(p.resource.loaded);
                 }));
             }
 

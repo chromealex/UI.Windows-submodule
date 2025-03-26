@@ -2,7 +2,8 @@
     "name": "UI.Windows.Atlases",
     "rootNamespace": "",
     "references": [
-        "UI.Windows"
+        "UI.Windows",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

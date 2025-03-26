@@ -2,7 +2,8 @@
     "name": "UI.Windows.Essentials.UnityLocalization",
     "references": [
         "GUID:2df4fd010e8cc4ac8ac47736afb07034",
-        "GUID:eec0964c48f6f4e40bc3ec2257ccf8c5"
+        "GUID:eec0964c48f6f4e40bc3ec2257ccf8c5",
+        "GUID:2bafac87e7f4b9b418d9448d219b01ab"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

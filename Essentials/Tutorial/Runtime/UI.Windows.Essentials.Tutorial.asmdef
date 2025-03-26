@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "UI.Windows",
-        "UnityEngine.UIElementsModule"
+        "UnityEngine.UIElementsModule",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

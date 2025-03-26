@@ -5,7 +5,8 @@
         "UI.Windows",
         "Unity.Localization",
         "UnityEngine.UIElementsModule",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

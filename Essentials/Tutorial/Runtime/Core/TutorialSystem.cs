@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules;
+using System.Linq;
 
 namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
@@ -36,6 +37,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
     public class TutorialSystem : WindowSystemModule {
 
         public List<TutorialData> currentTutorialItems;
+        public List<TutorialData> itemsExecutedByName;
 
         public override void OnStart() {
 
@@ -139,6 +141,16 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
             return false;
 
+        }
+
+        public void ExecuteByName(string tutorialName) {
+            
+            var tutorialData = this.itemsExecutedByName.FirstOrDefault(i => i.name == tutorialName);
+            if (tutorialData == null) return;
+            var windowItem = WindowSystem.GetCurrentOpened().FirstOrDefault(i => UnityEngine.UI.Windows.Utilities.TypesCache.GetFullName(i.instance.GetType()) == tutorialData.forWindowType.type);
+            if (windowItem.instance == null) return;
+            this.TryToStart(windowItem.instance, tutorialData, tutorialData.startEvent);
+            
         }
 
     }

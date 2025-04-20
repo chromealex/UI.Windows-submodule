@@ -29,6 +29,11 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public void SetKey(UnityEngine.Localization.LocalizedString locString) {
+            this.key = locString;
+            this.OnChanged(locString.GetLocalizedString());
+        }
+
         private void OnChanged(string val) {
             
             this.textComponent.SetText(val);

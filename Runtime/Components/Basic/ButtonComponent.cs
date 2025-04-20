@@ -84,7 +84,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         public void RaiseClick() {
             
-            this.DoClick();
+            this.DoClickInternal();
             
         }
 

@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "UI.Windows",
-        "Unity.RenderPipelines.Universal.Runtime"
+        "Unity.RenderPipelines.Universal.Runtime",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

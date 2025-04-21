@@ -500,6 +500,10 @@ namespace UnityEngine.UI.Windows {
             
         }
 
+        public static bool HasWaitInteractable() {
+            return WindowSystem.instance.waitInteractables == null && WindowSystem.instance.waitInteractable == null;
+        }
+
         public static void WaitInteractable(System.Action onComplete, UnityEngine.UI.Windows.Components.IInteractable interactable) {
 
             WindowSystem.instance.waitInteractableOnComplete = onComplete;

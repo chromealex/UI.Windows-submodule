@@ -89,7 +89,7 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         public bool CanClick() {
-            
+
             if (this.GetWindow().GetState() != ObjectState.Showing &&
                 this.GetWindow().GetState() != ObjectState.Shown) {
 
@@ -106,6 +106,12 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
 
+            foreach (var module in WindowSystem.instance.modules) {
+                if (module is ICanClickCheckModule moduleClick) {
+                    if (moduleClick.CanClick(this) == false) return false;
+                }
+            }
+            
             return WindowSystem.CanInteractWith(this);
 
         }

@@ -8,4 +8,10 @@ namespace UnityEngine.UI.Windows {
 
     }
 
+    public interface ICanClickCheckModule {
+
+        bool CanClick(UnityEngine.UI.Windows.Components.IInteractable obj);
+
+    }
+
 }

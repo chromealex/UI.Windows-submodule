@@ -3,7 +3,7 @@
     public class WindowLayoutSafeZone : WindowComponent {
 
         [ContextMenu("Apply")]
-        public void Apply() {
+        public virtual void Apply() {
             
             var rect = this.rectTransform;
             rect.localScale = Vector3.one;

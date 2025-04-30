@@ -16,8 +16,11 @@
         public class RectState : State {
 
             public Vector2 anchorPosition;
+            public bool useInitialAnchorPosition;
             public Vector3 rotation;
+            public bool useInitialRotation;
             public Vector3 scale;
+            public bool useInitialScale;
 
             public override void CopyFrom(State other) {
 
@@ -62,7 +65,9 @@
         public override void OnValidate() {
 
             this.rectTransform = this.GetComponent<RectTransform>();
-
+            this.SetInitialValues(this.hiddenState);
+            this.SetInitialValues(this.shownState);
+            this.SetInitialValues(this.resetState);
         }
 
         public override State LerpState(State from, State to, float value) {
@@ -130,6 +135,14 @@
 
             return this.hiddenState;
 
+        }
+
+        private void SetInitialValues(RectState state) {
+            
+            if (state.useInitialAnchorPosition == true) state.anchorPosition = this.rectTransform.anchoredPosition;
+            if (state.useInitialRotation == true) state.rotation = this.rectTransform.localRotation.eulerAngles;
+            if (state.useInitialScale == true) state.scale = this.rectTransform.localScale;
+            
         }
 
     }

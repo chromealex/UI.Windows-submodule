@@ -476,6 +476,12 @@ namespace UnityEngine.UI.Windows {
             WindowSystem.instance.lockInteractables = true;
 
         }
+        
+        public static void UnlockAllInteractables() {
+
+            WindowSystem.instance.lockInteractables = false;
+
+        }
 
         public static void SetCallbackOnAnyInteractable(System.Action<UnityEngine.UI.Windows.Components.IInteractable> callback) {
 

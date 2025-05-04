@@ -169,7 +169,7 @@ namespace UnityEditor.UI.Windows {
                     GUILayoutExt.Separator();
                     GUILayout.Space(2f);
                     
-                    if (this.list == null) {
+                    if (this.selectedTab != idx || this.list == null) {
                 
                         var componentsProp = prop.FindPropertyRelative("components");
                         this.list = new UnityEditorInternal.ReorderableList(property.serializedObject, componentsProp, true, true, false, false);

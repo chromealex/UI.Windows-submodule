@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <Style src="/Assets/UI.Windows-submodule/Essentials/Console/Runtime/Windows/UIConsole/Components/USS/Styles.uss" />
+    <Style src="../USS/Styles.uss" />
     <ui:VisualElement name="Container" class="popup-container">
         <ui:VisualElement name="Content-Container" class="line-popup-container content">
             <ui:ScrollView>

@@ -491,6 +491,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         #if UNITY_LOCALIZATION_SUPPORT
 
+        public static bool localizationTestMode;
         private UnityEngine.Localization.LocalizedString lastLocalizationKey;
         private bool avoidLocalizationUnsubscribe;
 
@@ -502,10 +503,14 @@ namespace UnityEngine.UI.Windows.Components {
                     this.lastLocalizationKey.StringChanged -= this.OnLocalizationStringChanged;
                 }
 
-                this.lastLocalizationKey = key;
-                this.lastLocalizationKey.Arguments = args;
-                this.lastLocalizationKey.StringChanged += this.OnLocalizationStringChanged;
-                this.lastLocalizationKey.RefreshString();
+                if (localizationTestMode == true) {
+                    this.OnLocalizationStringChanged($"#{key?.TableEntryReference.Key}#");
+                } else {
+                    this.lastLocalizationKey = key;
+                    this.lastLocalizationKey.Arguments = args;
+                    this.lastLocalizationKey.StringChanged += this.OnLocalizationStringChanged;
+                    this.lastLocalizationKey.RefreshString();
+                }
 
             }
 

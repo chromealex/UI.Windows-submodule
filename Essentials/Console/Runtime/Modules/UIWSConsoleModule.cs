@@ -9,6 +9,16 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
     [Alias("uiws")]
     public class UIWSConsoleModule : ConsoleModule {
 
+        #if UNITY_LOCALIZATION_SUPPORT
+        [UnityEngine.Scripting.PreserveAttribute]
+        [Help("Set localization test mode on/off")]
+        public void SetLocalizationTestMode(bool state) {
+
+            UnityEngine.UI.Windows.Components.TextComponent.localizationTestMode = state;
+
+        }
+        #endif
+        
         /*[FastLink("Open Test")]
         public ConsolePopup OpenTest() {
 

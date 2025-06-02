@@ -38,7 +38,8 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         public List<TutorialData> currentTutorialItems;
         public List<TutorialData> itemsExecutedByName;
-
+        public bool useDebugLogs;
+        
         public override void OnStart() {
 
             var events = WindowSystem.GetEvents();
@@ -132,7 +133,9 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                 };
                 if (tutorialData.IsValid(window, in context) == true) {
 
+                    if (this.useDebugLogs == true) Debug.Log($"[TutorialSystem] {tutorialData.name} started for window `{UnityEngine.UI.Windows.Utilities.TypesCache.GetFullName(window.GetType())}`");
                     tutorialData.OnStart(context);
+                    if (this.useDebugLogs == true) Debug.Log($"[TutorialSystem] {tutorialData.name} finished for window `{UnityEngine.UI.Windows.Utilities.TypesCache.GetFullName(window.GetType())}`");
                     return true;
 
                 }

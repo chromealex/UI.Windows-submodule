@@ -266,7 +266,9 @@ namespace UnityEngine.UI.Windows.Modules {
 
     using Utilities;
     
-    public interface IResourceConstructor<T> where T : class {
+    public interface IResourceConstructor {}
+    
+    public interface IResourceConstructor<T> : IResourceConstructor where T : class {
 
         T Construct();
         void Deconstruct(ref T obj);
@@ -351,7 +353,8 @@ namespace UnityEngine.UI.Windows.Modules {
             public Resource resource;
             public List<object> references;
             public HashSet<object> handlers;
-            public System.Action deconstruct;
+            public System.Action<object, IResourceConstructor> deconstruct;
+            public IResourceConstructor resourceConstructor;
 
             public int referencesCount => this.references.Count;
 
@@ -362,7 +365,8 @@ namespace UnityEngine.UI.Windows.Modules {
                 this.references = null;
                 this.handlers = null;
                 this.deconstruct = null;
-                
+                this.resourceConstructor = null;
+
             }
 
         }
@@ -500,7 +504,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
             if (this.loaded.TryGetValue(resource, out var internalResource) == true) {
 
-                this.AddObject(handler, internalResource.loaded, resource, internalResource.deconstruct);
+                this.AddObject(handler, internalResource.loaded, null, resource, internalResource.deconstruct);
                 this.CompleteTask(handler, resource, internalResource.loaded);
                 return true;
                 
@@ -568,15 +572,12 @@ namespace UnityEngine.UI.Windows.Modules {
 
                 case Resource.Type.Addressables: {
 
-
                     IEnumerator loader = null;
-
                     if (resource.objectType == Resource.ObjectType.Component) {
-                        loader = this.LoadAddressable_INTERNAL<GameObject, T>(loadParameters, handler, resource, go => {
+                        loader = this.LoadAddressable_INTERNAL<GameObject, T>(loadParameters, handler, resource, static go => {
                             var result = go.GetComponent<T>();
-                            if (result == null && this.showLogs == true) {
-                                Debug.LogError("[ UIWR ] Failed to load resource: " + resource.GetAddress() + ", gameObject loaded " + go +
-                                               ", but component was not found with type " + typeof(T));
+                            if (result == null && WindowSystem.GetResources().showLogs == true) {
+                                Debug.LogError($"[ UIWR ] Failed to load resource, gameObject loaded {go}, but component was not found with type {typeof(T)}");
                             }
 
                             return result;
@@ -595,7 +596,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        private IEnumerator LoadAddressable_INTERNAL<TResource, TResult>(LoadParameters loadParameters, object handler, Resource resource, System.Func<TResource, TResult> converter) {
+        private IEnumerator LoadAddressable_INTERNAL<TResource, TResult>(LoadParameters loadParameters, object handler, Resource resource, System.Func<TResource, TResult> converter) where TResult : class {
             
             var op = Addressables.LoadAssetAsync<TResource>(resource.GetAddress());
             yield return null;
@@ -613,21 +614,21 @@ namespace UnityEngine.UI.Windows.Modules {
 
                 } else {
 
-                    var result = converter(asset);
-                    this.AddObject(handler, result, resource, () => WindowSystemResources.ReleaseAddressableAsset(asset));
+                    var result = converter.Invoke(asset);
+                    this.AddObject(handler, result, null, resource, static (obj, _) => WindowSystemResources.ReleaseAddressableAsset(obj));
                     this.CompleteTask(handler, resource, result);
 
                 }
 
             } else {
-                            
-                if (this.showLogs == true) Debug.LogError("[ UIWR ] Resource failed while loading: " + resource + "\nValid: " + op.IsValid());
+                
+                if (this.showLogs == true) Debug.LogError($"[ UIWR ] Resource failed while loading: {resource}\nValid: {op.IsValid()}");
                 this.CompleteTask(handler, resource, null);
                             
             }
                         
             this.LoadEnd(handler, cancellationTask);
-            
+
         }
 
 
@@ -695,7 +696,10 @@ namespace UnityEngine.UI.Windows.Modules {
             if (handler == null) handler = this;
 
             var obj = resourceConstructor.Construct();
-            this.AddObject(handler, obj, new Resource() { type = Resource.Type.Manual }, () => resourceConstructor.Deconstruct(ref obj));
+            this.AddObject(handler, obj, resourceConstructor, new Resource() { type = Resource.Type.Manual }, static (o, resourceConstructor) => {
+                var obj = (T)o;
+                ((IResourceConstructor<T>)resourceConstructor).Deconstruct(ref obj);
+            });
             return obj;
 
         }
@@ -788,7 +792,7 @@ namespace UnityEngine.UI.Windows.Modules {
                         this.loadedObjCache.Remove(obj);
                         
                         intResource.handlers.Remove(handler);
-                        intResource.deconstruct?.Invoke();
+                        intResource.deconstruct?.Invoke(intResource.loaded, intResource.resourceConstructor);
                         PoolHashSet<object>.Recycle(ref intResource.handlers);
                         PoolList<object>.Recycle(ref intResource.references);
                         intResource.Reset();
@@ -805,14 +809,15 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        private void AddObject(object handler, object obj, Resource resource, System.Action deconstruct) {
+        private void AddObject(object handler, object obj, IResourceConstructor resourceConstructor, Resource resource, System.Action<object, IResourceConstructor> deconstruct) {
 
-            if (this.loaded.TryGetValue(resource, out var intResource) == false) {
+            if (resource.type == Resource.Type.Manual || this.loaded.TryGetValue(resource, out var intResource) == false) {
 
                 intResource = PoolClass<IntResource>.Spawn();
                 intResource.handlers = PoolHashSet<object>.Spawn();
                 intResource.references = PoolList<object>.Spawn();
                 intResource.loaded = obj;
+                intResource.resourceConstructor = resourceConstructor;
                 intResource.resource = resource;
                 intResource.deconstruct = deconstruct;
                 this.loaded.Add(resource, intResource);

@@ -1455,6 +1455,12 @@ namespace UnityEngine.UI.Windows {
             
         }
 
+        public static void HideAllAndClean(TransitionParameters parameters = default) {
+            
+            WindowSystem.HideAllAndClean(null, parameters);
+            
+        }
+
         public static void HideAllAndClean(System.Predicate<WindowBase> predicate, TransitionParameters parameters = default) {
 
             var list = PoolList<WindowBase>.Spawn();

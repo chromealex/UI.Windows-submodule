@@ -784,7 +784,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     
                     if (intResource.referencesCount == 0) {
 
-                        if (this.loaded.Remove(intResource.resource) == false && intResource.resource.type != Resource.Type.Manual) {
+                        if (this.loaded.Remove(intResource.resource) == false) {
                             
                             if (this.showLogs == true) Debug.LogError($"[ UIWR ] Remove resource failed while refCount = 0 and resource is {intResource.resource}");
                             
@@ -811,7 +811,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         private void AddObject(object handler, object obj, IResourceConstructor resourceConstructor, Resource resource, System.Action<object, IResourceConstructor> deconstruct) {
 
-            if (resource.type == Resource.Type.Manual || this.loaded.TryGetValue(resource, out var intResource) == false) {
+            if (this.loaded.TryGetValue(resource, out var intResource) == false) {
 
                 intResource = PoolClass<IntResource>.Spawn();
                 intResource.handlers = PoolHashSet<object>.Spawn();
@@ -820,7 +820,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 intResource.resourceConstructor = resourceConstructor;
                 intResource.resource = resource;
                 intResource.deconstruct = deconstruct;
-                if (resource.type != Resource.Type.Manual) this.loaded.Add(resource, intResource);
+                this.loaded.Add(resource, intResource);
                 this.loadedObjCache.Add(obj, intResource);
 
             }

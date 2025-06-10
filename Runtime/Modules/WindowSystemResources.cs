@@ -784,7 +784,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     
                     if (intResource.referencesCount == 0) {
 
-                        if (this.loaded.Remove(intResource.resource) == false) {
+                        if (this.loaded.Remove(intResource.resource) == false && intResource.resource.type != Resource.Type.Manual) {
                             
                             if (this.showLogs == true) Debug.LogError($"[ UIWR ] Remove resource failed while refCount = 0 and resource is {intResource.resource}");
                             
@@ -820,7 +820,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 intResource.resourceConstructor = resourceConstructor;
                 intResource.resource = resource;
                 intResource.deconstruct = deconstruct;
-                this.loaded.Add(resource, intResource);
+                if (resource.type != Resource.Type.Manual) this.loaded.Add(resource, intResource);
                 this.loadedObjCache.Add(obj, intResource);
 
             }

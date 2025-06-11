@@ -495,6 +495,11 @@ namespace UnityEngine.UI.Windows.Modules {
         }
 
         private static void ReleaseAddressableAsset<T>(T obj) {
+
+            if (obj is Component component) {
+                UnityEngine.AddressableAssets.Addressables.Release(component.gameObject);
+                return;
+            }
             
             UnityEngine.AddressableAssets.Addressables.Release(obj);
             

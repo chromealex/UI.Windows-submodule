@@ -59,10 +59,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
         }
 
-        public void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false, bool canCopy = false) {
-            this.consoleComponent.console.AddLine(text, logType, isCommand, canCopy);
-        }
-
     }
     
 }

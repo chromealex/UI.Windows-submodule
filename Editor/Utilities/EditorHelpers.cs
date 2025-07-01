@@ -231,13 +231,18 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        public static void FindType(object root, System.Type searchType, System.Func<MemberInfo, object, object> del, HashSet<object> visited = null, bool includeUnityObjects = false, System.Type[] ignoreTypes = null, bool getProperties = false) {
+        public static bool FindType(object root, System.Type searchType, System.Func<MemberInfo, object, object> del, HashSet<object> visited = null, bool includeUnityObjects = false, System.Type[] ignoreTypes = null, bool getProperties = false) {
+
+            var result = false;
             
-            if (root == null) return;
+            if (root == null) return result;
             if (visited == null) visited = new HashSet<object>();
 
-            if (visited.Contains(root) == true) return;
-            visited.Add(root);
+            if (root.GetType().IsValueType == false && root.GetType().IsPrimitive == false) {
+                                        
+                if (visited.Add(root) == false) return result;
+
+            }
 
             var isGeneric = searchType.IsGenericType;
             
@@ -257,7 +262,7 @@ namespace UnityEditor.UI.Windows {
             var rootType = root.GetType();
             if (ignoreTypes != null) {
 
-                if (System.Array.IndexOf(ignoreTypes, rootType) >= 0) return;
+                if (System.Array.IndexOf(ignoreTypes, rootType) >= 0) return result;
 
             }
 
@@ -278,6 +283,7 @@ namespace UnityEditor.UI.Windows {
 
                         var obj = field.GetValue(root);
                         field.SetValue(root, del.Invoke(field, obj));
+                        result = true;
 
                     } else if (field.PropertyType.IsArray == true) {
 
@@ -289,8 +295,12 @@ namespace UnityEditor.UI.Windows {
                                     if (check.Invoke(r.GetType(), searchType) == true) {
                                         arr.SetValue(del.Invoke(field, r), i);
                                     } else {
-                                        if (includeUnityObjects == true || (r is Object) == false) EditorHelpers.FindType(r, searchType, del, visited);
-                                        arr.SetValue(r, i);
+                                        var localResult = false;
+                                        if (includeUnityObjects == true || (r is Object) == false) localResult = EditorHelpers.FindType(r, searchType, del, visited);
+                                        if (localResult == true) {
+                                            arr.SetValue(r, i);
+                                            result = true;
+                                        }
                                     }
                                 }
                             }
@@ -298,9 +308,13 @@ namespace UnityEditor.UI.Windows {
 
                     } else {
 
+                        var localResult = false;
                         var obj = field.GetValue(root);
-                        if (includeUnityObjects == true || (obj is Object) == false) EditorHelpers.FindType(obj, searchType, del, visited);
-                        field.SetValue(root, obj);
+                        if (includeUnityObjects == true || (obj is Object) == false) localResult = EditorHelpers.FindType(obj, searchType, del, visited);
+                        if (localResult == true) {
+                            field.SetValue(root, obj);
+                            result = true;
+                        }
 
                     }
 
@@ -328,8 +342,12 @@ namespace UnityEditor.UI.Windows {
                                 if (check.Invoke(r.GetType(), searchType) == true) {
                                     arr.SetValue(del.Invoke(field, r), i);
                                 } else {
-                                    if (includeUnityObjects == true || (r is Object) == false) EditorHelpers.FindType(r, searchType, del, visited);
-                                    arr.SetValue(r, i);
+                                    var localResult = false;
+                                    if (includeUnityObjects == true || (r is Object) == false) localResult = EditorHelpers.FindType(r, searchType, del, visited);
+                                    if (localResult == true) {
+                                        arr.SetValue(r, i);
+                                        result = true;
+                                    }
                                 }
                             }
                         }
@@ -337,13 +355,18 @@ namespace UnityEditor.UI.Windows {
 
                 } else {
                     
+                    var localResult = false;
                     var obj = field.GetValue(root);
-                    if (includeUnityObjects == true || (obj is Object) == false) EditorHelpers.FindType(obj, searchType, del, visited);
-                    field.SetValue(root, obj);
-                    
+                    if (includeUnityObjects == true || (obj is Object) == false) localResult = EditorHelpers.FindType(obj, searchType, del, visited);
+                    if (localResult == true) {
+                        field.SetValue(root, obj);
+                        result = true;
+                    }
                 }
 
             }
+            
+            return result;
 
         }
 

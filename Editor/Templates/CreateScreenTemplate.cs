@@ -228,7 +228,12 @@ public static class ScriptTemplates {
             ScriptTemplates.CreateEmptyDirectory(dir, "Components");
             ScriptTemplates.CreateEmptyDirectory(dir, "Layouts");
 
-            ScriptTemplates.Create(dir + "/Screens", assetName + "Screen.prefab", "61-ScreenAsset", allowRename: false, customDefines: defs);
+            #if UNITY_URP
+            var templateName = "61-ScreenAsset-URP";
+            #else
+            var templateName = "61-ScreenAsset";
+            #endif
+            ScriptTemplates.Create(dir + "/Screens", assetName + "Screen.prefab", templateName, allowRename: false, customDefines: defs);
 
         }
             

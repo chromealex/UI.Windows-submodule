@@ -327,6 +327,7 @@
                                 if (stopOthersOnPlay == true) {
 
                                     item.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+                                    return default;
 
                                 }
 
@@ -411,19 +412,19 @@
             
         }
 
-        public void Play() {
+        public readonly void Play() {
             
             this.Play_INTERNAL(default, false);
             
         }
 
-        public void Play(Vector3 position) {
+        public readonly void Play(Vector3 position) {
             
             this.Play_INTERNAL(position, true);
             
         }
 
-        private void Play_INTERNAL(Vector3 position, bool usePosition) {
+        private readonly void Play_INTERNAL(Vector3 position, bool usePosition) {
 
             if (string.IsNullOrEmpty(this.audioEvent) == true) return;
 

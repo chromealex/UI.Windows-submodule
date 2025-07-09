@@ -154,6 +154,18 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        private readonly struct LoadClosure {
+
+            public readonly ImageComponent component;
+            public readonly System.Action onSetImageComplete;
+
+            public LoadClosure(ImageComponent component, System.Action onSetImageComplete) {
+                this.component = component;
+                this.onSetImageComplete = onSetImageComplete;
+            }
+
+        }
+        
         public void SetImage(Resource resource, bool async = true, System.Action onSetImageComplete = null) {
 
             if (this.prevResourceLoad.IsEquals(resource) == false) {
@@ -163,10 +175,10 @@ namespace UnityEngine.UI.Windows.Components {
 
                     case Resource.ObjectType.Sprite: {
                         if (async == true) {
-                            UnityEngine.UI.Windows.Utilities.Coroutines.Run(resources.LoadAsync<Sprite>(this, resource, (asset, _) => {
-                                if (this != null) {
-                                    this.SetImage(asset);
-                                    onSetImageComplete?.Invoke();
+                            UnityEngine.UI.Windows.Utilities.Coroutines.Run(resources.LoadAsync<Sprite, LoadClosure>(this, new LoadClosure(this, onSetImageComplete), resource, static (asset, data) => {
+                                if (data.component != null) {
+                                    data.component.SetImage(asset);
+                                    data.onSetImageComplete?.Invoke();
                                 }
                             }));
                         } else {
@@ -178,10 +190,10 @@ namespace UnityEngine.UI.Windows.Components {
 
                     case Resource.ObjectType.Texture: {
                         if (async == true) {
-                            UnityEngine.UI.Windows.Utilities.Coroutines.Run(resources.LoadAsync<Texture>(this, resource, (asset, _) => {
-                                if (this != null) {
-                                    this.SetImage(asset);
-                                    onSetImageComplete?.Invoke();
+                            UnityEngine.UI.Windows.Utilities.Coroutines.Run(resources.LoadAsync<Texture, LoadClosure>(this, new LoadClosure(this, onSetImageComplete), resource, static (asset, data) => {
+                                if (data.component != null) {
+                                    data.component.SetImage(asset);
+                                    data.onSetImageComplete?.Invoke();
                                 }
                             }));
                         } else {

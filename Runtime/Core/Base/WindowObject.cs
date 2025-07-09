@@ -928,7 +928,8 @@ namespace UnityEngine.UI.Windows {
         private bool CheckSubObject(List<WindowObject> subObjects, ref int index) {
             
             if (subObjects[index] == null) {
-                
+
+                if (this == null) return false;
                 Debug.LogError($"Null subObject encountered on window [{(this.window == null ? "Null" : this.window.name)}], object [{this.name}], index [{index}] (previous subObject is [{(index > 0 ? subObjects[index - 1].name : "Empty")}], next subObject is [{(index < subObjects.Count - 1 ? subObjects[index + 1].name : "Empty")}])");
                 this.subObjects.RemoveAt(index);
                 --index;

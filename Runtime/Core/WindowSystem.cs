@@ -1449,9 +1449,15 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static void HideAllAndClean<T>(System.Predicate<T> predicate, TransitionParameters parameters = default) where T : WindowBase {
+        public static void HideAllAndClean<T>(TransitionParameters parameters = default) where T : WindowBase {
             
             WindowSystem.HideAllAndClean((w) => w is T, parameters);
+            
+        }
+
+        public static void HideAllAndClean(TransitionParameters parameters = default) {
+            
+            WindowSystem.HideAllAndClean(null, parameters);
             
         }
 

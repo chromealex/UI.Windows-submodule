@@ -41,6 +41,7 @@ namespace UnityEngine.UI.Windows {
 
         void Hide();
         void CloseCustomPopup();
+        void AddLine(string text, LogType logType = LogType.Log, bool isCommand = false, bool canCopy = false);
 
     }
 

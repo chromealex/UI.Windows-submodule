@@ -467,9 +467,9 @@
                     instance.release();
                 } else {
                     if (this.autoRelease == true) {
-                        UnityEngine.UI.Windows.Utilities.Coroutines.WaitTime(this.autoReleaseDuration, () => {
+                        UnityEngine.UI.Windows.Utilities.Coroutines.WaitTime(instance, this.autoReleaseDuration, static (inst) => {
                             
-                            instance.release();
+                            inst.release();
 
                         });
                     }

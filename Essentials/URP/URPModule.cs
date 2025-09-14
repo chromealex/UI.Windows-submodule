@@ -12,21 +12,35 @@ namespace UnityEngine.UI.Windows {
         public virtual Camera MainCamera => Camera.main;
         
 #if UNITY_URP
+        private bool awaitForCamera;
         private void AddToStack(WindowObject obj) {
 
             if (obj is WindowBase window) {
                 this.cameras.Add(window.workCamera);
                 this.SortCameras();
-                var data = this.MainCamera.GetUniversalAdditionalCameraData();
-                foreach (var camera in this.cameras) {
-                    data.cameraStack.Remove(camera);
+                
+                if (this.MainCamera == null) {
+                    this.awaitForCamera = true;
+                    return;
                 }
-                foreach (var camera in this.cameras) {
-                    data.cameraStack.Add(camera);
-                }
+                
                 WindowSystem.GetEvents().RegisterOnce(window, WindowEvent.OnDeInitialize, this.RemoveFromStack);
+
+                this.UpdateStack();
             }
             
+        }
+
+        private void UpdateStack() {
+            
+            var data = this.MainCamera.GetUniversalAdditionalCameraData();
+            foreach (var camera in this.cameras) {
+                data.cameraStack.Remove(camera);
+            }
+            foreach (var camera in this.cameras) {
+                data.cameraStack.Add(camera);
+            }
+
         }
 
         private void SortCameras() {
@@ -37,11 +51,23 @@ namespace UnityEngine.UI.Windows {
             
             if (obj is WindowBase window) {
                 this.cameras.Remove(window.workCamera);
+                if (this.MainCamera == null) {
+                    return;
+                }
                 this.MainCamera.GetUniversalAdditionalCameraData().cameraStack.Remove(window.workCamera);
             }
             
         }
-        
+
+        public override void OnUpdate() {
+
+            if (this.awaitForCamera == true && this.MainCamera != null) {
+                this.awaitForCamera = false;
+                this.UpdateStack();
+            }
+            
+        }
+
         public override void OnStart() {
             WindowSystem.GetEvents().Register(WindowEvent.OnInitialize, this.AddToStack);
         }

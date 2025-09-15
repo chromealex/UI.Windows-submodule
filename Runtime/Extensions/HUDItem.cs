@@ -11,6 +11,9 @@ public class HUDItem : MonoBehaviour {
 
     public Vector3 offset;
 
+    public bool clampToScreen;
+    public Vector2 screenOffset;
+    
     private bool isVisible;
 
     public void InitHUD(Transform alignTo, Camera uiCamera, Camera gameCamera, Vector3 offset = default) {
@@ -148,6 +151,13 @@ public class HUDItem : MonoBehaviour {
 
                 this.SetVisible(isVisible);
 
+            }
+
+            if (this.clampToScreen == true) {
+                if (pos.x <= this.screenOffset.x) pos.x = this.screenOffset.x;
+                if (pos.y <= this.screenOffset.y) pos.y = this.screenOffset.y;
+                if (pos.x >= 1f - this.screenOffset.x) pos.x = 1f - this.screenOffset.x;
+                if (pos.y >= 1f - this.screenOffset.y) pos.y = 1f - this.screenOffset.y;
             }
 
             var rPos = this.uiCamera.ViewportToWorldPoint(pos);

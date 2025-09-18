@@ -33,6 +33,8 @@ namespace UnityEngine.UI.Windows {
 
         private void UpdateStack() {
             
+            this.cameras.RemoveAll(x => x == null);
+            
             var data = this.MainCamera.GetUniversalAdditionalCameraData();
             foreach (var camera in this.cameras) {
                 data.cameraStack.Remove(camera);
@@ -44,7 +46,10 @@ namespace UnityEngine.UI.Windows {
         }
 
         private void SortCameras() {
-            this.cameras.Sort((c1, c2) => c1.depth.CompareTo(c2.depth));
+            this.cameras.Sort((c1, c2) => {
+                if (c1 == null || c2 == null) return 0;
+                return c1.depth.CompareTo(c2.depth);
+            });
         }
 
         private void RemoveFromStack(WindowObject obj) {

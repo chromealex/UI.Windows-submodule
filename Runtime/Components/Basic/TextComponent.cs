@@ -497,7 +497,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         public virtual void SetText(UnityEngine.Localization.LocalizedString key, params object[] args) {
 
-            if (this.lastLocalizationKey != key || (args != null && args.Length > 0)) {
+            if (this.lastLocalizationKey != key || args.Length > 0) {
 
                 if (this.lastLocalizationKey != null) {
                     this.lastLocalizationKey.StringChanged -= this.OnLocalizationStringChanged;

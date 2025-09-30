@@ -57,13 +57,6 @@
 
         public override void Hide(TransitionParameters parameters) {
 
-            if (this.GetState() == ObjectState.Hiding || this.GetState() == ObjectState.Hidden) {
-                
-                parameters.RaiseCallback();
-                return;
-                
-            }
-            
             parameters = parameters.ReplaceIgnoreTouch(true);
             var cbParameters = parameters.ReplaceCallback(() => {
 

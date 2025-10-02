@@ -49,7 +49,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private static ParticleSystem.Particle[] particles = new ParticleSystem.Particle[1000];
+        private static readonly ParticleSystem.Particle[] particles = new ParticleSystem.Particle[1000];
 
         private void ApplyAlpha(float alpha) {
 

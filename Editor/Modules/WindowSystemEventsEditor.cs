@@ -28,13 +28,23 @@ namespace UnityEditor.UI.Windows {
             var target = this.target as WindowSystemEvents;
 
             UnityEditor.UI.Windows.GUILayoutExt.DrawHeader("Registered Events");
-            foreach (var item in target.objects) {
+            this.DrawRegistry(target.registry);
+            foreach (var item in target.registriesGeneric) {
+                this.DrawRegistry(item);
+            }
+
+        }
+
+        private void DrawRegistry(WindowSystemEvents.RegistryBase registry) {
+            
+            UnityEditor.UI.Windows.GUILayoutExt.DrawHeader($"Registry: {registry}");
+            foreach (var item in registry.GetObjects()) {
 
                 UnityEditor.UI.Windows.GUILayoutExt.Box(2f, 2f, () => {
 
                     if (item.Value.instance == null) {
                         
-                        GUILayout.Label("Object: " + item.Value.name);
+                        GUILayout.Label($"Object: {item.Value.name}");
                         
                     } else {
 
@@ -43,12 +53,12 @@ namespace UnityEditor.UI.Windows {
                     }
 
                     UnityEngine.UI.Windows.Utilities.UIWSMath.GetKey(item.Key, out var hash, out var evt);
-                    GUILayout.Label("Event: " + (WindowEvent)evt + " (" + (target.cache.ContainsKey(item.Key) == true ? "Multiple" : "Once") + ")");
+                    GUILayout.Label($"Event: {(WindowEvent)evt} ({(registry.ContainsCache(item.Key) == true ? "Multiple" : "Once")})");
 
                 });
 
             }
-
+            
         }
 
     }

@@ -1022,6 +1022,34 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public static void RaiseEvent<TState>(TState state, WindowObject instance, WindowEvent windowEvent) {
+
+            var events = WindowSystem.GetEvents();
+            events.Raise(state, instance, windowEvent);
+
+        }
+
+        public static void RegisterActionOnce<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
+
+            var events = WindowSystem.GetEvents();
+            events.RegisterOnce(state, instance, windowEvent, callback);
+
+        }
+
+        public static void RegisterAction<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
+
+            var events = WindowSystem.GetEvents();
+            events.Register(state, instance, windowEvent, callback);
+
+        }
+
+        public static void UnRegisterAction<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
+
+            var events = WindowSystem.GetEvents();
+            events.UnRegister(state, instance, windowEvent, callback);
+
+        }
+
         public static WindowSystemBreadcrumbs GetBreadcrumbs() {
 
             return WindowSystem.instance?.breadcrumbs;
@@ -1274,7 +1302,18 @@ namespace UnityEngine.UI.Windows {
             public bool internalCall;
 
         }
-        
+
+        private struct ShowInstanceClosure<T> {
+
+            public WindowSystem instance;
+            public TransitionParameters parameters;
+            public WindowBase existInstance;
+            public InitialParameters initialParameters;
+            public TransitionParameters transitionParameters;
+            public System.Action<T> onInitialized;
+            
+        }
+
         public static void HideInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
 
             if (instance.GetState() <= ObjectState.Initializing) {
@@ -1846,7 +1885,15 @@ namespace UnityEngine.UI.Windows {
 
                     }
 
-                    WindowSystem.RegisterActionOnce(existInstance, state, (obj) => { this.Show_INTERNAL(existInstance, initialParameters, onInitialized, transitionParameters); });
+                    WindowSystem.RegisterActionOnce(new ShowInstanceClosure<T>() {
+                        instance = this,
+                        existInstance = existInstance,
+                        initialParameters = initialParameters,
+                        onInitialized = onInitialized,
+                        transitionParameters = transitionParameters,
+                    }, existInstance, state, static (obj, state) => {
+                        state.instance.Show_INTERNAL(state.existInstance, state.initialParameters, state.onInitialized, state.transitionParameters);
+                    });
 
                     return;
 
@@ -1898,32 +1945,49 @@ namespace UnityEngine.UI.Windows {
 
             }
 
-            instance.LoadAsync(initialParameters, () => {
+            instance.LoadAsync(new LoadAsyncClosure<T>() {
+                instance = instance,
+                onInitialized = onInitialized,
+                transitionParameters = transitionParameters,
+                initialParameters = initialParameters,
+            }, initialParameters, static (state) => {
             
-                if (initialParameters.showSync == false) {
+                if (state.initialParameters.showSync == false) {
 
-                    if (onInitialized != null) {
+                    if (state.onInitialized != null) {
 
-                        onInitialized.Invoke((T)instance);
+                        state.onInitialized.Invoke((T)state.instance);
 
                     } else {
 
-                        instance.OnEmptyPass();
+                        state.instance.OnEmptyPass();
 
                     }
 
                 }
 
-                var tr = transitionParameters.ReplaceCallback(() => {
+                var tr = state.transitionParameters.ReplaceCallbackWithContext(static (obj, tr, i) => {
 
-                    Coroutines.Run(WindowSystem.WaitForLayoutBuildComplete(instance));
-                    transitionParameters.RaiseCallback();
+                    Coroutines.Run(WindowSystem.WaitForLayoutBuildComplete((WindowBase)obj));
+                    tr.RaiseCallback();
                     
-                });
+                }, state.instance, state.transitionParameters, true);
                 
-                instance.DoInit(() => instance.ShowInternal(tr));
+                state.instance.DoInit(new WindowObject.DoInitClosure() {
+                    component = state.instance,
+                    parameters = tr,
+                }, static (data) => data.component.ShowInternal(data.parameters));
 
             });
+
+        }
+
+        internal struct LoadAsyncClosure<TState> {
+
+            public System.Action<TState> onInitialized;
+            public InitialParameters initialParameters;
+            public WindowBase instance;
+            public TransitionParameters transitionParameters;
 
         }
 

@@ -212,13 +212,13 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
-        public void LoadAsync(InitialParameters initialParameters, LayoutWindowType windowInstance, System.Action onComplete) {
+        public void LoadAsync<TState>(TState state, InitialParameters initialParameters, LayoutWindowType windowInstance, System.Action<TState> onComplete) {
 
             windowInstance.Setup(windowInstance);
             
             var used = new HashSet<WindowLayout>();
             var layoutItem = this;
-            Coroutines.Run(layoutItem.InitLayoutInstance(initialParameters, windowInstance, windowInstance, layoutItem.windowLayout, used, onComplete));
+            Coroutines.Run(layoutItem.InitLayoutInstance(state, initialParameters, windowInstance, windowInstance, layoutItem.windowLayout, used, onComplete));
 
         }
 
@@ -240,11 +240,11 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         }
 
         private int loadingCount;
-        private IEnumerator InitLayoutInstance(InitialParameters initialParameters, LayoutWindowType windowInstance, WindowObject root, WindowLayout windowLayout, HashSet<WindowLayout> used, System.Action onComplete, bool isInner = false) {
+        private IEnumerator InitLayoutInstance<TState>(TState state, InitialParameters initialParameters, LayoutWindowType windowInstance, WindowObject root, WindowLayout windowLayout, HashSet<WindowLayout> used, System.Action<TState> onComplete, bool isInner = false) {
 
             if (((ILayoutInstance)root).windowLayoutInstance != null || windowLayout == null) {
                 
-                if (onComplete != null) onComplete.Invoke();
+                if (onComplete != null) onComplete.Invoke(state);
                 yield break;
                 
             }
@@ -334,7 +334,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                     if (used.Contains(layoutElement.innerLayout) == false) {
 
-                        yield return this.InitLayoutInstance(initialParameters, windowInstance, layoutElement, layoutElement.innerLayout, used, null, isInner: true);
+                        yield return this.InitLayoutInstance(state, initialParameters, windowInstance, layoutElement, layoutElement.innerLayout, used, null, isInner: true);
 
                     } else {
 
@@ -346,7 +346,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
             }
 
-            if (onComplete != null) onComplete.Invoke();
+            if (onComplete != null) onComplete.Invoke(state);
 
         }
 
@@ -599,12 +599,32 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
-        public override void LoadAsync(InitialParameters initialParameters, System.Action onComplete) {
+        private struct LoadAsyncClosure<TState> {
+
+            public LayoutWindowType component;
+            public TState state;
+            public System.Action<TState> onComplete;
+            public InitialParameters initialParameters;
+
+        }
+
+        private void CallLoadAsyncBase<TState>(TState state, InitialParameters initialParameters, System.Action<TState> onComplete) {
+            base.LoadAsync(state, initialParameters, onComplete);
+        }
+        
+        public override void LoadAsync<TState>(TState state, InitialParameters initialParameters, System.Action<TState> onComplete) {
 
             this.layouts.SetActive();
 
             var currentItem = this.layouts.GetActive();
-            currentItem.LoadAsync(initialParameters, this, () => { base.LoadAsync(initialParameters, onComplete); });
+            currentItem.LoadAsync(new LoadAsyncClosure<TState>() {
+                component = this,
+                state = state,
+                onComplete = onComplete,
+                initialParameters = initialParameters,
+            }, initialParameters, this, static (st) => {
+                st.component.CallLoadAsyncBase(st.state, st.initialParameters, st.onComplete);
+            });
 
         }
 

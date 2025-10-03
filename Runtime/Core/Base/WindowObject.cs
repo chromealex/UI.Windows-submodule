@@ -96,7 +96,7 @@ namespace UnityEngine.UI.Windows {
     [RequireComponent(typeof(RectTransform))]
     public abstract class WindowObject : MonoBehaviour, IOnPoolGet, IOnPoolAdd, ISearchComponentByTypeSingleEditor, IHolder {
 
-        private struct DoInitClosure {
+        public struct DoInitClosure {
 
             public WindowObject component;
             public WindowObject windowObject;
@@ -1480,7 +1480,7 @@ namespace UnityEngine.UI.Windows {
             public System.Action<TState> onCompleteState;
             public InitialParameters initialParameters;
             public TState state;
-
+            
         }
 
         public void LoadAsync<T, TState>(TState state, Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {

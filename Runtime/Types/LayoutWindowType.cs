@@ -295,7 +295,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                             initialParameters = initialParameters,
                         };
                         ++this.loadingCount;
-                        Coroutines.Run(resources.LoadAsync<WindowComponent, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, layoutElement, data, layoutComponent.component, (asset, closure) => {
+                        Coroutines.Run(resources.LoadAsync<WindowComponent, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, layoutElement, data, layoutComponent.component, static (asset, closure) => {
 
                             if (asset == null) {
 
@@ -312,7 +312,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                             closure.windowLayoutInstance.SetLoadedComponent(item.tag, instance);
                             item.componentInstance = instance;
 
-                            instance.DoLoadScreenAsync(closure.initialParameters, () => { --closure.instance.loadingCount; });
+                            instance.DoLoadScreenAsync(closure, closure.initialParameters, static (c) => { --c.instance.loadingCount; });
                             
                         }));
 

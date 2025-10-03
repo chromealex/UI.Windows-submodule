@@ -34,7 +34,6 @@ RectTransform:
   m_Children:
   - {fileID: 670988408115811299}
   m_Father: {fileID: 4132840862641798318}
-  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -83,14 +82,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry: []
   componentModules:
     windowComponent: {fileID: 8957172461844523635}
@@ -210,7 +202,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4132840862641798318}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -291,7 +282,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4132840862641798318}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -337,14 +327,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry: []
   componentModules:
     windowComponent: {fileID: 8315637883405603250}
@@ -423,7 +406,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4275049550869201622}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -508,7 +490,6 @@ RectTransform:
   - {fileID: 7661838159766762314}
   - {fileID: 4275049550869201622}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -559,14 +540,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry: []
   componentModules:
     windowComponent: {fileID: 7157483974793182015}

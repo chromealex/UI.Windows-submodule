@@ -33,7 +33,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5492694295995556602}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -79,14 +78,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry:
   - holder: {fileID: 7804158160238293149}
     moduleHolder: {fileID: 0}
@@ -186,7 +178,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3754852264144203633}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -232,14 +223,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry:
   - holder: {fileID: 7466443270484645655}
     moduleHolder: {fileID: 0}
@@ -341,7 +325,6 @@ RectTransform:
   - {fileID: 8112976714886443502}
   - {fileID: 7872436719226105455}
   m_Father: {fileID: 4727120795715246228}
-  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -393,14 +376,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry: []
   componentModules:
     windowComponent: {fileID: 831554429323187497}
@@ -504,7 +480,6 @@ RectTransform:
   - {fileID: 3754852264144203633}
   - {fileID: 4727120795715246228}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -550,14 +525,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry: []
   componentModules:
     windowComponent: {fileID: 5124798591967899215}
@@ -622,7 +590,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3295080239299309594}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -702,7 +669,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 370067804142031923}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -783,7 +749,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2405045969076973068}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -880,7 +845,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3295080239299309594}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -978,7 +942,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5492694295995556602}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1024,14 +987,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry:
   - holder: {fileID: 7804158160238293149}
     moduleHolder: {fileID: 0}
@@ -1130,7 +1086,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 370067804142031923}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1228,7 +1183,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3754852264144203633}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1274,14 +1228,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry:
   - holder: {fileID: 7466443270484645655}
     moduleHolder: {fileID: 0}
@@ -1383,7 +1330,6 @@ RectTransform:
   - {fileID: 3800776517169059131}
   - {fileID: 1210375403476883860}
   m_Father: {fileID: 5492694295995556602}
-  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1435,14 +1381,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry: []
   componentModules:
     windowComponent: {fileID: 2530473048899682478}
@@ -1547,7 +1486,6 @@ RectTransform:
   - {fileID: 198287987895350801}
   - {fileID: 370067804142031923}
   m_Father: {fileID: 4072449349731362688}
-  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1593,14 +1531,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry: []
   componentModules:
     windowComponent: {fileID: 3971340159860270996}
@@ -1717,7 +1648,6 @@ RectTransform:
   - {fileID: 3585242073022866816}
   - {fileID: 1653911156475688273}
   m_Father: {fileID: 3754852264144203633}
-  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1769,14 +1699,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry: []
   componentModules:
     windowComponent: {fileID: 5943618713721513522}
@@ -1881,7 +1804,6 @@ RectTransform:
   - {fileID: 7510286717129027931}
   - {fileID: 3295080239299309594}
   m_Father: {fileID: 4072449349731362688}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1927,14 +1849,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry: []
   componentModules:
     windowComponent: {fileID: 7804158160238293149}
@@ -2047,7 +1962,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2405045969076973068}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2131,7 +2045,6 @@ RectTransform:
   - {fileID: 5945798244817622022}
   - {fileID: 2405045969076973068}
   m_Father: {fileID: 4072449349731362688}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2177,14 +2090,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry: []
   componentModules:
     windowComponent: {fileID: 7466443270484645655}
@@ -2299,7 +2205,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4727120795715246228}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -2345,14 +2250,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry:
   - holder: {fileID: 3971340159860270996}
     moduleHolder: {fileID: 0}
@@ -2452,7 +2350,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4727120795715246228}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -2498,14 +2395,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry:
   - holder: {fileID: 3971340159860270996}
     moduleHolder: {fileID: 0}

@@ -88,13 +88,21 @@ namespace UnityEngine.UI.Windows {
 
     public interface ILoadable {
 
-        void Load(System.Action onComplete);
+        void Load<TState>(TState state, System.Action<TState> onComplete);
 
     }
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
     public abstract class WindowObject : MonoBehaviour, IOnPoolGet, IOnPoolAdd, ISearchComponentByTypeSingleEditor, IHolder {
+
+        private struct DoInitClosure {
+
+            public WindowObject component;
+            public WindowObject windowObject;
+            public TransitionParameters parameters;
+
+        }
 
         [System.Serializable]
         public struct RenderItem : System.IEquatable<RenderItem> {
@@ -459,7 +467,7 @@ namespace UnityEngine.UI.Windows {
 
         public virtual T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowObject {
 
-            return this.FindComponent<T, System.Func<T, bool>>(filter, (fn, c) => {
+            return this.FindComponent<T, System.Func<T, bool>>(filter, static (fn, c) => {
                 if (fn != null) return fn.Invoke(c);
                 return c;
             });
@@ -489,7 +497,7 @@ namespace UnityEngine.UI.Windows {
 
         public virtual T FindComponentParent<T>(System.Func<T, bool> filter = null) where T : WindowObject {
 
-            return this.FindComponentParent<T, System.Func<T, bool>>(filter, (fn, c) => {
+            return this.FindComponentParent<T, System.Func<T, bool>>(filter, static (fn, c) => {
                 if (fn != null) return fn.Invoke(c);
                 return c;
             });
@@ -684,7 +692,7 @@ namespace UnityEngine.UI.Windows {
                 
                 this.window = null;
                 this.rootObject = null;
-                WindowSystem.GetPools().Despawn(this, (obj) => {
+                WindowSystem.GetPools().Despawn(this, static (obj) => {
                     
                     obj.DoDeInit();
                     
@@ -699,22 +707,36 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        internal void DoLoadScreenAsync(InitialParameters initialParameters, System.Action onComplete) {
+        public struct DoLoadScreenClosure<TState> {
+
+            public WindowObject component;
+            public InitialParameters initialParameters;
+            public System.Action<TState> onComplete;
+            public TState state;
+
+        }
+        
+        internal void DoLoadScreenAsync<TState>(TState state, InitialParameters initialParameters, System.Action<TState> onComplete) {
             
             Utilities.Coroutines.CallInSequence((closure) => {
                 
-                this.OnLoadScreenAsync(closure, onComplete);
+                closure.component.OnLoadScreenAsync(closure.state, closure.initialParameters, closure.onComplete);
 
-            }, initialParameters, this.subObjects, (x, cb, closure) => x.OnLoadScreenAsync(closure, cb));
+            }, new DoLoadScreenClosure<TState>() {
+                component = this,
+                initialParameters = initialParameters,
+                onComplete = onComplete,
+                state = state,
+            }, this.subObjects, static (x, cb, closure) => x.OnLoadScreenAsync(cb, closure.initialParameters, static cbInt => cbInt.Invoke()));
             
         }
-        
-        protected virtual void OnLoadScreenAsync(InitialParameters initialParameters, System.Action onComplete) {
+
+        protected virtual void OnLoadScreenAsync<TState>(TState state, InitialParameters initialParameters, System.Action<TState> onComplete) {
             
-            if (onComplete != null) onComplete.Invoke();
+            if (onComplete != null) onComplete.Invoke(state);
             
         }
-        
+
         public ObjectState GetState() {
 
             return this.objectState;
@@ -952,7 +974,10 @@ namespace UnityEngine.UI.Windows {
                 
                 if (windowObject.GetState() == ObjectState.NotInitialized) {
 							    
-                    windowObject.DoInit(() => this.AdjustObjectState(windowObject));
+                    windowObject.DoInit(new DoInitClosure() {
+                        component = this,
+                        windowObject = windowObject,
+                    }, static (c) => c.component.AdjustObjectState(c.windowObject));
                                 
                 } else {
                     
@@ -997,11 +1022,11 @@ namespace UnityEngine.UI.Windows {
 
                         WindowSystem.ShowInstance(
                             windowObject,
-                            TransitionParameters.Default.ReplaceImmediately(true).ReplaceCallback(() => {
-                                        
-                                WindowSystem.SetShown(windowObject, TransitionParameters.Default.ReplaceImmediately(true), true);
-                                        
-                            }), internalCall: true);
+                            TransitionParameters.Default.ReplaceImmediately(true).ReplaceCallbackWithContext(static (obj, tr, i) => {
+                                
+                                WindowSystem.SetShown(obj, TransitionParameters.Default.ReplaceImmediately(true), true);
+                                
+                            }, windowObject, default, true), internalCall: true);
 
                     }
 
@@ -1165,13 +1190,25 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        public void DoInit(System.Action callback = null) {
+        public void DoInit<TState>(TState state, System.Action<TState> callback = null) {
 
-            Coroutines.Run(this.DoInitAsync(callback));
+            Coroutines.Run(this.DoInitAsync(state, callback));
 
         }
 
-        private IEnumerator DoInitAsync(System.Action callback = null) {
+        public void DoInit(System.Action callback = null) {
+
+            Coroutines.Run(this.DoInitAsync(callback, static (cb) => cb?.Invoke()));
+
+        }
+
+        private class InitLoader {
+
+            public bool loaded;
+
+        }
+        
+        private IEnumerator DoInitAsync<TState>(TState state, System.Action<TState> callback = null) {
             
             if (this.objectState < ObjectState.Initializing) {
 
@@ -1181,9 +1218,12 @@ namespace UnityEngine.UI.Windows {
 
                     this.SetState(ObjectState.Loading);
 
-                    var loaded = false;
-                    loadable.Load(() => loaded = true);
-                    yield return new WaitUntil(() => loaded);
+                    var instance = PoolClass<InitLoader>.Spawn();
+                    loadable.Load(instance, static (c) => c.loaded = true);
+                    while (instance.loaded == false) {
+                        yield return null;
+                    }
+                    PoolClass<InitLoader>.Recycle(instance);
 
                 }
 
@@ -1204,7 +1244,7 @@ namespace UnityEngine.UI.Windows {
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
                 if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
-                coroutines.Add(this.subObjects[i].DoInitAsync());
+                coroutines.Add(this.subObjects[i].DoInitAsync(state));
 
             }
             
@@ -1220,7 +1260,7 @@ namespace UnityEngine.UI.Windows {
             
             PoolList<IEnumerator>.Recycle(coroutines);
             
-            callback?.Invoke();
+            callback?.Invoke(state);
 
         }
 
@@ -1228,7 +1268,7 @@ namespace UnityEngine.UI.Windows {
 
             if (this.objectState >= ObjectState.DeInitializing) {
                 
-                Debug.LogWarning("Object is out of state: " + this, this);
+                Debug.LogWarning($"Object is out of state: {this}", this);
                 return;
                 
             }
@@ -1288,14 +1328,14 @@ namespace UnityEngine.UI.Windows {
             
             if (this.objectState <= ObjectState.Initializing) {
                 
-                Debug.LogWarning("Object is out of state: " + this, this);
+                Debug.LogWarning($"Object is out of state: {this}", this);
                 return;
                 
             }
 
             var cObj = this;
             var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetShown, cObj, cParams, true);
+            var cbParameters = parameters.ReplaceCallbackWithContext(static (c, p, i) => WindowSystem.SetShown(c, p, i), cObj, cParams, true);
             WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
@@ -1311,7 +1351,7 @@ namespace UnityEngine.UI.Windows {
             
             var cObj = this;
             var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallbackWithContext(WindowSystem.SetHidden, cObj, cParams, true);
+            var cbParameters = parameters.ReplaceCallbackWithContext(static (c, p, i) => WindowSystem.SetHidden(c, p, i), cObj, cParams, true);
             WindowSystem.HideInstance(this, cbParameters, internalCall: true);
 
         }
@@ -1348,16 +1388,20 @@ namespace UnityEngine.UI.Windows {
 
                 if (this.objectState == ObjectState.NotInitialized) {
 
-                    var copy = parameters;
-                    this.DoInit(() => this.Show(copy));
-                    return;
-
+                    this.DoInit(new DoInitClosure() {
+                        component = this,
+                        parameters = parameters,
+                    }, static (c) => {
+                        c.component.Show(c.parameters);
+                    });
+                    
                 } else {
 
-                    Debug.LogWarning("Object is out of state: " + this, this);
-                    return;
+                    Debug.LogWarning($"Object is out of state: {this}", this);
 
                 }
+
+                return;
 
             }
 
@@ -1389,13 +1433,17 @@ namespace UnityEngine.UI.Windows {
                 
                 if (this.objectState == ObjectState.NotInitialized) {
 
-                    var copy = parameters;
-                    this.DoInit(() => this.Hide(copy));
+                    this.DoInit(new DoInitClosure() {
+                        component = this,
+                        parameters = parameters,
+                    }, static (c) => {
+                        c.component.Hide(c.parameters);
+                    });
                     return;
                     
                 } else {
 
-                    Debug.LogWarning("Object is out of state: " + this, this);
+                    Debug.LogWarning($"Object is out of state: {this}", this);
                     return;
 
                 }
@@ -1424,36 +1472,69 @@ namespace UnityEngine.UI.Windows {
             
         }
         
-        public void LoadAsync<T>(Resource resource, System.Action<T> onComplete = null, bool async = true) where T : WindowObject {
-            
-            Coroutines.Run(this.LoadAsync_YIELD(resource, onComplete, async));
-            
-        }
-
-        private struct LoadAsyncClosure<T> {
+        internal struct LoadAsyncClosure<T, TState> {
 
             public WindowObject component;
-            public System.Action<T> onComplete;
+            public System.Action<T, TState> onComplete;
+            public System.Action<T> onCompleteNoState;
+            public System.Action<TState> onCompleteState;
+            public InitialParameters initialParameters;
+            public TState state;
 
         }
 
-        private IEnumerator LoadAsync_YIELD<T>(Resource resource, System.Action<T> onComplete = null, bool async = true) where T : WindowObject {
+        public void LoadAsync<T, TState>(TState state, Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
             
-            var resources = WindowSystem.GetResources();
-            var data = new LoadAsyncClosure<T>() {
+            Coroutines.Run(this.LoadAsync_YIELD<T, LoadAsyncClosure<T, TState>>(new LoadAsyncClosure<T, TState>() {
                 component = this,
                 onComplete = onComplete,
+                state = state,
+            }, resource, static (obj, c) => {
+                c.onComplete.Invoke(obj, c.state);
+            }, async));
+            
+        }
+
+        public void LoadAsync<T, TState>(TState state, Resource resource, System.Action<TState> onComplete = null, bool async = true) where T : WindowObject {
+            
+            Coroutines.Run(this.LoadAsync_YIELD<T, LoadAsyncClosure<T, TState>>(new LoadAsyncClosure<T, TState>() {
+                component = this,
+                onCompleteState = onComplete,
+            }, resource, static (obj, c) => {
+                c.onCompleteState.Invoke(c.state);
+            }, async));
+            
+        }
+
+        public void LoadAsync<T>(Resource resource, System.Action<T> onComplete = null, bool async = true) where T : WindowObject {
+            
+            Coroutines.Run(this.LoadAsync_YIELD<T, LoadAsyncClosure<T, T>>(new LoadAsyncClosure<T, T>() {
+                component = this,
+                onCompleteNoState = onComplete,
+            }, resource, static (obj, c) => {
+                c.onCompleteNoState.Invoke(obj);
+            }, async));
+            
+        }
+
+        private IEnumerator LoadAsync_YIELD<T, TState>(TState state, Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
+            
+            var resources = WindowSystem.GetResources();
+            var data = new LoadAsyncClosure<T, TState>() {
+                component = this,
+                onComplete = onComplete,
+                state = state,
             };
-            yield return resources.LoadAsync<T, LoadAsyncClosure<T>>(new WindowSystemResources.LoadParameters() { async = async },this.GetWindow(), data, resource, (asset, closure) => {
+            yield return resources.LoadAsync<T, LoadAsyncClosure<T, TState>>(new WindowSystemResources.LoadParameters() { async = async },this.GetWindow(), data, resource, static (asset, closure) => {
 
                 if (asset != null) {
 
                     var instance = closure.component.Load(asset);
-                    if (closure.onComplete != null) closure.onComplete.Invoke(instance);
+                    if (closure.onComplete != null) closure.onComplete.Invoke(instance, closure.state);
 
                 } else {
                     
-                    if (closure.onComplete != null) closure.onComplete.Invoke(null);
+                    if (closure.onComplete != null) closure.onComplete.Invoke(null, closure.state);
                     
                 }
 
@@ -1488,7 +1569,6 @@ namespace UnityEngine.UI.Windows {
                 
             }
             
-
         }
 
         public void DoLayoutReady() {

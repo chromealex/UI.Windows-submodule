@@ -10,25 +10,34 @@
 
         private WindowObject loadedAsset;
 
-        protected override void OnLoadScreenAsync(InitialParameters initialParameters, System.Action onComplete) {
+        protected override void OnLoadScreenAsync<TState>(TState state, InitialParameters initialParameters, System.Action<TState> onComplete) {
 
             if (this.autoLoad == true) {
                 
-                this.LoadAsync<WindowObject>(this.prefab, (instance) => {
+                this.LoadAsync<WindowObject, LoadAsyncClosure<WindowObject, TState>>(new LoadAsyncClosure<WindowObject, TState> {
+                    component = this,
+                    onCompleteState = onComplete,
+                    state = state,
+                }, this.prefab, static (instance, state) => {
 
                     if (instance != null) {
                         
-                        instance.DoLoadScreenAsync(initialParameters, () => {
+                        instance.DoLoadScreenAsync(new DoLoadScreenClosure<TState>() {
+                            component = state.component,
+                            initialParameters = state.initialParameters,
+                            onComplete = state.onCompleteState,
+                            state = state.state,
+                        }, state.initialParameters, static (c) => {
                             
-                            base.OnLoadScreenAsync(initialParameters, onComplete);
+                            c.onComplete?.Invoke(c.state);
 
                         });
 
-                        this.loadedAsset = instance;
+                        ((LinkerComponent)state.component).loadedAsset = instance;
 
                     } else {
 
-                        base.OnLoadScreenAsync(initialParameters, onComplete);
+                        state.onCompleteState?.Invoke(state.state);
 
                     }
 
@@ -38,7 +47,7 @@
 
             }
             
-            base.OnLoadScreenAsync(initialParameters, onComplete);
+            base.OnLoadScreenAsync(state, initialParameters, onComplete);
             
         }
 

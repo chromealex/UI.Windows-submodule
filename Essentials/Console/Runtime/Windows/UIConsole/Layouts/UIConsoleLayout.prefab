@@ -78,14 +78,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry: []
   canvas: {fileID: 3002262861325224963}
   canvasScaler: {fileID: 4562398388743874407}
@@ -247,14 +240,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry: []
   componentModules:
     windowComponent: {fileID: 5470113545036599192}

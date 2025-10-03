@@ -122,7 +122,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                     closure.windowModules.modules[closure.index].moduleInstance = instance;
                     
-                    instance.DoLoadScreenAsync(closure.initialParameters, () => { --closure.windowModules.loadingCount; });
+                    instance.DoLoadScreenAsync(closure, closure.initialParameters, static (c) => { --c.windowModules.loadingCount; });
                     
                 }));
 

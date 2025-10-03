@@ -304,7 +304,7 @@ namespace UnityEngine.UI.Windows {
                 #if UNITY_EDITOR
                 if (WindowSystem._instance == null && Application.isPlaying == false) {
 
-                    WindowSystem._instance = Object.FindObjectOfType<WindowSystem>();
+                    WindowSystem._instance = Object.FindFirstObjectByType<WindowSystem>();
 
                 }
                 #endif
@@ -1125,7 +1125,7 @@ namespace UnityEngine.UI.Windows {
 
                     instance.BreakStateHierarchy();
                     
-                    Coroutines.CallInSequence((p) => {
+                    Coroutines.CallInSequence(static (p) => {
 
                         p.hierarchyComplete = true;
                         if (p.animationComplete == true && p.baseComplete == true) {
@@ -1136,7 +1136,7 @@ namespace UnityEngine.UI.Windows {
 
                         }
 
-                    }, closure, instance.subObjects, (obj, cb, p) => {
+                    }, closure, instance.subObjects, static (obj, cb, p) => {
 
                         if (p.parameters.data.replaceDelay == true) {
 
@@ -1174,7 +1174,7 @@ namespace UnityEngine.UI.Windows {
                     
                 }
 
-                WindowObjectAnimation.Show(closure, instance, parameters, (cParams) => {
+                WindowObjectAnimation.Show(closure, instance, parameters, static (cParams) => {
                     
                     cParams.animationComplete = true;
                     if (cParams.hierarchyComplete == true && cParams.baseComplete == true) {

@@ -1,10 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-
 
 namespace UnityEngine.UI.Windows {
     
@@ -471,16 +469,15 @@ namespace UnityEngine.UI.Windows.Modules {
         public Task<T> LoadAsync<T>(object handler, Resource resource) where T : class {
 
             var tcs = new TaskCompletionSource<T>();
-            
-            Coroutines.Run(this.LoadAsync<T, TaskCompletionSource<T>>(handler, tcs, resource, (asset, s) => s.SetResult(asset)));
-
+            Coroutines.Run(this.LoadAsync<T, TaskCompletionSource<T>>(handler, tcs, resource, static (asset, s) => s.SetResult(asset)));
             return tcs.Task;
+            
         }
 
         public T Load<T>(object handler, Resource resource) where T : class {
             
             var closure = PoolClass<ClosureResult<T>>.Spawn();
-            var op = this.Load_INTERNAL<T, ClosureResult<T>>(new LoadParameters() { async = false }, handler, closure, resource, (asset, c) => {
+            var op = this.Load_INTERNAL<T, ClosureResult<T>>(new LoadParameters() { async = false }, handler, closure, resource, static (asset, c) => {
 
                 c.result = asset;
 
@@ -602,7 +599,7 @@ namespace UnityEngine.UI.Windows.Modules {
         }
 
         private IEnumerator LoadAddressable_INTERNAL<TResource, TResult>(LoadParameters loadParameters, object handler, Resource resource, System.Func<TResource, TResult> converter) where TResult : class {
-            
+
             var op = Addressables.LoadAssetAsync<TResource>(resource.GetAddress());
             yield return null;
             System.Action cancellationTask = () => { if (op.IsValid() == true) Addressables.Release(op); };

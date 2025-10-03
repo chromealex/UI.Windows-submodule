@@ -32,7 +32,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -75,14 +74,7 @@ MonoBehaviour:
   audioEvents:
     play: 0
     stop: 0
-    fmodAudioComponent:
-      audioEvent: 
-      stopOthersOnPlay: 0
-      parameters: []
-      autoStopOnceParameters: 0
-      autoStopDuration: 0
-      autoRelease: 0
-      autoReleaseDuration: 0
+    clip: {fileID: 0}
   registry: []
   preferences:
     layer:
@@ -106,13 +98,10 @@ MonoBehaviour:
     items:
     - targets:
         target: {fileID: 0}
-      windowLayout: {fileID: 9075030843538608721, guid: 057b44df3b48b45a2932144228334f98,
-        type: 3}
-      layoutPreferences: {fileID: 11400000, guid: b072e0cbf0fce4cc9a3b99b3553892d7,
-        type: 2}
+      windowLayout: {fileID: 9075030843538608721, guid: 057b44df3b48b45a2932144228334f98, type: 3}
+      layoutPreferences: {fileID: 11400000, guid: b072e0cbf0fce4cc9a3b99b3553892d7, type: 2}
       components:
-      - windowLayout: {fileID: 9075030843538608721, guid: 057b44df3b48b45a2932144228334f98,
-          type: 3}
+      - windowLayout: {fileID: 9075030843538608721, guid: 057b44df3b48b45a2932144228334f98, type: 3}
         tag: 1
         localTag: 1
         component:
@@ -121,8 +110,7 @@ MonoBehaviour:
           address: 
           guid: 048802b519d9044e5b9590f3af1fc4ef
           subObjectName: 
-          directRef: {fileID: 2085204466533394332, guid: 048802b519d9044e5b9590f3af1fc4ef,
-            type: 3}
+          directRef: {fileID: 2085204466533394332, guid: 048802b519d9044e5b9590f3af1fc4ef, type: 3}
           validationRequired: 0
   document: {fileID: 1510372177379998272}
   references:
@@ -142,9 +130,17 @@ Camera:
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -185,6 +181,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PanelSettings: {fileID: 11400000, guid: aa4a8013409294e7080b5371332a5700, type: 2}
   m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: 64b4f9958c1ee44a6a0b71bff361574f,
-    type: 3}
+  sourceAsset: {fileID: 9197481963319205126, guid: 64b4f9958c1ee44a6a0b71bff361574f, type: 3}
   m_SortingOrder: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080

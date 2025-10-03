@@ -405,6 +405,19 @@ namespace UnityEngine.UI.Windows.Components {
         public void SetValue(double value, SourceValue sourceValue = SourceValue.Digits, TimeResult timeValueResult = TimeResult.None,
                              TimeResult timeShortestVariant = TimeResult.None) {
 
+            switch (sourceValue) {
+                case SourceValue.Digits:
+                    break;
+
+                case SourceValue.Seconds:
+                    value = System.Math.Floor(value);
+                    break;
+
+                case SourceValue.Milliseconds:
+                    value = System.Math.Floor(value * 1000d) / 1000d;
+                    break;
+            }
+            
             var currentData = new ValueData() {
                 value = value,
                 sourceValue = sourceValue,

@@ -96,14 +96,6 @@ namespace UnityEngine.UI.Windows {
     [RequireComponent(typeof(RectTransform))]
     public abstract class WindowObject : MonoBehaviour, IOnPoolGet, IOnPoolAdd, ISearchComponentByTypeSingleEditor, IHolder {
 
-        public struct DoInitClosure {
-
-            public WindowObject component;
-            public WindowObject windowObject;
-            public TransitionParameters parameters;
-
-        }
-
         [System.Serializable]
         public struct RenderItem : System.IEquatable<RenderItem> {
 
@@ -707,15 +699,6 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public struct DoLoadScreenClosure<TState> {
-
-            public WindowObject component;
-            public InitialParameters initialParameters;
-            public System.Action<TState> onComplete;
-            public TState state;
-
-        }
-        
         internal void DoLoadScreenAsync<TState>(TState state, InitialParameters initialParameters, System.Action<TState> onComplete) {
             
             Utilities.Coroutines.CallInSequence((closure) => {
@@ -1472,17 +1455,6 @@ namespace UnityEngine.UI.Windows {
             
         }
         
-        internal struct LoadAsyncClosure<T, TState> {
-
-            public WindowObject component;
-            public System.Action<T, TState> onComplete;
-            public System.Action<T> onCompleteNoState;
-            public System.Action<TState> onCompleteState;
-            public InitialParameters initialParameters;
-            public TState state;
-            
-        }
-
         public void LoadAsync<T, TState>(TState state, Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
             
             Coroutines.Run(this.LoadAsync_YIELD<T, LoadAsyncClosure<T, TState>>(new LoadAsyncClosure<T, TState>() {

@@ -599,15 +599,6 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
-        private struct LoadAsyncClosure<TState> {
-
-            public LayoutWindowType component;
-            public TState state;
-            public System.Action<TState> onComplete;
-            public InitialParameters initialParameters;
-
-        }
-
         private void CallLoadAsyncBase<TState>(TState state, InitialParameters initialParameters, System.Action<TState> onComplete) {
             base.LoadAsync(state, initialParameters, onComplete);
         }

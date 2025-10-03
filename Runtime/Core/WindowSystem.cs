@@ -1092,29 +1092,6 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public class ShowHideClosureParametersClass {
-
-            public WindowObject instance;
-            public TransitionParameters parameters;
-            public bool internalCall;
-            public bool animationComplete;
-            public bool hierarchyComplete;
-            public bool baseComplete;
-
-            public void Dispose() {
-
-                this.internalCall = default;
-                this.animationComplete = default;
-                this.hierarchyComplete = default;
-                this.baseComplete = default;
-                this.instance = null;
-                this.parameters = default;
-                PoolClass<ShowHideClosureParametersClass>.Recycle(this);
-                
-            }
-
-        }
-
         public static void ShowInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
             
             if (instance.GetState() == ObjectState.Showing || instance.GetState() == ObjectState.Shown) {
@@ -1293,25 +1270,6 @@ namespace UnityEngine.UI.Windows {
 
             parameters.RaiseCallback();
 
-        }
-
-        private struct HideInstanceClosure {
-
-            public WindowObject instance;
-            public TransitionParameters parameters;
-            public bool internalCall;
-
-        }
-
-        private struct ShowInstanceClosure<T> {
-
-            public WindowSystem instance;
-            public TransitionParameters parameters;
-            public WindowBase existInstance;
-            public InitialParameters initialParameters;
-            public TransitionParameters transitionParameters;
-            public System.Action<T> onInitialized;
-            
         }
 
         public static void HideInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
@@ -1973,21 +1931,12 @@ namespace UnityEngine.UI.Windows {
                     
                 }, state.instance, state.transitionParameters, true);
                 
-                state.instance.DoInit(new WindowObject.DoInitClosure() {
+                state.instance.DoInit(new DoInitClosure() {
                     component = state.instance,
                     parameters = tr,
                 }, static (data) => data.component.ShowInternal(data.parameters));
 
             });
-
-        }
-
-        internal struct LoadAsyncClosure<TState> {
-
-            public System.Action<TState> onInitialized;
-            public InitialParameters initialParameters;
-            public WindowBase instance;
-            public TransitionParameters transitionParameters;
 
         }
 

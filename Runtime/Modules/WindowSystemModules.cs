@@ -72,16 +72,6 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
         
-        private struct LoadingClosure {
-
-            public WindowBase window;
-            public WindowModule.Parameters parameters;
-            public WindowModules windowModules;
-            public InitialParameters initialParameters;
-            public int index;
-
-        }
-        
         private int loadingCount;
         private IEnumerator InitModules<TState>(TState state, InitialParameters initialParameters, WindowBase window, System.Action<TState> onComplete) {
 
@@ -103,7 +93,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     initialParameters = initialParameters,
                 };
                 ++this.loadingCount;
-                Coroutines.Run(resources.LoadAsync<WindowModule, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, window, data, moduleInfo.module, (asset, closure) => {
+                Coroutines.Run(resources.LoadAsync<WindowModule, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, window, data, moduleInfo.module, static (asset, closure) => {
 
                     if (asset.createPool == true) WindowSystem.GetPools().CreatePool(asset);
                     var instance = WindowSystem.GetPools().Spawn(asset, closure.window.transform);

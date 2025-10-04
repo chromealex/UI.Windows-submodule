@@ -24,7 +24,7 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public virtual void SetItems<T, TItem, TClosure>(List<TItem> list, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListItemListClosureParameters<TItem> {
+        public virtual async void SetItems<T, TItem, TClosure>(List<TItem> list, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListItemListClosureParameters<TItem> {
 
             if (this.isLoadingRequest == true) {
 
@@ -55,7 +55,7 @@ namespace UnityEngine.UI.Windows.Components {
 
             if (emitItems > 0) {
 
-                this.Emit(emitItems, this.source, onItem, closure, onComplete, (c) => {
+                await this.Emit(emitItems, this.source, onItem, closure, onComplete, static (c) => {
 
                     c.data = c.arr[c.index];
                     return c;

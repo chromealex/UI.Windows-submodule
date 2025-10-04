@@ -3,6 +3,7 @@
 namespace UnityEngine.UI.Windows.Components {
 
     using Utilities;
+    using System.Threading.Tasks;
     
     public interface IListClosureParameters {
 
@@ -235,9 +236,9 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public virtual void AddItem<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
+        public virtual async void AddItem<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
 
-            this.AddItemInternal(source, closure, onComplete);
+            await this.AddItemInternal(source, closure, onComplete);
 
         }
 
@@ -315,7 +316,7 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        internal void AddItemInternal<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
+        internal async Task AddItemInternal<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
             
             var resources = WindowSystem.GetResources();
             var data = new AddItemClosure<T, TClosure>() {
@@ -323,11 +324,11 @@ namespace UnityEngine.UI.Windows.Components {
                 onComplete = onComplete,
                 component = this,
             };
-            Coroutines.Run(resources.LoadAsync<T, AddItemClosure<T, TClosure>>(this, data, source, (asset, innerClosure) => {
+            await resources.LoadAsync<T, AddItemClosure<T, TClosure>>(this, data, source, static (asset, innerClosure) => {
 
                 ListBaseComponent.SetupLoadedAsset(asset, innerClosure);
                 
-            }));
+            });
 
         }
 
@@ -401,7 +402,7 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         private bool isLoadingRequest = false;
-        public virtual void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListClosureParameters {
+        public virtual async void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListClosureParameters {
 
             if (this.isLoadingRequest == true) {
 
@@ -431,7 +432,7 @@ namespace UnityEngine.UI.Windows.Components {
                         onItem.Invoke((T)this.items[i], closure);
                     
                     }
-                    this.Emit(delta, source, onItem, closure, onComplete);
+                    await this.Emit(delta, source, onItem, closure, onComplete);
 
                 } else {
                     
@@ -477,7 +478,7 @@ namespace UnityEngine.UI.Windows.Components {
             public EmitLoaded loadedCounter;
 
         }
-        private void Emit<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete = null, System.Func<TClosure, TClosure> onClosure = null) where T : WindowComponent where TClosure : IListClosureParameters {
+        private async Task Emit<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete = null, System.Func<TClosure, TClosure> onClosure = null) where T : WindowComponent where TClosure : IListClosureParameters {
 
             if (count == 0) {
                 
@@ -505,7 +506,7 @@ namespace UnityEngine.UI.Windows.Components {
                 var index = i + offset;
                 closureInner.index = index;
                 
-                this.AddItemInternal<T, EmitClosure<T, TClosure>>(source, closureInner, (item, c) => {
+                await this.AddItemInternal<T, EmitClosure<T, TClosure>>(source, closureInner, static (item, c) => {
 
                     c.data.index = c.index;
                     if (c.onClosure != null) c.data = c.onClosure.Invoke(c.data);

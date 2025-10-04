@@ -3,6 +3,25 @@ namespace UnityEngine.UI.Windows {
     using Modules;
     using UnityEngine.UI.Windows.Utilities;
     
+    public struct LayoutLoadingClosure {
+
+        public int index;
+        public WindowLayoutElement element;
+        public WindowLayout windowLayoutInstance;
+        public UnityEngine.UI.Windows.WindowTypes.LayoutItem.LayoutComponentItem[] layoutComponentItems;
+        public UnityEngine.UI.Windows.WindowTypes.LayoutItem instance;
+        public InitialParameters initialParameters;
+
+    }
+
+    public struct LoadAsyncLayoutClosure<TState> {
+
+        public System.Collections.Generic.HashSet<WindowLayout> used;
+        public TState state;
+        public System.Action<TState> onComplete;
+
+    }
+
     public struct LoadingClosure {
 
         public WindowBase window;

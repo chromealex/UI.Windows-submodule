@@ -3,6 +3,7 @@
 namespace UnityEngine.UI.Windows.Modules {
 
     using Utilities;
+    using System.Threading.Tasks;
 
     public abstract class WindowModule : WindowLayout {
 
@@ -54,9 +55,9 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
         
-        public void LoadAsync<TState>(TState state, InitialParameters initialParameters, WindowBase window, System.Action<TState> onComplete) {
+        public async void LoadAsync<TState>(TState state, InitialParameters initialParameters, WindowBase window, System.Action<TState> onComplete) {
 
-            Coroutines.Run(this.InitModules(state, initialParameters, window, onComplete));
+            await this.InitModules(state, initialParameters, window, onComplete);
 
         }
 
@@ -73,7 +74,7 @@ namespace UnityEngine.UI.Windows.Modules {
         }
         
         private int loadingCount;
-        private IEnumerator InitModules<TState>(TState state, InitialParameters initialParameters, WindowBase window, System.Action<TState> onComplete) {
+        private async Task InitModules<TState>(TState state, InitialParameters initialParameters, WindowBase window, System.Action<TState> onComplete) {
 
             var resources = WindowSystem.GetResources();
             var targetData = WindowSystem.GetTargetData();
@@ -93,7 +94,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     initialParameters = initialParameters,
                 };
                 ++this.loadingCount;
-                Coroutines.Run(resources.LoadAsync<WindowModule, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, window, data, moduleInfo.module, static (asset, closure) => {
+                await resources.LoadAsync<WindowModule, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, window, data, moduleInfo.module, static (asset, closure) => {
 
                     if (asset.createPool == true) WindowSystem.GetPools().CreatePool(asset);
                     var instance = WindowSystem.GetPools().Spawn(asset, closure.window.transform);
@@ -114,11 +115,11 @@ namespace UnityEngine.UI.Windows.Modules {
                     
                     instance.DoLoadScreenAsync(closure, closure.initialParameters, static (c) => { --c.windowModules.loadingCount; });
                     
-                }));
+                });
 
             }
 
-            while (this.loadingCount > 0) yield return null;
+            while (this.loadingCount > 0) await Task.Yield();
 
             onComplete.Invoke(state);
 

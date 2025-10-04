@@ -7,8 +7,8 @@ namespace UnityEngine.UI.Windows.Components {
         public interface IListItemIEnumerableClosureParameters<T> : IListItemClosureParameters<T> {
 
             public IEnumerable<T> arr { get; set; }
-            internal int _offset { get; set; }
-            internal List<T> _temp { get; set; }
+            internal int offset { get; set; }
+            internal List<T> temp { get; set; }
 
         }
         
@@ -17,8 +17,8 @@ namespace UnityEngine.UI.Windows.Components {
             public int index { get; set; }
             public T data { get; set; }
             public IEnumerable<T> arr { get; set; }
-            int IListItemIEnumerableClosureParameters<T>._offset { get; set; }
-            List<T> IListItemIEnumerableClosureParameters<T>._temp { get; set; }
+            int IListItemIEnumerableClosureParameters<T>.offset { get; set; }
+            List<T> IListItemIEnumerableClosureParameters<T>.temp { get; set; }
 
         }
 
@@ -28,7 +28,7 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public virtual void SetItems<T, TItem, TClosure>(IEnumerable<TItem> list, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListItemIEnumerableClosureParameters<TItem> {
+        public virtual async void SetItems<T, TItem, TClosure>(IEnumerable<TItem> list, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListItemIEnumerableClosureParameters<TItem> {
 
             if (this.isLoadingRequest == true) {
 
@@ -61,16 +61,16 @@ namespace UnityEngine.UI.Windows.Components {
 
             if (emitItems > 0) {
 
-                closure._offset = this.Count - emitItems;
-                closure._temp = temp;
-                this.Emit(emitItems, this.source, onItem, closure, (c) => {
+                closure.offset = this.Count - emitItems;
+                closure.temp = temp;
+                await this.Emit(emitItems, this.source, onItem, closure, static (c) => {
 
-                    var tmp = c._temp;
+                    var tmp = c.temp;
                     PoolList<TItem>.Recycle(ref tmp);
                     
                 }, (c) => {
 
-                    c.data = c._temp[c.index - c._offset];
+                    c.data = c.temp[c.index - c.offset];
                     return c;
 
                 });

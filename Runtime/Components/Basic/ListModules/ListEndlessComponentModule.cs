@@ -77,9 +77,9 @@ namespace UnityEngine.UI.Windows {
             private List<ItemInstanceToRedraw> instancesToRedraw = new List<ItemInstanceToRedraw>();
             private Dictionary<int, int> instancePrevIndexToListIndex = new Dictionary<int, int>();
             
-            public override void UpdateContent(bool forceRebuild = false) {
+            public override async void UpdateContent(bool forceRebuild = false) {
 
-                ref var requiredVisibleCount = ref this.module.requiredVisibleCount;
+                var requiredVisibleCount = this.module.requiredVisibleCount;
                 var fromIndex = this.module.fromIndex;
                 var toIndex = this.module.toIndex;
                 var contentSize = this.module.contentSize;
@@ -104,7 +104,7 @@ namespace UnityEngine.UI.Windows {
                             var k = i + fromIndex;
                             var item = this.items[k];
                             ++this.loadingCount;
-                            this.module.listComponent.AddItemInternal<T, InnerClosure>(item.source, new InnerClosure() { closure = item.closure, registry = this, item = item, },
+                            await this.module.listComponent.AddItemInternal<T, InnerClosure>(item.source, new InnerClosure() { closure = item.closure, registry = this, item = item, },
                                                                                        (obj, closure) => {
                                                                                            --closure.registry.loadingCount;
                                                                                            //closure.item.onItem.Invoke(obj, closure.closure);
@@ -143,8 +143,11 @@ namespace UnityEngine.UI.Windows {
 
                         var instance = this.module.listComponent.items[k];
                         var item = this.items[i];
-                        ref var data = ref this.module.items[i];
-                        if (forceRebuild == true) data.size = this.module.dataSource.GetSize(i);
+                        var data = this.module.items[i];
+                        if (forceRebuild == true) {
+                            data.size = this.module.dataSource.GetSize(i);
+                            this.module.items[i] = data;
+                        }
                         
                         var isLocalDirty = false;
                         var pos = instance.rectTransform.anchoredPosition;

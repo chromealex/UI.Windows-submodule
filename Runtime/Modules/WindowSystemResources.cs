@@ -71,7 +71,7 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        public Task<T> LoadAsync(object handler) {
+        public async Task<T> LoadAsync(object handler) {
 
             var tcs = new TaskCompletionSource<T>();
 
@@ -83,13 +83,13 @@ namespace UnityEngine.UI.Windows {
                     resource = this,
                 };
                 
-                Coroutines.Run(WindowSystem.GetResources().LoadAsync<T, AsyncClosure>(handler, closure, this.data, static (asset, p) => {
+                await WindowSystem.GetResources().LoadAsync<T, AsyncClosure>(handler, closure, this.data, static (asset, p) => {
                     p.resource.loaded = asset;
                     p.tcs.SetResult(p.resource.loaded);
-                }));
+                });
             }
 
-            return tcs.Task;
+            return tcs.Task.Result;
 
         }
 
@@ -448,29 +448,29 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        public IEnumerator LoadAsync<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        public async Task LoadAsync<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
             
-            yield return this.Load_INTERNAL(loadParameters, handler, closure, resource, onComplete);
-            
-        }
-
-        public IEnumerator LoadAsync<T>(object handler, Resource resource, System.Action<T, DefaultClosureData> onComplete) where T : class {
-
-            yield return this.LoadAsync<T, DefaultClosureData>(handler, new DefaultClosureData(), resource, onComplete);
-
-        }
-
-        public IEnumerator LoadAsync<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
-            
-            yield return this.Load_INTERNAL(new LoadParameters() { async = true }, handler, closure, resource, onComplete);
+            await this.Load_INTERNAL(loadParameters, handler, closure, resource, onComplete);
             
         }
 
-        public Task<T> LoadAsync<T>(object handler, Resource resource) where T : class {
+        public async Task LoadAsync<T>(object handler, Resource resource, System.Action<T, DefaultClosureData> onComplete) where T : class {
+
+            await this.LoadAsync<T, DefaultClosureData>(handler, new DefaultClosureData(), resource, onComplete);
+
+        }
+
+        public async Task LoadAsync<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+            
+            await this.Load_INTERNAL(new LoadParameters() { async = true }, handler, closure, resource, onComplete);
+            
+        }
+
+        public async Task<T> LoadAsync<T>(object handler, Resource resource) where T : class {
 
             var tcs = new TaskCompletionSource<T>();
-            Coroutines.Run(this.LoadAsync<T, TaskCompletionSource<T>>(handler, tcs, resource, static (asset, s) => s.SetResult(asset)));
-            return tcs.Task;
+            await this.LoadAsync<T, TaskCompletionSource<T>>(handler, tcs, resource, static (asset, s) => s.SetResult(asset));
+            return tcs.Task.Result;
             
         }
 
@@ -482,8 +482,8 @@ namespace UnityEngine.UI.Windows.Modules {
                 c.result = asset;
 
             });
-            while (op.MoveNext() == true) { }
-
+            op.ConfigureAwait(false).GetAwaiter().GetResult();
+            
             var result = closure.result;
             closure.result = null;
             PoolClass<ClosureResult<T>>.Recycle(ref closure);
@@ -516,7 +516,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        private IEnumerator Load_INTERNAL<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        private async Task Load_INTERNAL<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
 
             if (typeof(Component).IsAssignableFrom(typeof(T)) == true) {
                         
@@ -530,14 +530,14 @@ namespace UnityEngine.UI.Windows.Modules {
                     
                     // Waiting for loading then break
                     var item = new InternalTask(resource);
-                    while (this.tasks.ContainsKey(item) == true) yield return null;
-                    yield break;
+                    while (this.tasks.ContainsKey(item) == true) await Task.Yield();
+                    return;
                     
                 }
 
                 if (this.IsLoaded(handler, resource) == true) {
                     
-                    yield break;
+                    return;
                     
                 }
                 
@@ -559,12 +559,12 @@ namespace UnityEngine.UI.Windows.Modules {
 
                         var direct = go.GetComponent<T>();
                         onComplete.Invoke(direct, closure);
-                        yield break;
+                        return;
 
                     } else if (resource.directRef is T direct) {
 
                         onComplete.Invoke(direct, closure);
-                        yield break;
+                        return;
 
                     }
 
@@ -574,9 +574,8 @@ namespace UnityEngine.UI.Windows.Modules {
 
                 case Resource.Type.Addressables: {
 
-                    IEnumerator loader = null;
                     if (resource.objectType == Resource.ObjectType.Component) {
-                        loader = this.LoadAddressable_INTERNAL<GameObject, T>(loadParameters, handler, resource, static go => {
+                        await this.LoadAddressable_INTERNAL<GameObject, T>(loadParameters, handler, resource, static go => {
                             var result = go.GetComponent<T>();
                             if (result == null && WindowSystem.GetResources().showLogs == true) {
                                 Debug.LogError($"[ UIWR ] Failed to load resource, gameObject loaded {go}, but component was not found with type {typeof(T)}");
@@ -585,10 +584,8 @@ namespace UnityEngine.UI.Windows.Modules {
                             return result;
                         });
                     } else {
-                        loader = this.LoadAddressable_INTERNAL<T, T>(loadParameters, handler, resource, r => r);
+                        await this.LoadAddressable_INTERNAL<T, T>(loadParameters, handler, resource, r => r);
                     }
-                    
-                    while (loader.MoveNext() == true) yield return null;
                     
                     break;
 
@@ -598,14 +595,14 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        private IEnumerator LoadAddressable_INTERNAL<TResource, TResult>(LoadParameters loadParameters, object handler, Resource resource, System.Func<TResource, TResult> converter) where TResult : class {
+        private async Task LoadAddressable_INTERNAL<TResource, TResult>(LoadParameters loadParameters, object handler, Resource resource, System.Func<TResource, TResult> converter) where TResult : class {
 
             var op = Addressables.LoadAssetAsync<TResource>(resource.GetAddress());
-            yield return null;
+            await Task.Yield();
             System.Action cancellationTask = () => { if (op.IsValid() == true) Addressables.Release(op); };
             this.LoadBegin(handler, cancellationTask);
             if (loadParameters.async == false) op.WaitForCompletion();
-            while (op.IsDone == false) yield return null;
+            while (op.IsDone == false) await Task.Yield();
 
             if (op.IsValid() == true && op.Status == AsyncOperationStatus.Succeeded) {
 
@@ -630,7 +627,7 @@ namespace UnityEngine.UI.Windows.Modules {
             }
                         
             this.LoadEnd(handler, cancellationTask);
-
+            
         }
 
 

@@ -66,12 +66,6 @@ namespace UnityEditor.UI.Windows {
 
         private static bool changed;
         
-        public override bool CanCacheInspectorGUI(SerializedProperty property) {
-            
-            return false;
-            
-        }
-
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
             
             /*if (property.propertyType == SerializedPropertyType.ManagedReference) {

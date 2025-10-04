@@ -28,4 +28,4 @@ MonoBehaviour:
     perspectiveSize: 60
     perspectiveNearClippingPlane: 0.01
     perspectiveFarClippingPlane: 1000
-  collectDebugInfo: 1
+  collectDebugInfo: 0

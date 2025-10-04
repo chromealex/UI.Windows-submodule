@@ -1,4 +1,6 @@
 ﻿namespace UnityEngine.UI.Windows.Modules {
+    
+    using UnityEngine.UI.Windows.Utilities;
 
     public static class WindowObjectAnimation {
 
@@ -7,12 +9,12 @@
             public AnimationParameters animationParameters;
             public AnimationParameters.State fromState;
             public AnimationParameters.State toState;
-            public System.Action onComplete;
+            public Coroutines.ClosureDelegateCallback<T> onComplete;
             public T closureParameters;
 
         }
 
-        private struct AnimationGroupInfo<T> {
+        private class AnimationGroupInfo<T> : Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>> {
 
             public TransitionParameters transitionParameters;
             public AnimationState animationState;
@@ -21,6 +23,15 @@
             public System.Action<T> onCancel;
             public T closureParameters;
             public TweenerCustomParameters customParameters;
+
+            int Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.counter { get; set; }
+            bool Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.completed { get; set; }
+            Coroutines.ClosureDelegateCallback<AnimationGroupInfo<T>> Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.callback { get; set; }
+            Coroutines.ClosureDelegateEachCallback<AnimationParameters, AnimationGroupInfo<T>> Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.each { get; set; }
+            Coroutines.ClosureDelegateCallback<AnimationGroupInfo<T>> Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.doNext { get; set; }
+            Coroutines.ClosureDelegateCallback<AnimationGroupInfo<T>> Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.callbackItem { get; set; }
+            System.Collections.Generic.IList<AnimationParameters> Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.collection { get; set; }
+            System.Collections.Generic.IEnumerator<AnimationParameters> Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.ie { get; set; }
 
         }
 
@@ -150,20 +161,21 @@
 
             }
 
-            var animationGroupInfo = new AnimationGroupInfo<T> {
-                transitionParameters = parameters,
-                animationState = animationState,
-                closureParameters = closureParameters,
-                customParameters = customParameters,
-                onUpdate = onUpdate,
-                onCancel = onCancel,
-                onComplete = onComplete,
-            };
-            UnityEngine.UI.Windows.Utilities.Coroutines.CallInSequence((x) => {
+            var animationGroupInfo = PoolClass<AnimationGroupInfo<T>>.Spawn();
+            animationGroupInfo.transitionParameters = parameters;
+            animationGroupInfo.animationState = animationState;
+            animationGroupInfo.closureParameters = closureParameters;
+            animationGroupInfo.customParameters = customParameters;
+            animationGroupInfo.onUpdate = onUpdate;
+            animationGroupInfo.onCancel = onCancel;
+            animationGroupInfo.onComplete = onComplete;
+            
+            Coroutines.CallInSequence(ref animationGroupInfo, static (ref AnimationGroupInfo<T> x) => {
                 
                 x.onComplete.Invoke(x.closureParameters);
-                
-            }, animationGroupInfo, animationParameters, (anim, cb, state) => {
+                PoolClass<AnimationGroupInfo<T>>.Recycle(x);
+
+            }, animationParameters, static (AnimationParameters anim, Coroutines.ClosureDelegateCallback<AnimationGroupInfo<T>> cb, ref AnimationGroupInfo<T> state) => {
                 
                 if (anim != null) {
 
@@ -204,24 +216,24 @@
                     .OnComplete((obj) => {
 
                         obj.fromState.Recycle(); 
-                        obj.onComplete.Invoke();
+                        obj.onComplete.Invoke(ref obj.closureParameters);
                        
                     })
                     .OnCancel((obj) => {
                        
                         if (obj.closureParameters.onCancel != null) obj.closureParameters.onCancel.Invoke(obj.closureParameters.closureParameters);
                         obj.fromState.Recycle();
-                        obj.onComplete.Invoke();
+                        obj.onComplete.Invoke(ref obj.closureParameters);
                        
                     });
 
-                    if (customParameters.loops != 0) {
+                    if (state.customParameters.loops != 0) {
 
-                        tween.Loop(customParameters.loops);
+                        tween.Loop(state.customParameters.loops);
 
                     }
 
-                    if (customParameters.reflect == true) {
+                    if (state.customParameters.reflect == true) {
                         
                         tween.Reflect();
 
@@ -229,7 +241,7 @@
                     
                 } else {
                     
-                    cb.Invoke();
+                    cb.Invoke(ref state);
                     
                 }
                 

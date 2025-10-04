@@ -700,17 +700,26 @@ namespace UnityEngine.UI.Windows {
         }
 
         internal void DoLoadScreenAsync<TState>(TState state, InitialParameters initialParameters, System.Action<TState> onComplete) {
+
+            var closure = PoolClass<DoLoadScreenClosure<TState>>.Spawn();
+            closure.component = this;
+            closure.initialParameters = initialParameters;
+            closure.onComplete = onComplete;
+            closure.state = state;
             
-            Utilities.Coroutines.CallInSequence((closure) => {
+            Utilities.Coroutines.CallInSequence(ref closure, static (ref DoLoadScreenClosure<TState> closure) => {
                 
                 closure.component.OnLoadScreenAsync(closure.state, closure.initialParameters, closure.onComplete);
+                PoolClass<DoLoadScreenClosure<TState>>.Recycle(closure);
 
-            }, new DoLoadScreenClosure<TState>() {
-                component = this,
-                initialParameters = initialParameters,
-                onComplete = onComplete,
-                state = state,
-            }, this.subObjects, static (x, cb, closure) => x.OnLoadScreenAsync(cb, closure.initialParameters, static cbInt => cbInt.Invoke()));
+            }, this.subObjects, static (WindowObject x, Coroutines.ClosureDelegateCallback<DoLoadScreenClosure<TState>> cb, ref DoLoadScreenClosure<TState> closure) => {
+                x.OnLoadScreenAsync(new DoLoadScreenClosureInternal<DoLoadScreenClosure<TState>>() {
+                    callback = cb,
+                    data = closure,
+                }, closure.initialParameters, static cbInt => {
+                    cbInt.callback.Invoke(ref cbInt.data);
+                });
+            });
             
         }
 
@@ -956,12 +965,12 @@ namespace UnityEngine.UI.Windows {
                 windowObject.rootObject = this;
                 
                 if (windowObject.GetState() == ObjectState.NotInitialized) {
-							    
+                    
                     windowObject.DoInit(new DoInitClosure() {
                         component = this,
                         windowObject = windowObject,
                     }, static (c) => c.component.AdjustObjectState(c.windowObject));
-                                
+                    
                 } else {
                     
                     this.AdjustObjectState(windowObject);
@@ -1173,15 +1182,15 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        public void DoInit<TState>(TState state, System.Action<TState> callback = null) {
+        public async void DoInit<TState>(TState state, System.Action<TState> callback = null) {
 
-            Coroutines.Run(this.DoInitAsync(state, callback));
+            await this.DoInitAsync(state, callback);
 
         }
 
-        public void DoInit(System.Action callback = null) {
+        public async void DoInit(System.Action callback = null) {
 
-            Coroutines.Run(this.DoInitAsync(callback, static (cb) => cb?.Invoke()));
+            await this.DoInitAsync(callback, static (cb) => cb?.Invoke());
 
         }
 
@@ -1191,7 +1200,49 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        private IEnumerator DoInitAsync<TState>(TState state, System.Action<TState> callback = null) {
+        private async Task DoInitAsync<TState>(TState state, System.Action<TState> callback = null) {
+            
+            if (this.objectState < ObjectState.Initializing) {
+
+                this.SetState(ObjectState.Initializing);
+
+                if (this is ILoadable loadable) {
+
+                    this.SetState(ObjectState.Loading);
+
+                    var instance = PoolClass<InitLoader>.Spawn();
+                    loadable.Load(instance, static (c) => c.loaded = true);
+                    while (instance.loaded == false) {
+                        await Task.Yield();
+                    }
+                    PoolClass<InitLoader>.Recycle(instance);
+
+                }
+
+                this.SetState(ObjectState.Loaded);
+
+                this.audioEvents.Initialize(this);
+
+                this.OnInitInternal();
+                this.OnInit();
+                WindowSystem.RaiseEvent(this, WindowEvent.OnInitialize);
+
+                this.SetState(ObjectState.Initialized);
+
+            }
+
+            for (int i = 0; i < this.subObjects.Count; ++i) {
+
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
+                await this.subObjects[i].DoInitAsync(state);
+
+            }
+            
+            callback?.Invoke(state);
+
+        }
+        
+        /*private IEnumerator DoInitAsync<TState>(TState state, System.Action<TState> callback = null) {
             
             if (this.objectState < ObjectState.Initializing) {
 
@@ -1245,7 +1296,7 @@ namespace UnityEngine.UI.Windows {
             
             callback?.Invoke(state);
 
-        }
+        }*/
 
         public void DoDeInit() {
 

@@ -22,7 +22,7 @@
 
                     if (instance != null) {
                         
-                        instance.DoLoadScreenAsync(new DoLoadScreenClosure<TState>() {
+                        instance.DoLoadScreenAsync(new DoLoadScreenClosureStruct<TState>() {
                             component = state.component,
                             initialParameters = state.initialParameters,
                             onComplete = state.onCompleteState,

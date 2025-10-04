@@ -122,6 +122,9 @@ namespace UnityEngine.UI.Windows {
         internal bool ignoreTouch;
 
         internal System.Action callback;
+        internal System.Action<object> callbackUserData;
+
+        internal object userData;
 
     }
     
@@ -130,6 +133,7 @@ namespace UnityEngine.UI.Windows {
         public WindowObject context;
         public TransitionParametersData data;
         public bool internalCall;
+        public object userData;
 
     }
 
@@ -147,8 +151,9 @@ namespace UnityEngine.UI.Windows {
 
         public void RaiseCallback() {
 
-            if (this.contextCallback != null) this.contextCallback.Invoke(this.internalData.context, new TransitionParameters() { data = this.internalData.data }, this.internalData.internalCall);
+            if (this.contextCallback != null) this.contextCallback.Invoke(this.internalData.context, new TransitionParameters() { data = this.internalData.data, internalData = this.internalData, }, this.internalData.internalCall);
             if (this.data.callback != null) this.data.callback.Invoke();
+            if (this.data.callbackUserData != null) this.data.callbackUserData.Invoke(this.data.userData);
 
         }
 
@@ -199,6 +204,18 @@ namespace UnityEngine.UI.Windows {
 
             var instance = this;
             instance.data.callback = callback;
+            instance.data.callbackUserData = null;
+            instance.contextCallback = null;
+            return instance;
+
+        }
+
+        public TransitionParameters ReplaceCallback(object userData, System.Action<object> callback) {
+
+            var instance = this;
+            instance.data.callback = null;
+            instance.data.callbackUserData = callback;
+            instance.data.userData = userData;
             instance.contextCallback = null;
             return instance;
 
@@ -208,8 +225,9 @@ namespace UnityEngine.UI.Windows {
 
             var instance = this;
             instance.data.callback = null;
+            instance.data.callbackUserData = null;
             instance.contextCallback = callback;
-            instance.internalData = new TransitionInternalData() { context = context, data = other.data, internalCall = internalCall };
+            instance.internalData = new TransitionInternalData() { context = context, data = other.data, internalCall = internalCall, };
             return instance;
 
         }
@@ -1145,7 +1163,7 @@ namespace UnityEngine.UI.Windows {
 
                     instance.BreakStateHierarchy();
                     
-                    Coroutines.CallInSequence(static (p) => {
+                    Coroutines.CallInSequence(ref closure, static (ref ShowHideClosureParametersClass p) => {
 
                         p.hierarchyComplete = true;
                         if (p.animationComplete == true && p.baseComplete == true) {
@@ -1156,31 +1174,28 @@ namespace UnityEngine.UI.Windows {
 
                         }
 
-                    }, closure, instance.subObjects, static (obj, cb, p) => {
+                    }, instance.subObjects, static (WindowObject obj, Coroutines.ClosureDelegateCallback<ShowHideClosureParametersClass> cb, ref ShowHideClosureParametersClass p) => {
+                        
+                        var closure = PoolClass<ShowHideInstanceInternalClosure>.Spawn();
+                        closure.cb = cb;
+                        closure.data = p;
 
+                        var parameters = p.parameters.ReplaceCallback(closure, static (obj) => {
+                            var d = (ShowHideInstanceInternalClosure)obj;
+                            d.cb.Invoke(ref d.data);
+                            PoolClass<ShowHideInstanceInternalClosure>.Recycle(d);
+                        });
                         if (p.parameters.data.replaceDelay == true) {
+                            parameters = parameters.ReplaceDelay(0f);
+                        }
+                        
+                        if (p.internalCall == true) {
 
-                            if (p.internalCall == true) {
-
-                                obj.ShowInternal(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
-
-                            } else {
-
-                                obj.Show(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
-
-                            }
+                            obj.ShowInternal(parameters);
 
                         } else {
-                            
-                            if (p.internalCall == true) {
 
-                                obj.ShowInternal(p.parameters.ReplaceCallback(cb));
-
-                            } else {
-
-                                obj.Show(p.parameters.ReplaceCallback(cb));
-
-                            }
+                            obj.Show(parameters);
 
                         }
 
@@ -1313,7 +1328,7 @@ namespace UnityEngine.UI.Windows {
                 parameters = parameters,
                 internalCall = internalCall,
             };
-            Coroutines.Wait(closureInstance, (inst) => inst.instance.IsReadyToHide(), (inst) => {
+            Coroutines.Wait(closureInstance, static (inst) => inst.instance.IsReadyToHide(), static (inst) => {
                 
                 {
 
@@ -1335,12 +1350,12 @@ namespace UnityEngine.UI.Windows {
 
                     }
 
-                    WindowObjectAnimation.Hide(closure, inst.instance, inst.parameters, (cParams) => {
+                    WindowObjectAnimation.Hide(closure, inst.instance, inst.parameters, static (cParams) => {
                         
                         if (cParams.parameters.data.replaceAffectChilds == false ||
                             cParams.parameters.data.affectChilds == true) {
 
-                            Coroutines.CallInSequence((p) => {
+                            Coroutines.CallInSequence(ref cParams, static (ref ShowHideClosureParametersClass p) => {
 
                                 p.hierarchyComplete = true;
                             
@@ -1352,31 +1367,28 @@ namespace UnityEngine.UI.Windows {
 
                                 }
 
-                            }, cParams, cParams.instance.subObjects, (obj, cb, p) => {
+                            }, cParams.instance.subObjects, static (WindowObject obj, Coroutines.ClosureDelegateCallback<ShowHideClosureParametersClass> cb, ref ShowHideClosureParametersClass p) => {
+                                
+                                var closure = PoolClass<ShowHideInstanceInternalClosure>.Spawn();
+                                closure.cb = cb;
+                                closure.data = p;
 
+                                var parameters = p.parameters.ReplaceCallback(closure, static (obj) => {
+                                    var d = (ShowHideInstanceInternalClosure)obj;
+                                    d.cb.Invoke(ref d.data);
+                                    PoolClass<ShowHideInstanceInternalClosure>.Recycle(d);
+                                });
                                 if (p.parameters.data.replaceDelay == true) {
+                                    parameters = parameters.ReplaceDelay(0f);
+                                }
+                                
+                                if (p.internalCall == true) {
 
-                                    if (p.internalCall == true) {
-
-                                        obj.HideInternal(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
-
-                                    } else {
-
-                                        obj.Hide(p.parameters.ReplaceCallback(cb).ReplaceDelay(0f));
-
-                                    }
+                                    obj.HideInternal(parameters);
 
                                 } else {
-                            
-                                    if (p.internalCall == true) {
 
-                                        obj.HideInternal(p.parameters.ReplaceCallback(cb));
-
-                                    } else {
-
-                                        obj.Hide(p.parameters.ReplaceCallback(cb));
-
-                                    }
+                                    obj.Hide(parameters);
 
                                 }
 

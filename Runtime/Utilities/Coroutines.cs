@@ -14,17 +14,17 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-        public static void NextFrame<T>(T state, System.Action<T> callback) {
+        public static async void NextFrame<T>(T state, System.Action<T> callback) {
 	        
-	        Coroutines.instance.StartCoroutine(Coroutines.WaitFrames_INTERNAL(state, callback, 1));
+	        await Coroutines.WaitFrames_INTERNAL(state, callback, 1);
 	        
         }
 
-        private static IEnumerator WaitFrames_INTERNAL<T>(T state, System.Action<T> callback, int frames) {
+        private static async System.Threading.Tasks.Task WaitFrames_INTERNAL<T>(T state, System.Action<T> callback, int frames) {
 
 	        while (frames > 0) {
 		        
-		        yield return null;
+		        await System.Threading.Tasks.Task.Yield();
 		        --frames;
 
 	        }
@@ -32,17 +32,17 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
         
-        public static void NextFrame(System.Action callback) {
+        public static async void NextFrame(System.Action callback) {
 	        
-	        Coroutines.instance.StartCoroutine(Coroutines.WaitFrames_INTERNAL(callback, 1));
+	        await Coroutines.WaitFrames_INTERNAL(callback, 1);
 	        
         }
 
-        private static IEnumerator WaitFrames_INTERNAL(System.Action callback, int frames) {
+        private static async System.Threading.Tasks.Task WaitFrames_INTERNAL(System.Action callback, int frames) {
 
 	        while (frames > 0) {
 		        
-		        yield return null;
+		        await System.Threading.Tasks.Task.Yield();
 		        --frames;
 
 	        }
@@ -50,54 +50,54 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
         
-        public static void WaitTime(float time, System.Action callback) {
+        public static async void WaitTime(float time, System.Action callback) {
 	        
-            Coroutines.instance.StartCoroutine(Coroutines.TimeWaiter_INTERNAL(time, callback));
+            await Coroutines.TimeWaiter_INTERNAL(time, callback);
 	        
         }
 
-        private static IEnumerator TimeWaiter_INTERNAL(float time, System.Action callback) {
+        private static async System.Threading.Tasks.Task TimeWaiter_INTERNAL(float time, System.Action callback) {
 
-            yield return new WaitForSecondsRealtime(time);
+	        await System.Threading.Tasks.Task.Delay((int)(time * 1000));
             callback.Invoke();
 
         }
 
-        public static void WaitTime<TState>(TState state, float time, System.Action<TState> callback) {
+        public static async void WaitTime<TState>(TState state, float time, System.Action<TState> callback) {
 	        
-            Coroutines.instance.StartCoroutine(Coroutines.TimeWaiter_INTERNAL(state, time, callback));
+	        await Coroutines.TimeWaiter_INTERNAL(state, time, callback);
 	        
         }
 
-        private static IEnumerator TimeWaiter_INTERNAL<TState>(TState state, float time, System.Action<TState> callback) {
-
-            yield return new WaitForSecondsRealtime(time);
+        private static async System.Threading.Tasks.Task TimeWaiter_INTERNAL<TState>(TState state, float time, System.Action<TState> callback) {
+	        
+            await System.Threading.Tasks.Task.Delay((int)(time * 1000));
             callback.Invoke(state);
 
         }
 
-        public static void Wait(System.Func<bool> waitFor, System.Action callback) {
+        public static async void Wait(System.Func<bool> waitFor, System.Action callback) {
 	        
-	        Coroutines.instance.StartCoroutine(Coroutines.Waiter_INTERNAL(waitFor, callback));
-	        
-        }
-
-        public static void Wait<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
-	        
-	        Coroutines.instance.StartCoroutine(Coroutines.Waiter_INTERNAL(state, waitFor, callback));
+	        await Coroutines.Waiter_INTERNAL(waitFor, callback);
 	        
         }
 
-        private static IEnumerator Waiter_INTERNAL<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+        public static async void Wait<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+	        
+	        await Coroutines.Waiter_INTERNAL(state, waitFor, callback);
+	        
+        }
 
-	        while (waitFor.Invoke(state) == false) yield return null;
+        private static async System.Threading.Tasks.Task Waiter_INTERNAL<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+
+	        while (waitFor.Invoke(state) == false) await System.Threading.Tasks.Task.Yield();
 	        callback.Invoke(state);
 
         }
         
-        private static IEnumerator Waiter_INTERNAL(System.Func<bool> waitFor, System.Action callback) {
+        private static async System.Threading.Tasks.Task Waiter_INTERNAL(System.Func<bool> waitFor, System.Action callback) {
 
-	        while (waitFor.Invoke() == false) yield return null;
+	        while (waitFor.Invoke() == false) await System.Threading.Tasks.Task.Yield();
 	        callback.Invoke();
 
         }
@@ -120,24 +120,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-        /*public static void CallInSequence<T, TState>(TState state, System.Action<TState> callback, System.Action<T, System.Action<TState>, TState> each, params T[] collection) {
-
-	        Coroutines.CallInSequence(state, callback, (IEnumerable<T>)collection, each);
-
-        }*/
-
-		public static void CallInSequence<T>(System.Action callback, System.Action<T, System.Action> each, params T[] collection) {
-
-			Coroutines.CallInSequence(callback, (IEnumerable<T>)collection, each);
-
-		}
-
-		public static void CallInSequence<T>(System.Action callback, bool waitPrevious, System.Action<T, System.Action> each, params T[] collection) {
-
-			Coroutines.CallInSequence(callback, (IEnumerable<T>)collection, each, waitPrevious);
-
-		}
-
         private static bool MoveNext<T>(IEnumerator<T> ie, IEnumerable<T> collection) {
 
             var next = false;
@@ -157,7 +139,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-		public static void CallInSequence<T, TState>(System.Action<TState> callback, TState state, IEnumerable<T> collection, System.Action<T, System.Action, TState> each, bool waitPrevious = false) {
+		public static void CallInSequence<T, TState>(System.Action<TState> callback, TState state, IList<T> collection, System.Action<T, System.Action, TState> each, bool waitPrevious = false) {
 
 			if (collection == null) {
 
@@ -241,7 +223,20 @@ namespace UnityEngine.UI.Windows.Utilities {
 		public delegate void ClosureDelegateCallbackContext<T, TC>(WindowObject context, ref T obj, TC custom);
 		public delegate void ClosureDelegateEachCallback<in T, TClosure>(T item, ClosureDelegateCallback<TClosure> cb, ref TClosure obj);
 
-		public static void CallInSequence<T, TClosure>(ref TClosure closure, ClosureDelegateCallback<TClosure> callback, IEnumerable<T> collection, ClosureDelegateEachCallback<T, TClosure> each, bool waitPrevious = false) {
+		public interface ICallInSequenceClosure<T, TClosure> {
+
+			internal int counter { get; set; }
+			internal bool completed { get; set; }
+			internal ClosureDelegateCallback<TClosure> callback { get; set; }
+			internal ClosureDelegateEachCallback<T, TClosure> each { get; set; }
+			internal ClosureDelegateCallback<TClosure> doNext { get; set; }
+			internal ClosureDelegateCallback<TClosure> callbackItem { get; set; }
+			internal IList<T> collection { get; set; }
+			internal IEnumerator<T> ie { get; set; }
+
+		}
+		
+		public static void CallInSequence<T, TClosure>(ref TClosure closure, ClosureDelegateCallback<TClosure> callback, IList<T> collection, ClosureDelegateEachCallback<T, TClosure> each, bool waitPrevious = false) where TClosure : ICallInSequenceClosure<T, TClosure> {
 			
 			if (collection == null) {
 
@@ -252,47 +247,54 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 			var count = collection.Count();
 
-			var completed = false;
-			var counter = 0;
-			ClosureDelegateCallback<TClosure> callbackItem = (ref TClosure cParamsInner) => {
+			closure.counter = count;
+			closure.completed = false;
+			closure.callback = callback;
+			closure.collection = collection;
+			closure.each = each;
+			
+			ClosureDelegateCallback<TClosure> callbackItem = static (ref TClosure cParamsInner) => {
 
-				++counter;
-				if (counter < count) return;
+				--cParamsInner.counter;
+				if (cParamsInner.counter > 0) return;
 
-				completed = true;
+				cParamsInner.completed = true;
 
-				if (callback != null) callback.Invoke(ref cParamsInner);
+				if (cParamsInner.callback != null) cParamsInner.callback.Invoke(ref cParamsInner);
 				
 			};
+			closure.callbackItem = callbackItem;
 
 			if (waitPrevious == true) {
 
 				var ie = collection.GetEnumerator();
+				closure.ie = ie;
 
 				ClosureDelegateCallback<TClosure> doNext = null;
-				doNext = (ref TClosure cParamsInner) => {
+				doNext = static (ref TClosure cParamsInner) => {
 
-					if (Coroutines.MoveNext(ie, collection) == true) {
+					if (Coroutines.MoveNext(cParamsInner.ie, cParamsInner.collection) == true) {
 
-						if (ie.Current != null) {
+						if (cParamsInner.ie.Current != null) {
 
-							each.Invoke(ie.Current, (ref TClosure cParams) => {
+							cParamsInner.each.Invoke(cParamsInner.ie.Current, static (ref TClosure cParams) => {
 								
-								callbackItem(ref cParams);
-								doNext(ref cParams);
+								cParams.callbackItem.Invoke(ref cParams);
+								cParams.doNext(ref cParams);
 
 							}, ref cParamsInner);
 
 						} else {
 
-							callbackItem.Invoke(ref cParamsInner);
-							doNext.Invoke(ref cParamsInner);
+							cParamsInner.callbackItem.Invoke(ref cParamsInner);
+							cParamsInner.doNext.Invoke(ref cParamsInner);
 
 						}
 
 					}
 
 				};
+				closure.doNext = doNext;
 				doNext.Invoke(ref closure);
 
 			} else {
@@ -310,92 +312,14 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 					}
 
-					if (completed == true) break;
+					if (closure.completed == true) break;
 
 				}
+				ie.Dispose();
 
 			}
 
 			if (count == 0 && callback != null) callback(ref closure);
-
-		}
-
-		public static void CallInSequence<T>(System.Action callback, IEnumerable<T> collection, System.Action<T, System.Action> each, bool waitPrevious = false) {
-
-			if (collection == null) {
-
-				if (callback != null) callback.Invoke();
-				return;
-
-			}
-
-			var count = collection.Count();
-
-			var completed = false;
-			var counter = 0;
-			System.Action callbackItem = () => {
-
-				++counter;
-				if (counter < count) return;
-
-				completed = true;
-
-				if (callback != null) callback.Invoke();
-				
-			};
-
-			if (waitPrevious == true) {
-
-				var ie = collection.GetEnumerator();
-
-				System.Action doNext = null;
-				doNext = () => {
-
-					if (Coroutines.MoveNext(ie, collection) == true) {
-
-						if (ie.Current != null) {
-
-							each(ie.Current, () => {
-								
-								callbackItem();
-								doNext();
-
-							});
-
-						} else {
-
-							callbackItem();
-							doNext();
-
-						}
-
-					}
-
-				};
-				doNext();
-
-			} else {
-
-				var ie = collection.GetEnumerator();
-				while (Coroutines.MoveNext(ie, collection) == true) {
-
-					if (ie.Current != null) {
-
-						each(ie.Current, callbackItem);
-
-					} else {
-
-						callbackItem();
-
-					}
-
-					if (completed == true) break;
-
-				}
-
-			}
-
-			if (count == 0 && callback != null) callback();
 
 		}
 

@@ -24,7 +24,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 	        while (frames > 0) {
 		        
-		        await System.Threading.Tasks.Task.Yield();
+		        await Awaitable.NextFrameAsync();
 		        --frames;
 
 	        }
@@ -42,7 +42,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 	        while (frames > 0) {
 		        
-		        await System.Threading.Tasks.Task.Yield();
+		        await Awaitable.NextFrameAsync();
 		        --frames;
 
 	        }

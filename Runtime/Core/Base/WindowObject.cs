@@ -1506,41 +1506,41 @@ namespace UnityEngine.UI.Windows {
             
         }
         
-        public void LoadAsync<T, TState>(TState state, Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
+        public async void LoadAsync<T, TState>(TState state, Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
             
-            Coroutines.Run(this.LoadAsync_YIELD<T, LoadAsyncClosure<T, TState>>(new LoadAsyncClosure<T, TState>() {
+            await this.LoadAsync_YIELD<T, LoadAsyncClosure<T, TState>>(new LoadAsyncClosure<T, TState>() {
                 component = this,
                 onComplete = onComplete,
                 state = state,
             }, resource, static (obj, c) => {
                 c.onComplete.Invoke(obj, c.state);
-            }, async));
+            }, async);
             
         }
 
-        public void LoadAsync<T, TState>(TState state, Resource resource, System.Action<TState> onComplete = null, bool async = true) where T : WindowObject {
+        public async void LoadAsync<T, TState>(TState state, Resource resource, System.Action<TState> onComplete = null, bool async = true) where T : WindowObject {
             
-            Coroutines.Run(this.LoadAsync_YIELD<T, LoadAsyncClosure<T, TState>>(new LoadAsyncClosure<T, TState>() {
+            await this.LoadAsync_YIELD<T, LoadAsyncClosure<T, TState>>(new LoadAsyncClosure<T, TState>() {
                 component = this,
                 onCompleteState = onComplete,
             }, resource, static (obj, c) => {
                 c.onCompleteState.Invoke(c.state);
-            }, async));
+            }, async);
             
         }
 
-        public void LoadAsync<T>(Resource resource, System.Action<T> onComplete = null, bool async = true) where T : WindowObject {
+        public async void LoadAsync<T>(Resource resource, System.Action<T> onComplete = null, bool async = true) where T : WindowObject {
             
-            Coroutines.Run(this.LoadAsync_YIELD<T, LoadAsyncClosure<T, T>>(new LoadAsyncClosure<T, T>() {
+            await this.LoadAsync_YIELD<T, LoadAsyncClosure<T, T>>(new LoadAsyncClosure<T, T>() {
                 component = this,
                 onCompleteNoState = onComplete,
             }, resource, static (obj, c) => {
                 c.onCompleteNoState.Invoke(obj);
-            }, async));
+            }, async);
             
         }
 
-        private IEnumerator LoadAsync_YIELD<T, TState>(TState state, Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
+        private async Task LoadAsync_YIELD<T, TState>(TState state, Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
             
             var resources = WindowSystem.GetResources();
             var data = new LoadAsyncClosure<T, TState>() {
@@ -1548,7 +1548,7 @@ namespace UnityEngine.UI.Windows {
                 onComplete = onComplete,
                 state = state,
             };
-            yield return resources.LoadAsync<T, LoadAsyncClosure<T, TState>>(new WindowSystemResources.LoadParameters() { async = async },this.GetWindow(), data, resource, static (asset, closure) => {
+            await resources.LoadAsync<T, LoadAsyncClosure<T, TState>>(new WindowSystemResources.LoadParameters() { async = async },this.GetWindow(), data, resource, static (asset, closure) => {
 
                 if (asset != null) {
 

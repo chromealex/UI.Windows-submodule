@@ -1953,7 +1953,7 @@ namespace UnityEngine.UI.Windows {
 
                 var tr = state.transitionParameters.ReplaceCallbackWithContext(static (obj, tr, i) => {
 
-                    Coroutines.Run(WindowSystem.WaitForLayoutBuildComplete((WindowBase)obj));
+                    WindowSystem.WaitForLayoutBuildComplete((WindowBase)obj);
                     tr.RaiseCallback();
                     
                 }, state.instance, state.transitionParameters, true);
@@ -1967,13 +1967,13 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private static System.Collections.IEnumerator WaitForLayoutBuildComplete(WindowBase instance) {
+        private static async void WaitForLayoutBuildComplete(WindowBase instance) {
             
-            yield return new WaitForEndOfFrame();
+            await Awaitable.EndOfFrameAsync();
             instance.DoLayoutReady();
             
         }
 
     }
-
+    
 }

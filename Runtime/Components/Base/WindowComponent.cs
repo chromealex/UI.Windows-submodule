@@ -29,24 +29,17 @@
 
             }
 
-            public T[] GetModules<T>() {
+            public void GetModules<T>(System.Collections.Generic.List<T> results) {
                 
-                var modulesOfGivenType = new System.Collections.Generic.List<T>();
-                
-                if (this.modules == null) return modulesOfGivenType.ToArray();
+                results.Clear();
+                if (this.modules == null) return;
                 
                 for (int i = 0; i < this.modules.Length; ++i) {
-
                     if (this.modules[i] is T module) {
-
-                        modulesOfGivenType.Add(module);
-
+                        results.Add(module);
                     }
-
                 }
 
-                return modulesOfGivenType.ToArray();
-                
             }
             
             public void ValidateEditor() {
@@ -186,10 +179,27 @@
         
         public T[] GetModules<T>() {
 
-            return this.componentModules.GetModules<T>();
+            var results = new System.Collections.Generic.List<T>();
+            this.componentModules.GetModules(results);
+            return results.ToArray();
 
         }
-        
+
+        public void GetModules<T>(System.Collections.Generic.List<T> results) {
+
+            this.componentModules.GetModules(results);
+
+        }
+
+        public void ForEachModule<T, TState>(TState state, System.Action<T, TState> action) {
+
+            var results = PoolList<T>.Spawn();
+            this.GetModules(results);
+            foreach (var item in results) action.Invoke(item, state);
+            PoolList<T>.Recycle(results);
+
+        }
+
         public override void ValidateEditor() {
             
             base.ValidateEditor();

@@ -485,7 +485,22 @@ namespace UnityEngine.UI.Windows {
 
         public static void SetCallbackOnAnyInteractable(System.Action<UnityEngine.UI.Windows.Components.IInteractable> callback) {
 
+            if (WindowSystem.instance == null) return;
             WindowSystem.instance.callbackOnAnyInteractable = callback;
+
+        }
+
+        public static void AddCallbackOnAnyInteractable(System.Action<UnityEngine.UI.Windows.Components.IInteractable> callback) {
+
+            if (WindowSystem.instance == null) return;
+            WindowSystem.instance.callbackOnAnyInteractable += callback;
+
+        }
+
+        public static void RemoveCallbackOnAnyInteractable(System.Action<UnityEngine.UI.Windows.Components.IInteractable> callback) {
+
+            if (WindowSystem.instance == null) return;
+            WindowSystem.instance.callbackOnAnyInteractable -= callback;
 
         }
 

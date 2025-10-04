@@ -93,7 +93,7 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.GetWindow().GetState() != ObjectState.Showing &&
                 this.GetWindow().GetState() != ObjectState.Shown) {
 
-                Debug.LogWarning("Couldn't send click because window is in `" + this.GetWindow().GetState().ToString() + "` state.", this);
+                Debug.LogWarning($"Couldn't send click because window is in `{this.GetWindow().GetState()}` state.", this);
                 return false;
 
             }
@@ -101,7 +101,7 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.GetState() != ObjectState.Showing &&
                 this.GetState() != ObjectState.Shown) {
 
-                Debug.LogWarning("Couldn't send click because component is in `" + this.GetState().ToString() + "` state.", this);
+                Debug.LogWarning($"Couldn't send click because component is in `{this.GetState()}` state.", this);
                 return false;
 
             }

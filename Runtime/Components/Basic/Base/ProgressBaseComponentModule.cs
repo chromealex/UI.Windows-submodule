@@ -12,6 +12,10 @@
             
         }
 
+        public virtual void OnValueChanged(float f) {
+            
+        }
+
     }
     
 }

@@ -106,6 +106,8 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.callback != null) this.callback.Invoke(value);
             if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this, value);
             
+            this.ForEachModule<ProgressComponentModule, float>(value, (p, v) => p.OnValueChanged(v));
+            
         }
         
         public void SetCallback(System.Action<float> callback) {

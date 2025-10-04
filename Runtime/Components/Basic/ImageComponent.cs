@@ -236,6 +236,8 @@ namespace UnityEngine.UI.Windows.Components {
                 
             }
 
+            this.ForEachModule<ImageComponentModule, Sprite>(sprite, static (c, sprite) => c.SetImage(sprite));
+            
         }
 
         public void SetImage(Texture texture) {
@@ -256,6 +258,8 @@ namespace UnityEngine.UI.Windows.Components {
                 image.useSpriteMesh = this.useSpriteMesh;
 
             }
+
+            this.ForEachModule<ImageComponentModule, Texture>(texture, static (c, texture) => c.SetImage(texture));
 
 		}
 

@@ -38,11 +38,11 @@ namespace UnityEngine.UI.Windows {
 
                         if (closure.module.roundToInt == true) {
 
-                            closure.module.textComponent.SetValue(Mathf.RoundToInt(val));
+                            closure.module.textComponent.SetValue_INTERNAL(Mathf.RoundToInt(val), out _);
 
                         } else {
 
-                            closure.module.textComponent.SetValue(val);
+                            closure.module.textComponent.SetValue_INTERNAL(val, out _);
 
                         }
 

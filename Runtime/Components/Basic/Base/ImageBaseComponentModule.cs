@@ -12,6 +12,14 @@
             
         }
 
+        public virtual void SetImage(Sprite sprite) {
+            
+        }
+
+        public virtual void SetImage(Texture texture) {
+            
+        }
+
     }
     
 }

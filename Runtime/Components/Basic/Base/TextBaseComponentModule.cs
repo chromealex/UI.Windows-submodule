@@ -1,4 +1,6 @@
 ﻿namespace UnityEngine.UI.Windows {
+    
+    using Components;
 
     public abstract class TextComponentModule : WindowComponentModule {
 
@@ -13,6 +15,10 @@
         }
 
         public virtual void OnSetValue(double prevValue, double value, UnityEngine.UI.Windows.Components.SourceValue sourceValue, string strFormat) { }
+
+        public virtual void SetValue(double value, SourceValue sourceValue = SourceValue.Digits, TimeResult timeValueResult = TimeResult.None, TimeResult timeShortestVariant = TimeResult.None) { }
+        
+        public virtual void SetText(string text) { }
         
         public virtual void OnSetText(string prevText, string text) { }
 

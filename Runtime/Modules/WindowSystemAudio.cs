@@ -1,19 +1,180 @@
-﻿namespace UnityEngine.UI.Windows {
+﻿using UIWSAudioEvent = UI.Windows.Runtime.Modules.Audio.UIWSAudioEvent;
+
+namespace UnityEngine.UI.Windows {
+    
+    using Components;
+
+    public interface IAudioComponentModule { }
 
     public class WindowSystemAudio : MonoBehaviour {
 
-        public AudioSource audioSource;
+        public enum EventType {
+            SFX,
+            Music,
+        }
 
-        public void Play(AudioClip clip) {
+        public enum Behaviour {
+            None,
+            StopOtherChannels,
+        }
+
+        public const int CHANNELS_COUNT = 16;
+        
+        public UIWSAudioEvent defaultButtonClickEvent;
+        public AudioSource audioSource;
+        
+        private AudioSource sfxSource;
+        private AudioSource[] musicSources;
+        private ME.Taptic.ITapticEngine taptic;
+        
+        public void Start() {
+
+            this.taptic = new ME.Taptic.TapticEngine();
+            this.taptic.SetActiveModule(new ME.Taptic.TapticAnimationCurveImpl());
             
-            this.audioSource.PlayOneShot(clip);
+            WindowSystem.AddCallbackOnAnyInteractable(this.OnAnyInteractable);
+
+            this.sfxSource = Instantiate(this.audioSource);
+            this.sfxSource.name = "[Audio] SFX";
+            this.sfxSource.gameObject.SetActive(true);
+            GameObject.DontDestroyOnLoad(this.sfxSource.gameObject);
+            this.musicSources = new AudioSource[CHANNELS_COUNT - 1];
+            for (int i = 1; i < CHANNELS_COUNT; ++i) {
+                var source = Instantiate(this.audioSource);
+                GameObject.DontDestroyOnLoad(source.gameObject);
+                source.name = $"[Audio] Musix Channel {i}";
+                source.gameObject.SetActive(true);
+                this.musicSources[i - 1] = source;
+            }
+
+        }
+
+        public void Update() {
+            this.taptic.Update();
+        }
+
+        public void OnDestroy() {
+            
+            WindowSystem.RemoveCallbackOnAnyInteractable(this.OnAnyInteractable);
             
         }
 
-        public void Play(AudioClip[] clips) {
+        private void OnAnyInteractable(UnityEngine.UI.Windows.Components.IInteractable obj) {
+
+            if (obj is ButtonComponent button) {
+                if (button.GetModule<IAudioComponentModule>() == null) {
+                    if (this.defaultButtonClickEvent != null) {
+                        this.defaultButtonClickEvent.Play();
+                    }
+                }
+            }
             
-            this.audioSource.PlayOneShot(clips[Random.Range(0, clips.Length)]);
+        }
+
+        /// <summary>
+        /// Set volume
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <param name="volume">0..1</param>
+        public void SetVolume(EventType eventType, float volume) {
+            if (eventType == EventType.SFX) {
+                this.sfxSource.volume = volume;
+            } else if (eventType == EventType.Music) {
+                for (int i = 1; i < CHANNELS_COUNT; ++i) {
+                    var source = this.musicSources[i - 1];
+                    source.volume = volume;
+                }
+            }
+            this.audioSource.volume = volume;
+        }
+
+        /// <summary>
+        /// Set vibration state
+        /// </summary>
+        /// <param name="state">True is on, False is off</param>
+        public void SetVibration(bool state) {
+            if (state == true) {
+                this.taptic.Unmute();
+            } else {
+                this.taptic.Mute();
+            }
+        }
+        
+        public void Play(UIWSAudioEvent clip) {
+
+            if (clip.eventType == EventType.SFX) {
+                if (clip.randomClips?.Length > 0) {
+                    this.ApplyParameters(this.sfxSource, clip);
+                    this.sfxSource.PlayOneShot(clip.randomClips[Random.Range(0, clip.randomClips.Length)]);
+                } else if (clip.audioClip != null) {
+                    this.ApplyParameters(this.sfxSource, clip);
+                    this.sfxSource.PlayOneShot(clip.audioClip);
+                }
+            } else if (clip.eventType == EventType.Music) {
+                if (clip.behaviour == Behaviour.StopOtherChannels) {
+                    this.StopAllChannels();
+                }
+                var source = this.GetChannel(clip.musicChannel);
+                this.ApplyParameters(source, clip);
+                source.clip = clip.audioClip;
+                source.Play();
+            }
+
+            if (clip.vibrate == true) {
+                if (clip.tapticByCurve == true) {
+                    this.taptic.PlayCurve(clip.tapticCurve, false);
+                } else {
+                    this.taptic.PlaySingle(clip.taptic);
+                }
+            }
+
+        }
+
+        public void StopAllChannels() {
+            for (int i = 0; i < this.musicSources.Length; ++i) {
+                var source = this.musicSources[i];
+                source.Stop();
+            }
+        }
+
+        private void ApplyParameters(AudioSource source, UIWSAudioEvent clip) {
+
+            var parameters = clip.parameters;
+            if (parameters.changePitch == true) {
+                if (parameters.randomPitch == true) {
+                    source.pitch = Random.Range(parameters.randomPitchValue.x, parameters.randomPitchValue.y);
+                } else {
+                    source.pitch = parameters.pitchValue;
+                }
+            } else {
+                source.pitch = this.audioSource.pitch;
+            }
+
+            if (parameters.changeVolume == true) {
+                if (parameters.randomVolume == true) {
+                    source.volume = Random.Range(parameters.randomVolumeValue.x, parameters.randomVolumeValue.y);
+                } else {
+                    source.volume = parameters.volumeValue;
+                }
+            } else {
+                source.volume = this.audioSource.volume;
+            }
+
+        }
+
+        public void Stop(UIWSAudioEvent clip) {
+
+            if (clip.eventType == EventType.SFX) {
+                this.sfxSource.Stop();
+            } else if (clip.eventType == EventType.Music) {
+                var source = this.GetChannel(clip.musicChannel);
+                source.Stop();
+            }
             
+        }
+
+        private AudioSource GetChannel(int musicChannel) {
+            return this.musicSources[musicChannel - 1];
         }
 
     }
@@ -27,7 +188,7 @@
         #if FMOD_SUPPORT
         public FMODAudioComponent fmodAudioComponent;
         #else
-        public AudioClip clip;
+        public UIWSAudioEvent clip;
         #endif
 
         private System.Action<WindowObject> onPlayCallback;
@@ -64,8 +225,7 @@
             #if FMOD_SUPPORT
             this.fmodAudioComponent.Play();
             #else
-            var audio = WindowSystem.GetAudio();
-            audio.Play(this.clip);
+            this.clip.Play();
             #endif
 
         }
@@ -75,8 +235,7 @@
             #if FMOD_SUPPORT
             this.fmodAudioComponent.Stop();
             #else
-            var audio = WindowSystem.GetAudio();
-            audio.Play(this.clip);
+            this.clip.Stop();
             #endif
 
         }

@@ -405,6 +405,20 @@ namespace UnityEngine.UI.Windows.Components {
         public void SetValue(double value, SourceValue sourceValue = SourceValue.Digits, TimeResult timeValueResult = TimeResult.None,
                              TimeResult timeShortestVariant = TimeResult.None) {
 
+            if (this.SetValue_INTERNAL(value, out var strFormat, sourceValue, timeValueResult, timeShortestVariant) == true) {
+
+                var prevData = this.lastValueData;
+                this.ForEachModule<TextComponentModule, System.ValueTuple<double, double, SourceValue, string>>((prevData.value, value, sourceValue, strFormat), static (c, state) => c.OnSetValue(state.Item1, state.Item2, state.Item3, state.Item4));
+
+                this.ForEachModule<TextComponentModule, System.ValueTuple<double, SourceValue, TimeResult, TimeResult>>((value, sourceValue, timeValueResult, timeShortestVariant), static (c, state) => c.SetValue(state.Item1, state.Item2, state.Item3, state.Item4));
+
+            }
+            
+        }
+
+        internal bool SetValue_INTERNAL(double value, out string strFormat, SourceValue sourceValue = SourceValue.Digits, TimeResult timeValueResult = TimeResult.None,
+                                        TimeResult timeShortestVariant = TimeResult.None) {
+            
             switch (sourceValue) {
                 case SourceValue.Digits:
                     break;
@@ -426,14 +440,14 @@ namespace UnityEngine.UI.Windows.Components {
                 isCreated = true,
             };
             if (this.lastValueData == currentData) {
-                return;
+                strFormat = default;
+                return false;
             }
 
-            var prevData = this.lastValueData;
             this.lastValueData = currentData;
             this.lastText = null;
 
-            string strFormat;
+            strFormat = default;
             if (timeShortestVariant > TimeResult.None && timeShortestVariant < timeValueResult) {
 
                 var ts = new TimeShort(value, this.timeResultStrings, sourceValue);
@@ -458,29 +472,9 @@ namespace UnityEngine.UI.Windows.Components {
                     this.SetText_INTERNAL(new TimeFormatFromMilliseconds() { format = strFormat }.GetValue(value));
                     break;
             }
-            
-            this.OnSetValue(prevData.value, value, sourceValue, strFormat);
 
-        }
+            return true;
 
-        private void OnSetValue(double prevValue, double value, SourceValue sourceValue, string strFormat) {
-
-            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
-                
-                if (this.componentModules.modules[i] is TextComponentModule module) module.OnSetValue(prevValue, value, sourceValue, strFormat);
-                
-            }
-            
-        }
-
-        private void OnSetText(string prevValue, string value) {
-
-            for (int i = 0; i < this.componentModules.modules.Length; ++i) {
-                
-                if (this.componentModules.modules[i] is TextComponentModule module) module.OnSetText(prevValue, value);
-                
-            }
-            
         }
 
         public string GetText() {
@@ -558,7 +552,8 @@ namespace UnityEngine.UI.Windows.Components {
             }
             #endif
 
-            this.OnSetText(prevText, text);
+            this.ForEachModule<TextComponentModule, System.ValueTuple<string, string>>((prevText, text), static (c, state) => c.OnSetText(state.Item1, state.Item2));
+            this.ForEachModule<TextComponentModule, string>(text, static (c, state) => c.SetText(state));
 
             this.SetText_INTERNAL(text);
 

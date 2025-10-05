@@ -4,7 +4,7 @@ namespace UnityEngine.UI.Windows.Components {
     
     using Utilities;
 
-    public class InputFieldComponent : GenericComponent, IInteractable, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
+    public partial class InputFieldComponent : GenericComponent, IInteractable, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
 
         System.Type ISearchComponentByTypeEditor.GetSearchType() { return typeof(InputFieldComponentModule); }
         IList ISearchComponentByTypeSingleEditor.GetSearchTypeArray() { return this.componentModules.modules;}

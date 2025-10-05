@@ -55,22 +55,48 @@
 
         }
 
+        private struct HideClosure {
+
+            public WindowBase window;
+            public TransitionParameters parameters;
+
+        }
+
+        private class HideCallbackClosure {
+
+            public WindowBase window;
+            public TransitionParameters parameters;
+
+        }
+
+        private void HideBase(TransitionParameters parameters) {
+            base.Hide(parameters);
+        }
+
         public override void Hide(TransitionParameters parameters) {
 
             parameters = parameters.ReplaceIgnoreTouch(true);
-            var cbParameters = parameters.ReplaceCallback(() => {
+            var closure = PoolClass<HideCallbackClosure>.Spawn();
+            closure.window = this;
+            closure.parameters = parameters;
+            var cbParameters = parameters.ReplaceCallback(closure, static (obj) => {
 
-                this.PushToPool();
-                parameters.RaiseCallback();
+                var closure = (HideCallbackClosure)obj;
+                closure.window.PushToPool();
+                closure.parameters.RaiseCallback();
+                PoolClass<HideCallbackClosure>.Recycle(closure);
 
             });
 
             if (cbParameters.data.replaceDelay == true) {
 
                 var tweener = WindowSystem.GetTweener();
-                tweener.Add(this, cbParameters.data.delay, 0f, 0f).Tag(this).OnComplete((obj) => {
+                tweener.Add(new HideClosure() {
+                    window = this,
+                    parameters = parameters,
+                }, cbParameters.data.delay, 0f, 0f).Tag(this).OnComplete(static (obj) => {
                     
-                    base.Hide(cbParameters.ReplaceDelay(0f));
+                    obj.window.HideBase(obj.parameters.ReplaceDelay(0f));
 
                 });
 

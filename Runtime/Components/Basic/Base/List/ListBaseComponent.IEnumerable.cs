@@ -28,7 +28,7 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public virtual async void SetItems<T, TItem, TClosure>(IEnumerable<TItem> list, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListItemIEnumerableClosureParameters<TItem> {
+        public virtual void SetItems<T, TItem, TClosure>(IEnumerable<TItem> list, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListItemIEnumerableClosureParameters<TItem> {
 
             if (this.isLoadingRequest == true) {
 
@@ -63,7 +63,7 @@ namespace UnityEngine.UI.Windows.Components {
 
                 closure.offset = this.Count - emitItems;
                 closure.temp = temp;
-                await this.Emit(emitItems, this.source, onItem, closure, static (c) => {
+                this.Emit(emitItems, this.source, onItem, closure, static (c) => {
 
                     var tmp = c.temp;
                     PoolList<TItem>.Recycle(ref tmp);

@@ -316,7 +316,7 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        internal async Task AddItemInternal<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
+        internal async Awaitable AddItemInternal<T, TClosure>(Resource source, TClosure closure, System.Action<T, TClosure> onComplete) where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
             
             var resources = WindowSystem.GetResources();
             var data = new AddItemClosure<T, TClosure>() {
@@ -324,7 +324,7 @@ namespace UnityEngine.UI.Windows.Components {
                 onComplete = onComplete,
                 component = this,
             };
-            await resources.LoadAsync<T, AddItemClosure<T, TClosure>>(this, data, source, static (asset, innerClosure) => {
+            await resources.LoadAsyncWait<T, AddItemClosure<T, TClosure>>(this, data, source, static (asset, innerClosure) => {
 
                 ListBaseComponent.SetupLoadedAsset(asset, innerClosure);
                 
@@ -402,7 +402,7 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         private bool isLoadingRequest = false;
-        public virtual async void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListClosureParameters {
+        public virtual void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListClosureParameters {
 
             if (this.isLoadingRequest == true) {
 
@@ -432,7 +432,7 @@ namespace UnityEngine.UI.Windows.Components {
                         onItem.Invoke((T)this.items[i], closure);
                     
                     }
-                    await this.Emit(delta, source, onItem, closure, onComplete);
+                    this.Emit(delta, source, onItem, closure, onComplete);
 
                 } else {
                     
@@ -478,7 +478,7 @@ namespace UnityEngine.UI.Windows.Components {
             public EmitLoaded loadedCounter;
 
         }
-        private async Task Emit<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete = null, System.Func<TClosure, TClosure> onClosure = null) where T : WindowComponent where TClosure : IListClosureParameters {
+        private async void Emit<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete = null, System.Func<TClosure, TClosure> onClosure = null) where T : WindowComponent where TClosure : IListClosureParameters {
 
             if (count == 0) {
                 

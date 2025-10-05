@@ -131,20 +131,6 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
         
-        public void SetColor(Color color) {
-
-            if (this.graphics == null) return;
-            this.graphics.color = color;
-
-        }
-
-        public Color GetColor() {
-
-            if (this.graphics == null) return Color.white;
-            return this.graphics.color;
-
-        }
-
         private Resource prevResourceLoad;
 
         public void SetImage<T>(T provider, bool async = true) where T : IResourceProvider {
@@ -166,7 +152,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
         
-        public async void SetImage(Resource resource, bool async = true, System.Action onSetImageComplete = null) {
+        public void SetImage(Resource resource, bool async = true, System.Action onSetImageComplete = null) {
 
             if (this.prevResourceLoad.IsEquals(resource) == false) {
 
@@ -175,7 +161,7 @@ namespace UnityEngine.UI.Windows.Components {
 
                     case Resource.ObjectType.Sprite: {
                         if (async == true) {
-                            await resources.LoadAsync<Sprite, LoadClosure>(this, new LoadClosure(this, onSetImageComplete), resource, static (asset, data) => {
+                            resources.LoadAsync<Sprite, LoadClosure>(this, new LoadClosure(this, onSetImageComplete), resource, static (asset, data) => {
                                 if (data.component != null) {
                                     data.component.SetImage(asset);
                                     data.onSetImageComplete?.Invoke();
@@ -190,7 +176,7 @@ namespace UnityEngine.UI.Windows.Components {
 
                     case Resource.ObjectType.Texture: {
                         if (async == true) {
-                            await resources.LoadAsync<Texture, LoadClosure>(this, new LoadClosure(this, onSetImageComplete), resource, static (asset, data) => {
+                            resources.LoadAsync<Texture, LoadClosure>(this, new LoadClosure(this, onSetImageComplete), resource, static (asset, data) => {
                                 if (data.component != null) {
                                     data.component.SetImage(asset);
                                     data.onSetImageComplete?.Invoke();
@@ -267,14 +253,41 @@ namespace UnityEngine.UI.Windows.Components {
             
             base.ValidateEditor();
 
-            if(this.graphics == null) this.graphics = this.GetComponent<Graphic>();
+            if (this.graphics == null) this.graphics = this.GetComponent<Graphic>();
 
         }
         
         public void SetFillAmount(float value) {
 
-            if (this.graphics == null) return;
             if (this.graphics is Image image) image.fillAmount = value;
+
+        }
+
+        public void SetMaterial(Material material) {
+
+            if (this.graphics == null) return;
+            this.graphics.material = material;
+            
+        }
+
+        public Material GetMaterial() {
+
+            if (this.graphics == null) return null;
+            return this.graphics.material;
+            
+        }
+
+        public void SetColor(Color color) {
+
+            if (this.graphics == null) return;
+            this.graphics.color = color;
+
+        }
+
+        public Color GetColor() {
+
+            if (this.graphics == null) return Color.white;
+            return this.graphics.color;
 
         }
 

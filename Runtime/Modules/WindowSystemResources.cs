@@ -71,9 +71,9 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        public async Task<T> LoadAsync(object handler) {
+        public async Awaitable<T> LoadAsync(object handler) {
 
-            var tcs = new TaskCompletionSource<T>();
+            var tcs = PoolClass<TaskCompletionSource<T>>.Spawn();
 
             if (this.loaded != null) {
                 tcs.SetResult(this.loaded);
@@ -83,13 +83,15 @@ namespace UnityEngine.UI.Windows {
                     resource = this,
                 };
                 
-                await WindowSystem.GetResources().LoadAsync<T, AsyncClosure>(handler, closure, this.data, static (asset, p) => {
+                await WindowSystem.GetResources().Load_INTERNAL<T, AsyncClosure>(new UnityEngine.UI.Windows.Modules.WindowSystemResources.LoadParameters() { async = true }, handler, closure, this.data, static (asset, p) => {
                     p.resource.loaded = asset;
                     p.tcs.SetResult(p.resource.loaded);
                 });
             }
 
-            return tcs.Task.Result;
+            var result = tcs.Task.Result;
+            PoolClass<TaskCompletionSource<T>>.Recycle(tcs);
+            return result;
 
         }
 
@@ -448,30 +450,38 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        public async Task LoadAsync<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        public async void LoadAsync<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
             
             await this.Load_INTERNAL(loadParameters, handler, closure, resource, onComplete);
             
         }
 
-        public async Task LoadAsync<T>(object handler, Resource resource, System.Action<T, DefaultClosureData> onComplete) where T : class {
+        public void LoadAsync<T>(object handler, Resource resource, System.Action<T, DefaultClosureData> onComplete) where T : class {
 
-            await this.LoadAsync<T, DefaultClosureData>(handler, new DefaultClosureData(), resource, onComplete);
+            this.LoadAsync(handler, new DefaultClosureData(), resource, onComplete);
 
         }
 
-        public async Task LoadAsync<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        public async void LoadAsync<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
             
             await this.Load_INTERNAL(new LoadParameters() { async = true }, handler, closure, resource, onComplete);
             
         }
 
-        public async Task<T> LoadAsync<T>(object handler, Resource resource) where T : class {
-
-            var tcs = new TaskCompletionSource<T>();
-            await this.LoadAsync<T, TaskCompletionSource<T>>(handler, tcs, resource, static (asset, s) => s.SetResult(asset));
-            return tcs.Task.Result;
+        public async Awaitable LoadAsyncWait<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
             
+            await this.Load_INTERNAL(new LoadParameters() { async = true }, handler, closure, resource, onComplete);
+            
+        }
+
+        public async Awaitable<T> LoadAsync<T>(object handler, Resource resource) where T : class {
+
+            var tcs = PoolClass<TaskCompletionSource<T>>.Spawn();
+            await this.Load_INTERNAL<T, TaskCompletionSource<T>>(new LoadParameters() { async = true }, handler, tcs, resource, static (asset, s) => s.SetResult(asset));
+            var result = tcs.Task.Result;
+            PoolClass<TaskCompletionSource<T>>.Recycle(tcs);
+            return result;
+
         }
 
         public T Load<T>(object handler, Resource resource) where T : class {
@@ -482,7 +492,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 c.result = asset;
 
             });
-            op.ConfigureAwait(false).GetAwaiter().GetResult();
+            op.GetAwaiter().GetResult();
             
             var result = closure.result;
             closure.result = null;
@@ -516,7 +526,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        private async Task Load_INTERNAL<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        internal async Awaitable Load_INTERNAL<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
 
             if (typeof(Component).IsAssignableFrom(typeof(T)) == true) {
                         
@@ -530,7 +540,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     
                     // Waiting for loading then break
                     var item = new InternalTask(resource);
-                    while (this.tasks.ContainsKey(item) == true) await Task.Yield();
+                    while (this.tasks.ContainsKey(item) == true) await Awaitable.NextFrameAsync();
                     return;
                     
                 }
@@ -595,14 +605,14 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        private async Task LoadAddressable_INTERNAL<TResource, TResult>(LoadParameters loadParameters, object handler, Resource resource, System.Func<TResource, TResult> converter) where TResult : class {
+        private async Awaitable LoadAddressable_INTERNAL<TResource, TResult>(LoadParameters loadParameters, object handler, Resource resource, System.Func<TResource, TResult> converter) where TResult : class {
 
             var op = Addressables.LoadAssetAsync<TResource>(resource.GetAddress());
-            await Task.Yield();
+            await Awaitable.NextFrameAsync();
             System.Action cancellationTask = () => { if (op.IsValid() == true) Addressables.Release(op); };
             this.LoadBegin(handler, cancellationTask);
             if (loadParameters.async == false) op.WaitForCompletion();
-            while (op.IsDone == false) await Task.Yield();
+            while (op.IsDone == false) await Awaitable.NextFrameAsync();
 
             if (op.IsValid() == true && op.Status == AsyncOperationStatus.Succeeded) {
 

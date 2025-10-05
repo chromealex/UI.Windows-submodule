@@ -14,94 +14,90 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-        public static async void NextFrame<T>(T state, System.Action<T> callback) {
+        public void Update() {
 	        
-	        await Coroutines.WaitFrames_INTERNAL(state, callback, 1);
-	        
-        }
-
-        private static async System.Threading.Tasks.Task WaitFrames_INTERNAL<T>(T state, System.Action<T> callback, int frames) {
-
-	        while (frames > 0) {
-		        
-		        await Awaitable.NextFrameAsync();
-		        --frames;
-
-	        }
-	        callback.Invoke(state);
-
+			WaitTasks.Update();
+			
         }
         
-        public static async void NextFrame(System.Action callback) {
-	        
-	        await Coroutines.WaitFrames_INTERNAL(callback, 1);
-	        
-        }
+        private struct WaitFrameClosure {
 
-        private static async System.Threading.Tasks.Task WaitFrames_INTERNAL(System.Action callback, int frames) {
-
-	        while (frames > 0) {
-		        
-		        await Awaitable.NextFrameAsync();
-		        --frames;
-
-	        }
-	        callback.Invoke();
-
-        }
-        
-        public static async void WaitTime(float time, System.Action callback) {
-	        
-            await Coroutines.TimeWaiter_INTERNAL(time, callback);
-	        
-        }
-
-        private static async System.Threading.Tasks.Task TimeWaiter_INTERNAL(float time, System.Action callback) {
-
-	        await System.Threading.Tasks.Task.Delay((int)(time * 1000));
-            callback.Invoke();
+	        public System.Action callback;
+	        public int frame;
 
         }
 
-        public static async void WaitTime<TState>(TState state, float time, System.Action<TState> callback) {
-	        
-	        await Coroutines.TimeWaiter_INTERNAL(state, time, callback);
-	        
-        }
+        private struct WaitFrameClosure<T> {
 
-        private static async System.Threading.Tasks.Task TimeWaiter_INTERNAL<TState>(TState state, float time, System.Action<TState> callback) {
-	        
-            await System.Threading.Tasks.Task.Delay((int)(time * 1000));
-            callback.Invoke(state);
+	        public T state;
+	        public System.Action<T> callback;
+	        public int frame;
 
         }
 
-        public static async void Wait(System.Func<bool> waitFor, System.Action callback) {
+        private struct WaitTimeClosure {
+
+	        public System.Action callback;
+	        public float time;
+
+        }
+
+        private struct WaitTimeClosure<T> {
+
+	        public T state;
+	        public System.Action<T> callback;
+	        public float time;
+
+        }
+
+        public static void NextFrame<T>(T state, System.Action<T> callback) {
 	        
-	        await Coroutines.Waiter_INTERNAL(waitFor, callback);
+	        WaitFrames(state, callback, 1);
+
+        }
+
+        public static void NextFrame(System.Action callback) {
+	        
+	        WaitFrames(callback, 1);
+
+        }
+
+        public static void WaitFrames<T>(T state, System.Action<T> callback, int frames) {
+	        
+	        WaitTasks.Add(new WaitFrameClosure<T>() { state = state, frame = Time.frameCount + frames, callback = callback }, static (t) => Time.frameCount >= t.frame, static (t) => t.callback.Invoke(t.state));
+
+        }
+
+        public static void WaitFrames(System.Action callback, int frames) {
+	        
+	        WaitTasks.Add(new WaitFrameClosure() { frame = Time.frameCount + frames, callback = callback }, static (t) => Time.frameCount >= t.frame, static (t) => t.callback.Invoke());
+
+        }
+
+        public static void WaitTime(float time, System.Action callback) {
+	        
+	        WaitTasks.Add(new WaitTimeClosure() { time = Time.time + time, callback = callback }, static (t) => Time.time >= t.time, static (t) => t.callback.Invoke());
+            
+        }
+
+        public static void WaitTime<TState>(TState state, float time, System.Action<TState> callback) {
+	        
+	        WaitTasks.Add(new WaitTimeClosure<TState>() { state = state, time = Time.time + time, callback = callback }, static (t) => Time.time >= t.time, static (t) => t.callback.Invoke(t.state));
+
+        }
+
+        public static void Wait(System.Func<bool> waitFor, System.Action callback) {
+
+	        WaitTasks.Add(waitFor, callback);
 	        
         }
 
-        public static async void Wait<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+        public static void Wait<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+
+	        WaitTasks.Add(state, waitFor, callback);
 	        
-	        await Coroutines.Waiter_INTERNAL(state, waitFor, callback);
-	        
         }
 
-        private static async System.Threading.Tasks.Task Waiter_INTERNAL<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
-
-	        while (waitFor.Invoke(state) == false) await System.Threading.Tasks.Task.Yield();
-	        callback.Invoke(state);
-
-        }
-        
-        private static async System.Threading.Tasks.Task Waiter_INTERNAL(System.Func<bool> waitFor, System.Action callback) {
-
-	        while (waitFor.Invoke() == false) await System.Threading.Tasks.Task.Yield();
-	        callback.Invoke();
-
-        }
-        
         public static Coroutine Run(IEnumerator coroutine) {
 
 	        return Coroutines.instance.StartCoroutine(coroutine);
@@ -120,103 +116,43 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-        private static bool MoveNext<T>(IEnumerator<T> ie, IEnumerable<T> collection) {
+        private static bool MoveNext<T>(ref List<T>.Enumerator ie, IList<T> collection) {
 
-            var next = false;
-            try {
-                next = ie.MoveNext();
-            } catch (System.Exception ex) {
-                // collection was modified
-                var info = string.Empty;
-                foreach (var item in collection) {
-                    info += item + "\n";
-                }
-                Debug.LogWarning("Exception caught while iterating the collection: " + ex.Message + "\n" + info);
-	            throw ex;
-            }
+	        var next = false;
+	        try {
+		        next = ie.MoveNext();
+	        } catch (System.Exception ex) {
+		        // collection was modified
+		        var info = string.Empty;
+		        foreach (var item in collection) {
+			        info += item + "\n";
+		        }
+		        Debug.LogWarning($"Exception caught while iterating the collection: {ex.Message}\n{info}");
+		        throw ex;
+	        }
 
-            return next;
+	        return next;
 
         }
 
-		public static void CallInSequence<T, TState>(System.Action<TState> callback, TState state, IList<T> collection, System.Action<T, System.Action, TState> each, bool waitPrevious = false) {
+        private static bool MoveNext<T>(ref SZArrayEnumerator<T> ie, T[] collection) {
 
-			if (collection == null) {
+	        var next = false;
+	        try {
+		        next = ie.MoveNext();
+	        } catch (System.Exception ex) {
+		        // collection was modified
+		        var info = string.Empty;
+		        foreach (var item in collection) {
+			        info += item + "\n";
+		        }
+		        Debug.LogWarning($"Exception caught while iterating the collection: {ex.Message}\n{info}");
+		        throw ex;
+	        }
 
-				if (callback != null) callback.Invoke(state);
-				return;
+	        return next;
 
-			}
-
-			var count = collection.Count();
-
-			var completed = false;
-			var counter = 0;
-			System.Action callbackItem = () => {
-
-				++counter;
-				if (counter < count) return;
-
-				completed = true;
-
-				if (callback != null) callback.Invoke(state);
-				
-			};
-
-			if (waitPrevious == true) {
-
-				var ie = collection.GetEnumerator();
-
-				System.Action doNext = null;
-				doNext = () => {
-
-                    if (Coroutines.MoveNext(ie, collection) == true) {
-
-						if (ie.Current != null) {
-
-							each(ie.Current, () => {
-								
-								callbackItem();
-								doNext();
-
-							}, state);
-
-						} else {
-
-							callbackItem();
-							doNext();
-
-						}
-
-					}
-
-				};
-				doNext();
-
-			} else {
-
-                var ie = collection.GetEnumerator();
-                while (Coroutines.MoveNext(ie, collection) == true) {
-
-					if (ie.Current != null) {
-
-						each(ie.Current, callbackItem, state);
-
-					} else {
-
-						callbackItem();
-
-					}
-
-					if (completed == true) break;
-
-				}
-
-			}
-
-			if (count == 0 && callback != null) callback(state);
-
-		}
+        }
 
 		public delegate void ClosureDelegateCallback<T>(ref T obj);
 		public delegate void ClosureDelegateCallbackContext<T>(WindowObject context, ref T obj);
@@ -231,12 +167,14 @@ namespace UnityEngine.UI.Windows.Utilities {
 			internal ClosureDelegateEachCallback<T, TClosure> each { get; set; }
 			internal ClosureDelegateCallback<TClosure> doNext { get; set; }
 			internal ClosureDelegateCallback<TClosure> callbackItem { get; set; }
-			internal IList<T> collection { get; set; }
-			internal IEnumerator<T> ie { get; set; }
+			internal List<T> collection { get; set; }
+			internal T[] collectionArr { get; set; }
+			internal List<T>.Enumerator ie { get; set; }
+			internal SZArrayEnumerator<T> ieArr { get; set; }
 
 		}
 		
-		public static void CallInSequence<T, TClosure>(ref TClosure closure, ClosureDelegateCallback<TClosure> callback, IList<T> collection, ClosureDelegateEachCallback<T, TClosure> each, bool waitPrevious = false) where TClosure : ICallInSequenceClosure<T, TClosure> {
+		public static void CallInSequence<T, TClosure>(ref TClosure closure, ClosureDelegateCallback<TClosure> callback, List<T> collection, ClosureDelegateEachCallback<T, TClosure> each, bool waitPrevious = false) where TClosure : ICallInSequenceClosure<T, TClosure> {
 			
 			if (collection == null) {
 
@@ -273,8 +211,10 @@ namespace UnityEngine.UI.Windows.Utilities {
 				ClosureDelegateCallback<TClosure> doNext = null;
 				doNext = static (ref TClosure cParamsInner) => {
 
-					if (Coroutines.MoveNext(cParamsInner.ie, cParamsInner.collection) == true) {
-
+					var ie = cParamsInner.ie;
+					if (Coroutines.MoveNext(ref ie, cParamsInner.collection) == true) {
+						cParamsInner.ie = ie;
+						
 						if (cParamsInner.ie.Current != null) {
 
 							cParamsInner.each.Invoke(cParamsInner.ie.Current, static (ref TClosure cParams) => {
@@ -291,6 +231,8 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 						}
 
+					} else {
+						cParamsInner.ie = ie;
 					}
 
 				};
@@ -300,7 +242,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 			} else {
 
 				var ie = collection.GetEnumerator();
-				while (Coroutines.MoveNext(ie, collection) == true) {
+				while (Coroutines.MoveNext(ref ie, collection) == true) {
 
 					if (ie.Current != null) {
 
@@ -323,6 +265,124 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 		}
 
+		public static void CallInSequence<T, TClosure>(ref TClosure closure, ClosureDelegateCallback<TClosure> callback, T[] collection, ClosureDelegateEachCallback<T, TClosure> each, bool waitPrevious = false) where TClosure : ICallInSequenceClosure<T, TClosure> {
+			
+			if (collection == null) {
+
+				if (callback != null) callback.Invoke(ref closure);
+				return;
+
+			}
+
+			var count = collection.Count();
+
+			closure.counter = count;
+			closure.completed = false;
+			closure.callback = callback;
+			closure.collectionArr = collection;
+			closure.each = each;
+			
+			ClosureDelegateCallback<TClosure> callbackItem = static (ref TClosure cParamsInner) => {
+
+				--cParamsInner.counter;
+				if (cParamsInner.counter > 0) return;
+
+				cParamsInner.completed = true;
+
+				if (cParamsInner.callback != null) cParamsInner.callback.Invoke(ref cParamsInner);
+				
+			};
+			closure.callbackItem = callbackItem;
+
+			if (waitPrevious == true) {
+
+				var ie = new SZArrayEnumerator<T>(collection);
+				closure.ieArr = ie;
+
+				ClosureDelegateCallback<TClosure> doNext = null;
+				doNext = static (ref TClosure cParamsInner) => {
+
+					var ie = cParamsInner.ieArr;
+					if (Coroutines.MoveNext(ref ie, cParamsInner.collectionArr) == true) {
+						cParamsInner.ieArr = ie;
+
+						if (cParamsInner.ie.Current != null) {
+
+							cParamsInner.each.Invoke(cParamsInner.ie.Current, static (ref TClosure cParams) => {
+								
+								cParams.callbackItem.Invoke(ref cParams);
+								cParams.doNext(ref cParams);
+
+							}, ref cParamsInner);
+
+						} else {
+
+							cParamsInner.callbackItem.Invoke(ref cParamsInner);
+							cParamsInner.doNext.Invoke(ref cParamsInner);
+
+						}
+
+					} else {
+						cParamsInner.ieArr = ie;
+					}
+
+				};
+				closure.doNext = doNext;
+				doNext.Invoke(ref closure);
+
+			} else {
+
+				var ie = new SZArrayEnumerator<T>(collection);
+				while (Coroutines.MoveNext(ref ie, collection) == true) {
+
+					if (ie.Current != null) {
+
+						each.Invoke(ie.Current, callbackItem, ref closure);
+
+					} else {
+
+						callbackItem.Invoke(ref closure);
+
+					}
+
+					if (closure.completed == true) break;
+
+				}
+
+			}
+
+			if (count == 0 && callback != null) callback(ref closure);
+
+		}
+
+		internal struct SZArrayEnumerator<T> : IEnumerator {
+			private readonly T[] array; 
+			private int index; 
+			private readonly int endIndex; // cache array length, since it's a little slow.
+ 
+			internal SZArrayEnumerator(T[] array) {
+				this.array = array;
+				this.index = -1;
+				this.endIndex = array.Length;
+			} 
+ 
+			public bool MoveNext() { 
+				if (this.index < this.endIndex) {
+					this.index++; 
+					return (this.index < this.endIndex); 
+				}
+				return false; 
+			}
+
+			public T Current => this.array[this.index];
+
+			object IEnumerator.Current => throw new System.Exception();
+
+			public void Reset() {
+				this.index = -1;
+			} 
+		}
+		
     }
 
 }

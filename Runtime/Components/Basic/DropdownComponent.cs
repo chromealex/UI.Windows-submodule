@@ -22,7 +22,7 @@ namespace UnityEngine.UI.Windows.Components {
 
     public class DropdownComponent : GenericComponent, IInteractable, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
 
-        private static Vector2[] anchors = new Vector2[] {
+        private static readonly Vector2[] anchors = new Vector2[] {
             new Vector2(0f, 1f),
             new Vector2(0.5f, 1f),
             new Vector2(1f, 1f),

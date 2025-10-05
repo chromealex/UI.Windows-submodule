@@ -26,7 +26,7 @@ namespace UnityEngine.UI.Windows {
         public static void HideLoader() {
 
             if (WindowSystem.instance.loaderShowBegin == true && WindowSystem.instance.loaderInstance == null) {
-                Coroutines.Wait(static () => WindowSystem.instance.loaderInstance != null, WindowSystem.HideLoader);
+                Coroutines.Wait(static () => WindowSystem.instance.loaderInstance != null, static () => WindowSystem.HideLoader());
             } else {
                 if (WindowSystem.instance.loaderInstance != null) {
                     WindowSystem.instance.loaderInstance.Hide();

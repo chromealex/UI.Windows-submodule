@@ -42,7 +42,7 @@ namespace UnityEngine.UI.Windows {
 
         public class Registry<T, TClosure> : RegistryBase where T : WindowComponent where TClosure : UnityEngine.UI.Windows.Components.IListClosureParameters {
 
-            private List<Item<T, TClosure>> items = new List<Item<T, TClosure>>();
+            private readonly List<Item<T, TClosure>> items = new List<Item<T, TClosure>>();
             private int loadingCount;
             private bool isDirty;
             private bool forceRebuild;
@@ -73,9 +73,9 @@ namespace UnityEngine.UI.Windows {
 
             }
             
-            private List<Item<T, TClosure>> itemsToRedraw = new List<Item<T, TClosure>>();
-            private List<ItemInstanceToRedraw> instancesToRedraw = new List<ItemInstanceToRedraw>();
-            private Dictionary<int, int> instancePrevIndexToListIndex = new Dictionary<int, int>();
+            private readonly List<Item<T, TClosure>> itemsToRedraw = new List<Item<T, TClosure>>();
+            private readonly List<ItemInstanceToRedraw> instancesToRedraw = new List<ItemInstanceToRedraw>();
+            private readonly Dictionary<int, int> instancePrevIndexToListIndex = new Dictionary<int, int>();
             
             public override async void UpdateContent(bool forceRebuild = false) {
 

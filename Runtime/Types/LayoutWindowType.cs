@@ -238,7 +238,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         }
 
         private int loadingCount;
-        private async Task InitLayoutInstance<TState>(TState state, InitialParameters initialParameters, LayoutWindowType windowInstance, WindowObject root, WindowLayout windowLayout, HashSet<WindowLayout> used, System.Action<TState> onComplete, bool isInner = false) {
+        private async Awaitable InitLayoutInstance<TState>(TState state, InitialParameters initialParameters, LayoutWindowType windowInstance, WindowObject root, WindowLayout windowLayout, HashSet<WindowLayout> used, System.Action<TState> onComplete, bool isInner = false) {
 
             if (((ILayoutInstance)root).windowLayoutInstance != null || windowLayout == null) {
                 
@@ -293,7 +293,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                             initialParameters = initialParameters,
                         };
                         ++this.loadingCount;
-                        await resources.LoadAsync<WindowComponent, LayoutLoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, layoutElement, data, layoutComponent.component, static (asset, closure) => {
+                        resources.LoadAsync<WindowComponent, LayoutLoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, layoutElement, data, layoutComponent.component, static (asset, closure) => {
 
                             if (asset == null) {
 
@@ -320,7 +320,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
             }
 
-            while (this.loadingCount > 0) await Task.Yield();
+            while (this.loadingCount > 0) await Awaitable.NextFrameAsync();
             
             for (int i = 0; i < arr.Length; ++i) {
 
@@ -620,10 +620,20 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         public int GetNextTagId(LayoutItem layoutItem) {
 
             var tagId = 1;
-            while (layoutItem.components.Any(x => x.tag == tagId)) {
+            while (true) {
+                var found = false;
+                foreach (var item in layoutItem.components) {
+                    if (item.tag == tagId) {
+                        found = true;
+                        break;
+                    }
+                }
 
-                ++tagId;
-
+                if (found == true) {
+                    ++tagId;
+                } else {
+                    break;
+                }
             }
 
             return tagId;
@@ -633,10 +643,20 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         public int GetNextLocalTagId(LayoutItem layoutItem) {
 
             var tagId = 1;
-            while (layoutItem.components.Any(x => x.localTag == tagId)) {
+            while (true) {
+                var found = false;
+                foreach (var item in layoutItem.components) {
+                    if (item.localTag == tagId) {
+                        found = true;
+                        break;
+                    }
+                }
 
-                ++tagId;
-
+                if (found == true) {
+                    ++tagId;
+                } else {
+                    break;
+                }
             }
 
             return tagId;
@@ -651,17 +671,18 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             for (int j = layoutItem.components.Length - 1; j >= 0; --j) {
 
                 var com = layoutItem.components[j];
-                if (com.localTag == 0 || layoutItem.components.Count(x => x.localTag == com.localTag) > 1) {
+                var counter = 0;
+                foreach (var item in layoutItem.components) {
+                    if (item.localTag == com.localTag) {
+                        ++counter;
+                        if (counter > 1) break;
+                    }
+                }
+                if (com.localTag == 0 || counter > 1) {
 
                     helper.Set(ref com.localTag, this.GetNextLocalTagId(layoutItem));
 
                 }
-
-                /*if (layoutItem.components.Count(x => x.tag == com.tag && x.windowLayout == com.windowLayout) > 1) {
-
-                    com.tag = 0;
-
-                }*/
 
                 layoutItem.components[j] = com;
 
@@ -750,9 +771,14 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                             ref var com = ref layoutItem.components[c];
                             var comLock = com;
-                            if ((windowLayout != com.windowLayout || windowLayout.HasLayoutElementByTagId(com.tag) == false) && windowLayout.layoutElements.Any(x => {
-                                return x.innerLayout != null && x.innerLayout == comLock.windowLayout && x.innerLayout.HasLayoutElementByTagId(comLock.tag);
-                            }) == false) {
+                            var found = false;
+                            foreach (var x in windowLayout.layoutElements) {
+                                if (x.innerLayout != null && x.innerLayout == comLock.windowLayout && x.innerLayout.HasLayoutElementByTagId(comLock.tag) == true) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if ((windowLayout != com.windowLayout || windowLayout.HasLayoutElementByTagId(com.tag) == false) && found == false) {
 
                                 var list = layoutItem.components.ToList();
                                 list.RemoveAt(c);

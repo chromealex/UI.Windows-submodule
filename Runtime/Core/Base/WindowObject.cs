@@ -303,7 +303,14 @@ namespace UnityEngine.UI.Windows {
 
             if (this.registry == null) this.registry = new List<EditorParametersRegistry>();
 
-            if (this.registry.Any(x => x.IsEquals(param)) == false) {
+            var found = false;
+            foreach (var item in this.registry) {
+                if (item.IsEquals(param) == true) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found == false) {
 
                 this.registry.Add(param);
 
@@ -353,6 +360,8 @@ namespace UnityEngine.UI.Windows {
                     if (this != null) this.ValidateEditor();
                     
                 };
+
+                this.debugStateLog = default;
 
             }
 
@@ -1182,25 +1191,42 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        public async void DoInit<TState>(TState state, System.Action<TState> callback = null) {
+        public void DoInit<TState>(TState state, System.Action<TState> callback = null) {
 
-            await this.DoInitAsync(state, callback);
-
-        }
-
-        public async void DoInit(System.Action callback = null) {
-
-            await this.DoInitAsync(callback, static (cb) => cb?.Invoke());
+            this.DoInitAsync(state, callback);
 
         }
 
-        private class InitLoader {
+        public void DoInit(System.Action callback = null) {
+
+            this.DoInitAsync(callback, static (cb) => cb?.Invoke());
+
+        }
+
+        private class InitLoader<TState> {
 
             public bool loaded;
+            public WindowObject instance;
+            public TState state;
+            public System.Action<TState> callback;
+
+        }
+
+        private void SetLoaded() {
+            
+            this.SetState(ObjectState.Loaded);
+
+            this.audioEvents.Initialize(this);
+
+            this.OnInitInternal();
+            this.OnInit();
+            WindowSystem.RaiseEvent(this, WindowEvent.OnInitialize);
+
+            this.SetState(ObjectState.Initialized);
 
         }
         
-        private async Task DoInitAsync<TState>(TState state, System.Action<TState> callback = null) {
+        private void DoInitAsync<TState>(TState state, System.Action<TState> callback = null) {
             
             if (this.objectState < ObjectState.Initializing) {
 
@@ -1210,31 +1236,30 @@ namespace UnityEngine.UI.Windows {
 
                     this.SetState(ObjectState.Loading);
 
-                    var instance = PoolClass<InitLoader>.Spawn();
+                    var instance = PoolClass<InitLoader<TState>>.Spawn();
+                    instance.instance = this;
+                    instance.state = state;
+                    instance.callback = callback;
                     loadable.Load(instance, static (c) => c.loaded = true);
-                    while (instance.loaded == false) {
-                        await Task.Yield();
+                    if (instance.loaded == false) {
+                        Coroutines.Wait(instance, static (loader) => loader.loaded, static (loader) => {
+                            loader.instance.SetLoaded();
+                            loader.instance.DoInitAsync(loader.state, loader.callback);
+                            PoolClass<InitLoader<TState>>.Recycle(loader);
+                        });
+                        return;
                     }
-                    PoolClass<InitLoader>.Recycle(instance);
 
                 }
 
-                this.SetState(ObjectState.Loaded);
-
-                this.audioEvents.Initialize(this);
-
-                this.OnInitInternal();
-                this.OnInit();
-                WindowSystem.RaiseEvent(this, WindowEvent.OnInitialize);
-
-                this.SetState(ObjectState.Initialized);
+                this.SetLoaded();
 
             }
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
 
                 if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
-                await this.subObjects[i].DoInitAsync(state);
+                this.subObjects[i].DoInitAsync(state);
 
             }
             
@@ -1506,9 +1531,9 @@ namespace UnityEngine.UI.Windows {
             
         }
         
-        public async void LoadAsync<T, TState>(TState state, Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
+        public void LoadAsync<T, TState>(TState state, Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
             
-            await this.LoadAsync_YIELD<T, LoadAsyncClosure<T, TState>>(new LoadAsyncClosure<T, TState>() {
+            this.LoadAsync_YIELD<T, LoadAsyncClosure<T, TState>>(new LoadAsyncClosure<T, TState>() {
                 component = this,
                 onComplete = onComplete,
                 state = state,
@@ -1518,9 +1543,9 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public async void LoadAsync<T, TState>(TState state, Resource resource, System.Action<TState> onComplete = null, bool async = true) where T : WindowObject {
+        public void LoadAsync<T, TState>(TState state, Resource resource, System.Action<TState> onComplete = null, bool async = true) where T : WindowObject {
             
-            await this.LoadAsync_YIELD<T, LoadAsyncClosure<T, TState>>(new LoadAsyncClosure<T, TState>() {
+            this.LoadAsync_YIELD<T, LoadAsyncClosure<T, TState>>(new LoadAsyncClosure<T, TState>() {
                 component = this,
                 onCompleteState = onComplete,
             }, resource, static (obj, c) => {
@@ -1529,9 +1554,9 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public async void LoadAsync<T>(Resource resource, System.Action<T> onComplete = null, bool async = true) where T : WindowObject {
+        public void LoadAsync<T>(Resource resource, System.Action<T> onComplete = null, bool async = true) where T : WindowObject {
             
-            await this.LoadAsync_YIELD<T, LoadAsyncClosure<T, T>>(new LoadAsyncClosure<T, T>() {
+            this.LoadAsync_YIELD<T, LoadAsyncClosure<T, T>>(new LoadAsyncClosure<T, T>() {
                 component = this,
                 onCompleteNoState = onComplete,
             }, resource, static (obj, c) => {
@@ -1540,7 +1565,7 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        private async Task LoadAsync_YIELD<T, TState>(TState state, Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
+        private void LoadAsync_YIELD<T, TState>(TState state, Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
             
             var resources = WindowSystem.GetResources();
             var data = new LoadAsyncClosure<T, TState>() {
@@ -1548,7 +1573,7 @@ namespace UnityEngine.UI.Windows {
                 onComplete = onComplete,
                 state = state,
             };
-            await resources.LoadAsync<T, LoadAsyncClosure<T, TState>>(new WindowSystemResources.LoadParameters() { async = async },this.GetWindow(), data, resource, static (asset, closure) => {
+            resources.LoadAsync<T, LoadAsyncClosure<T, TState>>(new WindowSystemResources.LoadParameters() { async = async },this.GetWindow(), data, resource, static (asset, closure) => {
 
                 if (asset != null) {
 

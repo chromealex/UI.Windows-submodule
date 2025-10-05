@@ -330,7 +330,9 @@ namespace UnityEditor.UI.Windows {
                 if (check.Invoke(field.FieldType, searchType) == true) {
 
                     var obj = field.GetValue(root);
-                    field.SetValue(root, del.Invoke(field, obj));
+                    if (obj != null) {
+                        field.SetValue(root, del.Invoke(field, obj));
+                    }
 
                 } else if (field.FieldType.IsArray == true) {
                     

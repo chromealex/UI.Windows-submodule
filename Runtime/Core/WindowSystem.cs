@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using ExitGames.Client.Photon.StructWrapping;
 
 namespace UnityEngine.UI.Windows {
 
@@ -138,8 +139,8 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static System.Action onPointerUp;
-        public static System.Action onPointerDown;
+        public static event System.Action onPointerUp;
+        public static event System.Action onPointerDown;
 
         [Tooltip("Automatically show `Root Screen` on Start.")]
         public bool showRootOnStart;
@@ -325,8 +326,14 @@ namespace UnityEngine.UI.Windows {
 
         private void TurnRenderBeneath(WindowBase window, bool state) {
 
-            var ordered = this.currentWindows.OrderByDescending(x => x.instance.GetDepth()).ToList();
-            foreach (var item in ordered) {
+            var temp = PoolList<WindowItem>.Spawn();
+            temp.AddRange(this.currentWindows);
+            temp.Sort(static (item1, item2) => {
+                var d1 = item1.instance.GetDepth();
+                var d2 = item2.instance.GetDepth();
+                return d1.CompareTo(d2);
+            });
+            foreach (var item in temp) {
 
                 var instance = item.instance;
                 if (instance.IsVisible() == false) continue;
@@ -350,6 +357,7 @@ namespace UnityEngine.UI.Windows {
                 }
 
             }
+            PoolList<WindowItem>.Recycle(temp);
 
         }
 
@@ -643,7 +651,7 @@ namespace UnityEngine.UI.Windows {
 
             if (instance.GetState() <= ObjectState.Initializing) {
                 
-                Debug.LogWarning("Object is out of state: " + instance, instance);
+                Debug.LogWarning($"Object is out of state: {instance}", instance);
                 return;
                 
             }
@@ -665,8 +673,9 @@ namespace UnityEngine.UI.Windows {
                 parameters = parameters,
                 internalCall = internalCall,
             };
+            
             Coroutines.Wait(closureInstance, static (inst) => inst.instance.IsReadyToHide(), static (inst) => {
-                
+
                 {
 
                     var closure = PoolClass<ShowHideClosureParametersClass>.Spawn();
@@ -680,22 +689,22 @@ namespace UnityEngine.UI.Windows {
                         inst.parameters.data.affectChilds == true) {
 
                         inst.instance.BreakStateHierarchy();
-                        
+
                     } else {
-                        
+
                         inst.instance.BreakState();
 
                     }
 
                     WindowObjectAnimation.Hide(closure, inst.instance, inst.parameters, static (cParams) => {
-                        
+
                         if (cParams.parameters.data.replaceAffectChilds == false ||
                             cParams.parameters.data.affectChilds == true) {
 
                             Coroutines.CallInSequence(ref cParams, static (ref ShowHideClosureParametersClass p) => {
 
                                 p.hierarchyComplete = true;
-                            
+
                                 if (p.animationComplete == true) {
 
                                     var pars = p.parameters;
@@ -704,8 +713,9 @@ namespace UnityEngine.UI.Windows {
 
                                 }
 
-                            }, cParams.instance.subObjects, static (WindowObject obj, Coroutines.ClosureDelegateCallback<ShowHideClosureParametersClass> cb, ref ShowHideClosureParametersClass p) => {
-                                
+                            }, cParams.instance.subObjects, static (WindowObject obj, Coroutines.ClosureDelegateCallback<ShowHideClosureParametersClass> cb,
+                                                                    ref ShowHideClosureParametersClass p) => {
+
                                 var closure = PoolClass<ShowHideInstanceInternalClosure>.Spawn();
                                 closure.cb = cb;
                                 closure.data = p;
@@ -718,7 +728,7 @@ namespace UnityEngine.UI.Windows {
                                 if (p.parameters.data.replaceDelay == true) {
                                     parameters = parameters.ReplaceDelay(0f);
                                 }
-                                
+
                                 if (p.internalCall == true) {
 
                                     obj.HideInternal(parameters);
@@ -730,28 +740,28 @@ namespace UnityEngine.UI.Windows {
                                 }
 
                             });
-                            
+
                         } else {
-                            
+
                             cParams.hierarchyComplete = true;
-                            
+
                         }
 
                         cParams.animationComplete = true;
                         if (cParams.hierarchyComplete == true) {
-                            
+
                             var pars = cParams.parameters;
                             cParams.Dispose();
                             pars.RaiseCallback();
-                            
+
                         }
-                        
+
                     });
 
                 }
 
             });
-            
+
         }
 
         private static bool CanBeDestroy(DontDestroy state, DontDestroy windowInstanceFlag) {

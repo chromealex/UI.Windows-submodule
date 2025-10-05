@@ -4,9 +4,9 @@
     "references": [
         "UI.Windows",
         "Unity.Localization",
-        "UnityEngine.UIElementsModule",
         "Unity.InputSystem",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "Unity.Collections"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,298 +1,679 @@
 ﻿namespace UnityEngine.UI.Windows.Components {
 
+    public partial class InputFieldComponent {
+
+        private Unity.Collections.FixedString512Bytes lastBytesText;
+        public void SetText(Unity.Collections.FixedString32Bytes value) {
+            if (this.lastBytesText == value) return;
+            this.lastBytesText = value;
+            this.SetText(value.ToString());
+        }
+
+        public void SetText(Unity.Collections.FixedString64Bytes value) {
+            if (this.lastBytesText == value) return;
+            this.lastBytesText = value;
+            this.SetText(value.ToString());
+        }
+
+        public void SetText(Unity.Collections.FixedString128Bytes value) {
+            if (this.lastBytesText == value) return;
+            this.lastBytesText = value;
+            this.SetText(value.ToString());
+        }
+
+        public void SetText(Unity.Collections.FixedString512Bytes value) {
+            if (this.lastBytesText == value) return;
+            this.lastBytesText = value;
+            this.SetText(value.ToString());
+        }
+
+    }
+    
     public partial class TextComponent {
 
         private const int DEFAULT_INTEGER_NUMBER_LENGTH = 2;
         private System.Text.StringBuilder sb;
+
+        public void SetText(double value) {
+            this.SetValue(value);
+        }
+
+        private Unity.Collections.FixedString512Bytes lastBytesText;
+        public void SetText(Unity.Collections.FixedString32Bytes value) {
+            if (this.lastBytesText == value) return;
+            this.lastBytesText = value;
+            this.SetText(value.ToString());
+        }
+
+        public void SetText(Unity.Collections.FixedString64Bytes value) {
+            if (this.lastBytesText == value) return;
+            this.lastBytesText = value;
+            this.SetText(value.ToString());
+        }
+
+        public void SetText(Unity.Collections.FixedString128Bytes value) {
+            if (this.lastBytesText == value) return;
+            this.lastBytesText = value;
+            this.SetText(value.ToString());
+        }
+
+        public void SetText(Unity.Collections.FixedString512Bytes value) {
+            if (this.lastBytesText == value) return;
+            this.lastBytesText = value;
+            this.SetText(value.ToString());
+        }
+
+        public struct LastDataCache : System.IEquatable<LastDataCache> {
+
+            public string s0;
+            public string s1;
+            public string s2;
+            public string s3;
+            public int i0;
+            public int i1;
+            public int i2;
+            public int i3;
+
+            public static bool operator ==(LastDataCache lhs, LastDataCache rhs) {
+                return lhs.i0 == rhs.i0 && lhs.i1 == rhs.i1 && lhs.i2 == rhs.i2 && lhs.i3 == rhs.i3 &&
+                       lhs.s0 == rhs.s0 && lhs.s1 == rhs.s1 && lhs.s2 == rhs.s2 && lhs.s3 == rhs.s3;
+            }
+
+            public static bool operator !=(LastDataCache lhs, LastDataCache rhs) {
+                return !(lhs == rhs);
+            }
+
+            public bool Equals(LastDataCache other) {
+                return this.s0 == other.s0 && this.s1 == other.s1 && this.s2 == other.s2 && this.s3 == other.s3 && this.i0 == other.i0 && this.i1 == other.i1 && this.i2 == other.i2 && this.i3 == other.i3;
+            }
+
+            public override bool Equals(object obj) {
+                return obj is LastDataCache other && this.Equals(other);
+            }
+
+            public override int GetHashCode() {
+                return System.HashCode.Combine(this.s0, this.s1, this.s2, this.s3, this.i0, this.i1, this.i2, this.i3);
+            }
+
+        }
+
+        private LastDataCache lastData;
+
+        public void SetText(int i0, string s1) {
+            var data = new LastDataCache() { i0 = i0, s1 = s1, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+DEFAULT_INTEGER_NUMBER_LENGTH + s1.Length);
+            }
+
+            this.sb.Clear().Append(i0).Append(s1);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(string s0, int i1) {
+            var data = new LastDataCache() { s0 = s0, i1 = i1, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+s0.Length + DEFAULT_INTEGER_NUMBER_LENGTH);
+            }
+
+            this.sb.Clear().Append(s0).Append(i1);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(int i0, int i1) {
+            var data = new LastDataCache() { i0 = i0, i1 = i1, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH);
+            }
+
+            this.sb.Clear().Append(i0).Append(i1);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(string s0, string s1) {
+            var data = new LastDataCache() { s0 = s0, s1 = s1, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+s0.Length + s1.Length);
+            }
+
+            this.sb.Clear().Append(s0).Append(s1);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(string s0, string s1, string s2) {
+            var data = new LastDataCache() { s0 = s0, s1 = s1, s2 = s2, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+s0.Length + s1.Length + s2.Length);
+            }
+
+            this.sb.Clear().Append(s0).Append(s1).Append(s2);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(int i0, int i1, int i2) {
+            var data = new LastDataCache() { i0 = i0, i1 = i1, i2 = i2, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH);
+            }
+
+            this.sb.Clear().Append(i0).Append(i1).Append(i2);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(string s0, int i1, int i2) {
+            var data = new LastDataCache() { s0 = s0, i1 = i1, i2 = i2, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+s0.Length + DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH);
+            }
+
+            this.sb.Clear().Append(s0).Append(i1).Append(i2);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(string s0, string s1, int i2) {
+            var data = new LastDataCache() { s0 = s0, s1 = s1, i2 = i2, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+s0.Length + s1.Length + DEFAULT_INTEGER_NUMBER_LENGTH);
+            }
+
+            this.sb.Clear().Append(s0).Append(s1).Append(i2);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(int i0, string s1, string s2) {
+            var data = new LastDataCache() { i0 = i0, s1 = s1, s2 = s2, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+DEFAULT_INTEGER_NUMBER_LENGTH + s1.Length + s2.Length);
+            }
+
+            this.sb.Clear().Append(i0).Append(s1).Append(s2);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(int i0, int i1, string s2) {
+            var data = new LastDataCache() { i0 = i0, i1 = i1, s2 = s2, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH + s2.Length);
+            }
+
+            this.sb.Clear().Append(i0).Append(i1).Append(s2);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(string s0, int i1, string s2) {
+            var data = new LastDataCache() { s0 = s0, i1 = i1, s2 = s2, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+s0.Length + DEFAULT_INTEGER_NUMBER_LENGTH + s2.Length);
+            }
+
+            this.sb.Clear().Append(s0).Append(i1).Append(s2);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(int i0, string s1, int i2) {
+            var data = new LastDataCache() { i0 = i0, s1 = s1, i2 = i2, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+DEFAULT_INTEGER_NUMBER_LENGTH + s1.Length + DEFAULT_INTEGER_NUMBER_LENGTH);
+            }
+
+            this.sb.Clear().Append(i0).Append(s1).Append(i2);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(string s0, string s1, string s2, string s3) {
+            var data = new LastDataCache() {
+                s0 = s0, s1 = s1, s2 = s2, s3 = s3,
+            };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+s0.Length + s1.Length + s2.Length + s3.Length);
+            }
+
+            this.sb.Clear().Append(s0).Append(s1).Append(s2).Append(s3);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(int i0, int i1, int i2, int i3) {
+            var data = new LastDataCache() {
+                i0 = i0, i1 = i1, i2 = i2, i3 = i3,
+            };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH +
+                                                        DEFAULT_INTEGER_NUMBER_LENGTH);
+            }
+
+            this.sb.Clear().Append(i0).Append(i1).Append(i2).Append(i3);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(string s0, int i1, int i2, int i3) {
+            var data = new LastDataCache() {
+                s0 = s0, i1 = i1, i2 = i2, i3 = i3,
+            };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+s0.Length + DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH);
+            }
+
+            this.sb.Clear().Append(s0).Append(i1).Append(i2).Append(i3);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(string s0, string s1, int i2, int i3) {
+            var data = new LastDataCache() {
+                s0 = s0, s1 = s1, i2 = i2, i3 = i3,
+            };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+s0.Length + s1.Length + DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH);
+            }
+
+            this.sb.Clear().Append(s0).Append(s1).Append(i2).Append(i3);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(string s0, string s1, string s2, int i3) {
+            var data = new LastDataCache() {
+                s0 = s0, s1 = s1, s2 = s2, i3 = i3,
+            };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+s0.Length + s1.Length + s2.Length + DEFAULT_INTEGER_NUMBER_LENGTH);
+            }
+
+            this.sb.Clear().Append(s0).Append(s1).Append(s2).Append(i3);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(int i0, string s1, string s2, string s3) {
+            var data = new LastDataCache() {
+                i0 = i0, s1 = s1, s2 = s2, s3 = s3,
+            };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+DEFAULT_INTEGER_NUMBER_LENGTH + s1.Length + s2.Length + s3.Length);
+            }
+
+            this.sb.Clear().Append(i0).Append(s1).Append(s2).Append(s3);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(int i0, int i1, string s2, string s3) {
+            var data = new LastDataCache() {
+                i0 = i0, i1 = i1, s2 = s2, s3 = s3,
+            };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH + s2.Length + s3.Length);
+            }
+
+            this.sb.Clear().Append(i0).Append(i1).Append(s2).Append(s3);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(int i0, int i1, int i2, string s3) {
+            var data = new LastDataCache() {
+                i0 = i0, i1 = i1, i2 = i2, s3 = s3,
+            };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH + s3.Length);
+            }
+
+            this.sb.Clear().Append(i0).Append(i1).Append(i2).Append(s3);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(string s0, int i1, int i2, string s3) {
+            var data = new LastDataCache() {
+                s0 = s0, i1 = i1, i2 = i2, s3 = s3,
+            };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+s0.Length + DEFAULT_INTEGER_NUMBER_LENGTH + DEFAULT_INTEGER_NUMBER_LENGTH + s3.Length);
+            }
+
+            this.sb.Clear().Append(s0).Append(i1).Append(i2).Append(s3);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(string s0, int i1, string s2, int i3) {
+            var data = new LastDataCache() {
+                s0 = s0, i1 = i1, s2 = s2, i3 = i3,
+            };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+s0.Length + DEFAULT_INTEGER_NUMBER_LENGTH + s2.Length + DEFAULT_INTEGER_NUMBER_LENGTH);
+            }
+
+            this.sb.Clear().Append(s0).Append(i1).Append(s2).Append(i3);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(int i0, string s1, int i2, string s3) {
+            var data = new LastDataCache() {
+                i0 = i0, s1 = s1, i2 = i2, s3 = s3,
+            };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+DEFAULT_INTEGER_NUMBER_LENGTH + s1.Length + DEFAULT_INTEGER_NUMBER_LENGTH + s3.Length);
+            }
+
+            this.sb.Clear().Append(i0).Append(s1).Append(i2).Append(s3);
+            this.SetText(this.sb.ToString());
+        }
+
+        public void SetText(int i0, string s1, string s2, int i3) {
+            var data = new LastDataCache() {
+                i0 = i0, s1 = s1, s2 = s2, i3 = i3,
+            };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            if (this.sb == null) {
+                this.sb = new System.Text.StringBuilder(+DEFAULT_INTEGER_NUMBER_LENGTH + s1.Length + s2.Length + DEFAULT_INTEGER_NUMBER_LENGTH);
+            }
+
+            this.sb.Clear().Append(i0).Append(s1).Append(s2).Append(i3);
+            this.SetText(this.sb.ToString());
+        }
+
+        /*private struct TypeInfo {
+
+            public string type;
+            public string letter;
+
+        }
         
-        private struct LastText2ss {
+        [ContextMenu("Generate")]
+        public void Generate() {
 
-            public string s1;
-            public string s2;
+            var inp = new [] {
+                new [] {
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "string", letter = "s" },
+                },
+                new [] {
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "int", letter = "i" },
+                },
+                new [] {
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                },
+                new [] {
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                },
+                
+                new [] {
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                },
+                new [] {
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                },
+                new [] {
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                },
+                new [] {
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "int", letter = "i" },
+                },
+                new [] {
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                },
+                new [] {
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "string", letter = "s" },
+                },
+                new [] {
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "string", letter = "s" },
+                },
+                new [] {
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "int", letter = "i" },
+                },
+                
+                new [] {
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                },
+                new [] {
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                },
+                new [] {
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                },
+                new [] {
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                },
+                new [] {
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "int", letter = "i" },
+                },
+                new [] {
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                },
+                new [] {
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                },
+                new [] {
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "string", letter = "s" },
+                },
+                new [] {
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "string", letter = "s" },
+                },
+                new [] {
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "int", letter = "i" },
+                },
+                new [] {
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "string", letter = "s" },
+                },
+                new [] {
+                    new TypeInfo { type = "int", letter = "i" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "string", letter = "s" },
+                    new TypeInfo { type = "int", letter = "i" },
+                },
+            };
+            var output = string.Empty;
+            foreach (var item in inp) {
+                var res = this.Gen(item);
+                output += res + "\n";
+            }
+
+            Debug.Log(output);
 
         }
-        private LastText2ss lastText2ss;
-        public void SetText(string text1, string text2) {
 
-            if (this.lastText2ss.s1 == text1 && this.lastText2ss.s2 == text2) return;
-            this.lastText2ss = new LastText2ss() { s1 = text1, s2 = text2 };
+        private string Gen(TypeInfo[] typeInfos) {
             
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(text1.Length + text2.Length);
-            this.sb.Clear().Append(text1).Append(text2);
-            this.SetText(this.sb.ToString());
+            var arrParams = typeInfos.Select(x => $"{x.type} {x.letter}").ToArray();
+            var arrParamsStr = new string[arrParams.Length];
+            for (int i = 0; i < arrParams.Length; ++i) {
+                arrParamsStr[i] = $"{arrParams[i]}{i}";
+            }
+            var arr = typeInfos.Select(x => x.letter).ToArray();
+            var arrUseStr = new string[arr.Length];
+            for (int i = 0; i < arr.Length; ++i) {
+                arrUseStr[i] = $"{arr[i]}{i} = {arr[i]}{i}";
+            }
+            var appends = string.Empty;
+            var lengths = string.Empty;
+            for (var index = 0; index < typeInfos.Length; ++index) {
+                var item = typeInfos[index];
+                appends += $".Append({item.letter}{index})";
+                if (item.type == "int") {
+                    lengths += " + TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH";
+                } else {
+                    lengths += $" + {item.letter}{index}.Length";
+                }
+            }
+
+            //var output = $"private System.ValueTuple<{string.Join(", ", arrTypes)}> lastText{string.Join("", arr)};\n";
+            var output = $@"public void SetText({string.Join(", ", arrParamsStr)}) {{
+                var data = new LastDataCache() {{
+                    {string.Join(", ", arrUseStr)},
+                }};
+                if (this.lastData == data) return;
+                this.lastData = data;
+                if (this.sb == null) this.sb = new System.Text.StringBuilder({lengths});
+                this.sb.Clear(){appends};
+                this.SetText(this.sb.ToString());
+            }}";
+            return output;
             
-        }
-
-        private struct LastText2si {
-
-            public string s1;
-            public int s2;
-
-        }
-        private LastText2si lastText2si;
-        public void SetText(string text1, int text2) {
-
-            if (this.lastText2si.s1 == text1 && this.lastText2si.s2 == text2) return;
-            this.lastText2si = new LastText2si() { s1 = text1, s2 = text2 };
-            
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(text1.Length + TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH);
-            this.sb.Clear().Append(text1).Append(text2);
-            this.SetText(this.sb.ToString());
-            
-        }
-
-        private struct LastText2is {
-
-            public int s1;
-            public string s2;
-
-        }
-        private LastText2is lastText2is;
-        public void SetText(int text1, string text2) {
-
-            if (this.lastText2is.s1 == text1 && this.lastText2is.s2 == text2) return;
-            this.lastText2is = new LastText2is() { s1 = text1, s2 = text2 };
-            
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH + text2.Length);
-            this.sb.Clear().Append(text1).Append(text2);
-            this.SetText(this.sb.ToString());
-            
-        }
-
-        private struct LastText3ssi {
-
-            public string s1;
-            public string s2;
-            public int s3;
-
-        }
-        private LastText3ssi lastText3ssi;
-        public void SetText(string text1, string text2, int text3) {
-
-            if (this.lastText3ssi.s1 == text1 && this.lastText3ssi.s2 == text2 && this.lastText3ssi.s3 == text3) return;
-            this.lastText3ssi = new LastText3ssi() { s1 = text1, s2 = text2, s3 = text3 };
-            
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(text1.Length + text2.Length);
-            this.sb.Clear().Append(text1).Append(text2).Append(text3);
-            this.SetText(this.sb.ToString());
-            
-        }
-
-        private struct LastText3sis {
-
-            public string s1;
-            public int s2;
-            public string s3;
-            
-        }
-        private LastText3sis lastText3sis;
-        public void SetText(string text1, int text2, string text3) {
-
-            if (this.lastText3sis.s1 == text1 && this.lastText3sis.s2 == text2 && this.lastText3sis.s3 == text3) return;
-            this.lastText3sis = new LastText3sis() { s1 = text1, s2 = text2, s3 = text3 };
-            
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(text1.Length + text3.Length);
-            this.sb.Clear().Append(text1).Append(text2).Append(text3);
-            this.SetText(this.sb.ToString());
-            
-        }
-
-        private struct LastText3isi {
-
-            public int s1;
-            public string s2;
-            public int s3;
-
-        }
-        private LastText3isi lastText3isi;
-        public void SetText(int text1, string text2, int text3) {
-
-            if (this.lastText3isi.s1 == text1 && this.lastText3isi.s2 == text2 && this.lastText3isi.s3 == text3) return;
-            this.lastText3isi = new LastText3isi() { s1 = text1, s2 = text2, s3 = text3 };
-            
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH + text2.Length + TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH);
-            this.sb.Clear().Append(text1).Append(text2).Append(text3);
-            this.SetText(this.sb.ToString());
-
-        }
-
-        private struct LastText3iss {
-
-            public int s1;
-            public string s2;
-            public string s3;
-
-        }
-        private LastText3iss lastText3iss;
-        public void SetText(int text1, string text2, string text3) {
-
-            if (this.lastText3iss.s1 == text1 && this.lastText3iss.s2 == text2 && this.lastText3iss.s3 == text3) return;
-            this.lastText3iss = new LastText3iss() { s1 = text1, s2 = text2, s3 = text3 };
-            
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH + text2.Length + text3.Length);
-            this.sb.Clear().Append(text1).Append(text2).Append(text3);
-            this.SetText(this.sb.ToString());
-
-        }
-
-        private struct LastText3sss {
-
-            public string s1;
-            public string s2;
-            public string s3;
-
-        }
-        private LastText3sss lastText3sss;
-        public void SetText(string text1, string text2, string text3) {
-
-            if (this.lastText3sss.s1 == text1 && this.lastText3sss.s2 == text2 && this.lastText3sss.s3 == text3) return;
-            this.lastText3sss = new LastText3sss() { s1 = text1, s2 = text2, s3 = text3 };
-
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(text1.Length + text2.Length + text3.Length);
-            this.sb.Clear().Append(text1).Append(text2).Append(text3);
-            this.SetText(this.sb.ToString());
-            
-        }
-
-        private struct LastText4ssss {
-
-            public string s1;
-            public string s2;
-            public string s3;
-            public string s4;
-
-        }
-        private LastText4ssss lastText4ssss;
-        public void SetText(string text1, string text2, string text3, string text4) {
-
-            if (this.lastText4ssss.s1 == text1 && this.lastText4ssss.s2 == text2 && this.lastText4ssss.s3 == text3 && this.lastText4ssss.s4 == text4) return;
-            this.lastText4ssss = new LastText4ssss() { s1 = text1, s2 = text2, s3 = text3, s4 = text4 };
-            
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(text1.Length + text2.Length + text3.Length + text4.Length);
-            this.sb.Clear().Append(text1).Append(text2).Append(text3).Append(text4);
-            this.SetText(this.sb.ToString());
-            
-        }
-
-        private struct LastText4isss {
-
-            public int s1;
-            public string s2;
-            public string s3;
-            public string s4;
-
-        }
-        private LastText4isss lastText4isss;
-        public void SetText(int text1, string text2, string text3, string text4) {
-
-            if (this.lastText4isss.s1 == text1 && this.lastText4isss.s2 == text2 && this.lastText4isss.s3 == text3 && this.lastText4isss.s4 == text4) return;
-            this.lastText4isss = new LastText4isss() { s1 = text1, s2 = text2, s3 = text3, s4 = text4 };
-            
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH + text2.Length + text3.Length + text4.Length);
-            this.sb.Clear().Append(text1).Append(text2).Append(text3).Append(text4);
-            this.SetText(this.sb.ToString());
-            
-        }
-
-        private struct LastText4isis {
-
-            public int s1;
-            public string s2;
-            public int s3;
-            public string s4;
-
-        }
-        private LastText4isis lastText4isis;
-        public void SetText(int text1, string text2, int text3, string text4) {
-
-            if (this.lastText4isis.s1 == text1 && this.lastText4isis.s2 == text2 && this.lastText4isis.s3 == text3 && this.lastText4isis.s4 == text4) return;
-            this.lastText4isis = new LastText4isis() { s1 = text1, s2 = text2, s3 = text3, s4 = text4 };
-            
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH + text2.Length + TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH + text4.Length);
-            this.sb.Clear().Append(text1).Append(text2).Append(text3).Append(text4);
-            this.SetText(this.sb.ToString());
-            
-        }
-
-        private struct LastText4siss {
-
-            public string s1;
-            public int s2;
-            public string s3;
-            public string s4;
-
-        }
-        private LastText4siss lastText4siss;
-        public void SetText(string text1, int text2, string text3, string text4) {
-
-            if (this.lastText4siss.s1 == text1 && this.lastText4siss.s2 == text2 && this.lastText4siss.s3 == text3 && this.lastText4siss.s4 == text4) return;
-            this.lastText4siss = new LastText4siss() { s1 = text1, s2 = text2, s3 = text3, s4 = text4 };
-            
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(text1.Length + TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH + text3.Length + text4.Length);
-            this.sb.Clear().Append(text1).Append(text2).Append(text3).Append(text4);
-            this.SetText(this.sb.ToString());
-            
-        }
-
-        private struct LastText4sisi {
-
-            public string s1;
-            public int s2;
-            public string s3;
-            public int s4;
-
-        }
-        private LastText4sisi lastText4sisi;
-        public void SetText(string text1, int text2, string text3, int text4) {
-
-            if (this.lastText4sisi.s1 == text1 && this.lastText4sisi.s2 == text2 && this.lastText4sisi.s3 == text3 && this.lastText4sisi.s4 == text4) return;
-            this.lastText4sisi = new LastText4sisi() { s1 = text1, s2 = text2, s3 = text3, s4 = text4 };
-            
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(text1.Length + TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH + text3.Length + TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH);
-            this.sb.Clear().Append(text1).Append(text2).Append(text3).Append(text4);
-            this.SetText(this.sb.ToString());
-            
-        }
-
-        private struct LastText4ssis {
-
-            public string s1;
-            public string s2;
-            public int s3;
-            public string s4;
-
-        }
-        private LastText4ssis lastText4ssis;
-        public void SetText(string text1, string text2, int text3, string text4) {
-
-            if (this.lastText4ssis.s1 == text1 && this.lastText4ssis.s2 == text2 && this.lastText4ssis.s3 == text3 && this.lastText4ssis.s4 == text4) return;
-            this.lastText4ssis = new LastText4ssis() { s1 = text1, s2 = text2, s3 = text3, s4 = text4 };
-            
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(text1.Length + text2.Length + TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH + text4.Length);
-            this.sb.Clear().Append(text1).Append(text2).Append(text3).Append(text4);
-            this.SetText(this.sb.ToString());
-            
-        }
-
-        private struct LastText4sssi {
-
-            public string s1;
-            public string s2;
-            public string s3;
-            public int s4;
-
-        }
-        private LastText4sssi lastText4sssi;
-        public void SetText(string text1, string text2, string text3, int text4) {
-
-            if (this.lastText4sssi.s1 == text1 && this.lastText4sssi.s2 == text2 && this.lastText4sssi.s3 == text3 && this.lastText4sssi.s4 == text4) return;
-            this.lastText4sssi = new LastText4sssi() { s1 = text1, s2 = text2, s3 = text3, s4 = text4 };
-            
-            if (this.sb == null) this.sb = new System.Text.StringBuilder(text1.Length + text2.Length + text3.Length + TextComponent.DEFAULT_INTEGER_NUMBER_LENGTH);
-            this.sb.Clear().Append(text1).Append(text2).Append(text3).Append(text4);
-            this.SetText(this.sb.ToString());
-            
-        }
+        }*/
 
     }
 

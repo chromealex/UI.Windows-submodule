@@ -10,7 +10,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public ActionResult Execute(in Context context) {
 
             var contextData = context;
-            UnityEngine.UI.Windows.Utilities.Coroutines.WaitTime(this.seconds, () => {
+            UnityEngine.UI.Windows.Utilities.Coroutines.WaitTime(contextData, this.seconds, static (contextData) => {
             
                 contextData.data.RunActions(contextData, contextData.index + 1);
     

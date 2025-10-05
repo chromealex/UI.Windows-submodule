@@ -134,8 +134,10 @@ namespace UnityEngine.UI.Windows {
         Coroutines.ClosureDelegateEachCallback<WindowObject, ShowHideClosureParametersClass> Coroutines.ICallInSequenceClosure<WindowObject, ShowHideClosureParametersClass>.each { get; set; }
         Coroutines.ClosureDelegateCallback<ShowHideClosureParametersClass> Coroutines.ICallInSequenceClosure<WindowObject, ShowHideClosureParametersClass>.doNext { get; set; }
         Coroutines.ClosureDelegateCallback<ShowHideClosureParametersClass> Coroutines.ICallInSequenceClosure<WindowObject, ShowHideClosureParametersClass>.callbackItem { get; set; }
-        System.Collections.Generic.IList<WindowObject> Coroutines.ICallInSequenceClosure<WindowObject, ShowHideClosureParametersClass>.collection { get; set; }
-        System.Collections.Generic.IEnumerator<WindowObject> Coroutines.ICallInSequenceClosure<WindowObject, ShowHideClosureParametersClass>.ie { get; set; }
+        System.Collections.Generic.List<WindowObject> Coroutines.ICallInSequenceClosure<WindowObject, ShowHideClosureParametersClass>.collection { get; set; }
+        WindowObject[] Coroutines.ICallInSequenceClosure<WindowObject, ShowHideClosureParametersClass>.collectionArr { get; set; }
+        System.Collections.Generic.List<WindowObject>.Enumerator Coroutines.ICallInSequenceClosure<WindowObject, ShowHideClosureParametersClass>.ie { get; set; }
+        Coroutines.SZArrayEnumerator<WindowObject> Coroutines.ICallInSequenceClosure<WindowObject, ShowHideClosureParametersClass>.ieArr { get; set; }
 
     }
 
@@ -152,8 +154,10 @@ namespace UnityEngine.UI.Windows {
         Coroutines.ClosureDelegateEachCallback<WindowObject, DoLoadScreenClosure<TState>> Coroutines.ICallInSequenceClosure<WindowObject, DoLoadScreenClosure<TState>>.each { get; set; }
         Coroutines.ClosureDelegateCallback<DoLoadScreenClosure<TState>> Coroutines.ICallInSequenceClosure<WindowObject, DoLoadScreenClosure<TState>>.doNext { get; set; }
         Coroutines.ClosureDelegateCallback<DoLoadScreenClosure<TState>> Coroutines.ICallInSequenceClosure<WindowObject, DoLoadScreenClosure<TState>>.callbackItem { get; set; }
-        System.Collections.Generic.IList<WindowObject> Coroutines.ICallInSequenceClosure<WindowObject, DoLoadScreenClosure<TState>>.collection { get; set; }
-        System.Collections.Generic.IEnumerator<WindowObject> Coroutines.ICallInSequenceClosure<WindowObject, DoLoadScreenClosure<TState>>.ie { get; set; }
+        System.Collections.Generic.List<WindowObject> Coroutines.ICallInSequenceClosure<WindowObject, DoLoadScreenClosure<TState>>.collection { get; set; }
+        WindowObject[] Coroutines.ICallInSequenceClosure<WindowObject, DoLoadScreenClosure<TState>>.collectionArr { get; set; }
+        System.Collections.Generic.List<WindowObject>.Enumerator Coroutines.ICallInSequenceClosure<WindowObject, DoLoadScreenClosure<TState>>.ie { get; set; }
+        Coroutines.SZArrayEnumerator<WindowObject> Coroutines.ICallInSequenceClosure<WindowObject, DoLoadScreenClosure<TState>>.ieArr { get; set; }
 
     }
 

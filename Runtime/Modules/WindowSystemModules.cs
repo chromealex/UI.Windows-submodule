@@ -74,7 +74,7 @@ namespace UnityEngine.UI.Windows.Modules {
         }
         
         private int loadingCount;
-        private async Task InitModules<TState>(TState state, InitialParameters initialParameters, WindowBase window, System.Action<TState> onComplete) {
+        private async Awaitable InitModules<TState>(TState state, InitialParameters initialParameters, WindowBase window, System.Action<TState> onComplete) {
 
             var resources = WindowSystem.GetResources();
             var targetData = WindowSystem.GetTargetData();
@@ -94,7 +94,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     initialParameters = initialParameters,
                 };
                 ++this.loadingCount;
-                await resources.LoadAsync<WindowModule, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, window, data, moduleInfo.module, static (asset, closure) => {
+                resources.LoadAsync<WindowModule, LoadingClosure>(new WindowSystemResources.LoadParameters() { async = !initialParameters.showSync }, window, data, moduleInfo.module, static (asset, closure) => {
 
                     if (asset.createPool == true) WindowSystem.GetPools().CreatePool(asset);
                     var instance = WindowSystem.GetPools().Spawn(asset, closure.window.transform);
@@ -119,7 +119,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
             }
 
-            while (this.loadingCount > 0) await Task.Yield();
+            while (this.loadingCount > 0) await Awaitable.NextFrameAsync();
 
             onComplete.Invoke(state);
 

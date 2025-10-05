@@ -30,8 +30,10 @@
             Coroutines.ClosureDelegateEachCallback<AnimationParameters, AnimationGroupInfo<T>> Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.each { get; set; }
             Coroutines.ClosureDelegateCallback<AnimationGroupInfo<T>> Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.doNext { get; set; }
             Coroutines.ClosureDelegateCallback<AnimationGroupInfo<T>> Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.callbackItem { get; set; }
-            System.Collections.Generic.IList<AnimationParameters> Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.collection { get; set; }
-            System.Collections.Generic.IEnumerator<AnimationParameters> Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.ie { get; set; }
+            System.Collections.Generic.List<AnimationParameters> Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.collection { get; set; }
+            AnimationParameters[] Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.collectionArr { get; set; }
+            System.Collections.Generic.List<AnimationParameters>.Enumerator Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.ie { get; set; }
+            Coroutines.SZArrayEnumerator<AnimationParameters> Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.ieArr { get; set; }
 
         }
 

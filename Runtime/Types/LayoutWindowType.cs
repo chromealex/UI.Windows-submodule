@@ -606,7 +606,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             this.layouts.SetActive();
 
             var currentItem = this.layouts.GetActive();
-            currentItem.LoadAsync(new LoadAsyncClosure<TState>() {
+            currentItem.LoadAsync(new ShowLoadAsyncClosure<TState, byte>() {
                 component = this,
                 state = state,
                 onComplete = onComplete,

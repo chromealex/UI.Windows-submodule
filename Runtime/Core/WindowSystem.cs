@@ -106,134 +106,6 @@ namespace UnityEngine.UI.Windows {
 
     }
 
-    [System.Serializable]
-    public struct TransitionParametersData {
-
-        internal bool resetAnimation;
-        internal bool immediately;
-        
-        internal bool replaceDelay;
-        internal float delay;
-
-        internal bool replaceAffectChilds;
-        internal bool affectChilds;
-
-        internal bool replaceIgnoreTouch;
-        internal bool ignoreTouch;
-
-        internal System.Action callback;
-        internal System.Action<object> callbackUserData;
-
-        internal object userData;
-
-    }
-    
-    internal struct TransitionInternalData {
-
-        public WindowObject context;
-        public TransitionParametersData data;
-        public bool internalCall;
-        public object userData;
-
-    }
-
-    [System.Serializable]
-    public struct TransitionParameters {
-
-        internal TransitionParametersData data;
-
-        private System.Action<WindowObject, TransitionParameters, bool> contextCallback;
-        private TransitionInternalData internalData;
-
-        public static TransitionParameters Default => new TransitionParameters() {
-            data = new TransitionParametersData() { resetAnimation = false },
-        };
-
-        public void RaiseCallback() {
-
-            if (this.contextCallback != null) this.contextCallback.Invoke(this.internalData.context, new TransitionParameters() { data = this.internalData.data, internalData = this.internalData, }, this.internalData.internalCall);
-            if (this.data.callback != null) this.data.callback.Invoke();
-            if (this.data.callbackUserData != null) this.data.callbackUserData.Invoke(this.data.userData);
-
-        }
-
-        public TransitionParameters ReplaceIgnoreTouch(bool state) {
-
-            var instance = this;
-            instance.data.replaceIgnoreTouch = true;
-            instance.data.ignoreTouch = state;
-            return instance;
-
-        }
-
-        public TransitionParameters ReplaceAffectChilds(bool state) {
-
-            var instance = this;
-            instance.data.replaceAffectChilds = true;
-            instance.data.affectChilds = state;
-            return instance;
-
-        }
-
-        public TransitionParameters ReplaceResetAnimation(bool state) {
-
-            var instance = this;
-            instance.data.resetAnimation = state;
-            return instance;
-
-        }
-
-        public TransitionParameters ReplaceImmediately(bool state) {
-
-            var instance = this;
-            instance.data.immediately = state;
-            return instance;
-
-        }
-
-        public TransitionParameters ReplaceDelay(float value) {
-
-            var instance = this;
-            instance.data.delay = value;
-            instance.data.replaceDelay = value > 0f;
-            return instance;
-
-        }
-
-        public TransitionParameters ReplaceCallback(System.Action callback) {
-
-            var instance = this;
-            instance.data.callback = callback;
-            instance.data.callbackUserData = null;
-            instance.contextCallback = null;
-            return instance;
-
-        }
-
-        public TransitionParameters ReplaceCallback(object userData, System.Action<object> callback) {
-
-            var instance = this;
-            instance.data.callback = null;
-            instance.data.callbackUserData = callback;
-            instance.data.userData = userData;
-            instance.contextCallback = null;
-            return instance;
-
-        }
-
-        public TransitionParameters ReplaceCallbackWithContext(System.Action<WindowObject, TransitionParameters, bool> callback, WindowObject context, TransitionParameters other, bool internalCall) {
-
-            var instance = this;
-            instance.data.callback = null;
-            instance.data.callbackUserData = null;
-            instance.contextCallback = callback;
-            instance.internalData = new TransitionInternalData() { context = context, data = other.data, internalCall = internalCall, };
-            return instance;
-
-        }
-
-    }
-    
     public enum WindowEvent {
 
         None = 0,
@@ -255,7 +127,7 @@ namespace UnityEngine.UI.Windows {
     }
 
     [DefaultExecutionOrder(-1000)]
-    public class WindowSystem : MonoBehaviour {
+    public partial class WindowSystem : MonoBehaviour {
 
         private const float CLICK_THRESHOLD = 0.125f;
         [System.Serializable]
@@ -298,21 +170,14 @@ namespace UnityEngine.UI.Windows {
         [SearchAssetsByTypePopupAttribute(typeof(WindowSystemModule), menuName: "Modules")]
         public List<WindowSystemModule> modules = new List<WindowSystemModule>();
 
-        private List<WindowItem> currentWindows = new List<WindowItem>();
-        private Dictionary<int, int> windowsCountByLayer = new Dictionary<int, int>();
-        private Dictionary<int, WindowBase> topWindowsByLayer = new Dictionary<int, WindowBase>();
-        private Dictionary<System.Type, WindowBase> hashToPrefabs = new Dictionary<System.Type, WindowBase>();
+        private readonly List<WindowItem> currentWindows = new List<WindowItem>();
+        private readonly Dictionary<int, int> windowsCountByLayer = new Dictionary<int, int>();
+        private readonly Dictionary<int, WindowBase> topWindowsByLayer = new Dictionary<int, WindowBase>();
+        private readonly Dictionary<System.Type, WindowBase> hashToPrefabs = new Dictionary<System.Type, WindowBase>();
 
         private bool loaderShowBegin;
         private WindowBase loaderInstance;
         private int nextWindowId;
-
-        private System.Action waitInteractableOnComplete;
-        private UnityEngine.UI.Windows.Components.IInteractable waitInteractable;
-        private UnityEngine.UI.Windows.Components.IInteractable[] waitInteractables;
-        private bool lockInteractables;
-        private System.Action<UnityEngine.UI.Windows.Components.IInteractable> callbackOnAnyInteractable;
-        private List<WindowObject> interactablesIgnoreContainers = new List<WindowObject>();
 
         internal static WindowSystem _instance;
 
@@ -340,62 +205,6 @@ namespace UnityEngine.UI.Windows {
         }
         #endif
 
-        public static T GetWindowSystemModule<T>() where T : WindowSystemModule {
-
-            if (WindowSystem.instance.modules != null) {
-
-                for (int i = 0; i < WindowSystem.instance.modules.Count; ++i) {
-
-                    var module = WindowSystem.instance.modules[i];
-                    if (module != null && module is T moduleT) {
-                        return moduleT;
-                    }
-
-                }
-
-            }
-
-            return null;
-
-        }
-
-        public static void AddModule<T>(T module) where T : WindowSystemModule {
-
-            if (WindowSystem.instance.modules == null) WindowSystem.instance.modules = new List<WindowSystemModule>();
-            WindowSystem.instance.modules.Add(module);
-            
-        }
-
-        public static T FindOpened<T>() {
-
-            foreach (var item in WindowSystem.instance.currentWindows) {
-
-                if (item.instance is T win) return win;
-
-            }
-
-            return default;
-
-        }
-
-        public static T GetFocused<T>() where T : WindowBase {
-            
-            foreach (var item in WindowSystem.instance.currentWindows) {
-
-                if (item.instance is T win && win.GetFocusState() == FocusState.Focused) return win;
-
-            }
-
-            return default;
-
-        }
-        
-        public static bool HasInstance() {
-
-            return WindowSystem.instance != null;
-
-        }
-        
         public void Awake() {
 
             #if ENABLE_INPUT_SYSTEM
@@ -469,357 +278,6 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private Vector2 pointerScreenPosition;
-        private bool hasPointerUpThisFrame;
-        private bool hasPointerDownThisFrame;
-        private float lastPointerActionTime;
-
-        public static T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowComponent {
-
-            foreach (var window in WindowSystem.instance.currentWindows) {
-
-                if (window.instance == null) continue;
-                
-                var component = window.instance.FindComponent(filter);
-                if (component != null) return component;
-
-            }
-
-            return null;
-
-        }
-
-        public static void LockAllInteractables() {
-
-            WindowSystem.instance.lockInteractables = true;
-
-        }
-        
-        public static void UnlockAllInteractables() {
-
-            WindowSystem.instance.lockInteractables = false;
-
-        }
-
-        public static void SetCallbackOnAnyInteractable(System.Action<UnityEngine.UI.Windows.Components.IInteractable> callback) {
-
-            if (WindowSystem.instance == null) return;
-            WindowSystem.instance.callbackOnAnyInteractable = callback;
-
-        }
-
-        public static void AddCallbackOnAnyInteractable(System.Action<UnityEngine.UI.Windows.Components.IInteractable> callback) {
-
-            if (WindowSystem.instance == null) return;
-            WindowSystem.instance.callbackOnAnyInteractable += callback;
-
-        }
-
-        public static void RemoveCallbackOnAnyInteractable(System.Action<UnityEngine.UI.Windows.Components.IInteractable> callback) {
-
-            if (WindowSystem.instance == null) return;
-            WindowSystem.instance.callbackOnAnyInteractable -= callback;
-
-        }
-
-        public static void AddWaitInteractable(System.Action onComplete, UnityEngine.UI.Windows.Components.IInteractable interactable) {
-            
-            WindowSystem.instance.waitInteractableOnComplete = onComplete;
-            
-            ref var arr = ref WindowSystem.instance.waitInteractables;
-            if (arr == null) {
-                arr = new UnityEngine.UI.Windows.Components.IInteractable[1] {
-                    interactable,
-                };
-            } else {
-                var list = arr.ToList();
-                list.Add(interactable);
-                arr = list.ToArray();
-            }
-            
-        }
-
-        public static bool HasWaitInteractable() {
-            return WindowSystem.instance.waitInteractables == null && WindowSystem.instance.waitInteractable == null;
-        }
-
-        public static void WaitInteractable(System.Action onComplete, UnityEngine.UI.Windows.Components.IInteractable interactable) {
-
-            WindowSystem.instance.waitInteractableOnComplete = onComplete;
-            WindowSystem.instance.waitInteractable = interactable;
-            WindowSystem.instance.waitInteractables = null;
-            WindowSystem.instance.lockInteractables = false;
-
-        }
-
-        public static void WaitInteractable(System.Action onComplete, params UnityEngine.UI.Windows.Components.IInteractable[] interactables) {
-
-            WindowSystem.instance.waitInteractableOnComplete = onComplete;
-            WindowSystem.instance.waitInteractable = null;
-            WindowSystem.instance.waitInteractables = interactables;
-            WindowSystem.instance.lockInteractables = false;
-
-        }
-
-        public static void CancelWaitInteractables() {
-
-            WindowSystem.instance.waitInteractable = null;
-            WindowSystem.instance.waitInteractables = null;
-            WindowSystem.instance.waitInteractableOnComplete = null;
-            WindowSystem.instance.lockInteractables = false;
-
-        }
-
-        public static void RaiseAndCancelWaitInteractables() {
-
-            if (WindowSystem.instance.waitInteractable != null && WindowSystem.InteractWith(WindowSystem.instance.waitInteractable) == true) {
-                
-            }
-            
-            if (WindowSystem.instance.waitInteractables != null) {
-
-                foreach (var item in WindowSystem.instance.waitInteractables) {
-
-                    var comp = (item as WindowComponent);
-                    if (comp != null && comp.GetState() == ObjectState.Shown) WindowSystem.InteractWith(item);
-
-                }
-                
-            }
-            
-            WindowSystem.CancelWaitInteractables();
-
-        }
-
-        public static void AddInteractablesIgnoreContainer(WindowObject container) {
-            
-            WindowSystem.instance.interactablesIgnoreContainers.Add(container);
-            
-        }
-
-        public static void RemoveInteractablesIgnoreContainer(WindowObject container) {
-            
-            WindowSystem.instance.interactablesIgnoreContainers.Remove(container);
-            
-        }
-
-        public static bool CanInteractWith(UnityEngine.UI.Windows.Components.IInteractable interactable) {
-
-            if (WindowSystem.instance.lockInteractables == true) return false;
-
-            for (int i = 0; i < WindowSystem.instance.interactablesIgnoreContainers.Count; ++i) {
-
-                var container = WindowSystem.instance.interactablesIgnoreContainers[i];
-                if (container != null) {
-                    
-                    if (interactable is WindowObject interactableObj) {
-
-                        var parent = interactableObj.FindComponentParent<WindowObject, WindowObject>(container, (obj, x) => {
-                            return x == obj;
-                        });
-                        if (parent != null) return true;
-
-                    }
-                    
-                }
-
-            }
-            
-            if (WindowSystem.instance.waitInteractables == null) {
-
-                if (WindowSystem.instance.waitInteractable == null) return true;
-
-                return WindowSystem.instance.waitInteractable == interactable;
-
-            } else {
-
-                for (int i = 0; i < WindowSystem.instance.waitInteractables.Length; ++i) {
-
-                    var interactableItem = WindowSystem.instance.waitInteractables[i];
-                    if (interactableItem == interactable) return true;
-
-                }
-                
-                return false;
-                
-            }
-            
-        }
-
-        public static bool InteractWith(UnityEngine.UI.Windows.Components.IInteractable interactable) {
-            
-            WindowSystem.instance.callbackOnAnyInteractable?.Invoke(interactable);
-            
-            if (WindowSystem.instance.lockInteractables == true) return false;
-
-            if (WindowSystem.instance.waitInteractables == null) {
-
-                if (WindowSystem.instance.waitInteractable == null ||
-                    WindowSystem.instance.waitInteractable == interactable) {
-                    
-                    WindowSystem.instance.waitInteractableOnComplete?.Invoke();
-                    return true;
-
-                }
-
-            } else {
-
-                for (int i = 0; i < WindowSystem.instance.waitInteractables.Length; ++i) {
-
-                    var interactableItem = WindowSystem.instance.waitInteractables[i];
-                    if (interactableItem == interactable) {
-
-                        WindowSystem.instance.waitInteractableOnComplete?.Invoke();
-                        return true;
-
-                    }
-
-                }
-                
-            }
-            
-            return false;
-                
-        }
-
-        public static Vector2 GetPointerPosition() {
-
-            return WindowSystem.instance.pointerScreenPosition;
-
-        }
-
-        public static bool HasPointerUpThisFrame() {
-
-            return WindowSystem.instance.hasPointerUpThisFrame;
-
-        }
-        
-        public static bool HasPointerDownThisFrame() {
-
-            return WindowSystem.instance.hasPointerDownThisFrame;
-
-        }
-
-        
-        public void Update() {
-
-            if (this.modules != null) {
-
-                for (int i = 0; i < this.modules.Count; ++i) {
-
-                    this.modules[i]?.OnUpdate();
-
-                }
-
-            }
-
-            this.hasPointerUpThisFrame = false;
-            this.hasPointerDownThisFrame = false;
-            WindowSystemInput.hasPointerClickThisFrame.Data = false;
-            
-            #if ENABLE_INPUT_SYSTEM
-            if (UnityEngine.InputSystem.Mouse.current != null &&
-                (UnityEngine.InputSystem.Mouse.current.leftButton.wasPressedThisFrame == true ||
-                 UnityEngine.InputSystem.Mouse.current.rightButton.wasPressedThisFrame == true ||
-                 UnityEngine.InputSystem.Mouse.current.middleButton.wasPressedThisFrame == true)) {
-                
-                this.pointerScreenPosition = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
-                if (WindowSystem.onPointerDown != null) WindowSystem.onPointerDown.Invoke();
-                
-            }
-            if (UnityEngine.InputSystem.Mouse.current != null &&
-                (UnityEngine.InputSystem.Mouse.current.leftButton.wasReleasedThisFrame == true ||
-                UnityEngine.InputSystem.Mouse.current.rightButton.wasReleasedThisFrame == true ||
-                UnityEngine.InputSystem.Mouse.current.middleButton.wasReleasedThisFrame == true)) {
-                
-                this.pointerScreenPosition = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
-                this.hasPointerUpThisFrame = true;
-                this.lastPointerActionTime = Time.realtimeSinceStartup;
-                if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
-                
-            }
-
-            var touches = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches;
-            if (touches.Count > 0) {
-
-                for (int i = 0; i < touches.Count; ++i) {
-
-                    var touch = touches[i];
-                    if (touch.phase == UnityEngine.InputSystem.TouchPhase.Began) {
-                        
-                        this.pointerScreenPosition = touch.screenPosition;
-                        this.lastPointerActionTime = Time.realtimeSinceStartup;
-                        if (WindowSystem.onPointerDown != null) WindowSystem.onPointerDown.Invoke();
-                        
-                    } else if (touch.phase == UnityEngine.InputSystem.TouchPhase.Ended || touch.phase == UnityEngine.InputSystem.TouchPhase.Canceled) {
-
-                        this.pointerScreenPosition = touch.screenPosition;
-                        this.hasPointerUpThisFrame = true;
-                        WindowSystemInput.hasPointerClickThisFrame.Data = (Time.realtimeSinceStartup - this.lastPointerActionTime) <= CLICK_THRESHOLD;
-                        this.lastPointerActionTime = Time.realtimeSinceStartup;
-                        if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
-
-                    }
-
-                }
-                
-            }
-            #elif ENABLE_LEGACY_INPUT_MANAGER
-            if (UnityEngine.Input.GetMouseButtonDown(0) == true ||
-                UnityEngine.Input.GetMouseButtonDown(1) == true ||
-                UnityEngine.Input.GetMouseButtonDown(2) == true) {
-                
-                this.pointerScreenPosition = Input.mousePosition;
-                this.hasPointerDownThisFrame = true;
-                this.lastPointerActionTime = Time.realtimeSinceStartup;
-                if (WindowSystem.onPointerDown != null) WindowSystem.onPointerDown.Invoke();
-                
-            }
-            
-            if (UnityEngine.Input.GetMouseButtonUp(0) == true ||
-                UnityEngine.Input.GetMouseButtonUp(1) == true ||
-                UnityEngine.Input.GetMouseButtonUp(2) == true) {
-                
-                this.pointerScreenPosition = Input.mousePosition;
-                this.hasPointerUpThisFrame = true;
-                WindowSystemInput.hasPointerClickThisFrame.Data = (Time.realtimeSinceStartup - this.lastPointerActionTime) <= CLICK_THRESHOLD;
-                this.lastPointerActionTime = Time.realtimeSinceStartup;
-                if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
-                
-            }
-
-            if (UnityEngine.Input.touchCount > 0) {
-
-                for (int i = 0; i < UnityEngine.Input.touches.Length; ++i) {
-
-                    var touch = UnityEngine.Input.GetTouch(i);
-                    if (touch.phase == UnityEngine.InputSystem.TouchPhase.Began) {
-                        
-                        this.pointerScreenPosition = touch.screenPosition;
-                        this.lastPointerActionTime = Time.realtimeSinceStartup;
-                        if (WindowSystem.onPointerDown != null) WindowSystem.onPointerDown.Invoke();
-                        
-                    } else if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled) {
-                        
-                        this.pointerScreenPosition = touch.screenPosition;
-                        this.hasPointerUpThisFrame = true;
-                        if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
-
-                    }
-
-                }
-                
-            }
-            #endif
-            
-        }
-
-        public static List<WindowItem> GetCurrentOpened() {
-
-            return WindowSystem.instance.currentWindows;
-
-        }
-        
         public static RuntimePlatform GetCurrentRuntimePlatform() {
 
             if (WindowSystem.instance.emulatePlatform == true) {
@@ -832,23 +290,13 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static TargetData GetTargetData() {
+        internal static TargetData GetTargetData() {
 
             return new TargetData() {
                 platform = WindowSystem.GetCurrentRuntimePlatform(),
                 screenSize = new Vector2(Screen.width, Screen.height)
             };
 
-        }
-
-        public static void SendEvent<T>(T data) {
-
-            foreach (var item in WindowSystem.instance.currentWindows) {
-                
-                item.instance.SendEvent<T>(data);
-                
-            }
-            
         }
 
         internal static void SendFullCoverageOnShowEnd(WindowBase window) {
@@ -962,13 +410,7 @@ namespace UnityEngine.UI.Windows {
 
         public static int GetCountByLayer(UIWSLayer layer) {
 
-            if (WindowSystem.instance.windowsCountByLayer.TryGetValue(layer.value, out int count) == true) {
-
-                return count;
-
-            }
-
-            return 0;
+            return WindowSystem.instance.windowsCountByLayer.GetValueOrDefault(layer.value, 0);
 
         }
 
@@ -1020,112 +462,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static void RaiseEvent(WindowObject instance, WindowEvent windowEvent) {
-
-            var events = WindowSystem.GetEvents();
-            events.Raise(instance, windowEvent);
-
-        }
-
-        public static void ClearEvents(WindowObject instance) {
-
-            var events = WindowSystem.GetEvents();
-            events.Clear(instance);
-
-        }
-
-        public static void RegisterActionOnce(WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject> callback) {
-
-            var events = WindowSystem.GetEvents();
-            events.RegisterOnce(instance, windowEvent, callback);
-
-        }
-
-        public static void RegisterAction(WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject> callback) {
-
-            var events = WindowSystem.GetEvents();
-            events.Register(instance, windowEvent, callback);
-
-        }
-
-        public static void UnRegisterAction(WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject> callback) {
-
-            var events = WindowSystem.GetEvents();
-            events.UnRegister(instance, windowEvent, callback);
-
-        }
-
-        public static void RaiseEvent<TState>(TState state, WindowObject instance, WindowEvent windowEvent) {
-
-            var events = WindowSystem.GetEvents();
-            events.Raise(state, instance, windowEvent);
-
-        }
-
-        public static void RegisterActionOnce<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
-
-            var events = WindowSystem.GetEvents();
-            events.RegisterOnce(state, instance, windowEvent, callback);
-
-        }
-
-        public static void RegisterAction<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
-
-            var events = WindowSystem.GetEvents();
-            events.Register(state, instance, windowEvent, callback);
-
-        }
-
-        public static void UnRegisterAction<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
-
-            var events = WindowSystem.GetEvents();
-            events.UnRegister(state, instance, windowEvent, callback);
-
-        }
-
-        public static WindowSystemBreadcrumbs GetBreadcrumbs() {
-
-            return WindowSystem.instance?.breadcrumbs;
-
-        }
-
-        public static WindowSystemAudio GetAudio() {
-
-            return WindowSystem.instance?.audio;
-
-        }
-
-        public static WindowSystemPools GetPools() {
-
-            return WindowSystem.instance?.pools;
-
-        }
-
-        public static WindowSystemEvents GetEvents() {
-
-            return WindowSystem.instance?.events;
-
-        }
-
-        public static WindowSystemSettings GetSettings() {
-
-            return WindowSystem.instance?.settings;
-
-        }
-
-        public static WindowSystemResources GetResources() {
-
-            return WindowSystem.instance?.resources;
-
-        }
-
-        public static Tweener GetTweener() {
-
-            return WindowSystem.instance?.tweener;
-
-        }
-
-        public static void ShowInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
+        internal static void ShowInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
             
             if (instance.GetState() == ObjectState.Showing || instance.GetState() == ObjectState.Shown) {
                 
@@ -1417,122 +754,21 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        /// <summary>
-        /// Clean up window instance.
-        /// This instance would be removed from pools, and all resources will be free.
-        /// </summary>
-        /// <param name="instance"></param>
-        public static void Clean(WindowBase instance) {
-
-            if (instance.GetState() != ObjectState.Hidden) {
-
-                throw new System.Exception($"WindowSystem.Clean failed because of instance state: {instance.GetState()} (required state: Hidden)");
-                
-            }
-
-            instance.DoDeInit();
-
-            var pools = WindowSystem.GetPools();
-            pools.RemoveInstance(instance);
-            
-        }
-
-        public static void ShowLoader(TransitionParameters transitionParameters = default, bool showSync = false) {
-
-            if (WindowSystem.instance.loaderScreen != null && WindowSystem.instance.loaderInstance == null && WindowSystem.instance.loaderShowBegin == false) {
-
-                WindowSystem.instance.loaderShowBegin = true;
-                var w = WindowSystem.ShowSync(WindowSystem.instance.loaderScreen, new InitialParameters() { showSync = showSync },
-                                  onInitialized: static (w) => {
-                                      WindowSystem.instance.loaderInstance = w;
-                                      WindowSystem.instance.loaderShowBegin = false;
-                                  }, transitionParameters);
-                WindowSystem.GetEvents().RegisterOnce(w, WindowEvent.OnHideBegin, static (_) => {
-                    WindowSystem.instance.loaderInstance = null;
-                    WindowSystem.instance.loaderShowBegin = false;
-                });
-
-            }
-
-        }
-
-        public static void HideLoader() {
-
-            if (WindowSystem.instance.loaderShowBegin == true && WindowSystem.instance.loaderInstance == null) {
-                Coroutines.Wait(static () => WindowSystem.instance.loaderInstance != null, WindowSystem.HideLoader);
-            } else {
-                if (WindowSystem.instance.loaderInstance != null) {
-                    WindowSystem.instance.loaderInstance.Hide();
-                    WindowSystem.instance.loaderInstance = null;
-                    WindowSystem.instance.loaderShowBegin = false;
-                }
-            }
-            
-        }
-
-        public static void ShowRoot(TransitionParameters transitionParameters = default) {
-            
-            WindowSystem.Show(WindowSystem.instance.rootScreen, transitionParameters: transitionParameters);
-            
-        }
-        
-        public static void HideAll<T>(TransitionParameters parameters = default) where T : WindowBase {
-
-            WindowSystem.HideAll_INTERNAL((x) => x is T, parameters);
-
-        }
-
-        public static void HideAll(TransitionParameters parameters = default) {
-
-            WindowSystem.HideAll_INTERNAL(null, parameters);
-
-        }
-
-        public static void HideAll(System.Predicate<WindowBase> predicate, TransitionParameters parameters = default) {
-
-            WindowSystem.HideAll_INTERNAL(predicate, parameters);
-
-        }
-
-        public static void HideAllAndClean<T>(TransitionParameters parameters = default) where T : WindowBase {
-            
-            WindowSystem.HideAllAndClean((w) => w is T, parameters);
-            
-        }
-
-        public static void HideAllAndClean(TransitionParameters parameters = default) {
-            
-            WindowSystem.HideAllAndClean(null, parameters);
-            
-        }
-
-        public static void HideAllAndClean(System.Predicate<WindowBase> predicate, TransitionParameters parameters = default) {
-
-            var list = PoolList<WindowBase>.Spawn();
-            var cb = parameters.ReplaceCallback(() => {
-
-                foreach (var item in list) {
-                    WindowSystem.Clean(item);
-                }
-                parameters.RaiseCallback();
-                PoolList<WindowBase>.Recycle(ref list);
-                
-            });
-            WindowSystem.HideAll_INTERNAL(predicate, cb, (w) => {
-
-                list.Add(w);
-
-            });
-
-        }
-
         private static bool CanBeDestroy(DontDestroy state, DontDestroy windowInstanceFlag) {
 
             return windowInstanceFlag == DontDestroy.Default || (state & windowInstanceFlag) == 0;
 
         }
+
+        public class HideAllClosure {
+
+            public TransitionParameters parameters;
+            public int ptr;
+            public int filteredCount;
+
+        }
         
-        private static void HideAll_INTERNAL(System.Predicate<WindowBase> predicate, TransitionParameters parameters, System.Action<WindowBase> onWindow = null) {
+        private static void HideAll_INTERNAL<TState>(TState state, System.Func<WindowBase, TState, bool> predicate, TransitionParameters parameters, System.Action<WindowBase, TState> onWindow = null) {
 
             var currentList = WindowSystem.instance.currentWindows;
             var count = currentList.Count;
@@ -1540,7 +776,7 @@ namespace UnityEngine.UI.Windows {
             for (int i = 0; i < count; ++i) {
                 
                 var instance = currentList[i].instance;
-                if ((predicate == null || predicate.Invoke(instance) == true) && WindowSystem.CanBeDestroy(DontDestroy.OnHideAll, instance.preferences.dontDestroy) == true) ++filteredCount;
+                if ((predicate == null || predicate.Invoke(instance, state) == true) && WindowSystem.CanBeDestroy(DontDestroy.OnHideAll, instance.preferences.dontDestroy) == true) ++filteredCount;
 
             }
 
@@ -1551,21 +787,25 @@ namespace UnityEngine.UI.Windows {
 
             }
             
-            var ptr = 0;
-            var instanceParameters = parameters.ReplaceCallback(() => {
+            var closure = PoolClass<HideAllClosure>.Spawn();
+            closure.parameters = parameters;
+            closure.ptr = 0;
+            closure.filteredCount = filteredCount;
+            var instanceParameters = parameters.ReplaceCallback(closure, static (closure) => {
                 
-                ++ptr;
-                if (ptr == filteredCount) {
-                    
-                    parameters.RaiseCallback();
-                    
-                }
-                
+                var data = (HideAllClosure)closure;
+                ++data.ptr;
+                if (data.ptr != data.filteredCount) return;
+
+                data.parameters.RaiseCallback();
+                PoolClass<HideAllClosure>.Recycle(data);
+
+
             });
             for (int i = count - 1; i >= 0; --i) {
 
                 var instance = currentList[i].instance;
-                if ((predicate == null || predicate.Invoke(instance) == true) && WindowSystem.CanBeDestroy(DontDestroy.OnHideAll, instance.preferences.dontDestroy) == true) {
+                if ((predicate == null || predicate.Invoke(instance, state) == true) && WindowSystem.CanBeDestroy(DontDestroy.OnHideAll, instance.preferences.dontDestroy) == true) {
 
                     if (instance.GetState() == ObjectState.Hiding ||
                         instance.GetState() == ObjectState.Hidden) {
@@ -1576,96 +816,12 @@ namespace UnityEngine.UI.Windows {
                     }
                     
                     instance.BreakStateHierarchy();
-                    onWindow?.Invoke(instance);
+                    onWindow?.Invoke(instance, state);
                     instance.Hide(instanceParameters);
                     
                 }
                 
             }
-
-        }
-        
-        public static T ShowSync<T>(T source, InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
-            T instance = default;
-            initialParameters.showSync = true;
-            WindowSystem.instance.Show_INTERNAL<T>(source, initialParameters, (w) => {
-                
-                instance = w;
-                onInitialized?.Invoke(w);
-                
-            }, transitionParameters);
-            return instance;
-
-        }
-        
-        /// <summary>
-        /// Initializing window in sync mode.
-        /// Just returns instance immediately, but still stay in async mode for layout because of Addressable assets.
-        /// </summary>
-        /// <param name="initialParameters"></param>
-        /// <param name="onInitialized"></param>
-        /// <param name="transitionParameters"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static T ShowSync<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
-            return WindowSystem.ShowSync(WindowSystem.instance.GetSource<T>(), initialParameters, onInitialized, transitionParameters);
-
-        }
-
-        public static T ShowSync<T>(System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
-            return WindowSystem.ShowSync(default, onInitialized, transitionParameters);
-
-        }
-
-        public static void Show<T>(System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
-            WindowSystem.instance.Show_INTERNAL(new InitialParameters(), onInitialized, transitionParameters);
-
-        }
-
-        public static void Show(WindowBase source, System.Action<WindowBase> onInitialized = null, TransitionParameters transitionParameters = default) {
-
-            WindowSystem.instance.Show_INTERNAL(source, new InitialParameters(), onInitialized, transitionParameters);
-
-        }
-
-        public static void Show<T>(WindowBase source, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
-            WindowSystem.instance.Show_INTERNAL(source, new InitialParameters(), onInitialized, transitionParameters);
-
-        }
-
-        public static void Show<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
-            WindowSystem.instance.Show_INTERNAL(initialParameters, onInitialized, transitionParameters);
-
-        }
-
-        public static void Show(WindowBase source, InitialParameters initialParameters, System.Action<WindowBase> onInitialized = null, TransitionParameters transitionParameters = default) {
-
-            WindowSystem.instance.Show_INTERNAL(source, initialParameters, onInitialized, transitionParameters);
-
-        }
-
-        public static void Show<T>(WindowBase source, InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
-            WindowSystem.instance.Show_INTERNAL(source, initialParameters, onInitialized, transitionParameters);
-
-        }
-
-        public static void RemoveWindow(WindowBase instance) {
-
-            var uiws = WindowSystem.instance;
-            if (uiws.windowsCountByLayer.TryGetValue(instance.preferences.layer.value, out var count) == true) {
-
-                uiws.windowsCountByLayer[instance.preferences.layer.value] = count - 1;
-
-            }
-
-            uiws.RemoveWindow_INTERNAL(instance);
 
         }
 
@@ -1701,12 +857,6 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static WindowBase GetSource(System.Type type) {
-
-            return WindowSystem.instance.hashToPrefabs.GetValueOrDefault(type);
-
-        }
-
         private T GetSource<T>() where T : WindowBase {
 
             var hash = typeof(T);
@@ -1717,12 +867,6 @@ namespace UnityEngine.UI.Windows {
             }
 
             return default;
-
-        }
-
-        public static bool IsOpenedBySource(WindowBase source) {
-
-            return WindowSystem.instance.IsOpenedBySource_INTERNAL(source);
 
         }
 
@@ -1787,21 +931,16 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static WindowItem GetPreviousWindow(WindowBase instance) {
-
-            var breadcrumbs = WindowSystem.GetBreadcrumbs();
-            return breadcrumbs.GetPrevious(instance, true);
-
-        }
-        
         private void Show_INTERNAL<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
 
             var source = this.GetSource<T>();
-            this.Show_INTERNAL(source, initialParameters, onInitialized, transitionParameters);
+            this.Show_INTERNAL<T, System.Action<T>>(onInitialized, source, initialParameters, static (instance, state) => {
+                state?.Invoke(instance);
+            }, transitionParameters);
 
         }
 
-        private void Show_INTERNAL<T>(WindowBase source, InitialParameters initialParameters, System.Action<T> onInitialized, TransitionParameters transitionParameters) where T : WindowBase {
+        private void Show_INTERNAL<T, TState>(TState closure, WindowBase source, InitialParameters initialParameters, System.Action<T, TState> onInitialized, TransitionParameters transitionParameters) where T : WindowBase {
 
             if (source == null) {
 
@@ -1829,7 +968,7 @@ namespace UnityEngine.UI.Windows {
 
                     if (onInitialized != null) {
                         
-                        onInitialized.Invoke((T)instance);
+                        onInitialized.Invoke((T)instance, closure);
                         
                     } else {
                         
@@ -1870,14 +1009,15 @@ namespace UnityEngine.UI.Windows {
 
                     }
 
-                    WindowSystem.RegisterActionOnce(new ShowInstanceClosure<T>() {
+                    WindowSystem.RegisterActionOnce(new ShowInstanceClosure<T, TState>() {
                         instance = this,
                         existInstance = existInstance,
                         initialParameters = initialParameters,
                         onInitialized = onInitialized,
+                        state = closure,
                         transitionParameters = transitionParameters,
                     }, existInstance, state, static (obj, state) => {
-                        state.instance.Show_INTERNAL(state.existInstance, state.initialParameters, state.onInitialized, state.transitionParameters);
+                        state.instance.Show_INTERNAL(state.state, state.existInstance, state.initialParameters, state.onInitialized, state.transitionParameters);
                     });
 
                     return;
@@ -1920,7 +1060,7 @@ namespace UnityEngine.UI.Windows {
 
                 if (onInitialized != null) {
                     
-                    onInitialized.Invoke((T)instance);
+                    onInitialized.Invoke((T)instance, closure);
                     
                 } else {
                     
@@ -1930,9 +1070,11 @@ namespace UnityEngine.UI.Windows {
 
             }
 
-            instance.LoadAsync(new LoadAsyncClosure<T>() {
+            instance.LoadAsync(new ShowLoadAsyncClosure<T, TState>() {
                 instance = instance,
                 onInitialized = onInitialized,
+                state = (T)instance,
+                closure = closure,
                 transitionParameters = transitionParameters,
                 initialParameters = initialParameters,
             }, initialParameters, static (state) => {
@@ -1941,7 +1083,7 @@ namespace UnityEngine.UI.Windows {
 
                     if (state.onInitialized != null) {
 
-                        state.onInitialized.Invoke((T)state.instance);
+                        state.onInitialized.Invoke((T)state.instance, state.closure);
 
                     } else {
 

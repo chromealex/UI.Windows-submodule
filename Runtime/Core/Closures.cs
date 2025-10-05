@@ -51,6 +51,18 @@ namespace UnityEngine.UI.Windows {
             
     }
 
+    public struct ShowInstanceClosure<T, TState> {
+
+        public WindowSystem instance;
+        public TransitionParameters parameters;
+        public TState state;
+        public WindowBase existInstance;
+        public InitialParameters initialParameters;
+        public TransitionParameters transitionParameters;
+        public System.Action<T, TState> onInitialized;
+            
+    }
+
     public struct DoInitClosure {
 
         public WindowObject component;
@@ -58,13 +70,30 @@ namespace UnityEngine.UI.Windows {
         public TransitionParameters parameters;
 
     }
+    
+    public class TaskCompletionShowScreen<T> {
 
-    public struct LoadAsyncClosure<TState> {
+        public T instance;
+        public System.Action<T> onInitialized;
+
+    }
+
+    public class HideAllAndCleanClosure<TState> {
+
+        public System.Collections.Generic.List<WindowBase> list;
+        public TransitionParameters transitionParameters;
+        public System.Func<WindowBase, TState, bool> predicate;
+        public TState state;
+
+    }
+
+    public struct ShowLoadAsyncClosure<TState, TStateClosure> {
 
         public UnityEngine.UI.Windows.WindowTypes.LayoutWindowType component;
         public System.Action<TState> onComplete;
         public TState state;
-        public System.Action<TState> onInitialized;
+        public TStateClosure closure;
+        public System.Action<TState, TStateClosure> onInitialized;
         public InitialParameters initialParameters;
         public WindowBase instance;
         public TransitionParameters transitionParameters;

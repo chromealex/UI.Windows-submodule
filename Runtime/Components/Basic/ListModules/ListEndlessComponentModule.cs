@@ -77,7 +77,7 @@ namespace UnityEngine.UI.Windows {
             private readonly List<ItemInstanceToRedraw> instancesToRedraw = new List<ItemInstanceToRedraw>();
             private readonly Dictionary<int, int> instancePrevIndexToListIndex = new Dictionary<int, int>();
             
-            public override async void UpdateContent(bool forceRebuild = false) {
+            public override void UpdateContent(bool forceRebuild = false) {
 
                 var requiredVisibleCount = this.module.requiredVisibleCount;
                 var fromIndex = this.module.fromIndex;
@@ -104,7 +104,7 @@ namespace UnityEngine.UI.Windows {
                             var k = i + fromIndex;
                             var item = this.items[k];
                             ++this.loadingCount;
-                            await this.module.listComponent.AddItemInternal<T, InnerClosure>(item.source, new InnerClosure() { closure = item.closure, registry = this, item = item, },
+                            this.module.listComponent.AddItemInternal<T, InnerClosure>(item.source, new InnerClosure() { closure = item.closure, registry = this, item = item, },
                                                                                        (obj, closure) => {
                                                                                            --closure.registry.loadingCount;
                                                                                            //closure.item.onItem.Invoke(obj, closure.closure);

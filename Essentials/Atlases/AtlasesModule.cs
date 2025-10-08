@@ -23,11 +23,10 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private async void AtlasRequest(string name, System.Action<UnityEngine.U2D.SpriteAtlas> callback) {
+        private void AtlasRequest(string name, System.Action<UnityEngine.U2D.SpriteAtlas> callback) {
 
             var item = this.GetByName(name);
-            await item.data.LoadAsync(this);
-            callback.Invoke(item.data.Get());
+            item.data.LoadAsync(this, callback);
 
         }
 

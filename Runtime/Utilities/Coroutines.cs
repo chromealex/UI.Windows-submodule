@@ -194,7 +194,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 			ClosureDelegateCallback<TClosure> callbackItem = static (ref TClosure cParamsInner) => {
 
 				--cParamsInner.counter;
-				if (cParamsInner.counter > 0) return;
+				if (cParamsInner.counter != 0) return;
 
 				cParamsInner.completed = true;
 
@@ -285,7 +285,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 			ClosureDelegateCallback<TClosure> callbackItem = static (ref TClosure cParamsInner) => {
 
 				--cParamsInner.counter;
-				if (cParamsInner.counter > 0) return;
+				if (cParamsInner.counter != 0) return;
 
 				cParamsInner.completed = true;
 

@@ -18,16 +18,17 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public virtual void SetItems<T, TItem>(List<TItem> list, System.Action<T, DefaultItemListParameters<TItem>> onItem, System.Action<DefaultItemListParameters<TItem>> onComplete = null) where T : WindowComponent {
+        public virtual void SetItems<T, TItem>(List<TItem> list, System.Action<T, DefaultItemListParameters<TItem>> onItem, System.Action<DefaultItemListParameters<TItem>, bool> onComplete = null) where T : WindowComponent {
             
             this.SetItems(list, onItem, new DefaultItemListParameters<TItem>() { arr = list }, onComplete);
             
         }
 
-        public virtual void SetItems<T, TItem, TClosure>(List<TItem> list, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListItemListClosureParameters<TItem> {
+        public virtual void SetItems<T, TItem, TClosure>(List<TItem> list, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure, bool> onComplete) where T : WindowComponent where TClosure : IListItemListClosureParameters<TItem> {
 
             if (this.isLoadingRequest == true) {
 
+                onComplete?.Invoke(closure, false);
                 return;
 
             }
@@ -71,7 +72,7 @@ namespace UnityEngine.UI.Windows.Components {
                     
                 }
                 
-                onComplete?.Invoke(closure);
+                onComplete?.Invoke(closure, true);
                 
             }
 

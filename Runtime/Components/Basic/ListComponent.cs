@@ -72,7 +72,7 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public override void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) {
+        public override void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure, bool> onComplete) {
 
             if (this.HasCustomAddModule() == true) {
 

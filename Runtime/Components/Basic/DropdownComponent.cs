@@ -484,10 +484,10 @@ namespace UnityEngine.UI.Windows.Components {
             public int index { get; set; }
             public DropdownComponent component;
             public System.Action<T, int> onItem;
-            public System.Action onComplete;
+            public System.Action<bool> onComplete;
 
         }
-        public virtual void SetItems<T>(int count, System.Action<T, int> onItem, System.Action onComplete = null) where T : WindowComponent {
+        public virtual void SetItems<T>(int count, System.Action<T, int> onItem, System.Action<bool> onComplete = null) where T : WindowComponent {
             
             this.list.SetItems<T, DropdownClosureParameters<T>>(count, (item, c) => {
                 
@@ -498,15 +498,15 @@ namespace UnityEngine.UI.Windows.Components {
                 component = this,
                 onItem = onItem,
                 onComplete = onComplete,
-            }, (closure) => {
+            }, static (closure, result) => {
                 
-                closure.onComplete?.Invoke();
+                closure.onComplete?.Invoke(result);
                 
             });
             
         }
 
-        public virtual void SetItems<T>(int count, Resource source, System.Action<T, int> onItem, System.Action onComplete = null) where T : WindowComponent {
+        public virtual void SetItems<T>(int count, Resource source, System.Action<T, int> onItem, System.Action<bool> onComplete = null) where T : WindowComponent {
             
             this.list.SetItems<T, DropdownClosureParameters<T>>(count, source, (item, c) => {
                 
@@ -517,9 +517,9 @@ namespace UnityEngine.UI.Windows.Components {
                 component = this,
                 onItem = onItem,
                 onComplete = onComplete,
-            }, (closure) => {
+            }, (closure, result) => {
                 
-                closure.onComplete?.Invoke();
+                closure.onComplete?.Invoke(result);
                 
             });
 

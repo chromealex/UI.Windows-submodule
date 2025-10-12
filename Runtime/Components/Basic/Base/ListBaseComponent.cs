@@ -389,23 +389,24 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
 
-        public virtual void SetItems<T>(int count, System.Action<T, DefaultParameters> onItem, System.Action<DefaultParameters> onComplete = null) where T : WindowComponent {
+        public virtual void SetItems<T>(int count, System.Action<T, DefaultParameters> onItem, System.Action<DefaultParameters, bool> onComplete = null) where T : WindowComponent {
             
             this.SetItems(count, this.source, onItem, new DefaultParameters(), onComplete);
             
         }
 
-        public virtual void SetItems<T, TClosure>(int count, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete = null) where T : WindowComponent where TClosure : IListClosureParameters {
+        public virtual void SetItems<T, TClosure>(int count, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure, bool> onComplete = null) where T : WindowComponent where TClosure : IListClosureParameters {
             
             this.SetItems(count, this.source, onItem, closure, onComplete);
             
         }
 
         private bool isLoadingRequest = false;
-        public virtual void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete) where T : WindowComponent where TClosure : IListClosureParameters {
+        public virtual void SetItems<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure, bool> onComplete) where T : WindowComponent where TClosure : IListClosureParameters {
 
             if (this.isLoadingRequest == true) {
 
+                onComplete?.Invoke(closure, false);
                 return;
 
             }
@@ -419,7 +420,7 @@ namespace UnityEngine.UI.Windows.Components {
                     
                 }
 
-                if (onComplete != null) onComplete.Invoke(closure);
+                if (onComplete != null) onComplete.Invoke(closure, true);
 
             } else {
 
@@ -443,7 +444,7 @@ namespace UnityEngine.UI.Windows.Components {
                         onItem.Invoke((T)this.items[i], closure);
                     
                     }
-                    if (onComplete != null) onComplete.Invoke(closure);
+                    if (onComplete != null) onComplete.Invoke(closure, true);
                     
                 }
 
@@ -472,17 +473,17 @@ namespace UnityEngine.UI.Windows.Components {
             public ListBaseComponent list;
             public int requiredCount;
             public System.Action<T, TClosure> onItem;
-            public System.Action<TClosure> onComplete;
+            public System.Action<TClosure, bool> onComplete;
             public TClosure data;
             public System.Func<TClosure, TClosure> onClosure;
             public EmitLoaded loadedCounter;
 
         }
-        private void Emit<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure> onComplete = null, System.Func<TClosure, TClosure> onClosure = null) where T : WindowComponent where TClosure : IListClosureParameters {
+        private void Emit<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure, bool> onComplete = null, System.Func<TClosure, TClosure> onClosure = null) where T : WindowComponent where TClosure : IListClosureParameters {
 
             if (count == 0) {
                 
-                if (onComplete != null) onComplete.Invoke(closure);
+                if (onComplete != null) onComplete.Invoke(closure, true);
                 this.isLoadingRequest = false;
                 return;
 
@@ -515,7 +516,7 @@ namespace UnityEngine.UI.Windows.Components {
                     ++c.loadedCounter.loaded;
                     if (c.loadedCounter.loaded == c.requiredCount) {
                         
-                        if (c.onComplete != null) c.onComplete.Invoke(c.data);
+                        if (c.onComplete != null) c.onComplete.Invoke(c.data, true);
                         c.list.isLoadingRequest = false;
                         PoolClass<EmitLoaded>.Recycle(ref c.loadedCounter);
                         

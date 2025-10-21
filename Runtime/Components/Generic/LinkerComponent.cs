@@ -51,12 +51,22 @@
             
         }
 
+        private struct Closure<T> {
+
+            public System.Action<T> onComplete;
+            public LinkerComponent component;
+
+        }
+
         public void LoadAsync<T>(System.Action<T> onComplete = null) where T : WindowObject {
             
-            this.LoadAsync<T>(this.prefab, (asset) => {
+            this.LoadAsync<T, Closure<T>>(new Closure<T>() {
+                onComplete = onComplete,
+                component = this,
+            }, this.prefab, static (asset, state) => {
 
-                this.loadedAsset = asset;
-                onComplete?.Invoke(asset);
+                state.component.loadedAsset = asset;
+                state.onComplete?.Invoke(asset);
 
             });
             
@@ -64,13 +74,36 @@
 
         public T LoadSync<T>() where T : WindowObject {
             
-            this.LoadAsync<T>(this.prefab, (asset) => {
+            this.LoadAsync<T, Closure<T>>(new Closure<T>() {
+                component = this,
+            }, this.prefab, static (asset, state) => {
 
-                this.loadedAsset = asset;
+                state.component.loadedAsset = asset;
                 
             }, async: false);
             return this.loadedAsset as T;
 
+        }
+
+        public void ReloadAsync<T>(System.Action<T> onComplete) where T : WindowObject {
+            if (this.loadedAsset != null) {
+                this.Unload();
+            }
+            this.LoadAsync(onComplete);
+        }
+
+        public T ReloadSync<T>() where T : WindowObject {
+            if (this.loadedAsset != null) {
+                this.Unload();
+            }
+            return this.LoadSync<T>();
+        }
+
+        public bool Unload() {
+            if (this.loadedAsset != null) {
+                return this.UnloadSubObject(this.loadedAsset);
+            }
+            return false;
         }
 
         public T Get<T>() where T : WindowObject {

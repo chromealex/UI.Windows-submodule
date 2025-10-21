@@ -1548,6 +1548,7 @@ namespace UnityEngine.UI.Windows {
             this.LoadAsync_YIELD<T, LoadAsyncClosure<T, TState>>(new LoadAsyncClosure<T, TState>() {
                 component = this,
                 onCompleteState = onComplete,
+                state = state,
             }, resource, static (obj, c) => {
                 c.onCompleteState.Invoke(c.state);
             }, async);
@@ -1602,12 +1603,15 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        public void UnloadSubObject(WindowObject subObject)  {
+        public bool UnloadSubObject(WindowObject subObject)  {
             
             if (this.UnRegisterSubObject(subObject) == true) {
                 var pools = WindowSystem.GetPools();
                 pools.Despawn(subObject);
+                return true;
             }
+
+            return false;
 
         }
 

@@ -1602,18 +1602,23 @@ namespace UnityEngine.UI.Windows {
 
         }
         
+        public void UnloadSubObject(WindowObject subObject)  {
+            
+            if (this.UnRegisterSubObject(subObject) == true) {
+                var pools = WindowSystem.GetPools();
+                pools.Despawn(subObject);
+            }
+
+        }
+
         public void UnloadSubObjects()  {
             
             if (this.subObjects.Count == 0) return;
             
-            var pools = WindowSystem.GetPools();
-
             for (int i = this.subObjects.Count - 1; i >= 0; i--) {
 
                 var subObject = this.subObjects[i];
-                
-                this.UnRegisterSubObject(subObject);
-                pools.Despawn(subObject);
+                this.UnloadSubObject(subObject);
                 
             }
             

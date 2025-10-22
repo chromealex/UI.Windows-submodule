@@ -365,13 +365,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public struct DefaultItemParameters<T> : IListItemClosureParameters<T> {
-
-            public int index { get; set; }
-            public T data { get; set; }
-
-        }
-
         public virtual void ForEach<T>(System.Action<T, DefaultParameters> onItem) where T : WindowComponent {
             
             this.ForEach(onItem, new DefaultParameters());
@@ -399,6 +392,59 @@ namespace UnityEngine.UI.Windows.Components {
             
             this.SetItems(count, this.source, onItem, closure, onComplete);
             
+        }
+
+        public struct ListClosureAPI<TClosure> {
+
+            internal ListBaseComponent list;
+            internal TClosure state;
+
+            public struct Parameters<T> : IListClosureParameters {
+                
+                public int index { get; set; }
+                public TClosure data;
+                internal System.Action<T, Parameters<T>> onItem;
+                internal System.Action<Parameters<T>, bool> onComplete;
+
+            }
+
+            public void SetItems<T>(int count, System.Action<T, Parameters<T>> onItem, System.Action<Parameters<T>, bool> onComplete = null) where T : WindowComponent {
+                
+                this.SetItems(count, this.list.source, onItem, onComplete);
+                
+            }
+
+            public void SetItems<T>(int count, Resource source, System.Action<T, Parameters<T>> onItem, System.Action<Parameters<T>, bool> onComplete) where T : WindowComponent {
+                
+                this.list.SetItems<T, Parameters<T>>(count, source, static (item, parameters) => {
+                    parameters.onItem?.Invoke(item, parameters);
+                }, new Parameters<T>() {
+                    data = this.state,
+                    onItem = onItem,
+                    onComplete = onComplete,
+                }, static (parameters, result) => {
+                    parameters.onComplete?.Invoke(parameters, result);
+                });
+
+            }
+
+            public void ForEach<T>(System.Action<T, TClosure> onItem) where T : WindowComponent {
+                
+                for (int i = 0; i < this.list.Count; ++i) {
+                    
+                    if (this.list.items[i] is T item) onItem.Invoke(item, this.state);
+                    
+                }
+                
+            }
+
+        }
+
+        public virtual ListClosureAPI<T> Closure<T>(T closure) {
+            return new ListClosureAPI<T>() {
+                list = this,
+                state = closure,
+            };
         }
 
         private bool isLoadingRequest = false;

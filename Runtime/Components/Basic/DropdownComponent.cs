@@ -479,28 +479,16 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        private struct DropdownClosureParameters<T> : IListClosureParameters where T : WindowComponent {
-
-            public int index { get; set; }
-            public DropdownComponent component;
-            public System.Action<T, int> onItem;
-            public System.Action<bool> onComplete;
-
-        }
         public virtual void SetItems<T>(int count, System.Action<T, int> onItem, System.Action<bool> onComplete = null) where T : WindowComponent {
             
-            this.list.SetItems<T, DropdownClosureParameters<T>>(count, (item, c) => {
+            this.list.Closure((component: this, onItem, onComplete)).SetItems<T>(count, static (item, c) => {
                 
-                c.component.TrySetCallbackToInteractable(item, c.index, null);
-                if (c.onItem != null) c.onItem.Invoke(item, c.index);
+                c.data.component.TrySetCallbackToInteractable(item, c.index, null);
+                if (c.data.onItem != null) c.data.onItem.Invoke(item, c.index);
                 
-            }, new DropdownClosureParameters<T>() {
-                component = this,
-                onItem = onItem,
-                onComplete = onComplete,
             }, static (closure, result) => {
                 
-                closure.onComplete?.Invoke(result);
+                closure.data.onComplete?.Invoke(result);
                 
             });
             
@@ -508,18 +496,14 @@ namespace UnityEngine.UI.Windows.Components {
 
         public virtual void SetItems<T>(int count, Resource source, System.Action<T, int> onItem, System.Action<bool> onComplete = null) where T : WindowComponent {
             
-            this.list.SetItems<T, DropdownClosureParameters<T>>(count, source, (item, c) => {
+            this.list.Closure((component: this, onItem, onComplete)).SetItems<T>(count, source, static (item, c) => {
                 
-                c.component.TrySetCallbackToInteractable(item, c.index, null);
-                if (c.onItem != null) c.onItem.Invoke(item, c.index);
+                c.data.component.TrySetCallbackToInteractable(item, c.index, null);
+                if (c.data.onItem != null) c.data.onItem.Invoke(item, c.index);
                 
-            }, new DropdownClosureParameters<T>() {
-                component = this,
-                onItem = onItem,
-                onComplete = onComplete,
-            }, (closure, result) => {
+            }, static (closure, result) => {
                 
-                closure.onComplete?.Invoke(result);
+                closure.data.onComplete?.Invoke(result);
                 
             });
 

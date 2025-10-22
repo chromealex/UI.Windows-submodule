@@ -612,9 +612,11 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             var console = this.GetConsole();
             console.GetFastLinks(this.currentDirectoryId, this.fastLinkCache);
             this.fastLinks.Get<TextComponent>().SetText(console.GetDirectoryPath(this.currentDirectoryId));
-            this.fastLinks.SetItems<FastLinkButtonComponent, ClosureFastLinksParameters>(this.fastLinkCache.Count, (button, parameters) => {
+            this.fastLinks
+                .Closure((this.fastLinkCache, screen: this))
+                .SetItems<FastLinkButtonComponent>(this.fastLinkCache.Count, (button, parameters) => {
 
-                var item = parameters.data[parameters.index];
+                var item = parameters.data.fastLinkCache[parameters.index];
                 button.SetInfo(item);
                 
                 if (item.style == FastLinkType.Directory) {
@@ -622,9 +624,9 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                     button.SetInteractable(true);
 
                     // Draw directory
-                    button.SetCallback(new ClosureFastLinksParametersButtonCallback() { parameters = parameters, data = item, }, (innerData) => {
+                    button.SetCallback((parameters, item), static (innerData) => {
 
-                        innerData.parameters.screen.currentDirectoryId = innerData.data.id;
+                        innerData.parameters.data.screen.currentDirectoryId = innerData.item.id;
 
                     });
                     button.Show();
@@ -633,15 +635,15 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
                     
                     button.SetInteractable(this.GetConsole().ValidateFastLink(item));
 
-                    button.SetCallback(new ClosureFastLinksParametersButtonCallback() { parameters = parameters, data = item, }, (innerData) => {
+                    button.SetCallback((parameters, item), static (innerData) => {
 
-                        if (innerData.data.run == true) {
+                        if (innerData.item.run == true) {
 
-                            innerData.parameters.screen.ApplyCommand(innerData.data.cmd);
+                            innerData.parameters.data.screen.ApplyCommand(innerData.item.cmd);
 
                         } else {
                         
-                            innerData.parameters.screen.ReplaceInput($"{innerData.data.cmd} ");
+                            innerData.parameters.data.screen.ReplaceInput($"{innerData.item.cmd} ");
                         
                         }
                     
@@ -650,10 +652,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
                 }
                 
-            }, new ClosureFastLinksParameters() {
-                data = this.fastLinkCache,
-                screen = this,
-            });
+                });
 
             this.list.SetDataSource(this);
             var allItems = console.GetItems();

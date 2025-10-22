@@ -4,6 +4,59 @@ namespace UnityEngine.UI.Windows {
 
     public partial class WindowSystem {
 
+        public struct ClosureAPI<TClosure> {
+
+            public TClosure data;
+
+            public class TaskCompletionShowScreen<T> {
+
+                public System.Action<T, TClosure> onInitialized;
+                public TClosure data;
+                public T instance;
+
+            }
+
+            public T ShowSync<T>(System.Action<T, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+                return this.ShowSync(new InitialParameters(), onInitialized, transitionParameters);
+            }
+
+            public T ShowSync<T>(InitialParameters initialParameters, System.Action<T, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+
+                initialParameters.showSync = true;
+                var taskCompletionData = PoolClass<TaskCompletionShowScreen<T>>.Spawn();
+                taskCompletionData.onInitialized = onInitialized;
+                taskCompletionData.data = this.data;
+                WindowSystem.Show<T, TaskCompletionShowScreen<T>>(taskCompletionData, initialParameters, static (instance, state) => {
+                    state.instance = instance;
+                    state.onInitialized?.Invoke(instance, state.data);
+                }, transitionParameters);
+
+                var result = taskCompletionData.instance;
+                PoolClass<TaskCompletionShowScreen<T>>.Recycle(taskCompletionData);
+                return result;
+                
+            }
+
+            public void Show<T>(System.Action<T, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+                WindowSystem.instance.Show_INTERNAL(this.data, new InitialParameters(), onInitialized, transitionParameters);
+            }
+
+            public void Show<T>(InitialParameters initialParameters, System.Action<T, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+                WindowSystem.instance.Show_INTERNAL(this.data, initialParameters, onInitialized, transitionParameters);
+            }
+
+            private void Show_INTERNAL<T>(InitialParameters initialParameters, System.Action<T, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+                WindowSystem.instance.Show_INTERNAL(this.data, initialParameters, onInitialized, transitionParameters);
+            }
+
+        }
+        
+        public static ClosureAPI<T> Closure<T>(T closure) {
+            return new ClosureAPI<T>() {
+                data = closure,
+            };
+        }
+
         public static T ShowSync<T>(T source, InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
 
             initialParameters.showSync = true;
@@ -44,6 +97,12 @@ namespace UnityEngine.UI.Windows {
         public static void Show<T, TState>(TState state, System.Action<T, TState> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
 
             WindowSystem.instance.Show_INTERNAL(state, new InitialParameters(), onInitialized, transitionParameters);
+
+        }
+
+        public static void Show<T, TState>(TState state, InitialParameters initialParameters, System.Action<T, TState> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+
+            WindowSystem.instance.Show_INTERNAL(state, initialParameters, onInitialized, transitionParameters);
 
         }
 

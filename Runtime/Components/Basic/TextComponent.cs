@@ -418,6 +418,8 @@ namespace UnityEngine.UI.Windows.Components {
 
         internal bool SetValue_INTERNAL(double value, out string strFormat, SourceValue sourceValue = SourceValue.Digits, TimeResult timeValueResult = TimeResult.None,
                                         TimeResult timeShortestVariant = TimeResult.None) {
+
+            this.lastData = default;
             
             switch (sourceValue) {
                 case SourceValue.Digits:

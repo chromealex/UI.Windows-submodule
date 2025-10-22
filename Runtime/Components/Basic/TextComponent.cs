@@ -402,25 +402,38 @@ namespace UnityEngine.UI.Windows.Components {
 
         private ValueData lastValueData;
 
-        public void SetValue(double value, SourceValue sourceValue = SourceValue.Digits, TimeResult timeValueResult = TimeResult.None,
-                             TimeResult timeShortestVariant = TimeResult.None) {
+        internal enum CacheLayer {
+            Data  = 1 << 0,
+            Bytes = 1 << 1,
+            Value = 1 << 2,
+        }
+
+        internal void ResetLastCacheOther(CacheLayer layer) {
+            this.ResetLastCache(~layer);
+        }
+
+        internal void ResetLastCache(CacheLayer layer) {
+            if ((layer & CacheLayer.Data) != 0) this.lastData = default;
+            if ((layer & CacheLayer.Bytes) != 0) this.lastBytesText = default;
+            if ((layer & CacheLayer.Value) != 0) this.lastValueData = default;
+        }
+
+        public void SetValue(double value, SourceValue sourceValue = SourceValue.Digits, TimeResult timeValueResult = TimeResult.None, TimeResult timeShortestVariant = TimeResult.None) {
 
             if (this.SetValue_INTERNAL(value, out var strFormat, sourceValue, timeValueResult, timeShortestVariant) == true) {
 
                 var prevData = this.lastValueData;
                 this.ForEachModule<TextComponentModule, System.ValueTuple<double, double, SourceValue, string>>((prevData.value, value, sourceValue, strFormat), static (c, state) => c.OnSetValue(state.Item1, state.Item2, state.Item3, state.Item4));
-
                 this.ForEachModule<TextComponentModule, System.ValueTuple<double, SourceValue, TimeResult, TimeResult>>((value, sourceValue, timeValueResult, timeShortestVariant), static (c, state) => c.SetValue(state.Item1, state.Item2, state.Item3, state.Item4));
 
             }
             
         }
 
-        internal bool SetValue_INTERNAL(double value, out string strFormat, SourceValue sourceValue = SourceValue.Digits, TimeResult timeValueResult = TimeResult.None,
-                                        TimeResult timeShortestVariant = TimeResult.None) {
+        internal bool SetValue_INTERNAL(double value, out string strFormat, SourceValue sourceValue = SourceValue.Digits, TimeResult timeValueResult = TimeResult.None, TimeResult timeShortestVariant = TimeResult.None) {
 
-            this.lastData = default;
-            
+            this.ResetLastCacheOther(CacheLayer.Value);
+
             switch (sourceValue) {
                 case SourceValue.Digits:
                     break;
@@ -463,7 +476,7 @@ namespace UnityEngine.UI.Windows.Components {
 
             switch (sourceValue) {
                 case SourceValue.Digits:
-                    this.SetText_INTERNAL(value.ToString());
+                    this.SetText_INTERNAL(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
                     break;
 
                 case SourceValue.Seconds:

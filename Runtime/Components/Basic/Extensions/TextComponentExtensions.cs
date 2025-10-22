@@ -40,24 +40,28 @@
 
         private Unity.Collections.FixedString512Bytes lastBytesText;
         public void SetText(Unity.Collections.FixedString32Bytes value) {
+            this.ResetLastCacheOther(CacheLayer.Bytes);
             if (this.lastBytesText == value) return;
             this.lastBytesText = value;
             this.SetText(value.ToString());
         }
 
         public void SetText(Unity.Collections.FixedString64Bytes value) {
+            this.ResetLastCacheOther(CacheLayer.Bytes);
             if (this.lastBytesText == value) return;
             this.lastBytesText = value;
             this.SetText(value.ToString());
         }
 
         public void SetText(Unity.Collections.FixedString128Bytes value) {
+            this.ResetLastCacheOther(CacheLayer.Bytes);
             if (this.lastBytesText == value) return;
             this.lastBytesText = value;
             this.SetText(value.ToString());
         }
 
         public void SetText(Unity.Collections.FixedString512Bytes value) {
+            this.ResetLastCacheOther(CacheLayer.Bytes);
             if (this.lastBytesText == value) return;
             this.lastBytesText = value;
             this.SetText(value.ToString());
@@ -100,6 +104,7 @@
         private LastDataCache lastData;
 
         public void SetText(int i0, string s1) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() { i0 = i0, s1 = s1, };
             if (this.lastData == data) {
                 return;
@@ -115,6 +120,7 @@
         }
 
         public void SetText(string s0, int i1) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() { s0 = s0, i1 = i1, };
             if (this.lastData == data) {
                 return;
@@ -130,6 +136,7 @@
         }
 
         public void SetText(int i0, int i1) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() { i0 = i0, i1 = i1, };
             if (this.lastData == data) {
                 return;
@@ -145,6 +152,7 @@
         }
 
         public void SetText(string s0, string s1) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() { s0 = s0, s1 = s1, };
             if (this.lastData == data) {
                 return;
@@ -160,6 +168,7 @@
         }
 
         public void SetText(string s0, string s1, string s2) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() { s0 = s0, s1 = s1, s2 = s2, };
             if (this.lastData == data) {
                 return;
@@ -175,6 +184,7 @@
         }
 
         public void SetText(int i0, int i1, int i2) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() { i0 = i0, i1 = i1, i2 = i2, };
             if (this.lastData == data) {
                 return;
@@ -190,6 +200,7 @@
         }
 
         public void SetText(string s0, int i1, int i2) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() { s0 = s0, i1 = i1, i2 = i2, };
             if (this.lastData == data) {
                 return;
@@ -205,6 +216,7 @@
         }
 
         public void SetText(string s0, string s1, int i2) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() { s0 = s0, s1 = s1, i2 = i2, };
             if (this.lastData == data) {
                 return;
@@ -220,6 +232,7 @@
         }
 
         public void SetText(int i0, string s1, string s2) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() { i0 = i0, s1 = s1, s2 = s2, };
             if (this.lastData == data) {
                 return;
@@ -235,6 +248,7 @@
         }
 
         public void SetText(int i0, int i1, string s2) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() { i0 = i0, i1 = i1, s2 = s2, };
             if (this.lastData == data) {
                 return;
@@ -250,6 +264,7 @@
         }
 
         public void SetText(string s0, int i1, string s2) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() { s0 = s0, i1 = i1, s2 = s2, };
             if (this.lastData == data) {
                 return;
@@ -265,6 +280,7 @@
         }
 
         public void SetText(int i0, string s1, int i2) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() { i0 = i0, s1 = s1, i2 = i2, };
             if (this.lastData == data) {
                 return;
@@ -280,6 +296,7 @@
         }
 
         public void SetText(string s0, string s1, string s2, string s3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() {
                 s0 = s0, s1 = s1, s2 = s2, s3 = s3,
             };
@@ -297,6 +314,7 @@
         }
 
         public void SetText(int i0, int i1, int i2, int i3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() {
                 i0 = i0, i1 = i1, i2 = i2, i3 = i3,
             };
@@ -315,6 +333,7 @@
         }
 
         public void SetText(string s0, int i1, int i2, int i3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() {
                 s0 = s0, i1 = i1, i2 = i2, i3 = i3,
             };
@@ -332,6 +351,7 @@
         }
 
         public void SetText(string s0, string s1, int i2, int i3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() {
                 s0 = s0, s1 = s1, i2 = i2, i3 = i3,
             };
@@ -349,6 +369,7 @@
         }
 
         public void SetText(string s0, string s1, string s2, int i3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() {
                 s0 = s0, s1 = s1, s2 = s2, i3 = i3,
             };
@@ -366,6 +387,7 @@
         }
 
         public void SetText(int i0, string s1, string s2, string s3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() {
                 i0 = i0, s1 = s1, s2 = s2, s3 = s3,
             };
@@ -383,6 +405,7 @@
         }
 
         public void SetText(int i0, int i1, string s2, string s3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() {
                 i0 = i0, i1 = i1, s2 = s2, s3 = s3,
             };
@@ -400,6 +423,7 @@
         }
 
         public void SetText(int i0, int i1, int i2, string s3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() {
                 i0 = i0, i1 = i1, i2 = i2, s3 = s3,
             };
@@ -417,6 +441,7 @@
         }
 
         public void SetText(string s0, int i1, int i2, string s3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() {
                 s0 = s0, i1 = i1, i2 = i2, s3 = s3,
             };
@@ -434,6 +459,7 @@
         }
 
         public void SetText(string s0, int i1, string s2, int i3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() {
                 s0 = s0, i1 = i1, s2 = s2, i3 = i3,
             };
@@ -451,6 +477,7 @@
         }
 
         public void SetText(int i0, string s1, int i2, string s3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() {
                 i0 = i0, s1 = s1, i2 = i2, s3 = s3,
             };
@@ -468,6 +495,7 @@
         }
 
         public void SetText(int i0, string s1, string s2, int i3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
             var data = new LastDataCache() {
                 i0 = i0, s1 = s1, s2 = s2, i3 = i3,
             };

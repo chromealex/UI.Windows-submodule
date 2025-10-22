@@ -950,6 +950,13 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        private void Show_INTERNAL<T, TState>(TState state, InitialParameters initialParameters, System.Action<T, TState> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+
+            var source = this.GetSource<T>();
+            this.Show_INTERNAL(state, source, initialParameters, onInitialized, transitionParameters);
+
+        }
+
         private void Show_INTERNAL<T, TState>(TState closure, WindowBase source, InitialParameters initialParameters, System.Action<T, TState> onInitialized, TransitionParameters transitionParameters) where T : WindowBase {
 
             if (source == null) {

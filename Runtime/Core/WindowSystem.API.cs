@@ -41,6 +41,12 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public static void Show<T, TState>(TState state, System.Action<T, TState> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+
+            WindowSystem.instance.Show_INTERNAL(state, new InitialParameters(), onInitialized, transitionParameters);
+
+        }
+
         public static void Show<T>(System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
 
             WindowSystem.instance.Show_INTERNAL(new InitialParameters(), onInitialized, transitionParameters);

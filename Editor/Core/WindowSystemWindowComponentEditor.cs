@@ -14,6 +14,7 @@ namespace UnityEditor.UI.Windows {
         private SerializedProperty createPool;
         
         private SerializedProperty animationParameters;
+        private SerializedProperty hideBehaviour;
         private SerializedProperty subObjects;
         private SerializedProperty componentModules;
 
@@ -71,6 +72,7 @@ namespace UnityEditor.UI.Windows {
             this.createPool = this.serializedObject.FindProperty("createPool");
 
             this.animationParameters = this.serializedObject.FindProperty("animationParameters");
+            this.hideBehaviour = this.serializedObject.FindProperty("hideBehaviour");
             this.renderBehaviourOnHidden = this.serializedObject.FindProperty("renderBehaviourOnHidden");
 
             this.subObjects = this.serializedObject.FindProperty("subObjects");
@@ -300,6 +302,7 @@ namespace UnityEditor.UI.Windows {
 
                     GUILayoutExt.DrawHeader("Animations");
                     EditorGUILayout.PropertyField(this.animationParameters);
+                    EditorGUILayout.PropertyField(this.hideBehaviour);
 
                     GUILayoutExt.DrawHeader("Graph");
                     GUILayoutExt.PropertyField(this.allowRegisterInRoot, (reg) => reg.holdAllowRegisterInRoot);

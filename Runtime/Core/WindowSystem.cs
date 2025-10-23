@@ -717,6 +717,128 @@ namespace UnityEngine.UI.Windows {
 
                     }
 
+                    if (inst.parameters.data.replaceAffectChilds == false ||
+                        inst.parameters.data.affectChilds == true) {
+
+                        if (inst.parameters.data.hideBehaviour == HideBehaviour.WaitForChild) {
+                            
+                            // hide sub objects first
+                            Coroutines.CallInSequence(ref closure, static (ref ShowHideClosureParametersClass p) => {
+
+                                p.hierarchyComplete = true;
+
+                                WindowObjectAnimation.Hide(p, p.instance, p.parameters, static (cParams) => {
+                                
+                                    var pars = cParams.parameters;
+                                    cParams.Dispose();
+                                    pars.RaiseCallback();
+
+                                });
+
+                            }, inst.instance.subObjects, static (WindowObject obj, Coroutines.ClosureDelegateCallback<ShowHideClosureParametersClass> cb,
+                                                                 ref ShowHideClosureParametersClass p) => {
+
+                                var closure = PoolClass<ShowHideInstanceInternalClosure>.Spawn();
+                                closure.cb = cb;
+                                closure.data = p;
+
+                                var parameters = p.parameters.ReplaceCallback(closure, static (obj) => {
+                                    var d = (ShowHideInstanceInternalClosure)obj;
+                                    d.cb.Invoke(ref d.data);
+                                    PoolClass<ShowHideInstanceInternalClosure>.Recycle(d);
+                                });
+                                if (p.parameters.data.replaceDelay == true) {
+                                    parameters = parameters.ReplaceDelay(p.parameters.data.delay);
+                                }
+
+                                if (p.internalCall == true) {
+
+                                    obj.HideInternal(parameters);
+
+                                } else {
+
+                                    obj.Hide(parameters);
+
+                                }
+
+                            });
+
+                        } else if (inst.parameters.data.hideBehaviour == HideBehaviour.Simultaneously) {
+                            
+                            // do not wait current object - start hiding all subobjects
+                            Coroutines.CallInSequence(ref closure, static (ref ShowHideClosureParametersClass p) => {
+
+                                p.hierarchyComplete = true;
+                                if (p.animationComplete == true) {
+
+                                    var pars = p.parameters;
+                                    p.Dispose();
+                                    pars.RaiseCallback();
+
+                                }
+                                
+                            }, inst.instance.subObjects, static (WindowObject obj, Coroutines.ClosureDelegateCallback<ShowHideClosureParametersClass> cb,
+                                                                 ref ShowHideClosureParametersClass p) => {
+
+                                var closure = PoolClass<ShowHideInstanceInternalClosure>.Spawn();
+                                closure.cb = cb;
+                                closure.data = p;
+
+                                var parameters = p.parameters.ReplaceCallback(closure, static (obj) => {
+                                    var d = (ShowHideInstanceInternalClosure)obj;
+                                    d.cb.Invoke(ref d.data);
+                                    PoolClass<ShowHideInstanceInternalClosure>.Recycle(d);
+                                });
+                                if (p.parameters.data.replaceDelay == true) {
+                                    parameters = parameters.ReplaceDelay(p.parameters.data.delay);
+                                }
+
+                                if (p.internalCall == true) {
+
+                                    obj.HideInternal(parameters);
+
+                                } else {
+
+                                    obj.Hide(parameters);
+
+                                }
+
+                            });
+                            
+                            WindowObjectAnimation.Hide(closure, closure.instance, closure.parameters, static (cParams) => {
+                                
+                                cParams.animationComplete = true;
+                                if (cParams.hierarchyComplete == true) {
+
+                                    var pars = cParams.parameters;
+                                    cParams.Dispose();
+                                    pars.RaiseCallback();
+
+                                }
+                                
+                            });
+                            
+                        }
+                        
+                    } else {
+
+                        // hide current object only
+                        WindowObjectAnimation.Hide(closure, inst.instance, inst.parameters, static (cParams) => {
+                            
+                            cParams.hierarchyComplete = true;
+                            {
+
+                                var pars = cParams.parameters;
+                                cParams.Dispose();
+                                pars.RaiseCallback();
+
+                            }
+                            
+                        });
+                        
+                    }
+
+                    /*
                     WindowObjectAnimation.Hide(closure, inst.instance, inst.parameters, static (cParams) => {
 
                         if (cParams.parameters.data.replaceAffectChilds == false ||
@@ -777,7 +899,7 @@ namespace UnityEngine.UI.Windows {
 
                         }
 
-                    });
+                    });*/
 
                 }
 

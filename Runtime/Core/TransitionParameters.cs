@@ -9,6 +9,13 @@ namespace UnityEngine.UI.Windows {
 
     }
 
+    public enum HideBehaviour {
+
+        Simultaneously,
+        WaitForChild,
+
+    }
+    
     [System.Serializable]
     public struct TransitionParametersData {
 
@@ -23,6 +30,9 @@ namespace UnityEngine.UI.Windows {
 
         internal bool replaceIgnoreTouch;
         internal bool ignoreTouch;
+
+        internal bool replaceHideBehaviour;
+        internal HideBehaviour hideBehaviour;
 
         internal System.Action callback;
         internal System.Action<object> callbackUserData;
@@ -73,6 +83,15 @@ namespace UnityEngine.UI.Windows {
 
             var instance = this;
             instance.data.resetAnimation = state;
+            return instance;
+
+        }
+
+        public TransitionParameters ReplaceHideBehaviour(HideBehaviour state) {
+
+            var instance = this;
+            instance.data.replaceHideBehaviour = true;
+            instance.data.hideBehaviour = state;
             return instance;
 
         }

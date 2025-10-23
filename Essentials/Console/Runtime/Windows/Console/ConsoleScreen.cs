@@ -611,7 +611,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
 
             var console = this.GetConsole();
             console.GetFastLinks(this.currentDirectoryId, this.fastLinkCache);
-            this.fastLinks.Get<TextComponent>().SetText(console.GetDirectoryPath(this.currentDirectoryId));
+            var text = this.fastLinks.FindComponent<TextComponent>(x => true);
+            text.SetText(console.GetDirectoryPath(this.currentDirectoryId));
             this.fastLinks
                 .Closure((this.fastLinkCache, screen: this))
                 .SetItems<FastLinkButtonComponent>(this.fastLinkCache.Count, (button, parameters) => {

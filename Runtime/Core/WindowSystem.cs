@@ -41,6 +41,27 @@ namespace UnityEngine.UI.Windows {
 
     }
 
+    public enum Algorithm {
+
+        /// <summary>
+        /// Returns next component derived from type T or of type T
+        /// </summary>
+        GetNextTypeAny,
+        /// <summary>
+        /// Returns next component strongly of type T
+        /// </summary>
+        GetNextTypeStrong,
+        /// <summary>
+        /// Returns first component derived from type T or of type T
+        /// </summary>
+        GetFirstTypeAny,
+        /// <summary>
+        /// Returns first component strongly of type T
+        /// </summary>
+        GetFirstTypeStrong,
+
+    }
+
     public interface IHasPreview {}
 
     public enum DontDestroy {

@@ -461,34 +461,13 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
     }
 
-    public enum Algorithm {
-
-        /// <summary>
-        /// Returns next component derived from type T or of type T
-        /// </summary>
-        GetNextTypeAny,
-        /// <summary>
-        /// Returns next component strongly of type T
-        /// </summary>
-        GetNextTypeStrong,
-        /// <summary>
-        /// Returns first component derived from type T or of type T
-        /// </summary>
-        GetFirstTypeAny,
-        /// <summary>
-        /// Returns first component strongly of type T
-        /// </summary>
-        GetFirstTypeStrong,
-
-    }
-    
     public abstract class LayoutWindowType : WindowBase, ILayoutInstance {
 
         public Layouts layouts = new Layouts() {
             items = new LayoutItem[1],
         };
 
-        private Dictionary<int, int> requestedIndexes = new Dictionary<int, int>();
+        private readonly Dictionary<int, int> requestedIndexes = new Dictionary<int, int>();
 
         internal override void OnDeInitInternal() {
             
@@ -503,11 +482,8 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         }
 
         WindowLayout ILayoutInstance.windowLayoutInstance {
-            get {
-                return this.layouts.GetActive().windowLayoutInstance; }
-            set {
-                this.layouts.GetActive().windowLayoutInstance = value;
-            }
+            get => this.layouts.GetActive().windowLayoutInstance;
+            set => this.layouts.GetActive().windowLayoutInstance = value;
         }
 
         public override int GetCanvasOrder() {
@@ -542,6 +518,10 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
+        public void ResetRequestedIndexes() {
+            this.requestedIndexes.Clear();
+        }
+        
         /// <summary>
         /// Returns component instance of type T
         /// </summary>
@@ -585,7 +565,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                 case Algorithm.GetFirstTypeAny:
                 case Algorithm.GetFirstTypeStrong: {
-                    var idx = 0;
+                    var idx = -1;
                     var currentItem = this.layouts.GetActive();
                     result = currentItem.GetLayoutComponent(out component, ref idx, algorithm);
                 }

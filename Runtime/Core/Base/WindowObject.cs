@@ -169,6 +169,9 @@ namespace UnityEngine.UI.Windows {
         public Canvas objectCanvas;
         public int canvasSortingOrderDelta;
         public RenderItem[] canvasRenderers = System.Array.Empty<RenderItem>();
+
+        [Tooltip("Simultaneously means that current animation will be played together with the childs.\nWaitForChild means that child animations played first, then played current one.")]
+        public HideBehaviour hideBehaviour;
         
         //public CanvasGroup canvasGroupRender;
 
@@ -1401,6 +1404,10 @@ namespace UnityEngine.UI.Windows {
 
         internal void HideInternal(TransitionParameters parameters = default) {
             
+            if (parameters.data.replaceHideBehaviour == false) {
+                parameters = parameters.ReplaceHideBehaviour(this.hideBehaviour);
+            }
+
             if (this.IsInternalManualTouch(parameters) == true) {
 
                 parameters.RaiseCallback();
@@ -1410,7 +1417,13 @@ namespace UnityEngine.UI.Windows {
             
             var cObj = this;
             var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallbackWithContext(static (c, p, i) => WindowSystem.SetHidden(c, p, i), cObj, cParams, true);
+            var cbParameters = parameters.ReplaceCallbackWithContext(static (c, p, i) => {
+                if (i == false) {
+                    WindowSystem.SetHidden(c, p, i);
+                } else {
+                    p.RaiseCallback();
+                }
+            }, cObj, cParams, true);
             WindowSystem.HideInstance(this, cbParameters, internalCall: true);
 
         }
@@ -1488,6 +1501,10 @@ namespace UnityEngine.UI.Windows {
 
         public virtual void Hide(TransitionParameters parameters) {
 
+            if (parameters.data.replaceHideBehaviour == false) {
+                parameters = parameters.ReplaceHideBehaviour(this.hideBehaviour);
+            }
+            
             if (this.objectState <= ObjectState.Initializing) {
                 
                 if (this.objectState == ObjectState.NotInitialized) {
@@ -1520,7 +1537,13 @@ namespace UnityEngine.UI.Windows {
 
             var cObj = this;
             var cParams = parameters;
-            var cbParameters = parameters.ReplaceCallbackWithContext(static (obj, tr, internalCall) => WindowSystem.SetHidden(obj, tr, internalCall), cObj, cParams, false);
+            var cbParameters = parameters.ReplaceCallbackWithContext(static (obj, tr, internalCall) => {
+                if (internalCall == false) {
+                    WindowSystem.SetHidden(obj, tr, internalCall);
+                } else {
+                    tr.RaiseCallback();
+                }
+            }, cObj, cParams, false);
             WindowSystem.HideInstance(this, cbParameters, internalCall: true);
 
         }

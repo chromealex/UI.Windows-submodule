@@ -565,7 +565,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
                 case Algorithm.GetFirstTypeAny:
                 case Algorithm.GetFirstTypeStrong: {
-                    var idx = 0;
+                    var idx = -1;
                     var currentItem = this.layouts.GetActive();
                     result = currentItem.GetLayoutComponent(out component, ref idx, algorithm);
                 }

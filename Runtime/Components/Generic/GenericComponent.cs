@@ -73,7 +73,7 @@
 
                 case Algorithm.GetFirstTypeAny:
                 case Algorithm.GetFirstTypeStrong: {
-                    var idx = 0;
+                    var idx = -1;
                     this.GetComponent(out component, ref idx, algorithm);
                 }
                     break;

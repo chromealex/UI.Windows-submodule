@@ -196,6 +196,7 @@ namespace UnityEngine.UI.Windows {
         
         public bool isObjectRoot;
         public WindowObject rootObject;
+        public WindowObject prefabSource;
         public List<WindowObject> subObjects = new List<WindowObject>();
 
         public ComponentAudio audioEvents;

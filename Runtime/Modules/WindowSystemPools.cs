@@ -221,11 +221,19 @@ namespace UnityEngine.UI.Windows.Modules {
                 
             }
 
+            if (result is WindowObject windowObject) {
+                windowObject.prefabSource = prefab as WindowObject;
+            }
+
             return result;
 
         }
 
         public void Despawn<T>(T instance, System.Action<T> onDestroy = null) where T : Component {
+
+            if (instance is WindowObject windowObject) {
+                windowObject.prefabSource = null;
+            }
 
             if (instance is IOnPoolAdd onPoolPush) {
                 

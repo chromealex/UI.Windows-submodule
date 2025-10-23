@@ -24,7 +24,7 @@
             }
 
             public void Forget() {
-                this.genericComponent.ResetRequestedIndexes();
+                this.genericComponent.Forget();
             }
 
         }
@@ -41,7 +41,7 @@
             onComponent.Invoke(component, closure);
         }
         
-        public void ResetRequestedIndexes() {
+        public void Forget() {
             this.requestedIndexes.Clear();
         }
 

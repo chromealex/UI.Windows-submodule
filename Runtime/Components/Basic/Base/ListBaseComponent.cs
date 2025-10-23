@@ -17,7 +17,7 @@ namespace UnityEngine.UI.Windows.Components {
 
     }
 
-    public abstract partial class ListBaseComponent : GenericComponent, ILayoutSelfController {
+    public abstract partial class ListBaseComponent : WindowComponent, ILayoutSelfController {
 
         [UnityEngine.UI.Windows.Modules.ResourceTypeAttribute(typeof(WindowComponent), RequiredType.Warning)]
         public Resource source;

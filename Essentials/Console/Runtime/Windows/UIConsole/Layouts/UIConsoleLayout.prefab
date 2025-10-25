@@ -60,6 +60,7 @@ MonoBehaviour:
   objectCanvas: {fileID: 3002262861325224963}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
+  hideBehaviour: 0
   createPool: 1
   animationParameters:
     items: []
@@ -73,6 +74,7 @@ MonoBehaviour:
     items: []
   isObjectRoot: 1
   rootObject: {fileID: 0}
+  prefabSource: {fileID: 0}
   subObjects:
   - {fileID: 5470113545036599192}
   audioEvents:
@@ -223,6 +225,7 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 8981599760317165295}
     graphics: {fileID: 2691108726531136768}
     rectMask: {fileID: 0}
+  hideBehaviour: 0
   createPool: 0
   animationParameters:
     items: []
@@ -236,6 +239,7 @@ MonoBehaviour:
     items: []
   isObjectRoot: 0
   rootObject: {fileID: 9075030843538608721}
+  prefabSource: {fileID: 0}
   subObjects: []
   audioEvents:
     play: 0

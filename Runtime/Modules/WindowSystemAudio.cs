@@ -76,28 +76,39 @@ namespace UnityEngine.UI.Windows {
         /// </summary>
         /// <param name="eventType"></param>
         /// <param name="volume">0..1</param>
-        public void SetVolume(EventType eventType, float volume) {
+        public bool SetVolume(EventType eventType, float volume) {
+            var changed = false;
             if (eventType == EventType.SFX) {
-                this.sfxSource.volume = volume;
+                if (this.sfxSource.volume != volume) {
+                    this.sfxSource.volume = volume;
+                    changed = true;
+                }
             } else if (eventType == EventType.Music) {
                 for (int i = 1; i < CHANNELS_COUNT; ++i) {
                     var source = this.musicSources[i - 1];
-                    source.volume = volume;
+                    if (source.volume != volume) {
+                        source.volume = volume;
+                        changed = true;
+                    }
                 }
             }
             this.audioSource.volume = volume;
+            return changed;
         }
 
         /// <summary>
         /// Set vibration state
         /// </summary>
         /// <param name="state">True is on, False is off</param>
-        public void SetVibration(bool state) {
-            if (state == true) {
+        public bool SetVibration(bool state) {
+            if (this.taptic.IsMuted() == true && state == true) {
                 this.taptic.Unmute();
-            } else {
+                return true;
+            } else if (state == false) {
                 this.taptic.Mute();
+                return true;
             }
+            return false;
         }
         
         public void Play(UIWSAudioEvent clip) {

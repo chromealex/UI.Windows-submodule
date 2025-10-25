@@ -33,6 +33,7 @@ namespace ME.Taptic {
 
         void Mute();
         void Unmute();
+        bool IsMuted();
 
         bool IsPlaying();
         bool IsSupported();
@@ -117,6 +118,12 @@ namespace ME.Taptic {
         void ITapticEngine.Unmute() {
 
             this.isMuted = false;
+
+        }
+
+        bool ITapticEngine.IsMuted() {
+
+            return this.isMuted;
 
         }
 

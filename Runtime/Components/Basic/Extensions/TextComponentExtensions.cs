@@ -1,4 +1,6 @@
 ﻿namespace UnityEngine.UI.Windows.Components {
+    
+    using System.Runtime.InteropServices;
 
     public partial class InputFieldComponent {
 
@@ -69,18 +71,73 @@
 
         public struct LastDataCache : System.IEquatable<LastDataCache> {
 
+            [StructLayout(LayoutKind.Explicit)]
+            public struct CacheData {
+
+                [FieldOffset(0)]
+                public int i0;
+                [FieldOffset(4)]
+                public int i1;
+                [FieldOffset(8)]
+                public int i2;
+                [FieldOffset(12)]
+                public int i3;
+                
+                [FieldOffset(0)]
+                public float f0;
+                [FieldOffset(4)]
+                public float f1;
+                [FieldOffset(8)]
+                public float f2;
+                [FieldOffset(12)]
+                public float f3;
+                
+            }
+
+            public CacheData cacheData;
+
+            public int i0 {
+                set => this.cacheData.i0 = value;
+                get => this.cacheData.i0;
+            }
+            public int i1 {
+                set => this.cacheData.i1 = value;
+                get => this.cacheData.i1;
+            }
+            public int i2 {
+                set => this.cacheData.i2 = value;
+                get => this.cacheData.i2;
+            }
+            public int i3 {
+                set => this.cacheData.i3 = value;
+                get => this.cacheData.i3;
+            }
+            public float f0 {
+                set => this.cacheData.f0 = value;
+                get => this.cacheData.f0;
+            }
+            public float f1 {
+                set => this.cacheData.f1 = value;
+                get => this.cacheData.f1;
+            }
+            public float f2 {
+                set => this.cacheData.f2 = value;
+                get => this.cacheData.f2;
+            }
+            public float f3 {
+                set => this.cacheData.f3 = value;
+                get => this.cacheData.f3;
+            }
             public string s0;
             public string s1;
             public string s2;
             public string s3;
-            public int i0;
-            public int i1;
-            public int i2;
-            public int i3;
+            #if UNITY_LOCALIZATION_SUPPORT
+            public UnityEngine.Localization.LocalizedString loc;
+            #endif
 
             public static bool operator ==(LastDataCache lhs, LastDataCache rhs) {
-                return lhs.i0 == rhs.i0 && lhs.i1 == rhs.i1 && lhs.i2 == rhs.i2 && lhs.i3 == rhs.i3 &&
-                       lhs.s0 == rhs.s0 && lhs.s1 == rhs.s1 && lhs.s2 == rhs.s2 && lhs.s3 == rhs.s3;
+                return lhs.Equals(rhs);
             }
 
             public static bool operator !=(LastDataCache lhs, LastDataCache rhs) {
@@ -88,7 +145,11 @@
             }
 
             public bool Equals(LastDataCache other) {
-                return this.s0 == other.s0 && this.s1 == other.s1 && this.s2 == other.s2 && this.s3 == other.s3 && this.i0 == other.i0 && this.i1 == other.i1 && this.i2 == other.i2 && this.i3 == other.i3;
+                return this.s0 == other.s0 && this.s1 == other.s1 && this.s2 == other.s2 && this.s3 == other.s3 && this.i0 == other.i0 && this.i1 == other.i1 && this.i2 == other.i2 && this.i3 == other.i3
+                       #if UNITY_LOCALIZATION_SUPPORT
+                       && this.loc == other.loc
+                       #endif
+                       ;
             }
 
             public override bool Equals(object obj) {
@@ -96,7 +157,11 @@
             }
 
             public override int GetHashCode() {
-                return System.HashCode.Combine(this.s0, this.s1, this.s2, this.s3, this.i0, this.i1, this.i2, this.i3);
+                return System.HashCode.Combine(this.s0, this.s1, this.s2, this.s3, this.i0, this.i1, this.i2, this.i3) 
+                       #if UNITY_LOCALIZATION_SUPPORT
+                       ^ this.loc.GetHashCode()
+                       #endif
+                       ;
             }
 
         }
@@ -511,6 +576,164 @@
             this.sb.Clear().Append(i0).Append(s1).Append(s2).Append(i3);
             this.SetText(this.sb.ToString());
         }
+
+        public void SetTextFormat(string template, int i1) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { s0 = template, i1 = i1, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(string.Format(template, i1));
+        }
+
+        public void SetTextFormat(string template, int i1, int i2) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { s0 = template, i1 = i1, i2 = i2 };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(string.Format(template, i1, i2));
+        }
+
+        public void SetTextFormat(string template, float f1) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { s0 = template, f1 = f1 };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(string.Format(template, f1));
+        }
+
+        public void SetTextFormat(string template, float f1, float f2) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { s0 = template, f1 = f1, f2 = f2 };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(string.Format(template, f1, f2));
+        }
+
+        public void SetTextFormat(string template, float f1, float f2, float f3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { s0 = template, f0 = f1, f1 = f2, f2 = f3 };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(string.Format(template, f1, f2, f3));
+        }
+
+        public void SetTextFormat(string template, float f1, float f2, float f3, float f4) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { s0 = template, f0 = f1, f1 = f2, f2 = f3, f3 = f4 };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(string.Format(template, f1, f2, f3, f4));
+        }
+
+        #if UNITY_LOCALIZATION_SUPPORT
+        
+        public void SetTextFormat(UnityEngine.Localization.LocalizedString template, int i1) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { loc = template, i1 = i1, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(template, i1);
+        }
+
+        public void SetTextFormat(UnityEngine.Localization.LocalizedString template, int i1, int i2) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { loc = template, i1 = i1, i2 = i2 };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(template, i1, i2);
+        }
+
+        public void SetTextFormat(UnityEngine.Localization.LocalizedString template, int i1, int i2, int i3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { loc = template, i0 = i1, i1 = i2, i2 = i3, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(template, i1, i2, i3);
+        }
+
+        public void SetTextFormat(UnityEngine.Localization.LocalizedString template, int i1, int i2, int i3, int i4) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { loc = template, i0 = i1, i1 = i2, i2 = i3, i3 = i4, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(template, i1, i2, i3, i4);
+        }
+
+        public void SetTextFormat(UnityEngine.Localization.LocalizedString template, float f1) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { loc = template, f0 = f1, };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(template, f1);
+        }
+
+        public void SetTextFormat(UnityEngine.Localization.LocalizedString template, float f1, float f2) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { loc = template, f0 = f1, f1 = f2 };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(template, f1, f2);
+        }
+
+        public void SetTextFormat(UnityEngine.Localization.LocalizedString template, float f1, float f2, float f3) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { loc = template, f0 = f1, f1 = f2, f2 = f3 };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(template, f1, f2, f3);
+        }
+
+        public void SetTextFormat(UnityEngine.Localization.LocalizedString template, float f1, float f2, float f3, float f4) {
+            this.ResetLastCacheOther(CacheLayer.Data);
+            var data = new LastDataCache() { loc = template, f0 = f1, f1 = f2, f2 = f3, f3 = f4 };
+            if (this.lastData == data) {
+                return;
+            }
+
+            this.lastData = data;
+            this.SetText(template, f1, f2, f3, f4);
+        }
+
+        #endif
 
         /*private struct TypeInfo {
 

@@ -517,6 +517,26 @@ namespace UnityEngine.UI.Windows.Components {
         private UnityEngine.Localization.LocalizedString lastLocalizationKey;
         private bool avoidLocalizationUnsubscribe;
 
+        public virtual void SetText(UnityEngine.Localization.LocalizedString key) {
+            
+            if (this.lastLocalizationKey != key) {
+
+                if (this.lastLocalizationKey != null) {
+                    this.lastLocalizationKey.StringChanged -= this.OnLocalizationStringChanged;
+                }
+
+                if (localizationTestMode == true) {
+                    this.OnLocalizationStringChanged($"#{key?.TableEntryReference.Key}#");
+                } else {
+                    this.lastLocalizationKey = key;
+                    this.lastLocalizationKey.StringChanged += this.OnLocalizationStringChanged;
+                    this.lastLocalizationKey.RefreshString();
+                }
+
+            }
+
+        }
+
         public virtual void SetText(UnityEngine.Localization.LocalizedString key, params object[] args) {
 
             if (this.lastLocalizationKey != key || args.Length > 0) {

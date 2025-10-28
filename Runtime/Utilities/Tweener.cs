@@ -726,6 +726,8 @@ namespace UnityEngine.UI.Windows.Utilities {
             void Stop(bool ignoreEvents = false);
             void Complete();
 
+            void Dispose();
+
         }
 
         internal interface ITweenInternal {
@@ -769,6 +771,26 @@ namespace UnityEngine.UI.Windows.Utilities {
             float ITweenInternal.GetFrom() { return this.from; }
             float ITweenInternal.GetTo() { return this.to; }
             object ITweenInternal.GetTag() { return this.tag; }
+
+            void ITween.Dispose() {
+	            this.timer = 0f;
+	            this.direction = 0f;
+	            this.loops = 1;
+	            this.reflect = false;
+	            this.tweener = default;
+	            this.obj = default;
+	            this.from = 0f;
+	            this.to = 0f;
+	            this.tag = default;
+	            this.delay = 0f;
+	            this.onComplete = default;
+	            this.onCompleteParameterless = default;
+	            this.onUpdate = default;
+	            this.onCancel = default;
+	            this.onCancelParameterless = default;
+	            this.easeFunction = default;
+	            PoolClass<Tweener.Tween<T>>.Recycle(this);
+            }
             
             bool ITween.Update(float dt) {
 
@@ -979,12 +1001,13 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-        public List<ITween> tweens = new List<ITween>();
-        public List<ITween> frameTweens = new List<ITween>();
+        public readonly List<ITween> tweens = new List<ITween>();
+        public readonly List<ITween> frameTweens = new List<ITween>();
+        private readonly List<ITween> completeList = new List<ITween>();
 
         public Tween<T> Add<T>(T obj, float duration, float from, float to) {
 
-            var tween = new Tweener.Tween<T>();
+            var tween = PoolClass<Tweener.Tween<T>>.Spawn();
             tween.tweener = this;
             tween.obj = obj;
             tween.duration = duration;
@@ -1016,6 +1039,7 @@ namespace UnityEngine.UI.Windows.Utilities {
             for (int i = 0; i < list.Count; ++i) {
 	            
 	            list[i].Stop(ignoreEvents);
+	            list[i].Dispose();
 
             }
             PoolList<ITween>.Recycle(ref list);
@@ -1028,6 +1052,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 		        this.completeList.Add(tween);
 		        this.tweens.Remove(tween);
+		        tween.Dispose();
 		        return true;
                     
 	        }
@@ -1036,7 +1061,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-        private List<ITween> completeList = new List<ITween>();
         public void Update() {
             
             var dt = Time.deltaTime;
@@ -1058,6 +1082,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
                 this.tweens.Remove(this.completeList[i]);
 	            this.completeList[i].Complete();
+	            this.completeList[i].Dispose();
 	            
             }
             this.completeList.Clear();

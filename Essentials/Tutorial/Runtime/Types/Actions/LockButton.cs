@@ -5,7 +5,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         public string text => $"Lock button with tag `#{this.tag}`";
 
-        public string tag;
+        public TagComponent tag;
         public TutorialData nextOnClick;
 
         public ActionResult Execute(in Context context) {
@@ -26,29 +26,57 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         }
 
+        private struct Closure {
+
+            public LockButton obj;
+            public Context context;
+
+        }
+        
         public void Do(in Context context) {
             
             var obj = this;
-            
-            var component = context.window.FindComponent<UnityEngine.UI.Windows.Components.ButtonComponent>(x => {
 
-                var tagModule = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule>();
-                if (tagModule == null) return false;
-                
-                return tagModule.uiTag == obj.tag;
+            var state = new Closure() {
+                obj = obj,
+                context = context,
+            };
+            if (obj.tag.isList == true) {
+                context.window.FindComponent<UnityEngine.UI.Windows.Components.ListComponent, Closure>(state, static (state, x) => {
 
-            });
-            
-            if (component == null) {
+                    foreach (var moduleBase in x.componentModules.modules) {
+                        if (moduleBase is UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialListComponentModule module) {
+                            if (module.uiTag == state.obj.tag.uiTag) {
+                                if (module.listComponent.GetItem<WindowComponent>(state.obj.tag.listIndex) is UnityEngine.UI.Windows.Components.IInteractable c) {
+                                    WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context), c);
+                                }
+                            }
+                        }
+                    }
+                    var tagModule = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule>();
+                    if (tagModule == null) return false;
 
-                return;
+                    return tagModule.uiTag == state.obj.tag.uiTag;
 
+                });
+            } else {
+                context.window.FindComponent<UnityEngine.UI.Windows.Components.ButtonComponent, Closure>(state, static (state, x) => {
+
+                    var tagModule = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule>();
+                    if (tagModule == null) return false;
+
+                    if (tagModule.uiTag == state.obj.tag.uiTag) {
+
+                        WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context), x);
+                        return true;
+
+                    }
+
+                    return false;
+
+                });
             }
-            
-            var contextData = context;
-            WindowSystem.AddWaitInteractable(() => obj.OnComplete(contextData), component);
-            
-            
+
         }
 
     }

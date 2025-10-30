@@ -8,11 +8,10 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             Hide,
         }
 
-        public string text => $"`{this.state.ToString()}` component with tag `{this.tag}`";
+        public string text => $"`{this.state.ToString()}` component with tag `{this.tag.uiTag}`";
 
+        public TagComponent tag;
         public State state;
-        public string tag;
-        public int listIndex;
 
         public ActionResult Execute(in Context context) {
 
@@ -22,57 +21,50 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         }
 
+        private struct Closure {
+
+            public ShowHideComponents obj;
+
+        }
+
         public void Do(in Context context) {
 
             var obj = this;
-            var tag = this.tag;
-            var listIndex = this.listIndex;
-            
-            var component = context.window.FindComponent<UnityEngine.UI.Windows.WindowComponent>(x => {
 
-                foreach (var moduleBase in x.componentModules.modules) {
+            var state = new Closure() {
+                obj = obj,
+            };
 
-                    if (moduleBase is UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule module) {
+            if (this.tag.isList == false) {
+                context.window.FindComponent<UnityEngine.UI.Windows.WindowComponent, Closure>(state, static (state, x) => {
 
-                        if (module.uiTag == tag) {
-
-                            module.windowComponent.ShowHide(obj.state == State.Show ? true : false);
-
+                    foreach (var moduleBase in x.componentModules.modules) {
+                        if (moduleBase is UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule module) {
+                            if (module.uiTag == state.obj.tag.uiTag) {
+                                module.windowComponent.ShowHide(state.obj.state == State.Show ? true : false);
+                            }
                         }
-
                     }
 
-                }
+                    return false;
 
-                return false;
+                });
+            } else {
+                context.window.FindComponent<UnityEngine.UI.Windows.Components.ListComponent, Closure>(state, static (state, x) => {
 
-            });
-            if (component != null) {
+                    foreach (var moduleBase in x.componentModules.modules) {
+                        if (moduleBase is UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialListComponentModule module) {
+                            if (module.uiTag == state.obj.tag.uiTag) {
+                                var c = module.listComponent.GetItem<WindowComponent>(state.obj.tag.listIndex);
+                                c.ShowHide(state.obj.state == State.Show ? true : false);
+                            }
+                        }
+                    }
 
-                return;
+                    return false;
 
+                });
             }
-
-            context.window.FindComponent<UnityEngine.UI.Windows.Components.ListComponent>(x => {
-
-                foreach (var moduleBase in x.componentModules.modules) {
-
-                    if (moduleBase is UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialListComponentModule module) {
-
-                        if (module.uiTag == tag) {
-
-                            var c = module.listComponent.GetItem<WindowComponent>(listIndex);
-                            c.ShowHide(obj.state == State.Show ? true : false);
-
-                        }
-
-                    }
-                    
-                }
-
-                return false;
-
-            });
 
         }
 

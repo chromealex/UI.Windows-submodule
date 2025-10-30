@@ -23,6 +23,15 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
     }
 
+    [System.Serializable]
+    public struct TagComponent {
+
+        public string uiTag;
+        public bool isList;
+        public int listIndex;
+
+    }
+
     public struct Context {
 
         public TutorialWindowEvent windowEvent;

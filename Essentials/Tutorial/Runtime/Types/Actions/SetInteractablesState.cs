@@ -8,8 +8,11 @@
 
         public ActionResult Execute(in Context context) {
 
-            if (this.isLocked == true) WindowSystem.LockAllInteractables();
-            else WindowSystem.UnlockAllInteractables();
+            if (this.isLocked == true) {
+                WindowSystem.LockAllInteractables();
+            } else {
+                WindowSystem.UnlockAllInteractables();
+            }
                 
             return ActionResult.MoveNext;
 

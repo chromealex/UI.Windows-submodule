@@ -49,7 +49,7 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                         
                     }
                     
-                    if (val is IConditionRuntime conditionRuntime) {
+                    if (val is IConditionRuntime conditionRuntime && Application.isPlaying == true) {
 
                         using (new GUILayoutExt.GUIColorUsing(Color.cyan)) {
 
@@ -107,7 +107,7 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
                             
                         }
 
-                        if (val is IConditionRuntime conditionRuntime) {
+                        if (val is IConditionRuntime conditionRuntime && Application.isPlaying == true) {
 
                             using (new GUILayoutExt.GUIColorUsing(Color.cyan)) {
 

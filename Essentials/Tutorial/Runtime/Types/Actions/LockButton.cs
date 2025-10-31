@@ -56,7 +56,12 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                     var tagModule = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule>();
                     if (tagModule == null) return false;
 
-                    return tagModule.uiTag == state.obj.tag.uiTag;
+                    if (tagModule.uiTag == state.obj.tag.uiTag) {
+                        WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context), x.GetItem<WindowComponent>(state.obj.tag.listIndex) as UnityEngine.UI.Windows.Components.IInteractable);
+                        return true;
+                    }
+
+                    return false;
 
                 });
             } else {

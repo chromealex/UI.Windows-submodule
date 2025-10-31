@@ -39,6 +39,16 @@ namespace UnityEditor.UI.Windows {
             if (string.IsNullOrEmpty(pth) == true) return;
             
             var assetPath = System.IO.Path.GetDirectoryName(pth);
+
+            var layoutName = System.IO.Path.GetFileNameWithoutExtension(pth);
+            var screenMarker = "Screen";
+            if (layoutName.EndsWith(screenMarker) == true) {
+
+                layoutName = layoutName.Remove(layoutName.Length - screenMarker.Length);
+                layoutName += "Layout";
+
+            }
+
             var screensMarker = "Screens";
             if (assetPath.EndsWith(screensMarker) == true) {
 
@@ -73,7 +83,7 @@ namespace UnityEditor.UI.Windows {
                     popup.Item("Clone Template/" + allObjects[i].name, null, searchable: true, action: (item) => {
 
                         var p = AssetDatabase.GetAssetPath(allObjects[idx]);
-                        var newPath = AssetDatabase.GenerateUniqueAssetPath(assetPath + "/" + allObjects[idx].name + ".prefab");
+                        var newPath = AssetDatabase.GenerateUniqueAssetPath(assetPath + "/" + layoutName + ".prefab");
                         AssetDatabase.CopyAsset(p, newPath);
                         AssetDatabase.ImportAsset(newPath, ImportAssetOptions.ForceUpdate);
                         AssetDatabase.ForceReserializeAssets(new [] { newPath }, ForceReserializeAssetsOptions.ReserializeAssetsAndMetadata);

@@ -69,6 +69,10 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                     if (tagModule.uiTag == state.obj.tag.uiTag) {
                         var button = x.GetItem<WindowComponent>(state.obj.tag.listIndex);
                         WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context, button), button as UnityEngine.UI.Windows.Components.IInteractable);
+                        var buttonHighlight = button.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
+                        if (buttonHighlight != null) {
+                            buttonHighlight.highlight.ShowHide(true);
+                        }
                         return true;
                     }
 

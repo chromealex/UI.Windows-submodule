@@ -16,7 +16,12 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         }
 
-        private void OnComplete(in Context context) {
+        private void OnComplete(in Context context, UnityEngine.UI.Windows.WindowComponent buttonComponent) {
+            
+            var buttonHighlight = buttonComponent?.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
+            if (buttonHighlight != null) {
+                buttonHighlight.highlight.ShowHide(false);
+            }
             
             WindowSystem.CancelWaitInteractables();
             
@@ -47,8 +52,13 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                     foreach (var moduleBase in x.componentModules.modules) {
                         if (moduleBase is UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialListComponentModule module) {
                             if (module.uiTag == state.obj.tag.uiTag) {
-                                if (module.listComponent.GetItem<WindowComponent>(state.obj.tag.listIndex) is UnityEngine.UI.Windows.Components.IInteractable c) {
-                                    WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context), c);
+                                var button = module.listComponent.GetItem<WindowComponent>(state.obj.tag.listIndex);
+                                if (button is UnityEngine.UI.Windows.Components.IInteractable c) {
+                                    WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context, button), c);
+                                }
+                                var buttonHighlight = button.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
+                                if (buttonHighlight != null) {
+                                    buttonHighlight.highlight.ShowHide(true);
                                 }
                             }
                         }
@@ -57,7 +67,8 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                     if (tagModule == null) return false;
 
                     if (tagModule.uiTag == state.obj.tag.uiTag) {
-                        WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context), x.GetItem<WindowComponent>(state.obj.tag.listIndex) as UnityEngine.UI.Windows.Components.IInteractable);
+                        var button = x.GetItem<WindowComponent>(state.obj.tag.listIndex);
+                        WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context, button), button as UnityEngine.UI.Windows.Components.IInteractable);
                         return true;
                     }
 
@@ -72,7 +83,11 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
                     if (tagModule.uiTag == state.obj.tag.uiTag) {
 
-                        WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context), x);
+                        WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context, x), x);
+                        var buttonHighlight = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
+                        if (buttonHighlight != null) {
+                            buttonHighlight.highlight.ShowHide(true);
+                        }
                         return true;
 
                     }

@@ -20,7 +20,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             
             var buttonHighlight = buttonComponent?.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
             if (buttonHighlight != null) {
-                buttonHighlight.highlight.ShowHide(false);
+                buttonHighlight.Do(false);
             }
             
             WindowSystem.CancelWaitInteractables();
@@ -58,7 +58,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                                 }
                                 var buttonHighlight = button.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
                                 if (buttonHighlight != null) {
-                                    buttonHighlight.highlight.ShowHide(true);
+                                    buttonHighlight.Do(true, button);
                                 }
                             }
                         }
@@ -71,7 +71,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                         WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context, button), button as UnityEngine.UI.Windows.Components.IInteractable);
                         var buttonHighlight = button.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
                         if (buttonHighlight != null) {
-                            buttonHighlight.highlight.ShowHide(true);
+                            buttonHighlight.Do(true, button);
                         }
                         return true;
                     }
@@ -90,7 +90,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                         WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context, x), x);
                         var buttonHighlight = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
                         if (buttonHighlight != null) {
-                            buttonHighlight.highlight.ShowHide(true);
+                            buttonHighlight.Do(true, x);
                         }
                         return true;
 

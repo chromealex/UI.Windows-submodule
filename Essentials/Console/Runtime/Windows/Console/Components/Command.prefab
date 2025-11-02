@@ -65,6 +65,7 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 4597125719989322073}
     graphics: {fileID: 2368193167506531856}
     rectMask: {fileID: 0}
+  hideBehaviour: 0
   createPool: 0
   animationParameters:
     items: []
@@ -78,6 +79,7 @@ MonoBehaviour:
     items: []
   isObjectRoot: 0
   rootObject: {fileID: 7157483974793182015}
+  prefabSource: {fileID: 0}
   subObjects: []
   audioEvents:
     play: 0
@@ -310,6 +312,7 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 1053871952593780424}
     graphics: {fileID: 5048931175835979990}
     rectMask: {fileID: 0}
+  hideBehaviour: 0
   createPool: 0
   animationParameters:
     items: []
@@ -323,6 +326,7 @@ MonoBehaviour:
     items: []
   isObjectRoot: 0
   rootObject: {fileID: 7157483974793182015}
+  prefabSource: {fileID: 0}
   subObjects: []
   audioEvents:
     play: 0
@@ -521,6 +525,7 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 1131759301774170057}
     graphics: {fileID: 6860704351555833948}
     rectMask: {fileID: 0}
+  hideBehaviour: 0
   createPool: 0
   animationParameters:
     items: []
@@ -534,6 +539,7 @@ MonoBehaviour:
     items: []
   isObjectRoot: 1
   rootObject: {fileID: 0}
+  prefabSource: {fileID: 0}
   subObjects:
   - {fileID: 8315637883405603250}
   - {fileID: 8957172461844523635}

@@ -57,6 +57,7 @@ MonoBehaviour:
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
+  hideBehaviour: 0
   createPool: 1
   animationParameters:
     items: []
@@ -70,6 +71,7 @@ MonoBehaviour:
     items: []
   isObjectRoot: 1
   rootObject: {fileID: 0}
+  prefabSource: {fileID: 0}
   subObjects: []
   audioEvents:
     play: 0

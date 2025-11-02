@@ -19,12 +19,14 @@ public static class AddressableEditorExtension {
     /// <param name="id">Key/ID</param>
     public static void SetAddressableID(this Object o, string id, UnityEditor.AddressableAssets.Settings.AddressableAssetGroup group = null) {
         if (id.Length == 0) {
-            Debug.LogWarning($"Can not set an empty adressables ID.");
+            Debug.LogWarning($"Can not set an empty addressables ID.");
         }
 
         var entry = AddressableEditorExtension.GetAddressableAssetEntry(o, createNew: group != null, group: group);
         if (entry != null) {
-            entry.address = id;
+            entry.SetAddress(id);
+        } else {
+            Debug.LogWarning($"Can not set {id} to {o} because of entry not found.");
         }
     }
 

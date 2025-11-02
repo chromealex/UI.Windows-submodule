@@ -15,13 +15,11 @@ namespace UnityEditor.UI.Windows {
         private UnityEditor.Editor builtInEditor;
 
         void OnEnable() {
-            this.builtInEditor =
-                CreateEditor(this.targets, Type.GetType("UnityEditor.GameObjectInspector, UnityEditor"));
+            this.builtInEditor = CreateEditor(this.targets, Type.GetType("UnityEditor.GameObjectInspector, UnityEditor"));
         }
 
         void OnDisable() {
-            if (this.builtInEditor != null)
-                DestroyImmediate(this.builtInEditor);
+            if (this.builtInEditor != null) DestroyImmediate(this.builtInEditor);
         }
 
         protected override void OnHeaderGUI() {
@@ -42,20 +40,27 @@ namespace UnityEditor.UI.Windows {
 
             if (hasWindowBase == false && hasWindowLayout == false) return;
 
-            EditorGUILayout.Space();
+            if (PrefabUtility.GetPrefabInstanceStatus(instance) == PrefabInstanceStatus.Connected) {
 
-            EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.Space();
 
-            if (GUILayout.Button(new GUIContent("✅Apply UI.Windows", "It applies all UI.Windows-related changes for this GameObject and removes all UI.Windows-related components from the GameObject"))) {
-                this.ApplyAndClean();
+                EditorGUILayout.BeginHorizontal();
+
+                if (GUILayout.Button(new GUIContent("Apply UI.Windows",
+                                                    "It applies all UI.Windows-related changes for this GameObject and removes all UI.Windows-related components from the GameObject"))) {
+                    this.ApplyAndClean();
+                }
+
+                if (GUILayout.Button(new GUIContent("Revert UI.Windows",
+                                                    "It reverts all UI.Windows-related changes for this GameObject and adds all UI.Windows-related components back to the GameObject"))) {
+                    this.RevertAndClean();
+                }
+
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.Space();
+
             }
-
-            if (GUILayout.Button(new GUIContent("❌Revert UI.Windows", "It reverts all UI.Windows-related changes for this GameObject and adds all UI.Windows-related components back to the GameObject"))) {
-                this.RevertAndClean();
-            }
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.Space();
 
         }
 

@@ -48,8 +48,10 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                     if (tagModule == null) return false;
 
                     if (tagModule.uiTag == state.obj.tag.uiTag) {
-                        var button = x.GetItem<UnityEngine.UI.Windows.Components.ButtonComponent>(state.obj.tag.listIndex);
-                        button.SetInteractable(state.obj.state);
+                        var button = x.GetItem<WindowComponent>(state.obj.tag.listIndex);
+                        if (button is UnityEngine.UI.Windows.Components.IInteractable c) {
+                            c.SetInteractable(state.obj.state);
+                        }
                         return true;
                     }
 

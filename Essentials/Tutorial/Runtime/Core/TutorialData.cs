@@ -132,10 +132,10 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public Conditions conditions;
         public Actions actions;
 
-        public bool IsValid(WindowObject window, in Context context) {
+        public bool IsValid(WindowObject window, in Context context, bool checkType = true) {
 
             var type = window != null ? UnityEngine.UI.Windows.Utilities.TypesCache.GetFullName(window.GetType()) : null;
-            if (this.forWindowType.type == type || type == null) {
+            if (checkType == false || this.forWindowType.type == type || type == null) {
 
                 for (int i = 0; i < this.conditions.items.Length; ++i) {
 

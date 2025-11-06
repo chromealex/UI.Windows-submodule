@@ -130,7 +130,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         }
 
-        public bool TryToStart(WindowObject window, TutorialData tutorialData, TutorialWindowEvent windowEvent) {
+        public bool TryToStart(WindowObject window, TutorialData tutorialData, TutorialWindowEvent windowEvent, bool checkType = true) {
 
             if (tutorialData == null) return false;
 
@@ -142,7 +142,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                     windowEvent = windowEvent,
                     data = tutorialData,
                 };
-                if (tutorialData.IsValid(window, in context) == true) {
+                if (tutorialData.IsValid(window, in context, checkType) == true) {
 
                     if (this.useDebugLogs == true) Debug.Log($"[TutorialSystem] {tutorialData.name} started for window `{UnityEngine.UI.Windows.Utilities.TypesCache.GetFullName(window.GetType())}`");
                     tutorialData.OnStart(context);

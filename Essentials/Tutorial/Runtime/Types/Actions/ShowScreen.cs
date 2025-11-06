@@ -16,7 +16,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                                   default,
                               (x) => x.OnEmptyPass(),
                               TransitionParameters.Default.ReplaceCallback(() => {
-                                  contextData.system.TryToStart(null, obj.onShown, TutorialWindowEvent.OnAny);
+                                  contextData.system.TryToStart(contextData.window, obj.onShown, TutorialWindowEvent.OnAny, false);
                               }));
 
             return ActionResult.MoveNext;

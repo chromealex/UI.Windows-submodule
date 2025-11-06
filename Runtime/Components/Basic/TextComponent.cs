@@ -288,7 +288,8 @@ namespace UnityEngine.UI.Windows.Components {
         private void ResetInstance() {
 
             this.lastValueData = default;
-            this.lastText = null;
+            this.lastData = default;
+            this.lastBytesText = default;
 
             #if UNITY_LOCALIZATION_SUPPORT
 
@@ -460,7 +461,8 @@ namespace UnityEngine.UI.Windows.Components {
             }
 
             this.lastValueData = currentData;
-            this.lastText = null;
+            this.lastBytesText = default;
+            this.lastValueData = default;
 
             strFormat = default;
             if (timeShortestVariant > TimeResult.None && timeShortestVariant < timeValueResult) {
@@ -568,16 +570,14 @@ namespace UnityEngine.UI.Windows.Components {
 
         #endif
 
-        private string lastText;
-
         public virtual void SetText(string text) {
 
-            if (this.lastText == text) {
+            if (this.lastData.s0 == text) {
                 return;
             }
 
-            var prevText = this.lastText;
-            this.lastText = text;
+            var prevText = this.lastData;
+            this.lastData = new LastDataCache() { s0 = text };
             this.lastValueData = default;
 
             #if UNITY_LOCALIZATION_SUPPORT
@@ -587,7 +587,7 @@ namespace UnityEngine.UI.Windows.Components {
             }
             #endif
 
-            this.ForEachModule<TextComponentModule, System.ValueTuple<string, string>>((prevText, text), static (c, state) => c.OnSetText(state.Item1, state.Item2));
+            this.ForEachModule<TextComponentModule, System.ValueTuple<string, string>>((prevText.s0, text), static (c, state) => c.OnSetText(state.Item1, state.Item2));
             this.ForEachModule<TextComponentModule, string>(text, static (c, state) => c.SetText(state));
 
             this.SetText_INTERNAL(text);

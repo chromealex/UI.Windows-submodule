@@ -8,7 +8,9 @@
 
         public ActionResult Execute(in Context context) {
 
-            if (this.tutorialData != null) context.system.TryToStart(context.window, this.tutorialData, context.windowEvent);
+            if (this.tutorialData != null) {
+                context.system.TryToStart(null, this.tutorialData, TutorialWindowEvent.OnAny);
+            }
             
             return ActionResult.MoveNext;
 

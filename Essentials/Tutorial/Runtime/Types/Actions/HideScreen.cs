@@ -30,7 +30,9 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
                 return false;
 
-            }, TransitionParameters.Default.ReplaceCallback(() => { contextData.system.TryToStart(contextData.window, obj.onHidden, contextData.windowEvent); }));
+            }, TransitionParameters.Default.ReplaceCallback(() => {
+                contextData.system.TryToStart(null, obj.onHidden, TutorialWindowEvent.OnAny);
+            }));
 
         }
 

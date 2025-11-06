@@ -11,6 +11,8 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         OnShowEnd,
         OnFocusTook,
         OnHideBegin,
+        
+        OnAny,
 
     }
 
@@ -132,7 +134,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
             if (tutorialData == null) return false;
 
-            if (tutorialData.startEvent == windowEvent) {
+            if (tutorialData.startEvent == windowEvent || windowEvent == TutorialWindowEvent.OnAny) {
 
                 var context = new Context() {
                     system = this,

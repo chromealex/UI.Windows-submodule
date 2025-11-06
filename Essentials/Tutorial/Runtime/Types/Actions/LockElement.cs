@@ -20,7 +20,9 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         private void OnComplete(in Context context) {
             
             WindowSystem.CancelWaitInteractables();
-            if (this.nextOnClick != null) context.system.TryToStart(context.window, this.nextOnClick, context.windowEvent);
+            if (this.nextOnClick != null) {
+                context.system.TryToStart(null, this.nextOnClick, TutorialWindowEvent.OnAny);
+            }
 
         }
 

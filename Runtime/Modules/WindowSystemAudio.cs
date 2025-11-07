@@ -72,6 +72,7 @@ namespace UnityEngine.UI.Windows {
                     timer -= dt;
                     if (timer <= 0f) {
                         pair.Value.timers.RemoveAt(j);
+                        continue;
                     }
                     pair.Value.timers[j] = timer;
                 }

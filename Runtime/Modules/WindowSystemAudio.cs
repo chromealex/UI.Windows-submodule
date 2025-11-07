@@ -8,6 +8,12 @@ namespace UnityEngine.UI.Windows {
 
     public class WindowSystemAudio : MonoBehaviour {
 
+        private struct ClipInfo {
+
+            public System.Collections.Generic.List<float> timers;
+
+        }
+        
         public enum EventType {
             SFX,
             Music,
@@ -26,6 +32,8 @@ namespace UnityEngine.UI.Windows {
         private AudioSource sfxSource;
         private AudioSource[] musicSources;
         private ME.Taptic.ITapticEngine taptic;
+
+        private System.Collections.Generic.Dictionary<UIWSAudioEvent, ClipInfo> playingSounds = new System.Collections.Generic.Dictionary<UIWSAudioEvent, ClipInfo>();
         
         public void Start() {
 
@@ -50,7 +58,28 @@ namespace UnityEngine.UI.Windows {
         }
 
         public void Update() {
+
+            var dt = Time.unscaledDeltaTime;
+            
+            var pairs = UnityEngine.Pool.ListPool<System.Collections.Generic.KeyValuePair<UIWSAudioEvent, ClipInfo>>.Get();
+            foreach (var kv in this.playingSounds) {
+                pairs.Add(kv);
+            }
+            for (int i = 0; i < pairs.Count; ++i) {
+                var pair = pairs[i];
+                for (int j = pair.Value.timers.Count - 1; j >= 0; --j) {
+                    var timer = pair.Value.timers[j];
+                    timer -= dt;
+                    if (timer <= 0f) {
+                        pair.Value.timers.RemoveAt(j);
+                    }
+                    pair.Value.timers[j] = timer;
+                }
+            }
+            UnityEngine.Pool.ListPool<System.Collections.Generic.KeyValuePair<UIWSAudioEvent, ClipInfo>>.Release(pairs);
+            
             this.taptic.Update();
+            
         }
 
         public void OnDestroy() {
@@ -114,13 +143,16 @@ namespace UnityEngine.UI.Windows {
         public void Play(UIWSAudioEvent clip) {
 
             if (clip.eventType == EventType.SFX) {
+                AudioClip audioClip = null;
                 if (clip.randomClips?.Length > 0) {
                     this.ApplyParameters(this.sfxSource, clip);
-                    this.sfxSource.PlayOneShot(clip.randomClips[Random.Range(0, clip.randomClips.Length)]);
+                    audioClip = clip.randomClips[Random.Range(0, clip.randomClips.Length)];
                 } else if (clip.audioClip != null) {
                     this.ApplyParameters(this.sfxSource, clip);
-                    this.sfxSource.PlayOneShot(clip.audioClip);
+                    audioClip = clip.audioClip;
                 }
+                if (this.TryAdd(clip, audioClip) == false) return;
+                this.sfxSource.PlayOneShot(audioClip);
             } else if (clip.eventType == EventType.Music) {
                 if (clip.behaviour == Behaviour.StopOtherChannels) {
                     this.StopAllChannels();
@@ -138,6 +170,27 @@ namespace UnityEngine.UI.Windows {
                     this.taptic.PlaySingle(clip.taptic);
                 }
             }
+
+        }
+
+        private bool TryAdd(UIWSAudioEvent clip, AudioClip audioClip) {
+
+            if (audioClip == null) return false;
+            if (clip.parameters.maxCount <= 0) return true;
+
+            if (this.playingSounds.TryGetValue(clip, out var info) == true) {
+                if (info.timers.Count >= clip.parameters.maxCount) return false;
+                info.timers.Add(audioClip.length);
+                this.playingSounds[clip] = info;
+            } else {
+                info = new ClipInfo() {
+                    timers = new System.Collections.Generic.List<float>(1),
+                };
+                info.timers.Add(audioClip.length);
+                this.playingSounds.Add(clip, info);
+            }
+
+            return true;
 
         }
 

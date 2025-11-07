@@ -6,6 +6,8 @@ namespace UI.Windows.Runtime.Modules.Audio {
         [System.Serializable]
         public struct Parameters {
 
+            public int maxCount;
+
             public bool changePitch;
             public bool randomPitch;
             public UnityEngine.Vector2 randomPitchValue;

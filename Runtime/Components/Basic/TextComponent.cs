@@ -461,8 +461,6 @@ namespace UnityEngine.UI.Windows.Components {
             }
 
             this.lastValueData = currentData;
-            this.lastBytesText = default;
-            this.lastValueData = default;
 
             strFormat = default;
             if (timeShortestVariant > TimeResult.None && timeShortestVariant < timeValueResult) {

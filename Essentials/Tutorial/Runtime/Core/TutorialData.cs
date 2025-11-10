@@ -128,15 +128,18 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         public WindowType forWindowType;
         public TutorialWindowEvent startEvent;
+        public string uiTag;
         
         public Conditions conditions;
         public Actions actions;
 
         public bool IsValid(WindowObject window, in Context context, bool checkType = true) {
-
+            
             var type = window != null ? UnityEngine.UI.Windows.Utilities.TypesCache.GetFullName(window.GetType()) : null;
             if (checkType == false || this.forWindowType.type == type || type == null) {
 
+                if (this.IsValidTag(in context) == false) return false;
+                
                 for (int i = 0; i < this.conditions.items.Length; ++i) {
 
                     if (this.conditions.items[i].IsValid(in context) == ConditionResult.Failed) return false;
@@ -145,6 +148,21 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
                 return true;
 
+            }
+
+            return false;
+
+        }
+
+        private bool IsValidTag(in Context context) {
+
+            if (string.IsNullOrEmpty(this.uiTag) == true) return true;
+            
+            var obj = context.window as WindowComponent;
+            if (obj == null) return false;
+            var module = obj.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule>();
+            if (module != null) {
+                if (module.uiTag == this.uiTag) return true;
             }
 
             return false;

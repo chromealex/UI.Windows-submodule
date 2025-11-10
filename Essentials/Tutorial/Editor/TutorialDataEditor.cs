@@ -23,6 +23,9 @@ namespace UnityEditor.UI.Windows.Essentials.Tutorial {
             var startEvent = so.FindProperty("startEvent");
             root.Add(new UnityEditor.UIElements.PropertyField(startEvent, "Start Event"));
 
+            var uiTag = so.FindProperty("uiTag");
+            root.Add(new UnityEditor.UIElements.PropertyField(uiTag, "UI Tag (optional)"));
+
             {
                 var conditions = so.FindProperty("conditions");
                 var items = conditions.FindPropertyRelative("items");

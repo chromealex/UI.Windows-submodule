@@ -47,8 +47,8 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                 context = context,
             };
             if (obj.tag.isList == true) {
-                context.window.FindComponent<UnityEngine.UI.Windows.Components.ListComponent, Closure>(state, static (state, x) => {
-
+                if (obj.tag.ignoreSearch == true) {
+                    var x = context.window as UnityEngine.UI.Windows.Components.ListComponent;
                     foreach (var moduleBase in x.componentModules.modules) {
                         if (moduleBase is UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialListComponentModule module) {
                             if (module.uiTag == state.obj.tag.uiTag) {
@@ -64,7 +64,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                         }
                     }
                     var tagModule = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule>();
-                    if (tagModule == null) return false;
+                    if (tagModule == null) return;
 
                     if (tagModule.uiTag == state.obj.tag.uiTag) {
                         var button = x.GetItem<WindowComponent>(state.obj.tag.listIndex);
@@ -73,17 +73,50 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                         if (buttonHighlight != null) {
                             buttonHighlight.Do(true, button);
                         }
-                        return true;
+                        return;
                     }
+                } else {
+                    context.window.FindComponent<UnityEngine.UI.Windows.Components.ListComponent, Closure>(state, static (state, x) => {
 
-                    return false;
+                        foreach (var moduleBase in x.componentModules.modules) {
+                            if (moduleBase is UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialListComponentModule module) {
+                                if (module.uiTag == state.obj.tag.uiTag) {
+                                    var button = module.listComponent.GetItem<WindowComponent>(state.obj.tag.listIndex);
+                                    if (button is UnityEngine.UI.Windows.Components.IInteractable c) {
+                                        WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context, button), c);
+                                    }
 
-                });
+                                    var buttonHighlight = button.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
+                                    if (buttonHighlight != null) {
+                                        buttonHighlight.Do(true, button);
+                                    }
+                                }
+                            }
+                        }
+
+                        var tagModule = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule>();
+                        if (tagModule == null) return false;
+
+                        if (tagModule.uiTag == state.obj.tag.uiTag) {
+                            var button = x.GetItem<WindowComponent>(state.obj.tag.listIndex);
+                            WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context, button), button as UnityEngine.UI.Windows.Components.IInteractable);
+                            var buttonHighlight = button.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
+                            if (buttonHighlight != null) {
+                                buttonHighlight.Do(true, button);
+                            }
+
+                            return true;
+                        }
+
+                        return false;
+
+                    });
+                }
             } else {
-                context.window.FindComponent<UnityEngine.UI.Windows.Components.ButtonComponent, Closure>(state, static (state, x) => {
-
+                if (obj.tag.ignoreSearch == true) {
+                    var x = context.window as UnityEngine.UI.Windows.Components.ButtonComponent;
                     var tagModule = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule>();
-                    if (tagModule == null) return false;
+                    if (tagModule == null) return;
 
                     if (tagModule.uiTag == state.obj.tag.uiTag) {
 
@@ -92,13 +125,30 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
                         if (buttonHighlight != null) {
                             buttonHighlight.Do(true, x);
                         }
-                        return true;
 
                     }
+                } else {
+                    context.window.FindComponent<UnityEngine.UI.Windows.Components.ButtonComponent, Closure>(state, static (state, x) => {
 
-                    return false;
+                        var tagModule = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule>();
+                        if (tagModule == null) return false;
 
-                });
+                        if (tagModule.uiTag == state.obj.tag.uiTag) {
+
+                            WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context, x), x);
+                            var buttonHighlight = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
+                            if (buttonHighlight != null) {
+                                buttonHighlight.Do(true, x);
+                            }
+
+                            return true;
+
+                        }
+
+                        return false;
+
+                    });
+                }
             }
 
         }

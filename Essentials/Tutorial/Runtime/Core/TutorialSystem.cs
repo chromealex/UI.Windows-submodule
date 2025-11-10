@@ -31,6 +31,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public string uiTag;
         public bool isList;
         public int listIndex;
+        public bool ignoreSearch;
 
     }
 

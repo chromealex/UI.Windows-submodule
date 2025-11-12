@@ -1,4 +1,4 @@
-﻿using UIWSAudioEvent = UI.Windows.Runtime.Modules.Audio.UIWSAudioEvent;
+﻿using UIWSAudioEvent = UnityEngine.UI.Windows.Runtime.Modules.Audio.UIWSAudioEvent;
 
 namespace UnityEngine.UI.Windows {
 

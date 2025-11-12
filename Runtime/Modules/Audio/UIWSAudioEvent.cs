@@ -1,4 +1,4 @@
-namespace UI.Windows.Runtime.Modules.Audio {
+namespace UnityEngine.UI.Windows.Runtime.Modules.Audio {
 
     [UnityEngine.CreateAssetMenu(menuName = "UI.Windows/Audio/Event")]
     public class UIWSAudioEvent : UnityEngine.ScriptableObject {

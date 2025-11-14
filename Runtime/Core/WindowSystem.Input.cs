@@ -120,15 +120,15 @@ namespace UnityEngine.UI.Windows {
                 for (int i = 0; i < UnityEngine.Input.touches.Length; ++i) {
 
                     var touch = UnityEngine.Input.GetTouch(i);
-                    if (touch.phase == UnityEngine.InputSystem.TouchPhase.Began) {
+                    if (touch.phase == TouchPhase.Began) {
                         
-                        this.pointerScreenPosition = touch.screenPosition;
+                        this.pointerScreenPosition = touch.position;
                         this.lastPointerActionTime = Time.realtimeSinceStartup;
                         if (WindowSystem.onPointerDown != null) WindowSystem.onPointerDown.Invoke();
                         
                     } else if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled) {
                         
-                        this.pointerScreenPosition = touch.screenPosition;
+                        this.pointerScreenPosition = touch.position;
                         this.hasPointerUpThisFrame = true;
                         if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
 

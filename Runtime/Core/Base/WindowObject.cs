@@ -1005,7 +1005,7 @@ namespace UnityEngine.UI.Windows {
                 case ObjectState.Initializing:
                 case ObjectState.Initialized:
 
-                    if (windowObject.GetState() != ObjectState.Initialized) {
+                    if (windowObject.GetState() < ObjectState.Initialized) {
                         
                         Debug.LogError($"WindowObject must be initialized before AdjustObjectState");
                         

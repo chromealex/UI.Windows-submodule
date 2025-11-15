@@ -613,8 +613,12 @@ namespace UnityEngine.UI.Windows.Modules {
             var op = Addressables.LoadAssetAsync<TResource>(resource.GetAddress());
             yield return null;
             System.Action cancellationTask = () => { if (op.IsValid() == true) Addressables.Release(op); };
-            this.LoadBegin(handler, cancellationTask);
+            this.LoadBegin(handler, cancellationTask);            
+            #if UNITY_WEBGL
+            Debug.LogWarning("[ UIWR ] LoadAddressable started as async because WebGL doesn't support synchronous loading.");
+            #else
             if (loadParameters.async == false) op.WaitForCompletion();
+            #endif
             while (op.IsDone == false) yield return null;
 
             if (op.IsValid() == true && op.Status == AsyncOperationStatus.Succeeded) {

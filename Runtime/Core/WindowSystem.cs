@@ -1107,11 +1107,18 @@ namespace UnityEngine.UI.Windows {
 
             }
 
+            #if UNITY_WEBGL
+            if (initialParameters.showSync == true) {
+                Debug.LogWarning("[ UIWS ] ShowSync ignored because WebGL doesn't support synchronous loading.");
+                initialParameters.showSync = false;
+            }
+            #else
             if (source.preferences.forceSyncLoad == true && initialParameters.showSync == false) {
 
                 initialParameters.showSync = true;
 
             }
+            #endif
             
             WindowBase instance;
             var singleInstance = source.preferences.singleInstance;

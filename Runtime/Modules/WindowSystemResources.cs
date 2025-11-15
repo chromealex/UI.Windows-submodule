@@ -615,7 +615,7 @@ namespace UnityEngine.UI.Windows.Modules {
             System.Action cancellationTask = () => { if (op.IsValid() == true) Addressables.Release(op); };
             this.LoadBegin(handler, cancellationTask);            
             #if UNITY_WEBGL
-            Debug.LogWarning("[ UIWR ] LoadAddressable started as async because WebGL doesn't support synchronous loading.");
+            if (loadParameters.async == false) Debug.LogWarning($"[ UIWR ] LoadAddressable started as async because WebGL doesn't support synchronous loading.\n{resource}");
             #else
             if (loadParameters.async == false) op.WaitForCompletion();
             #endif

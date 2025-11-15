@@ -75,7 +75,7 @@
 
                 this.scrollRect = this.GetComponentInChildren<ScrollRect>(true);
 
-            } 
+            }
 
         }
 

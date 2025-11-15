@@ -49,66 +49,102 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             if (obj.tag.isList == true) {
                 if (obj.tag.ignoreSearch == true) {
                     var x = context.window as UnityEngine.UI.Windows.Components.ListComponent;
+                    var hasAny = false;
                     foreach (var moduleBase in x.componentModules.modules) {
                         if (moduleBase is UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialListComponentModule module) {
                             if (module.uiTag == state.obj.tag.uiTag) {
                                 var button = module.listComponent.GetItem<WindowComponent>(state.obj.tag.listIndex);
                                 if (button is UnityEngine.UI.Windows.Components.IInteractable c) {
-                                    WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context, button), c);
+                                    WindowSystem.AddWaitInteractable(() => {
+                                        state.obj.OnComplete(state.context, button);
+                                        if (x.scrollRect != null) {
+                                            x.scrollRect.enabled = true;
+                                        }
+                                    }, c);
+                                    if (x.scrollRect != null) {
+                                        x.scrollRect.enabled = false;
+                                    }
                                 }
                                 var buttonHighlight = button.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
                                 if (buttonHighlight != null) {
                                     buttonHighlight.Do(true, button);
                                 }
+                                hasAny = true;
                             }
                         }
                     }
                     var tagModule = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule>();
-                    if (tagModule == null) return;
-
-                    if (tagModule.uiTag == state.obj.tag.uiTag) {
-                        var button = x.GetItem<WindowComponent>(state.obj.tag.listIndex);
-                        WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context, button), button as UnityEngine.UI.Windows.Components.IInteractable);
-                        var buttonHighlight = button.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
-                        if (buttonHighlight != null) {
-                            buttonHighlight.Do(true, button);
+                    if (tagModule != null) {
+                        if (tagModule.uiTag == state.obj.tag.uiTag) {
+                            var button = x.GetItem<WindowComponent>(state.obj.tag.listIndex);
+                            WindowSystem.AddWaitInteractable(() => {
+                                state.obj.OnComplete(state.context, button);
+                                if (x.scrollRect != null) {
+                                    x.scrollRect.enabled = true;
+                                }
+                            }, button as UnityEngine.UI.Windows.Components.IInteractable);
+                            var buttonHighlight = button.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
+                            if (buttonHighlight != null) {
+                                buttonHighlight.Do(true, button);
+                            }
+                            hasAny = true;
                         }
-                        return;
+                    }
+                    if (hasAny == true) {
+                        if (x.scrollRect != null) {
+                            x.scrollRect.enabled = false;
+                        }
                     }
                 } else {
                     context.window.FindComponent<UnityEngine.UI.Windows.Components.ListComponent, Closure>(state, static (state, x) => {
 
+                        var hasAny = false;
                         foreach (var moduleBase in x.componentModules.modules) {
                             if (moduleBase is UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialListComponentModule module) {
                                 if (module.uiTag == state.obj.tag.uiTag) {
                                     var button = module.listComponent.GetItem<WindowComponent>(state.obj.tag.listIndex);
                                     if (button is UnityEngine.UI.Windows.Components.IInteractable c) {
-                                        WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context, button), c);
+                                        WindowSystem.AddWaitInteractable(() => {
+                                            state.obj.OnComplete(state.context, button);
+                                            if (x.scrollRect != null) {
+                                                x.scrollRect.enabled = true;
+                                            }
+                                        }, c);
                                     }
-
                                     var buttonHighlight = button.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
                                     if (buttonHighlight != null) {
                                         buttonHighlight.Do(true, button);
                                     }
+                                    hasAny = true;
                                 }
                             }
                         }
 
                         var tagModule = x.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialWindowComponentTagComponentModule>();
-                        if (tagModule == null) return false;
-
-                        if (tagModule.uiTag == state.obj.tag.uiTag) {
-                            var button = x.GetItem<WindowComponent>(state.obj.tag.listIndex);
-                            WindowSystem.AddWaitInteractable(() => state.obj.OnComplete(state.context, button), button as UnityEngine.UI.Windows.Components.IInteractable);
-                            var buttonHighlight = button.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
-                            if (buttonHighlight != null) {
-                                buttonHighlight.Do(true, button);
+                        if (tagModule != null) {
+                            if (tagModule.uiTag == state.obj.tag.uiTag) {
+                                var button = x.GetItem<WindowComponent>(state.obj.tag.listIndex);
+                                WindowSystem.AddWaitInteractable(() => {
+                                    state.obj.OnComplete(state.context, button);
+                                    if (x.scrollRect != null) {
+                                        x.scrollRect.enabled = true;
+                                    }
+                                }, button as UnityEngine.UI.Windows.Components.IInteractable);
+                                var buttonHighlight = button.GetModule<UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules.TutorialButtonHighlightComponentModule>();
+                                if (buttonHighlight != null) {
+                                    buttonHighlight.Do(true, button);
+                                }
+                                hasAny = true;
                             }
-
-                            return true;
                         }
 
-                        return false;
+                        if (hasAny == true) {
+                            if (x.scrollRect != null) {
+                                x.scrollRect.enabled = false;
+                            }
+                        }
+
+                        return hasAny;
 
                     });
                 }

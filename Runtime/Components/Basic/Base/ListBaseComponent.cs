@@ -22,9 +22,10 @@ namespace UnityEngine.UI.Windows.Components {
         [UnityEngine.UI.Windows.Modules.ResourceTypeAttribute(typeof(WindowComponent), RequiredType.Warning)]
         public Resource source;
         public Transform customRoot;
+        public ScrollRect scrollRect;
 
         public List<WindowComponent> items = new List<WindowComponent>();
-        private HashSet<Object> loadedAssets = new HashSet<Object>();
+        private readonly HashSet<Object> loadedAssets = new HashSet<Object>();
         private System.Action onElementsChangedCallback;
         private System.Action onLayoutChangedCallback;
         private bool layoutHasChanged;
@@ -71,6 +72,10 @@ namespace UnityEngine.UI.Windows.Components {
             base.ValidateEditor();
 
             this.ValidateEditorRectTransformInternal();
+
+            if (this.scrollRect == null) {
+                this.scrollRect = this.GetComponentInChildren<ScrollRect>(true);
+            }
             
             var editorObj = this.source.GetEditorRef<WindowComponent>();
             if (editorObj != null) {

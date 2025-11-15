@@ -13,6 +13,7 @@ namespace UnityEngine.UI.Windows {
         
         internal WindowSystemConsole console;
         
+        #if !PRODUCTION || UNITY_EDITOR
         public override void OnStart() {
             
             this.console = new WindowSystemConsole(this.drawType, this.collapseLines);
@@ -56,6 +57,11 @@ namespace UnityEngine.UI.Windows {
             this.console = null;
 
         }
+        #else
+        public override void OnStart() { }
+        public override void OnUpdate() { }
+        public override void OnDestroy() { }
+        #endif
 
     }
 

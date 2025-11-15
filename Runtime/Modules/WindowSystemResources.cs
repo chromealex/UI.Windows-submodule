@@ -173,7 +173,7 @@ namespace UnityEngine.UI.Windows {
 
         public override string ToString() {
             
-            return $"[Resource] Type: {this.type}, Object Type: {this.objectType}, GUID: {this.guid} ({this.subObjectName}), Direct Reference: {this.directRef}";
+            return $"[Resource] Type: {this.type}, Object Type: {this.objectType}, GUID: {this.guid} ({this.address}, {this.subObjectName}), Direct Reference: {this.directRef}";
             
         }
 

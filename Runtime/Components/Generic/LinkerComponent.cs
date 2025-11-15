@@ -72,6 +72,17 @@
             
         }
 
+        public void LoadAsync<T, TState>(TState state, System.Action<T, TState> onComplete = null) where T : WindowObject {
+            
+            this.LoadAsync<T, System.ValueTuple<TState, System.Action<T, TState>, LinkerComponent>>((state, onComplete, this), this.prefab, static (asset, state) => {
+
+                state.Item3.loadedAsset = asset;
+                state.Item2?.Invoke(asset, state.Item1);
+
+            });
+            
+        }
+
         public T LoadSync<T>() where T : WindowObject {
             
             this.LoadAsync<T, Closure<T>>(new Closure<T>() {

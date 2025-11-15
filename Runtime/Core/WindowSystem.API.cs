@@ -44,7 +44,11 @@ namespace UnityEngine.UI.Windows {
             public void Show<T>(InitialParameters initialParameters, System.Action<T, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
                 WindowSystem.instance.Show_INTERNAL(this.data, initialParameters, onInitialized, transitionParameters);
             }
-
+            
+            public void Show(WindowBase source, System.Action<WindowBase, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) {
+                WindowSystem.instance.Show_INTERNAL(this.data, source, default, onInitialized, transitionParameters);
+            }
+            
             private void Show_INTERNAL<T>(InitialParameters initialParameters, System.Action<T, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
                 WindowSystem.instance.Show_INTERNAL(this.data, initialParameters, onInitialized, transitionParameters);
             }
@@ -113,7 +117,6 @@ namespace UnityEngine.UI.Windows {
         }
 
         public static void Show(WindowBase source, System.Action<WindowBase> onInitialized = null, TransitionParameters transitionParameters = default) {
-
             WindowSystem.instance.Show_INTERNAL<WindowBase, System.Action<WindowBase>>(onInitialized, source, default, static (instance, state) => {
                 state?.Invoke(instance);
             }, transitionParameters);

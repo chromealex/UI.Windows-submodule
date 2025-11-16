@@ -1083,23 +1083,19 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private void Show_INTERNAL<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
+        private WindowHandler<T> Show_INTERNAL<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
             var source = this.GetSource<T>();
-            this.Show_INTERNAL<T, System.Action<T>>(onInitialized, source, initialParameters, static (instance, state) => {
+            return this.Show_INTERNAL<T, System.Action<T>>(onInitialized, source, initialParameters, static (instance, state) => {
                 state?.Invoke(instance);
             }, transitionParameters);
-
         }
 
-        private void Show_INTERNAL<T, TState>(TState state, InitialParameters initialParameters, System.Action<T, TState> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
+        private WindowHandler<T> Show_INTERNAL<T, TState>(TState state, InitialParameters initialParameters, System.Action<T, TState> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
             var source = this.GetSource<T>();
-            this.Show_INTERNAL(state, source, initialParameters, onInitialized, transitionParameters);
-
+            return this.Show_INTERNAL(state, source, initialParameters, onInitialized, transitionParameters);
         }
 
-        private void Show_INTERNAL<T, TState>(TState closure, WindowBase source, InitialParameters initialParameters, System.Action<T, TState> onInitialized, TransitionParameters transitionParameters) where T : WindowBase {
+        private WindowHandler<T> Show_INTERNAL<T, TState>(TState closure, WindowBase source, InitialParameters initialParameters, System.Action<T, TState> onInitialized, TransitionParameters transitionParameters) where T : WindowBase {
 
             if (source == null) {
 
@@ -1141,7 +1137,7 @@ namespace UnityEngine.UI.Windows {
                         instance.OnEmptyPass();
                         
                     }
-                    return;
+                    return WindowHandler<T>.Create((T)instance);
 
                 }
 
@@ -1186,7 +1182,7 @@ namespace UnityEngine.UI.Windows {
                         state.instance.Show_INTERNAL(state.state, state.existInstance, state.initialParameters, state.onInitialized, state.transitionParameters);
                     });
 
-                    return;
+                    return WindowHandler<T>.Create((T)instance);
 
                 }
 
@@ -1272,6 +1268,8 @@ namespace UnityEngine.UI.Windows {
                 }, static (data) => data.component.ShowInternal(data.parameters));
 
             });
+
+            return WindowHandler<T>.Create((T)instance);
 
         }
 

@@ -2,6 +2,31 @@ using System.Collections.Generic;
 
 namespace UnityEngine.UI.Windows {
 
+    public struct WindowHandler<T> where T : WindowBase {
+
+        private T instance;
+
+        internal static WindowHandler<T> Create(T instance) {
+            return new WindowHandler<T>() {
+                instance = instance,
+            };
+        }
+        
+        public T screen => this.instance;
+
+        public void Hide() {
+            this.instance.Hide();
+        }
+
+        public void Hide(TransitionParameters transitionParameters) {
+            this.instance.Hide(transitionParameters);
+        }
+
+        public ObjectState GetState() => this.instance.GetState();
+        public FocusState GetFocusState() => this.instance.GetFocusState();
+
+    }
+    
     public partial class WindowSystem {
 
         public struct ClosureAPI<TClosure> {
@@ -37,20 +62,20 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
-            public void Show<T>(System.Action<T, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-                WindowSystem.instance.Show_INTERNAL(this.data, new InitialParameters(), onInitialized, transitionParameters);
+            public WindowHandler<T> Show<T>(System.Action<T, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+                return WindowSystem.instance.Show_INTERNAL(this.data, new InitialParameters(), onInitialized, transitionParameters);
             }
 
-            public void Show<T>(InitialParameters initialParameters, System.Action<T, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-                WindowSystem.instance.Show_INTERNAL(this.data, initialParameters, onInitialized, transitionParameters);
+            public WindowHandler<T> Show<T>(InitialParameters initialParameters, System.Action<T, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+                return WindowSystem.instance.Show_INTERNAL(this.data, initialParameters, onInitialized, transitionParameters);
             }
             
-            public void Show(WindowBase source, System.Action<WindowBase, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) {
-                WindowSystem.instance.Show_INTERNAL(this.data, source, default, onInitialized, transitionParameters);
+            public WindowHandler<WindowBase> Show(WindowBase source, System.Action<WindowBase, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) {
+                return WindowSystem.instance.Show_INTERNAL(this.data, source, default, onInitialized, transitionParameters);
             }
             
-            private void Show_INTERNAL<T>(InitialParameters initialParameters, System.Action<T, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-                WindowSystem.instance.Show_INTERNAL(this.data, initialParameters, onInitialized, transitionParameters);
+            private WindowHandler<T> Show_INTERNAL<T>(InitialParameters initialParameters, System.Action<T, TClosure> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+                return WindowSystem.instance.Show_INTERNAL(this.data, initialParameters, onInitialized, transitionParameters);
             }
 
         }
@@ -87,69 +112,51 @@ namespace UnityEngine.UI.Windows {
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static T ShowSync<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
             return WindowSystem.ShowSync(WindowSystem.instance.GetSource<T>(), initialParameters, onInitialized, transitionParameters);
-
         }
 
         public static T ShowSync<T>(System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
             return WindowSystem.ShowSync(default, onInitialized, transitionParameters);
-
         }
 
-        public static void Show<T, TState>(TState state, System.Action<T, TState> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
-            WindowSystem.instance.Show_INTERNAL(state, new InitialParameters(), onInitialized, transitionParameters);
-
+        public static WindowHandler<T> Show<T, TState>(TState state, System.Action<T, TState> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+            return WindowSystem.instance.Show_INTERNAL(state, new InitialParameters(), onInitialized, transitionParameters);
         }
 
-        public static void Show<T, TState>(TState state, InitialParameters initialParameters, System.Action<T, TState> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
-            WindowSystem.instance.Show_INTERNAL(state, initialParameters, onInitialized, transitionParameters);
-
+        public static WindowHandler<T> Show<T, TState>(TState state, InitialParameters initialParameters, System.Action<T, TState> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+            return WindowSystem.instance.Show_INTERNAL(state, initialParameters, onInitialized, transitionParameters);
         }
 
-        public static void Show<T>(System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
-            WindowSystem.instance.Show_INTERNAL(new InitialParameters(), onInitialized, transitionParameters);
-
+        public static WindowHandler<T> Show<T>(System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+            return WindowSystem.instance.Show_INTERNAL(new InitialParameters(), onInitialized, transitionParameters);
         }
 
-        public static void Show(WindowBase source, System.Action<WindowBase> onInitialized = null, TransitionParameters transitionParameters = default) {
-            WindowSystem.instance.Show_INTERNAL<WindowBase, System.Action<WindowBase>>(onInitialized, source, default, static (instance, state) => {
+        public static WindowHandler<WindowBase> Show(WindowBase source, System.Action<WindowBase> onInitialized = null, TransitionParameters transitionParameters = default) {
+            return WindowSystem.instance.Show_INTERNAL<WindowBase, System.Action<WindowBase>>(onInitialized, source, default, static (instance, state) => {
                 state?.Invoke(instance);
             }, transitionParameters);
         }
 
-        public static void Show<T>(WindowBase source, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
-            WindowSystem.instance.Show_INTERNAL<T, System.Action<T>>(onInitialized, source, default, static (instance, state) => {
+        public static WindowHandler<T> Show<T>(WindowBase source, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+            return WindowSystem.instance.Show_INTERNAL<T, System.Action<T>>(onInitialized, source, default, static (instance, state) => {
                 state?.Invoke(instance);
             }, transitionParameters);
-            
         }
 
-        public static void Show<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
-            WindowSystem.instance.Show_INTERNAL(initialParameters, onInitialized, transitionParameters);
-
+        public static WindowHandler<T> Show<T>(InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+            return WindowSystem.instance.Show_INTERNAL(initialParameters, onInitialized, transitionParameters);
         }
 
-        public static void Show(WindowBase source, InitialParameters initialParameters, System.Action<WindowBase> onInitialized = null, TransitionParameters transitionParameters = default) {
-
-            WindowSystem.instance.Show_INTERNAL<WindowBase, System.Action<WindowBase>>(onInitialized, source, initialParameters, static (instance, state) => {
+        public static WindowHandler<WindowBase> Show(WindowBase source, InitialParameters initialParameters, System.Action<WindowBase> onInitialized = null, TransitionParameters transitionParameters = default) {
+            return WindowSystem.instance.Show_INTERNAL<WindowBase, System.Action<WindowBase>>(onInitialized, source, initialParameters, static (instance, state) => {
                 state?.Invoke(instance);
             }, transitionParameters);
-
         }
 
-        public static void Show<T>(WindowBase source, InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
-
-            WindowSystem.instance.Show_INTERNAL<T, System.Action<T>>(onInitialized, source, initialParameters, static (instance, state) => {
+        public static WindowHandler<T> Show<T>(WindowBase source, InitialParameters initialParameters, System.Action<T> onInitialized = null, TransitionParameters transitionParameters = default) where T : WindowBase {
+            return WindowSystem.instance.Show_INTERNAL<T, System.Action<T>>(onInitialized, source, initialParameters, static (instance, state) => {
                 state?.Invoke(instance);
             }, transitionParameters);
-
         }
 
         public static void RemoveWindow(WindowBase instance) {

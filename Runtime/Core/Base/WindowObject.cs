@@ -970,6 +970,8 @@ namespace UnityEngine.UI.Windows {
 
         public bool RegisterSubObject(WindowObject windowObject) {
 
+            if (windowObject == null) return false;
+            
             windowObject.Setup(this.window);
             
             if (this.subObjects.Contains(windowObject) == false) {

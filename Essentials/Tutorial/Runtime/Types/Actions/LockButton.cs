@@ -7,6 +7,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         public TagComponent tag;
         public TutorialData nextOnClick;
+        public bool blockNextEvents;
 
         public ActionResult Execute(in Context context) {
 
@@ -24,6 +25,10 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
             this.Do(in context);
 
+            if (this.blockNextEvents == true) {
+                return ActionResult.Break;
+            }
+            
             return ActionResult.MoveNext;
 
         }
@@ -39,6 +44,10 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             
             if (this.nextOnClick != null) {
                 context.system.TryToStart(context.window, this.nextOnClick, TutorialWindowEvent.OnAny, false);
+            }
+
+            if (this.blockNextEvents == true) {
+                context.data.RunActions(context, context.index + 1);
             }
 
         }

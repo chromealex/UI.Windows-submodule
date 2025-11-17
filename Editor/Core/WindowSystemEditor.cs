@@ -192,13 +192,15 @@ namespace UnityEditor.UI.Windows {
                     GUILayout.Space(10f);
                     GUILayout.BeginHorizontal();
                     GUILayout.FlexibleSpace();
-                    if (GUILayout.Button("Collect prefabs", GUILayout.Width(200f), GUILayout.Height(30f)) == true) {
+                    if (GUILayout.Button("Collect Prefabs", GUILayout.Width(200f), GUILayout.Height(30f)) == true) {
 
                         var list = new List<WindowBase>();
                         var gameObjects = AssetDatabase.FindAssets("t:GameObject");
                         foreach (var guid in gameObjects) {
 
                             var path = AssetDatabase.GUIDToAssetPath(guid);
+                            var dir = System.IO.Path.GetDirectoryName(path);
+                            if (System.IO.File.Exists($"{dir}/UIWS-IgnoreCollect.txt") == true) continue;
                             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
                             var win = asset.GetComponent<WindowBase>();
                             if (win != null) {

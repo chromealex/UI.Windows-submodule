@@ -1602,7 +1602,7 @@ namespace UnityEngine.UI.Windows {
             };
             resources.LoadAsync<T, LoadAsyncClosure<T, TState>>(new WindowSystemResources.LoadParameters() { async = async },this.GetWindow(), data, resource, static (asset, closure) => {
 
-                if (asset != null) {
+                if (asset != null && closure.component != null) {
 
                     var instance = closure.component.Load(asset);
                     if (closure.onComplete != null) closure.onComplete.Invoke(instance, closure.state);

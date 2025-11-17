@@ -10,6 +10,18 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         public ActionResult Execute(in Context context) {
 
+            if (this.tag.isList == true) {
+                // wait for required index
+                var index = this.tag.listIndex;
+                if (context.window is UnityEngine.UI.Windows.Components.ListComponent list) {
+                    if (index >= list.Count) {
+                        var contextData = context;
+                        UnityEngine.UI.Windows.Utilities.Coroutines.NextFrame(contextData, static (contextData) => { contextData.data.RunActions(contextData, contextData.index); });
+                        return ActionResult.Break;
+                    }
+                }
+            }
+
             this.Do(in context);
 
             return ActionResult.MoveNext;

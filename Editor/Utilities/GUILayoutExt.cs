@@ -287,6 +287,26 @@ namespace UnityEditor.UI.Windows {
 							    }
                         
 						    }
+						    if (GUILayout.Button("Generate Extended", GUILayout.Width(140f), GUILayout.Height(30f)) == true) {
+
+							    var obj = (Component)target;
+							    if (PrefabUtility.IsPartOfAnyPrefab(obj) == true) {
+
+								    var path = AssetDatabase.GetAssetPath(obj.gameObject);
+								    using (var edit = new EditPrefabAssetScope(path)) {
+
+									    EditorHelpers.AddSafeZone(edit.prefabRoot.transform, true);
+                                
+								    }
+                            
+							    } else {
+
+								    var root = obj.gameObject;
+								    EditorHelpers.AddSafeZone(root.transform, true);
+                            
+							    }
+                        
+						    }
 						    GUILayout.FlexibleSpace();
 						    GUILayout.EndHorizontal();
                             

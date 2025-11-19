@@ -64,7 +64,7 @@
 
         public override void OnValidate() {
 
-            this.rectTransform = this.GetComponent<RectTransform>();
+            if (this.rectTransform == null) this.rectTransform = this.GetComponent<RectTransform>();
             this.SetInitialValues(this.hiddenState);
             this.SetInitialValues(this.shownState);
             this.SetInitialValues(this.resetState);

@@ -72,14 +72,14 @@ namespace ME.Taptic {
 
         private bool isMuted = false;
 
-        public TapticEngine() {
+        public TapticEngine(bool logs = true) {
 
             #if UNITY_IOS && !UNITY_EDITOR
             this.bridge = new TapticBridgeiOS();
             #elif UNITY_ANDROID && !UNITY_EDITOR
             this.bridge = new TapticBridgeAndroid();
             #else
-            this.bridge = new TapticBridgeDummy();
+            this.bridge = new TapticBridgeDummy() { logs = logs, };
             #endif
 
         }

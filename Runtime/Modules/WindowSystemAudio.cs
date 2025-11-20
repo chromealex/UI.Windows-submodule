@@ -37,7 +37,7 @@ namespace UnityEngine.UI.Windows {
         
         public void Start() {
 
-            this.taptic = new ME.Taptic.TapticEngine();
+            this.taptic = new ME.Taptic.TapticEngine(false);
             this.taptic.SetActiveModule(new ME.Taptic.TapticAnimationCurveImpl());
             
             WindowSystem.AddCallbackOnAnyInteractable(this.OnAnyInteractable);

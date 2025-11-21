@@ -225,6 +225,8 @@ namespace UnityEngine.UI.Windows {
                 source.volume = this.audioSource.volume;
             }
 
+            source.loop = parameters.loop;
+            
         }
 
         public void Stop(UIWSAudioEvent clip) {

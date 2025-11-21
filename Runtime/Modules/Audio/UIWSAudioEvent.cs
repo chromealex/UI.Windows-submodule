@@ -20,6 +20,7 @@ namespace UnityEngine.UI.Windows.Runtime.Modules.Audio {
             public UnityEngine.Vector2 randomVolumeValue;
             [UnityEngine.RangeAttribute(0f, 1f)]
             public float volumeValue;
+            public bool loop;
 
         }
 

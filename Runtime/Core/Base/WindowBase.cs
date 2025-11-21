@@ -255,7 +255,7 @@
         public override void TurnOffRender() {
             
             base.TurnOffRender();
-            
+
             this.workCamera.enabled = false;
             
         }

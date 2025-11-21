@@ -357,23 +357,17 @@ namespace UnityEngine.UI.Windows {
 
                 var instance = item.instance;
                 if (instance.IsVisible() == false) continue;
+                if (instance.preferences.takeFocus == false) continue;
 
                 var depth = instance.GetDepth();
                 if (depth < window.GetDepth()) {
-
                     if (state == false) {
-
                         instance.TurnOffRender();
-
                     } else {
-
                         instance.TurnOnRender();
-
                     }
-
                     // If beneath window has fullCoverage - break enumeration because beneath graph has its own coverage handler
                     if (instance.preferences.fullCoverage == true) break;
-
                 }
 
             }

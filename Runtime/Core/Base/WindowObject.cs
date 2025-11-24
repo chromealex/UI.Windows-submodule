@@ -1209,15 +1209,6 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private class InitLoader<TState> {
-
-            public bool loaded;
-            public WindowObject instance;
-            public TState state;
-            public System.Action<TState> callback;
-
-        }
-
         private void SetLoaded() {
             
             this.SetState(ObjectState.Loaded);
@@ -1262,14 +1253,30 @@ namespace UnityEngine.UI.Windows {
 
             }
 
-            for (int i = 0; i < this.subObjects.Count; ++i) {
+            if (this.subObjects.Count > 0) {
 
-                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
-                this.subObjects[i].DoInitAsync(state);
+                var initialized = PoolClass<WaitForInitialized<TState>>.Spawn();
+                initialized.state = state;
+                initialized.callback = callback;
+                initialized.count = 0;
+                for (int i = 0; i < this.subObjects.Count; ++i) {
 
+                    if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
+                    ++initialized.count;
+                    this.subObjects[i].DoInitAsync(initialized, static (loader) => { --loader.count; });
+
+                }
+
+                Coroutines.Wait(initialized, static (loader) => loader.count == 0, static (loader) => {
+                    loader.callback?.Invoke(loader.state);
+                    PoolClass<WaitForInitialized<TState>>.Recycle(loader);
+                });
+
+            } else {
+                
+                callback?.Invoke(state);
+                
             }
-            
-            callback?.Invoke(state);
 
         }
         

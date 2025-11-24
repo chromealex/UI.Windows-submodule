@@ -3,6 +3,23 @@ namespace UnityEngine.UI.Windows {
     using Modules;
     using UnityEngine.UI.Windows.Utilities;
     
+    public class InitLoader<TState> {
+
+        public bool loaded;
+        public WindowObject instance;
+        public TState state;
+        public System.Action<TState> callback;
+
+    }
+
+    public class WaitForInitialized<TState> {
+
+        public int count;
+        public TState state;
+        public System.Action<TState> callback;
+
+    }
+
     public struct LayoutLoadingClosure {
 
         public int index;

@@ -497,6 +497,7 @@ namespace UnityEngine.UI.Windows {
 
             {
 
+                WindowSystem.TryAddUpdateListener(instance);
                 instance.OnShowBeginInternal();
                 instance.OnShowBegin();
                 WindowSystem.RaiseEvent(instance, WindowEvent.OnShowBegin);

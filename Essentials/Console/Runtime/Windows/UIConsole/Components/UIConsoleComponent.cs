@@ -15,7 +15,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
     }
     
-    public class UIConsoleComponent : WindowComponent {
+    public class UIConsoleComponent : WindowComponent, IUpdate {
 
         public LinePopupComponent linePopupComponent;
         public CustomPopupComponent customPopupComponent;
@@ -182,7 +182,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         }
 
         private int prevScreenSize;
-        public void Update() {
+        public void OnUpdate(float dt) {
 
             if (this.console == null) return;
             

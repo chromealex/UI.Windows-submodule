@@ -26,9 +26,8 @@ namespace UnityEngine.UI.Windows {
             return WindowSystem.instance.hasPointerDownThisFrame;
 
         }
-
         
-        public void Update() {
+        public void DoUpdateInput() {
 
             if (this.modules != null) {
 

@@ -151,6 +151,17 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        private struct WithInstance<T> : System.IEquatable<WithInstance<T>> where T : WindowObject {
+
+            public WindowObject component;
+            public System.Action<T> action;
+
+            public bool Equals(WithInstance<T> other) {
+                return this.component == other.component && this.action == other.action;
+            }
+
+        }
+
         private struct SetCallbackData<T> : System.IEquatable<SetCallbackData<T>> {
 
             public T data;
@@ -190,6 +201,13 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        public void SetCallback<T>(System.Action<T> callback) where T : ButtonComponent {
+
+            this.RemoveCallbacks();
+            this.AddCallback(callback);
+
+        }
+
         public void AddCallback(System.Action callback) {
 
             this.callbackRegistries.Add(callback);
@@ -205,6 +223,12 @@ namespace UnityEngine.UI.Windows.Components {
         public void AddCallback(System.Action<ButtonComponent> callback) {
 
             this.AddCallback(new WithInstance() { component = this, action = callback, }, cb => cb.action.Invoke(cb.component));
+
+        }
+
+        public void AddCallback<T>(System.Action<T> callback) where T : ButtonComponent {
+
+            this.AddCallback(new WithInstance<T>() { component = this, action = callback, }, cb => cb.action.Invoke((T)cb.component));
 
         }
 

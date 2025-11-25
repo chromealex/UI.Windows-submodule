@@ -1,6 +1,6 @@
 namespace UnityEngine.UI.Windows {
 
-    public struct CallbackRegistries {
+    public struct CallbackRegistries : System.IEquatable<CallbackRegistries> {
 
         public abstract class RegistryBase {
 
@@ -45,6 +45,12 @@ namespace UnityEngine.UI.Windows {
             public System.Action<T> callback;
             public T data;
 
+            public void Invoke(T obj) {
+
+                this.callback?.Invoke(obj);
+
+            }
+
             public override void Invoke() {
 
                 this.callback?.Invoke(this.data);
@@ -76,12 +82,14 @@ namespace UnityEngine.UI.Windows {
         }
 
         private System.Collections.Generic.List<RegistryBase> list;
-        private int count;
         
-        public int Count {
-            get {
-                return this.count;
-            }
+        public int Count => this.list.Count;
+
+        public void InitializeAuto(WindowObject windowObject) {
+            this.Initialize();
+            WindowSystem.GetEvents().RegisterOnce(this, windowObject, WindowEvent.OnDeInitialize, static (obj, state) => {
+                state.DeInitialize();
+            });
         }
 
         public void Initialize() {
@@ -114,7 +122,6 @@ namespace UnityEngine.UI.Windows {
                     if (reg.Remove(callback) == true) {
                         
                         this.list.RemoveAt(i);
-                        --this.count;
                         --i;
                         
                     }
@@ -137,7 +144,6 @@ namespace UnityEngine.UI.Windows {
                     if (reg.Remove(state, callback) == true) {
 
                         this.list.RemoveAt(i);
-                        --this.count;
                         --i;
                         
                     }
@@ -155,7 +161,6 @@ namespace UnityEngine.UI.Windows {
             var item = PoolClass<RegistryNoState>.Spawn();
             item.callback = callback;
             this.list.Add(item);
-            ++this.count;
 
         }
 
@@ -167,7 +172,16 @@ namespace UnityEngine.UI.Windows {
             item.data = state;
             item.callback = callback;
             this.list.Add(item);
-            ++this.count;
+
+        }
+
+        public void Add<T>(System.Action<T> callback) where T : System.IEquatable<T> {
+            
+            this.Initialize();
+            
+            var item = PoolClass<Registry<T>>.Spawn();
+            item.callback = callback;
+            this.list.Add(item);
 
         }
 
@@ -182,7 +196,6 @@ namespace UnityEngine.UI.Windows {
 
             }
             this.list.Clear();
-            this.count = 0;
             
         }
 
@@ -192,7 +205,7 @@ namespace UnityEngine.UI.Windows {
 
             var copy = PoolClass<System.Collections.Generic.List<RegistryBase>>.Spawn();
             copy.Clear();
-            for (var i = 0; i < this.list.Count; ++i) copy.Add(this.list[i]);
+            copy.AddRange(this.list);
             
             for (var i = 0; i < copy.Count; ++i) {
 
@@ -203,6 +216,41 @@ namespace UnityEngine.UI.Windows {
 
             PoolClass<System.Collections.Generic.List<RegistryBase>>.Recycle(ref copy);
 
+        }
+
+        public void Invoke<T>(T obj) where T : System.IEquatable<T> {
+
+            if (this.list == null) return;
+
+            var copy = PoolClass<System.Collections.Generic.List<Registry<T>>>.Spawn();
+            copy.Clear();
+            foreach (var item in this.list) {
+                if (item is Registry<T> reg) {
+                    copy.Add(reg);
+                }
+            }
+            
+            for (var i = 0; i < copy.Count; ++i) {
+
+                var item = copy[i];
+                item.Invoke(obj);
+                
+            }
+
+            PoolClass<System.Collections.Generic.List<Registry<T>>>.Recycle(ref copy);
+
+        }
+
+        public bool Equals(CallbackRegistries other) {
+            return Equals(this.list, other.list);
+        }
+
+        public override bool Equals(object obj) {
+            return obj is CallbackRegistries other && this.Equals(other);
+        }
+
+        public override int GetHashCode() {
+            return System.HashCode.Combine(this.list);
         }
 
     }

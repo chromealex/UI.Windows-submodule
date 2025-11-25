@@ -68,7 +68,7 @@ namespace UnityEngine.UI.Windows {
             
     }
 
-    public struct ShowInstanceClosure<T, TState> {
+    public struct ShowInstanceClosure<T, TState> : System.IEquatable<ShowInstanceClosure<T, TState>> {
 
         public WindowSystem instance;
         public TransitionParameters parameters;
@@ -77,7 +77,19 @@ namespace UnityEngine.UI.Windows {
         public InitialParameters initialParameters;
         public TransitionParameters transitionParameters;
         public System.Action<T, TState> onInitialized;
-            
+
+        public bool Equals(ShowInstanceClosure<T, TState> other) {
+            return Equals(this.instance, other.instance) && this.parameters.Equals(other.parameters) && System.Collections.Generic.EqualityComparer<TState>.Default.Equals(this.state, other.state) && Equals(this.existInstance, other.existInstance) && this.initialParameters.Equals(other.initialParameters) && this.transitionParameters.Equals(other.transitionParameters) && Equals(this.onInitialized, other.onInitialized);
+        }
+
+        public override bool Equals(object obj) {
+            return obj is ShowInstanceClosure<T, TState> other && this.Equals(other);
+        }
+
+        public override int GetHashCode() {
+            return System.HashCode.Combine(this.instance, this.parameters, this.state, this.existInstance, this.initialParameters, this.transitionParameters, this.onInitialized);
+        }
+
     }
 
     public struct DoInitClosure {

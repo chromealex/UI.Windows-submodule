@@ -49,28 +49,28 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static void RaiseEvent<TState>(TState state, WindowObject instance, WindowEvent windowEvent) {
+        public static void RaiseEvent<TState>(WindowObject instance, WindowEvent windowEvent) where TState : System.IEquatable<TState> {
 
             var events = WindowSystem.GetEvents();
-            events.Raise(state, instance, windowEvent);
+            events.Raise<TState>(instance, windowEvent);
 
         }
 
-        public static void RegisterActionOnce<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
+        public static void RegisterActionOnce<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) where TState : System.IEquatable<TState> {
 
             var events = WindowSystem.GetEvents();
             events.RegisterOnce(state, instance, windowEvent, callback);
 
         }
 
-        public static void RegisterAction<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
+        public static void RegisterAction<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) where TState : System.IEquatable<TState> {
 
             var events = WindowSystem.GetEvents();
             events.Register(state, instance, windowEvent, callback);
 
         }
 
-        public static void UnRegisterAction<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
+        public static void UnRegisterAction<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) where TState : System.IEquatable<TState> {
 
             var events = WindowSystem.GetEvents();
             events.UnRegister(state, instance, windowEvent, callback);

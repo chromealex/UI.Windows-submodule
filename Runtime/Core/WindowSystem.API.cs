@@ -2,6 +2,33 @@ using System.Collections.Generic;
 
 namespace UnityEngine.UI.Windows {
 
+    public struct WindowHandler {
+
+        private WindowBase instance;
+
+        public WindowBase screen => this.instance;
+
+        public T GetWindow<T>() where T : WindowBase {
+            return this.instance as T;
+        }
+
+        public void Hide() {
+            this.instance.Hide();
+        }
+
+        public void Hide(TransitionParameters transitionParameters) {
+            this.instance.Hide(transitionParameters);
+        }
+
+        public ObjectState GetState() => this.instance.GetState();
+        public FocusState GetFocusState() => this.instance.GetFocusState();
+
+        public static implicit operator WindowHandler(WindowBase window) {
+            return new WindowHandler() { instance = window };
+        }
+
+    }
+
     public struct WindowHandler<T> where T : WindowBase {
 
         private T instance;
@@ -24,6 +51,10 @@ namespace UnityEngine.UI.Windows {
 
         public ObjectState GetState() => this.instance.GetState();
         public FocusState GetFocusState() => this.instance.GetFocusState();
+
+        public static implicit operator WindowBase(WindowHandler<T> handler) {
+            return handler.instance;
+        }
 
     }
     

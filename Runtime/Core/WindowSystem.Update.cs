@@ -14,6 +14,7 @@ namespace UnityEngine.UI.Windows {
         
         private readonly List<WindowObject> updates = new List<WindowObject>();
         private readonly List<WindowObject> lateUpdates = new List<WindowObject>();
+        private readonly List<WindowObject> toRemoveTemp = new List<WindowObject>();
 
         public static bool TryAddUpdateListener(WindowObject component) {
             var result = false;
@@ -28,23 +29,28 @@ namespace UnityEngine.UI.Windows {
             }
 
             if (result == true) {
-                WindowSystem.GetEvents().RegisterOnce(component, WindowEvent.OnHideEnd, static (obj) => {
-                    TryRemoveUpdateListener(obj);
-                });
+                WindowSystem.GetEvents().RegisterOnce(component, WindowEvent.OnHideEnd, static (obj) => TryRemoveUpdateListener(obj));
             }
             return result;
         }
 
-        public static bool TryRemoveUpdateListener(WindowObject component) {
-            var result = false;
+        public static void TryRemoveUpdateListener(WindowObject component) {
             var instance = WindowSystem.instance;
-            if (component is IUpdate) {
-                result |= instance.updates.Remove(component);
+            instance.toRemoveTemp.Add(component);
+        }
+
+        private void ApplyRemoved() {
+
+            foreach (var component in this.toRemoveTemp) {
+                if (component is IUpdate) {
+                    instance.updates.Remove(component);
+                }
+                if (component is ILateUpdate) {
+                    instance.lateUpdates.Remove(component);
+                }
             }
-            if (component is ILateUpdate) {
-                result |= instance.lateUpdates.Remove(component);
-            }
-            return result;
+            this.toRemoveTemp.Clear();
+
         }
 
         private void DoUpdateComponents(float dt) {
@@ -55,6 +61,8 @@ namespace UnityEngine.UI.Windows {
                 ((IUpdate)component).OnUpdate(dt);
             }
 
+            this.ApplyRemoved();
+
         }
 
         private void DoLateUpdateComponents(float dt) {
@@ -64,6 +72,8 @@ namespace UnityEngine.UI.Windows {
                 if (component.IsVisible() == false) continue;
                 ((ILateUpdate)component).OnLateUpdate(dt);
             }
+            
+            this.ApplyRemoved();
             
         }
 
@@ -77,7 +87,7 @@ namespace UnityEngine.UI.Windows {
         public void LateUpdate() {
             
             this.DoLateUpdateComponents(Time.deltaTime);
-            
+
         }
         
     }

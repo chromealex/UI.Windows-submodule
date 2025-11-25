@@ -15,6 +15,7 @@ namespace UnityEngine.UI.Windows.Components {
         Digits = 0,
         Seconds,
         Milliseconds,
+        Percent,
 
     }
 
@@ -436,6 +437,7 @@ namespace UnityEngine.UI.Windows.Components {
             this.ResetLastCacheOther(CacheLayer.Value);
 
             switch (sourceValue) {
+                case SourceValue.Percent:
                 case SourceValue.Digits:
                     break;
 
@@ -463,18 +465,20 @@ namespace UnityEngine.UI.Windows.Components {
             this.lastValueData = currentData;
 
             strFormat = default;
-            if (timeShortestVariant > TimeResult.None && timeShortestVariant < timeValueResult) {
-
-                var ts = new TimeShort(value, this.timeResultStrings, sourceValue);
-                strFormat = ts.GetShortestString(timeShortestVariant, timeValueResult);
-
-            } else {
-
-                strFormat = this.GetFormatTimeString(this.timeResultStrings, timeValueResult);
-
+            if (sourceValue == SourceValue.Milliseconds || sourceValue == SourceValue.Seconds) {
+                if (timeShortestVariant > TimeResult.None && timeShortestVariant < timeValueResult) {
+                    var ts = new TimeShort(value, this.timeResultStrings, sourceValue);
+                    strFormat = ts.GetShortestString(timeShortestVariant, timeValueResult);
+                } else {
+                    strFormat = this.GetFormatTimeString(this.timeResultStrings, timeValueResult);
+                }
             }
 
             switch (sourceValue) {
+                case SourceValue.Percent:
+                    this.SetText_INTERNAL($"{value.ToString(System.Globalization.CultureInfo.InvariantCulture)}%");
+                    break;
+
                 case SourceValue.Digits:
                     this.SetText_INTERNAL(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
                     break;

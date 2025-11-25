@@ -1134,6 +1134,12 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public bool IsWindow<T>() where T : WindowBase {
+
+            return (this.GetWindow() as T) != null;
+
+        }
+
         public void SetResetStateHierarchy() {
 
             this.SetResetState();

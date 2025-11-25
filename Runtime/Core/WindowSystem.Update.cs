@@ -51,6 +51,7 @@ namespace UnityEngine.UI.Windows {
 
             for (var index = this.updates.Count - 1; index >= 0; --index) {
                 var component = this.updates[index];
+                if (component.IsVisible() == false) continue;
                 ((IUpdate)component).OnUpdate(dt);
             }
 
@@ -60,6 +61,7 @@ namespace UnityEngine.UI.Windows {
 
             for (var index = this.lateUpdates.Count - 1; index >= 0; --index) {
                 var component = this.lateUpdates[index];
+                if (component.IsVisible() == false) continue;
                 ((ILateUpdate)component).OnLateUpdate(dt);
             }
             

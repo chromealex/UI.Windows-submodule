@@ -7,7 +7,10 @@ namespace UnityEngine.UI.Windows.Runtime.Modules.Audio {
         public struct Parameters {
 
             public int maxCount;
-
+            [Range(0f, 1f)] 
+            public float lengthFactor;
+            
+            [Space(10f)]
             public bool changePitch;
             public bool randomPitch;
             public UnityEngine.Vector2 randomPitchValue;
@@ -33,6 +36,7 @@ namespace UnityEngine.UI.Windows.Runtime.Modules.Audio {
         public UnityEngine.AudioClip[] randomClips;
 
         public Parameters parameters = new Parameters() {
+            lengthFactor = 1f,
             pitchValue = 1f,
             volumeValue = 1f,
         };

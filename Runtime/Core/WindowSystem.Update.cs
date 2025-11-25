@@ -49,15 +49,19 @@ namespace UnityEngine.UI.Windows {
 
         private void DoUpdateComponents(float dt) {
 
-            foreach (var component in this.updates) {
+            for (var index = this.updates.Count - 1; index >= 0; --index) {
+                var component = this.updates[index];
+                if (component.IsVisible() == false) continue;
                 ((IUpdate)component).OnUpdate(dt);
             }
-            
+
         }
 
         private void DoLateUpdateComponents(float dt) {
 
-            foreach (var component in this.lateUpdates) {
+            for (var index = this.lateUpdates.Count - 1; index >= 0; --index) {
+                var component = this.lateUpdates[index];
+                if (component.IsVisible() == false) continue;
                 ((ILateUpdate)component).OnLateUpdate(dt);
             }
             

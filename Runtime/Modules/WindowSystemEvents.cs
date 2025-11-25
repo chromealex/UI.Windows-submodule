@@ -16,6 +16,13 @@ namespace UnityEngine.UI.Windows.Modules {
 
             public abstract bool ContainsCache(long key);
 
+            public virtual void Raise(WindowObject instance, WindowEvent windowEvent) {
+            }
+
+            public virtual int GetCount(long key) {
+                return 0;
+            }
+
         }
         
         public class Registry : RegistryBase {
@@ -32,6 +39,17 @@ namespace UnityEngine.UI.Windows.Modules {
                 this.objects.Clear();
             }
 
+            public override int GetCount(long key) {
+                var count = 0;
+                if (this.cache.ContainsKey(key) == true) {
+                    ++count;
+                }
+                if (this.cacheOnce.ContainsKey(key) == true) {
+                    ++count;
+                }
+                return count;
+            }
+
             public override Dictionary<long, Info> GetObjects() {
                 return this.objects;
             }
@@ -69,14 +87,14 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        public class Registry<T> : RegistryBase {
+        public class Registry<T> : RegistryBase where T : System.IEquatable<T> {
 
             public static bool isCreated;
             public static readonly Registry<T> instance = new Registry<T>();
 
-            internal readonly Dictionary<int, System.Action<WindowObject, T>> cacheUnknown = new Dictionary<int, System.Action<WindowObject, T>>();
-            internal readonly Dictionary<long, System.Action<WindowObject, T>> cache = new Dictionary<long, System.Action<WindowObject, T>>();
-            internal readonly Dictionary<long, System.Action<WindowObject, T>> cacheOnce = new Dictionary<long, System.Action<WindowObject, T>>();
+            internal readonly Dictionary<(int, T), System.Action<WindowObject, T>> cacheUnknown = new Dictionary<(int, T), System.Action<WindowObject, T>>();
+            internal readonly Dictionary<(long, T), System.Action<WindowObject, T>> cache = new Dictionary<(long, T), System.Action<WindowObject, T>>();
+            internal readonly Dictionary<(long, T), System.Action<WindowObject, T>> cacheOnce = new Dictionary<(long, T), System.Action<WindowObject, T>>();
             internal readonly Dictionary<long, Info> objects = new Dictionary<long, Info>();
             
             public override void Clear() {
@@ -86,39 +104,78 @@ namespace UnityEngine.UI.Windows.Modules {
                 this.objects.Clear();
             }
 
+            public override int GetCount(long key) {
+                var count = 0;
+                foreach (var kv in this.cache) {
+                    if (kv.Key.Item1 == key) {
+                        ++count;
+                    }
+                }
+                foreach (var kv in this.cacheOnce) {
+                    if (kv.Key.Item1 == key) {
+                        ++count;
+                    }
+                }
+                return count;
+            }
+
+            public override void Raise(WindowObject instance, WindowEvent windowEvent) {
+                
+                var key = UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent);
+                foreach (var kv in this.cache) {
+                    if (kv.Key.Item1 == key) {
+                        kv.Value.Invoke(instance, kv.Key.Item2);
+                    }
+                }
+                foreach (var kv in this.cacheOnce) {
+                    if (kv.Key.Item1 == key) {
+                        kv.Value.Invoke(instance, kv.Key.Item2);
+                        this.cacheOnce.Remove(kv.Key);
+                        break;
+                    }
+                }
+                
+                foreach (var kv in this.cacheUnknown) {
+                    if (kv.Key.Item1 == (int)windowEvent) {
+                        kv.Value.Invoke(instance, kv.Key.Item2);
+                    }
+                }
+                
+            }
+
             public override Dictionary<long, Info> GetObjects() {
                 return this.objects;
             }
 
             public override bool ContainsCache(long key) {
-                return this.cache.ContainsKey(key);
+                foreach (var kv in this.cache) {
+                    if (kv.Key.Item1 == key) return true;
+                }
+                return false;
             }
 
             public override void Clear(WindowObject instance, int eventsCount) {
-                
-                for (int i = 0; i <= eventsCount; ++i) {
 
-                    var key = UIWSMath.GetKey(instance.GetHashCode(), i);
-                    {
-                        if (this.cache.ContainsKey(key) == true) {
-
-                            this.cache[key] = null;
-
+                foreach (var kv in this.cache) {
+                    for (int i = 0; i <= eventsCount; ++i) {
+                        var key = UIWSMath.GetKey(instance.GetHashCode(), i);
+                        if (kv.Key.Item1 == key) {
+                            this.cache[kv.Key] = null;
+                            this.objects.Remove(key);
                         }
                     }
-                    {
-                        if (this.cacheOnce.ContainsKey(key) == true) {
-
-                            this.cacheOnce[key] = null;
-
-                        }
-                    }
-                    {
-                        this.objects.Remove(key);
-                    }
-
                 }
-                
+
+                foreach (var kv in this.cacheOnce) {
+                    for (int i = 0; i <= eventsCount; ++i) {
+                        var key = UIWSMath.GetKey(instance.GetHashCode(), i);
+                        if (kv.Key.Item1 == key) {
+                            this.cacheOnce[kv.Key] = null;
+                            this.objects.Remove(key);
+                        }
+                    }
+                }
+
             }
 
         }
@@ -179,39 +236,40 @@ namespace UnityEngine.UI.Windows.Modules {
                 
             }
 
+            foreach (var reg in this.registriesGeneric) {
+                reg.Raise(instance, windowEvent);
+            }
+            
         }
 
-        public void Raise<TState>(TState state, WindowObject instance, WindowEvent windowEvent) {
+        public void Raise<TState>(WindowObject instance, WindowEvent windowEvent) where TState : System.IEquatable<TState> {
 
             if (windowEvent == WindowEvent.None || instance == null) return;
             
             var registry = this.GetInstance<TState>();
             var key = UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent);
-            {
-                if (registry.cache.TryGetValue(key, out var actions) == true) {
-
-                    actions?.Invoke(instance, state);
-
+            foreach (var kv in registry.cache) {
+                if (kv.Key.Item1 == key) {
+                    kv.Value?.Invoke(instance, kv.Key.Item2);
+                    break;
                 }
             }
-
-            {
-                if (registry.cacheOnce.TryGetValue(key, out var actions) == true) {
-
-                    actions?.Invoke(instance, state);
-                    registry.cacheOnce.Remove(key);
-
+            foreach (var kv in registry.cacheOnce) {
+                if (kv.Key.Item1 == key) {
+                    kv.Value?.Invoke(instance, kv.Key.Item2);
+                    registry.cacheOnce.Remove(kv.Key);
+                    break;
                 }
             }
-
+            
             {
-                
-                if (registry.cacheUnknown.TryGetValue((int)windowEvent, out var actions) == true) {
-
-                    actions?.Invoke(instance, state);
-
+                key = (int)windowEvent;
+                foreach (var kv in registry.cacheUnknown) {
+                    if (kv.Key.Item1 == key) {
+                        kv.Value?.Invoke(instance, kv.Key.Item2);
+                        break;
+                    }
                 }
-                
             }
 
         }
@@ -235,12 +293,12 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
 
-        public void Register<TState>(TState state, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
+        public void Register<TState>(TState state, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) where TState : System.IEquatable<TState> {
 
             if (windowEvent == WindowEvent.None) return;
 
             var registryInstance = this.GetInstance<TState>();
-            var key = (int)windowEvent;
+            var key = ((int)windowEvent, state);
             if (registryInstance.cacheUnknown.TryGetValue(key, out var actions) == true) {
 
                 actions += callback;
@@ -269,12 +327,12 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
 
-        public void UnRegister<TState>(TState state, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
+        public void UnRegister<TState>(TState state, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) where TState : System.IEquatable<TState> {
 
             if (windowEvent == WindowEvent.None) return;
 
             var registryInstance = this.GetInstance<TState>();
-            var key = (int)windowEvent;
+            var key = ((int)windowEvent, state);
             if (registryInstance.cacheUnknown.TryGetValue(key, out var actions) == true) {
 
                 actions -= callback;
@@ -313,12 +371,12 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        public void RegisterOnce<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
+        public void RegisterOnce<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) where TState : System.IEquatable<TState> {
 
             if (windowEvent == WindowEvent.None) return;
 
             var registryInstance = this.GetInstance<TState>();
-            var key = UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent);
+            var key = (UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent), state);
             if (registryInstance.cacheOnce.TryGetValue(key, out var actions) == true) {
 
                 actions += callback;
@@ -330,11 +388,11 @@ namespace UnityEngine.UI.Windows.Modules {
 
             }
 
-            if (registryInstance.objects.ContainsKey(key) == false) registryInstance.objects.Add(key, new Info() { instance = instance, name = instance.name });
+            if (registryInstance.objects.ContainsKey(key.Item1) == false) registryInstance.objects.Add(key.Item1, new Info() { instance = instance, name = instance.name });
 
         }
 
-        private Registry<TState> GetInstance<TState>() {
+        private Registry<TState> GetInstance<TState>() where TState : System.IEquatable<TState> {
             if (Registry<TState>.isCreated == false) {
                 Registry<TState>.isCreated = true;
                 this.registriesGeneric.Add(Registry<TState>.instance);
@@ -363,12 +421,12 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        public void Register<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
+        public void Register<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) where TState : System.IEquatable<TState> {
 
             if (windowEvent == WindowEvent.None) return;
 
             var registryInstance = this.GetInstance<TState>();
-            var key = UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent);
+            var key = (UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent), state);
             if (registryInstance.cache.TryGetValue(key, out var actions) == true) {
 
                 actions += callback;
@@ -380,7 +438,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
             }
             
-            if (registryInstance.objects.ContainsKey(key) == false) registryInstance.objects.Add(key, new Info() { instance = instance, name = instance.name });
+            if (registryInstance.objects.ContainsKey(key.Item1) == false) registryInstance.objects.Add(key.Item1, new Info() { instance = instance, name = instance.name });
 
         }
 
@@ -399,12 +457,12 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        public void UnRegister<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) {
+        public void UnRegister<TState>(TState state, WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject, TState> callback) where TState : System.IEquatable<TState> {
 
             if (windowEvent == WindowEvent.None) return;
 
             var registryInstance = this.GetInstance<TState>();
-            var key = UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent);
+            var key = (UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent), state);
             if (registryInstance.cache.TryGetValue(key, out var actions) == true) {
 
                 actions -= callback;
@@ -428,12 +486,12 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        public void UnRegister<TState>(TState state, WindowObject instance, WindowEvent windowEvent) {
+        public void UnRegister<TState>(TState state, WindowObject instance, WindowEvent windowEvent) where TState : System.IEquatable<TState> {
 
             if (windowEvent == WindowEvent.None) return;
 
             var registryInstance = this.GetInstance<TState>();
-            var key = UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent);
+            var key = (UIWSMath.GetKey(instance.GetHashCode(), (int)windowEvent), state);
             if (registryInstance.cache.ContainsKey(key) == true) {
 
                 registryInstance.cache[key] = null;

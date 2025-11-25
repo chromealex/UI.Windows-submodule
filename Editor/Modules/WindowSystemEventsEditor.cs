@@ -37,9 +37,11 @@ namespace UnityEditor.UI.Windows {
 
         private void DrawRegistry(WindowSystemEvents.RegistryBase registry) {
             
-            UnityEditor.UI.Windows.GUILayoutExt.DrawHeader($"Registry: {registry}");
+            UnityEditor.UI.Windows.GUILayoutExt.DrawHeader($"Registry: {registry.GetType().Name}");
             foreach (var item in registry.GetObjects()) {
 
+                var count = registry.GetCount(item.Key);
+                if (count == 0) continue;
                 UnityEditor.UI.Windows.GUILayoutExt.Box(2f, 2f, () => {
 
                     if (item.Value.instance == null) {
@@ -53,7 +55,7 @@ namespace UnityEditor.UI.Windows {
                     }
 
                     UnityEngine.UI.Windows.Utilities.UIWSMath.GetKey(item.Key, out var hash, out var evt);
-                    GUILayout.Label($"Event: {(WindowEvent)evt} ({(registry.ContainsCache(item.Key) == true ? "Multiple" : "Once")})");
+                    GUILayout.Label($"Event: {(WindowEvent)evt} ({(registry.ContainsCache(item.Key) == true ? "Multiple" : "Once")}) count: {count}");
 
                 });
 

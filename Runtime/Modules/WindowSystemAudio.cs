@@ -180,14 +180,16 @@ namespace UnityEngine.UI.Windows {
             if (clip.parameters.maxCount <= 0) return true;
 
             if (this.playingSounds.TryGetValue(clip, out var info) == true) {
-                if (info.timers.Count >= clip.parameters.maxCount) return false;
-                info.timers.Add(audioClip.length);
+                if (info.timers.Count >= clip.parameters.maxCount) {
+                    return false;
+                }
+                info.timers.Add(audioClip.length * clip.parameters.lengthFactor);
                 this.playingSounds[clip] = info;
             } else {
                 info = new ClipInfo() {
                     timers = new System.Collections.Generic.List<float>(1),
                 };
-                info.timers.Add(audioClip.length);
+                info.timers.Add(audioClip.length * clip.parameters.lengthFactor);
                 this.playingSounds.Add(clip, info);
             }
 

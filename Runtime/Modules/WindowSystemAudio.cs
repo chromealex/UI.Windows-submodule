@@ -1,24 +1,31 @@
 ﻿using UIWSAudioEvent = UnityEngine.UI.Windows.Runtime.Modules.Audio.UIWSAudioEvent;
 
 namespace UnityEngine.UI.Windows {
+
     using Components;
 
-    public interface IAudioComponentModule {
-    }
+    public interface IAudioComponentModule { }
 
     public class WindowSystemAudio : MonoBehaviour {
+
         private struct ClipInfo {
+
             public System.Collections.Generic.List<float> timers;
+
         }
 
         public enum EventType {
+
             SFX,
             Music,
+
         }
 
         public enum Behaviour {
+
             None,
             StopOtherChannels,
+
         }
 
         public const int CHANNELS_COUNT = 16;
@@ -30,8 +37,9 @@ namespace UnityEngine.UI.Windows {
         private AudioSource[] musicSources;
         private ME.Taptic.ITapticEngine taptic;
 
-        private System.Collections.Generic.Dictionary<UIWSAudioEvent, ClipInfo> playingSounds =
-            new System.Collections.Generic.Dictionary<UIWSAudioEvent, ClipInfo>();
+        private System.Collections.Generic.Dictionary<UIWSAudioEvent, ClipInfo> playingSounds = new();
+        private float sfxVolume;
+        private float musicVolume;
 
         public void Start() {
             this.taptic = new ME.Taptic.TapticEngine(false);
@@ -42,11 +50,11 @@ namespace UnityEngine.UI.Windows {
             this.sfxSource = Instantiate(this.audioSource);
             this.sfxSource.name = "[Audio] SFX";
             this.sfxSource.gameObject.SetActive(true);
-            GameObject.DontDestroyOnLoad(this.sfxSource.gameObject);
+            DontDestroyOnLoad(this.sfxSource.gameObject);
             this.musicSources = new AudioSource[CHANNELS_COUNT - 1];
-            for (int i = 1; i < CHANNELS_COUNT; ++i) {
+            for (var i = 1; i < CHANNELS_COUNT; ++i) {
                 var source = Instantiate(this.audioSource);
-                GameObject.DontDestroyOnLoad(source.gameObject);
+                DontDestroyOnLoad(source.gameObject);
                 source.name = $"[Audio] Musix Channel {i}";
                 source.gameObject.SetActive(true);
                 this.musicSources[i - 1] = source;
@@ -56,15 +64,14 @@ namespace UnityEngine.UI.Windows {
         public void Update() {
             var dt = Time.unscaledDeltaTime;
 
-            var pairs =
-                UnityEngine.Pool.ListPool<System.Collections.Generic.KeyValuePair<UIWSAudioEvent, ClipInfo>>.Get();
+            var pairs = UnityEngine.Pool.ListPool<System.Collections.Generic.KeyValuePair<UIWSAudioEvent, ClipInfo>>.Get();
             foreach (var kv in this.playingSounds) {
                 pairs.Add(kv);
             }
 
-            for (int i = 0; i < pairs.Count; ++i) {
+            for (var i = 0; i < pairs.Count; ++i) {
                 var pair = pairs[i];
-                for (int j = pair.Value.timers.Count - 1; j >= 0; --j) {
+                for (var j = pair.Value.timers.Count - 1; j >= 0; --j) {
                     var timer = pair.Value.timers[j];
                     timer -= dt;
                     if (timer <= 0f) {
@@ -107,21 +114,28 @@ namespace UnityEngine.UI.Windows {
                     this.sfxSource.volume = volume;
                     changed = true;
                 }
-            }
-            else if (eventType == EventType.Music) {
-                for (int i = 1; i < CHANNELS_COUNT; ++i) {
+                this.sfxVolume = volume;
+            } else if (eventType == EventType.Music) {
+                for (var i = 1; i < CHANNELS_COUNT; ++i) {
                     var source = this.musicSources[i - 1];
                     if (source.volume != volume) {
                         source.volume = volume;
                         changed = true;
                     }
                 }
+                this.musicVolume = volume;
             }
-
-            this.audioSource.volume = volume;
             return changed;
         }
 
+        public float GetVolume(EventType eventType) {
+            switch (eventType) {
+                case EventType.Music: return this.musicVolume;
+                case EventType.SFX: return this.sfxVolume;
+            }
+            return default;
+        }
+        
         /// <summary>
         /// Set vibration state
         /// </summary>
@@ -130,8 +144,7 @@ namespace UnityEngine.UI.Windows {
             if (this.taptic.IsMuted() == true && state == true) {
                 this.taptic.Unmute();
                 return true;
-            }
-            else if (state == false) {
+            } else if (state == false) {
                 this.taptic.Mute();
                 return true;
             }
@@ -145,16 +158,17 @@ namespace UnityEngine.UI.Windows {
                 if (clip.randomClips?.Length > 0) {
                     this.ApplyParameters(this.sfxSource, clip);
                     audioClip = clip.randomClips[Random.Range(0, clip.randomClips.Length)];
-                }
-                else if (clip.audioClip != null) {
+                } else if (clip.audioClip != null) {
                     this.ApplyParameters(this.sfxSource, clip);
                     audioClip = clip.audioClip;
                 }
 
-                if (this.TryAdd(clip, audioClip) == false) return;
+                if (this.TryAdd(clip, audioClip) == false) {
+                    return;
+                }
+
                 this.sfxSource.PlayOneShot(audioClip);
-            }
-            else if (clip.eventType == EventType.Music) {
+            } else if (clip.eventType == EventType.Music) {
                 if (clip.behaviour == Behaviour.StopOtherChannels) {
                     this.StopAllChannels();
                 }
@@ -168,16 +182,20 @@ namespace UnityEngine.UI.Windows {
             if (clip.vibrate == true) {
                 if (clip.tapticByCurve == true) {
                     this.taptic.PlayCurve(clip.tapticCurve, false);
-                }
-                else {
+                } else {
                     this.taptic.PlaySingle(clip.taptic);
                 }
             }
         }
 
         private bool TryAdd(UIWSAudioEvent clip, AudioClip audioClip) {
-            if (audioClip == null) return false;
-            if (clip.parameters.maxCount <= 0) return true;
+            if (audioClip == null) {
+                return false;
+            }
+
+            if (clip.parameters.maxCount <= 0) {
+                return true;
+            }
 
             if (this.playingSounds.TryGetValue(clip, out var info) == true) {
                 if (info.timers.Count >= clip.parameters.maxCount) {
@@ -186,8 +204,7 @@ namespace UnityEngine.UI.Windows {
 
                 info.timers.Add(audioClip.length * clip.parameters.lengthFactor);
                 this.playingSounds[clip] = info;
-            }
-            else {
+            } else {
                 info = new ClipInfo() {
                     timers = new System.Collections.Generic.List<float>(1),
                 };
@@ -199,7 +216,7 @@ namespace UnityEngine.UI.Windows {
         }
 
         public void StopAllChannels() {
-            for (int i = 0; i < this.musicSources.Length; ++i) {
+            for (var i = 0; i < this.musicSources.Length; ++i) {
                 var source = this.musicSources[i];
                 source.Stop();
             }
@@ -210,23 +227,20 @@ namespace UnityEngine.UI.Windows {
             if (parameters.changePitch == true) {
                 if (parameters.randomPitch == true) {
                     source.pitch = Random.Range(parameters.randomPitchValue.x, parameters.randomPitchValue.y);
-                }
-                else {
+                } else {
                     source.pitch = parameters.pitchValue;
                 }
-            }
-            else {
+            } else {
                 source.pitch = this.audioSource.pitch;
             }
 
             if (parameters.changeVolume == true) {
                 var volume = parameters.randomVolume == true
-                    ? source.volume = Random.Range(parameters.randomVolumeValue.x, parameters.randomVolumeValue.y)
-                    : parameters.volumeValue;
-                source.volume = volume * this.audioSource.volume;
-            }
-            else {
-                source.volume = this.audioSource.volume;
+                                 ? source.volume = Random.Range(parameters.randomVolumeValue.x, parameters.randomVolumeValue.y)
+                                 : parameters.volumeValue;
+                source.volume = volume * this.GetVolume(clip.eventType);
+            } else {
+                source.volume = this.GetVolume(clip.eventType);
             }
 
             source.loop = parameters.loop;
@@ -235,8 +249,7 @@ namespace UnityEngine.UI.Windows {
         public void Stop(UIWSAudioEvent clip) {
             if (clip.eventType == EventType.SFX) {
                 this.sfxSource.Stop();
-            }
-            else if (clip.eventType == EventType.Music) {
+            } else if (clip.eventType == EventType.Music) {
                 var source = this.GetChannel(clip.musicChannel);
                 source.Stop();
             }
@@ -245,24 +258,28 @@ namespace UnityEngine.UI.Windows {
         private AudioSource GetChannel(int musicChannel) {
             return this.musicSources[musicChannel - 1];
         }
+
     }
 
     [System.Serializable]
     public struct ComponentAudio {
+
         public WindowEvent play;
         public WindowEvent stop;
 
-#if FMOD_SUPPORT
+        #if FMOD_SUPPORT
         public FMODAudioComponent fmodAudioComponent;
-#else
+        #else
         public UIWSAudioEvent clip;
-#endif
+        #endif
 
         private System.Action<WindowObject> onPlayCallback;
         private System.Action<WindowObject> onStopCallback;
 
         public void Initialize(WindowObject handler) {
-            if (this.play == WindowEvent.None && this.stop == WindowEvent.None) return;
+            if (this.play == WindowEvent.None && this.stop == WindowEvent.None) {
+                return;
+            }
 
             this.onPlayCallback = this.DoPlay;
             this.onStopCallback = this.DoStop;
@@ -273,7 +290,9 @@ namespace UnityEngine.UI.Windows {
         }
 
         public void DeInitialize(WindowObject handler) {
-            if (this.play == WindowEvent.None && this.stop == WindowEvent.None) return;
+            if (this.play == WindowEvent.None && this.stop == WindowEvent.None) {
+                return;
+            }
 
             var events = WindowSystem.GetEvents();
             events.UnRegister(handler, this.play, this.onPlayCallback);
@@ -284,29 +303,30 @@ namespace UnityEngine.UI.Windows {
         }
 
         public void DoPlay(WindowObject obj) {
-#if FMOD_SUPPORT
+            #if FMOD_SUPPORT
             this.fmodAudioComponent.Play();
-#else
+            #else
             this.clip.Play();
-#endif
+            #endif
         }
 
         public void DoStop(WindowObject obj) {
-#if FMOD_SUPPORT
+            #if FMOD_SUPPORT
             this.fmodAudioComponent.Stop();
-#else
+            #else
             this.clip.Stop();
-#endif
+            #endif
         }
 
         public void DoRelease() {
-#if FMOD_SUPPORT
+            #if FMOD_SUPPORT
             this.fmodAudioComponent.Release();
-#endif
+            #endif
         }
+
     }
 
-#if FMOD_SUPPORT && FMOD_VERSION_2
+    #if FMOD_SUPPORT && FMOD_VERSION_2
     [System.Serializable]
     public struct FMODAudioComponent {
         
@@ -508,7 +528,7 @@ namespace UnityEngine.UI.Windows {
         }
         
     }
-#elif FMOD_SUPPORT
+    #elif FMOD_SUPPORT
     [System.Serializable]
     public struct FMODAudioComponent {
         
@@ -735,5 +755,6 @@ namespace UnityEngine.UI.Windows {
         }
         
     }
-#endif
+    #endif
+
 }

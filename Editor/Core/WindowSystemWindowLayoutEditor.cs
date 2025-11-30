@@ -79,13 +79,194 @@ namespace UnityEditor.UI.Windows {
             EditorHelpers.SetFirstSibling(this.targets);
 
             EditorApplication.update += this.Repaint;
-            
+            SceneView.duringSceneGui -= this.OnSceneDraw;
+            SceneView.duringSceneGui += this.OnSceneDraw;
+
+            this.LoadPrefs();
+
         }
 
         public void OnDisable() {
             
             EditorApplication.update -= this.Repaint;
+            SceneView.duringSceneGui -= this.OnSceneDraw;
             
+        }
+
+        private void OnSceneDraw(SceneView sceneView) {
+
+            WindowLayout targetLayout = null;
+            if (Selection.activeObject != null) {
+                var go = Selection.activeObject as GameObject;
+                var layout = go.GetComponentInParent<WindowLayout>(true);
+                if (layout == null) return;
+                targetLayout = layout;
+            } else {
+                return;
+            }
+            
+            if (tempLines == null) {
+                tempLines = new Vector3[8];
+            }
+
+            {
+
+                var rectTransform = targetLayout.rectTransform;
+
+                var rect = rectTransform.rect;
+                if (rect.width <= 0f || rect.height <= 0f) {
+                    return;
+                }
+
+                var position = rectTransform.transform.position;
+                var scale = rectTransform.localScale.x;
+                if (scale <= 0f) return;
+
+                {
+                    var handleSize = HandleUtility.GetHandleSize(position);
+                    var alpha = 1f - Mathf.Clamp01(handleSize / 300f);
+                    var gridSizeX = rect.width * scale;
+                    var gridSizeY = rect.height * scale;
+                    var startX = (-rect.width * 0.5f) * scale + position.x;
+                    var startY = (-rect.height * 0.5f) * scale + position.y;
+                    var startZ = 0f;
+                    var subColor = new Color(1f, 1f, 1f, 0.01f * alpha);
+                    var mainColor = new Color(1f, 1f, 1f, 0.025f * alpha);
+                    try {
+                        var smallStep = 10f * scale;
+                        var largeStep = 5;
+
+                        for (float x = startX, stepX = 0; x <= gridSizeX + startX; x += smallStep, ++stepX) {
+                            if (stepX % largeStep == 0) {
+                                Handles.color = mainColor;
+                            } else {
+                                Handles.color = subColor;
+                            }
+
+                            Handles.DrawLine(new Vector3(x, startY, startZ), new Vector3(x, startY + gridSizeY, startZ));
+                        }
+
+                        for (float y = startY, stepY = 0; y <= gridSizeY + startY; y += smallStep, ++stepY) {
+                            if (stepY % largeStep == 0) {
+                                Handles.color = mainColor;
+                            } else {
+                                Handles.color = subColor;
+                            }
+
+                            Handles.DrawLine(new Vector3(startX, y, startZ), new Vector3(startX + gridSizeX, y, startZ));
+                        }
+
+                    } catch (System.Exception ex) {
+                        Debug.LogException(ex);
+                    }
+
+                    { // Draw outline
+                        const float offset = 0f;
+                        tempLines[0] = new Vector3(startX - offset, startY - offset, startZ);
+                        tempLines[1] = new Vector3(startX - offset + gridSizeX + offset * 2f, startY - offset, startZ);
+                        tempLines[2] = new Vector3(startX - offset + gridSizeX + offset * 2f, startY - offset, startZ);
+                        tempLines[3] = new Vector3(startX - offset + gridSizeX + offset * 2f, startY - offset + gridSizeY + offset * 2f, startZ);
+                        tempLines[4] = new Vector3(startX - offset + gridSizeX + offset * 2f, startY - offset + gridSizeY + offset * 2f, startZ);
+                        tempLines[5] = new Vector3(startX - offset, startY - offset + gridSizeY + offset * 2f, startZ);
+                        tempLines[6] = new Vector3(startX - offset, startY - offset + gridSizeY + offset * 2f, startZ);
+                        tempLines[7] = new Vector3(startX - offset, startY - offset, startZ);
+                        Handles.color = mainColor;
+                        Handles.DrawAAPolyLine(1f, tempLines);
+                    }
+                    { // Draw outline
+                        const float offset = 10f;
+                        tempLines[0] = new Vector3(startX - offset, startY - offset, startZ);
+                        tempLines[1] = new Vector3(startX - offset + gridSizeX + offset * 2f, startY - offset, startZ);
+                        tempLines[2] = new Vector3(startX - offset + gridSizeX + offset * 2f, startY - offset, startZ);
+                        tempLines[3] = new Vector3(startX - offset + gridSizeX + offset * 2f, startY - offset + gridSizeY + offset * 2f, startZ);
+                        tempLines[4] = new Vector3(startX - offset + gridSizeX + offset * 2f, startY - offset + gridSizeY + offset * 2f, startZ);
+                        tempLines[5] = new Vector3(startX - offset, startY - offset + gridSizeY + offset * 2f, startZ);
+                        tempLines[6] = new Vector3(startX - offset, startY - offset + gridSizeY + offset * 2f, startZ);
+                        tempLines[7] = new Vector3(startX - offset, startY - offset, startZ);
+                        Handles.color = new Color(1f, 1f, 1f, 0.1f);
+                        Handles.DrawAAPolyLine(1f, tempLines);
+                    }
+                    this.DrawLabel(sceneView, targetLayout.name, 30, scale, new Color(1f, 1f, 1f, 0.2f), new Vector3(startX - 10f, startY + (rect.height) * scale + 10f, startZ));
+                    
+                    foreach (var layoutElement in targetLayout.layoutElements) {
+                        if (layoutElement.isActiveAndEnabled == false || layoutElement.hideInScreen == true) continue;
+                        this.DrawElement(sceneView, layoutElement, rectTransform, scale);
+                    }
+                }
+            }
+
+        }
+
+        private static GUIStyle labelStyle;
+        private static Vector3[] tempLines;
+        private void DrawElement(SceneView sceneView, WindowLayoutElement layoutElement, Transform root, float scale) {
+
+            var rectTransform = layoutElement.rectTransform;
+            var rect = rectTransform.rect;
+            var position = rectTransform.position;
+            var pivot = rectTransform.pivot;
+            
+            var startX = (-rect.width * pivot.x) * scale + position.x;
+            var startY = (-rect.height * pivot.y) * scale + position.y;
+            var startZ = 0f;
+            
+            var mainColor = new Color(0.08f, 0.6f, 1f, 1f);
+            var textColor = new Color(0.08f, 0.6f, 1f, 0.75f);
+            var gridSizeX = rect.width * scale;
+            var gridSizeY = rect.height * scale;
+
+            tempLines[0] = new Vector3(startX, startY, startZ);
+            tempLines[1] = new Vector3(startX + gridSizeX, startY, startZ);
+            tempLines[2] = new Vector3(startX + gridSizeX, startY, startZ);
+            tempLines[3] = new Vector3(startX + gridSizeX, startY + gridSizeY, startZ);
+            tempLines[4] = new Vector3(startX + gridSizeX, startY + gridSizeY, startZ);
+            tempLines[5] = new Vector3(startX, startY + gridSizeY, startZ);
+            tempLines[6] = new Vector3(startX, startY + gridSizeY, startZ);
+            tempLines[7] = new Vector3(startX, startY, startZ);
+            
+            Handles.color = mainColor;
+            Handles.DrawAAPolyLine(2f, tempLines);
+
+            this.DrawLabel(sceneView, layoutElement.name, 100, scale, textColor, new Vector3(startX, startY + (rect.height) * scale, startZ));
+
+        }
+
+        private void DrawLabel(SceneView sceneView, string text, float fontSize, float scale, Color textColor, Vector3 position) {
+            
+            Handles.BeginGUI();
+
+            var style = labelStyle ?? new GUIStyle(EditorStyles.label) {
+                alignment = TextAnchor.UpperLeft,
+                fontSize = (int)(100 * scale),
+                richText = true,
+                normal = new GUIStyleState() {
+                    textColor = textColor,
+                },
+                hover = new GUIStyleState() {
+                    textColor = textColor,
+                },
+                font = EditorGUIUtility.Load("Fonts/RobotoMono/RobotoMono-Regular.ttf") as Font,
+            };
+            labelStyle = style;
+            style.normal.textColor = textColor;
+            style.hover.textColor = textColor;
+            style.fontSize = (int)(fontSize * scale);
+
+            var size = style.CalcSize(new GUIContent(text));
+            var r = new Rect(0f, 0f, size.x, size.y);
+
+            var prev = GUI.matrix;
+            var guiPos = HandleUtility.WorldToGUIPoint(position);
+            var handleSize = HandleUtility.GetHandleSize(position);
+            var prevColor = GUI.color;
+            GUI.matrix = Matrix4x4.TRS(guiPos, Quaternion.Inverse(sceneView.camera.transform.rotation), Vector3.one / handleSize * 20f);
+            GUI.color = textColor;
+            GUI.Label(r, text, style);
+            GUI.matrix = prev;
+            GUI.color = prevColor;
+
+            Handles.EndGUI();
+
         }
 
         public override GUIContent GetPreviewTitle() {
@@ -106,9 +287,22 @@ namespace UnityEditor.UI.Windows {
                 this.selectedType = type;
                 this.selectedIndexAspect = idx;
                 this.selectedIndexInner = inner;
-                
+                SavePrefs();
+
             }, ref this.tabsScrollPosition, windowLayout, r, drawComponents: null);
             
+        }
+
+        private void SavePrefs() {
+            EditorPrefs.SetInt("UIWS.LayoutPreview.selectedIndexAspect", this.selectedIndexAspect);
+            EditorPrefs.SetInt("UIWS.LayoutPreview.selectedIndexInner", this.selectedIndexInner);
+            EditorPrefs.SetInt("UIWS.LayoutPreview.selectedType", this.selectedType);
+        }
+
+        private void LoadPrefs() {
+            this.selectedIndexAspect = EditorPrefs.GetInt("UIWS.LayoutPreview.selectedIndexAspect");
+            this.selectedIndexInner = EditorPrefs.GetInt("UIWS.LayoutPreview.selectedIndexInner");
+            this.selectedType = EditorPrefs.GetInt("UIWS.LayoutPreview.selectedType");
         }
 
         public override bool HasPreviewGUI() {

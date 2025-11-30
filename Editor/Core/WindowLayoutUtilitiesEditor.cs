@@ -309,9 +309,7 @@ namespace UnityEditor.UI.Windows {
                             if (oris[j].orientation == ScreenOrientation.LandscapeRight) {
                                 
                                 var hData = screens[i];
-                                var w = hData.width;
-                                hData.width = hData.height;
-                                hData.height = w;
+                                (hData.width, hData.height) = (hData.height, hData.width);
 
                                 items[0] = new Item() {
                                     name = "Landscape Right",
@@ -323,10 +321,8 @@ namespace UnityEditor.UI.Windows {
                             } else if (oris[j].orientation == ScreenOrientation.LandscapeLeft) {
                                 
                                 var hData = screens[i];
-                                var w = hData.width;
-                                hData.width = hData.height;
-                                hData.height = w;
-                                
+                                (hData.width, hData.height) = (hData.height, hData.width);
+
                                 items[1] = new Item() {
                                     name = "Landscape Left",
                                     value = hData.width / (float)hData.height,
@@ -384,8 +380,7 @@ namespace UnityEditor.UI.Windows {
         public static bool DrawLayout(float aspect, WindowLayout windowLayout, Rect r, float offset = 20f, HashSet<WindowLayout> used = null, DeviceInfo.ScreenData screenData = default, DeviceInfo.OrientationData orientationData = default, UnityEngine.UI.Windows.WindowTypes.LayoutWindowType drawComponents = null) {
             
             if (used == null) used = new HashSet<WindowLayout>();
-            if (used.Contains(windowLayout) == true) return false;
-            used.Add(windowLayout);
+            if (used.Add(windowLayout) == false) return false;
 
             var rSource = r;
             
@@ -433,6 +428,14 @@ namespace UnityEditor.UI.Windows {
             windowLayout.rectTransform.localScale = Vector3.one;*/
 
             var prevSize = windowLayout.rectTransform.sizeDelta;
+            var prevScale = windowLayout.rectTransform.localScale;
+            var prevPivot = windowLayout.rectTransform.pivot;
+
+            void ApplyPrev() {
+                windowLayout.rectTransform.sizeDelta = prevSize;
+                windowLayout.rectTransform.localScale = prevScale;
+                windowLayout.rectTransform.pivot = prevPivot;
+            }
             r = rectOffset;
             
             {
@@ -496,7 +499,8 @@ namespace UnityEditor.UI.Windows {
                 if (element == null) {
 
                     windowLayout.ValidateEditor();
-                    windowLayout.rectTransform.sizeDelta = prevSize;
+                    ApplyPrev();
+                    //windowLayout.rectTransform.sizeDelta = prevSize;
                     return false;
 
                 }
@@ -619,7 +623,8 @@ namespace UnityEditor.UI.Windows {
                 
             }
 
-            windowLayout.rectTransform.sizeDelta = prevSize;
+            //windowLayout.rectTransform.sizeDelta = prevSize;
+            ApplyPrev();
 
             return isHighlighted;
 

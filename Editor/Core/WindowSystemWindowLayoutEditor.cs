@@ -205,15 +205,37 @@ namespace UnityEditor.UI.Windows {
             var rect = rectTransform.rect;
             var position = rectTransform.position;
             var pivot = rectTransform.pivot;
+            var anchorMin = rectTransform.anchorMin;
+            var anchorMax = rectTransform.anchorMax;
             
             var startX = (-rect.width * pivot.x) * scale + position.x;
             var startY = (-rect.height * pivot.y) * scale + position.y;
             var startZ = 0f;
+
+            var alpha = layoutElement == ((GameObject)Selection.activeObject).GetComponent<WindowLayoutElement>() ? 1f : 0.5f;
             
-            var mainColor = new Color(0.08f, 0.6f, 1f, 1f);
-            var textColor = new Color(0.08f, 0.6f, 1f, 0.75f);
+            var mainColor = new Color(0.08f, 0.6f, 1f, 1f * alpha);
+            var textColor = new Color(0.08f, 0.6f, 1f, 0.75f * alpha);
+            var anchorColor = new Color(1f, 0.37f, 0.25f, 1f * alpha);
+            var stretchColor = new Color(0.14f, 0.6f, 1f, 1f * alpha);
+            var anchorPointColor = new Color(1f, 1f, 0f, 1f * alpha);
+            var borderColor = new Color(1f, 1f, 1f, 0.5f * alpha);
+            var pivotColor = new Color(0.14f, 0.6f, 1f, 1f * alpha);
+            
             var gridSizeX = rect.width * scale;
             var gridSizeY = rect.height * scale;
+
+            GUILayoutExt.HandlesDrawBoxNotFilled(new Rect(startX, startY, gridSizeX, gridSizeY), 2f, borderColor);
+            if (anchorMin == anchorMax) {
+                GUILayoutExt.HandlesDrawDottedLine(new Vector2(startX + gridSizeX * anchorMin.x, startY), new Vector2(startX + gridSizeX * anchorMin.x, startY + gridSizeY), 2f, anchorColor);
+                GUILayoutExt.HandlesDrawDottedLine(new Vector2(startX, startY + gridSizeY * anchorMin.y), new Vector2(startX + gridSizeX, startY + gridSizeY * anchorMin.y), 2f, anchorColor);
+            } else {
+                GUILayoutExt.HandlesDrawLine(new Vector2(startX + gridSizeX * anchorMin.x, startY), new Vector2(startX + gridSizeX * anchorMin.x, startY + gridSizeY), 2f, stretchColor);
+                GUILayoutExt.HandlesDrawLine(new Vector2(startX, startY + gridSizeY * anchorMin.y), new Vector2(startX + gridSizeX, startY + gridSizeY * anchorMin.y), 2f, stretchColor);
+            }
+            GUILayoutExt.HandlesDrawCircle(new Vector2(startX + gridSizeX * pivot.x, startY + gridSizeY * pivot.y), 4f, pivotColor);
+            GUILayoutExt.HandlesDrawBox(new Vector2(startX + gridSizeX * anchorMin.x, startY + gridSizeY * anchorMin.y), 4f, anchorPointColor);
+            GUILayoutExt.HandlesDrawBox(new Vector2(startX + gridSizeX * anchorMax.x, startY + gridSizeY * anchorMax.y), 4f, anchorPointColor);
 
             tempLines[0] = new Vector3(startX, startY, startZ);
             tempLines[1] = new Vector3(startX + gridSizeX, startY, startZ);
@@ -225,7 +247,7 @@ namespace UnityEditor.UI.Windows {
             tempLines[7] = new Vector3(startX, startY, startZ);
             
             Handles.color = mainColor;
-            Handles.DrawAAPolyLine(2f, tempLines);
+            //Handles.DrawAAPolyLine(2f, tempLines);
 
             this.DrawLabel(sceneView, layoutElement.name, 100, scale, textColor, new Vector3(startX, startY + (rect.height) * scale, startZ));
 
@@ -253,7 +275,7 @@ namespace UnityEditor.UI.Windows {
             style.fontSize = (int)(fontSize * scale);
 
             var size = style.CalcSize(new GUIContent(text));
-            var r = new Rect(0f, 0f, size.x, size.y);
+            var r = new Rect(0f, 0f, size.x * 2f, size.y);
 
             var prev = GUI.matrix;
             var guiPos = HandleUtility.WorldToGUIPoint(position);

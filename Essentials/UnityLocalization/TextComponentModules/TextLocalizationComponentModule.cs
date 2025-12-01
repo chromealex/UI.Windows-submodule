@@ -1,6 +1,7 @@
 ﻿
 namespace UnityEngine.UI.Windows {
 
+    #if UNITY_LOCALIZATION_SUPPORT
     public class TextLocalizationComponentModule : TextComponentModule {
 
         public UnityEngine.Localization.LocalizedString key;
@@ -41,5 +42,6 @@ namespace UnityEngine.UI.Windows {
         }
 
     }
+    #endif
 
 }

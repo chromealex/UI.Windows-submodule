@@ -174,7 +174,7 @@ namespace UnityEditor.UI.Windows {
                         Handles.DrawAAPolyLine(1f, tempLines);
                     }
                     { // Draw outline
-                        const float offset = 10f;
+                        float offset = 10f * scale;
                         tempLines[0] = new Vector3(startX - offset, startY - offset, startZ);
                         tempLines[1] = new Vector3(startX - offset + gridSizeX + offset * 2f, startY - offset, startZ);
                         tempLines[2] = new Vector3(startX - offset + gridSizeX + offset * 2f, startY - offset, startZ);
@@ -186,7 +186,7 @@ namespace UnityEditor.UI.Windows {
                         Handles.color = new Color(1f, 1f, 1f, 0.1f);
                         Handles.DrawAAPolyLine(1f, tempLines);
                     }
-                    this.DrawLabel(sceneView, targetLayout.name, 30, scale, new Color(1f, 1f, 1f, 0.2f), new Vector3(startX - 10f, startY + (rect.height) * scale + 10f, startZ));
+                    this.DrawLabel(sceneView, targetLayout.name, 30, scale, new Color(1f, 1f, 1f, 0.2f), new Vector3(startX - 10f * scale, startY + (rect.height) * scale + 10f * scale, startZ), TextAnchor.LowerLeft);
                     
                     foreach (var layoutElement in targetLayout.layoutElements) {
                         if (layoutElement.isActiveAndEnabled == false || layoutElement.hideInScreen == true) continue;
@@ -233,33 +233,20 @@ namespace UnityEditor.UI.Windows {
                 GUILayoutExt.HandlesDrawLine(new Vector2(startX + gridSizeX * anchorMin.x, startY), new Vector2(startX + gridSizeX * anchorMin.x, startY + gridSizeY), 2f, stretchColor);
                 GUILayoutExt.HandlesDrawLine(new Vector2(startX, startY + gridSizeY * anchorMin.y), new Vector2(startX + gridSizeX, startY + gridSizeY * anchorMin.y), 2f, stretchColor);
             }
-            GUILayoutExt.HandlesDrawCircle(new Vector2(startX + gridSizeX * pivot.x, startY + gridSizeY * pivot.y), 4f, pivotColor);
-            GUILayoutExt.HandlesDrawBox(new Vector2(startX + gridSizeX * anchorMin.x, startY + gridSizeY * anchorMin.y), 4f, anchorPointColor);
-            GUILayoutExt.HandlesDrawBox(new Vector2(startX + gridSizeX * anchorMax.x, startY + gridSizeY * anchorMax.y), 4f, anchorPointColor);
-
-            tempLines[0] = new Vector3(startX, startY, startZ);
-            tempLines[1] = new Vector3(startX + gridSizeX, startY, startZ);
-            tempLines[2] = new Vector3(startX + gridSizeX, startY, startZ);
-            tempLines[3] = new Vector3(startX + gridSizeX, startY + gridSizeY, startZ);
-            tempLines[4] = new Vector3(startX + gridSizeX, startY + gridSizeY, startZ);
-            tempLines[5] = new Vector3(startX, startY + gridSizeY, startZ);
-            tempLines[6] = new Vector3(startX, startY + gridSizeY, startZ);
-            tempLines[7] = new Vector3(startX, startY, startZ);
-            
-            Handles.color = mainColor;
-            //Handles.DrawAAPolyLine(2f, tempLines);
+            GUILayoutExt.HandlesDrawCircle(new Vector2(startX + gridSizeX * pivot.x, startY + gridSizeY * pivot.y), 4f * scale, pivotColor);
+            GUILayoutExt.HandlesDrawBox(new Vector2(startX + gridSizeX * anchorMin.x, startY + gridSizeY * anchorMin.y), 4f * scale, anchorPointColor);
+            GUILayoutExt.HandlesDrawBox(new Vector2(startX + gridSizeX * anchorMax.x, startY + gridSizeY * anchorMax.y), 4f * scale, anchorPointColor);
 
             this.DrawLabel(sceneView, layoutElement.name, 100, scale, textColor, new Vector3(startX, startY + (rect.height) * scale, startZ));
 
         }
 
-        private void DrawLabel(SceneView sceneView, string text, float fontSize, float scale, Color textColor, Vector3 position) {
+        private void DrawLabel(SceneView sceneView, string text, float fontSize, float scale, Color textColor, Vector3 position, TextAnchor alignment = TextAnchor.UpperLeft) {
             
             Handles.BeginGUI();
 
             var style = labelStyle ?? new GUIStyle(EditorStyles.label) {
                 alignment = TextAnchor.UpperLeft,
-                fontSize = (int)(100 * scale),
                 richText = true,
                 normal = new GUIStyleState() {
                     textColor = textColor,
@@ -273,6 +260,7 @@ namespace UnityEditor.UI.Windows {
             style.normal.textColor = textColor;
             style.hover.textColor = textColor;
             style.fontSize = (int)(fontSize * scale);
+            style.alignment = alignment;
 
             var size = style.CalcSize(new GUIContent(text));
             var r = new Rect(0f, 0f, size.x * 2f, size.y);
@@ -281,7 +269,7 @@ namespace UnityEditor.UI.Windows {
             var guiPos = HandleUtility.WorldToGUIPoint(position);
             var handleSize = HandleUtility.GetHandleSize(position);
             var prevColor = GUI.color;
-            GUI.matrix = Matrix4x4.TRS(guiPos, Quaternion.Inverse(sceneView.camera.transform.rotation), Vector3.one / handleSize * 20f);
+            GUI.matrix = Matrix4x4.TRS(guiPos, Quaternion.Inverse(sceneView.camera.transform.rotation), Vector3.one / handleSize * scale * 50f);
             GUI.color = textColor;
             GUI.Label(r, text, style);
             GUI.matrix = prev;

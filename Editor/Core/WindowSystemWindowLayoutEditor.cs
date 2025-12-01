@@ -120,6 +120,10 @@ namespace UnityEditor.UI.Windows {
 
                 var position = rectTransform.transform.position;
                 var scale = rectTransform.localScale.x;
+                var parentCanvas = rectTransform.parent?.GetComponentInParent<Canvas>(true);
+                if (parentCanvas != null) {
+                    scale = parentCanvas.transform.localScale.x;
+                }
                 if (scale <= 0f) return;
 
                 {

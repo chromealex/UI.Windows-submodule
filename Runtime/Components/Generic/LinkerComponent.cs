@@ -103,6 +103,13 @@
             this.LoadAsync(onComplete);
         }
 
+        public void ReloadAsync<T, TState>(TState state, System.Action<T, TState> onComplete) where T : WindowObject {
+            if (this.loadedAsset != null) {
+                this.Unload();
+            }
+            this.LoadAsync(state, onComplete);
+        }
+
         public T ReloadSync<T>() where T : WindowObject {
             if (this.loadedAsset != null) {
                 this.Unload();

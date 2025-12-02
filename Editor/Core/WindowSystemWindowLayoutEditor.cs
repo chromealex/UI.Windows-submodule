@@ -98,7 +98,7 @@ namespace UnityEditor.UI.Windows {
             WindowLayout targetLayout = null;
             if (Selection.activeObject != null) {
                 var go = Selection.activeObject as GameObject;
-                var layout = go.GetComponentInParent<WindowLayout>(true);
+                var layout = go?.GetComponentInParent<WindowLayout>(true);
                 if (layout == null) return;
                 targetLayout = layout;
             } else {
@@ -193,7 +193,7 @@ namespace UnityEditor.UI.Windows {
                     this.DrawLabel(sceneView, targetLayout.name, 30, scale, new Color(1f, 1f, 1f, 0.2f), new Vector3(startX - 10f * scale, startY + (rect.height) * scale + 10f * scale, startZ), TextAnchor.LowerLeft);
                     
                     foreach (var layoutElement in targetLayout.layoutElements) {
-                        if (layoutElement.isActiveAndEnabled == false || layoutElement.hideInScreen == true) continue;
+                        if (layoutElement == null || layoutElement.isActiveAndEnabled == false || layoutElement.hideInScreen == true) continue;
                         this.DrawElement(sceneView, layoutElement, rectTransform, scale);
                     }
                 }

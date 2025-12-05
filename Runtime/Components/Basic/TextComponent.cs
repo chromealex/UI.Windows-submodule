@@ -42,6 +42,29 @@ namespace UnityEngine.UI.Windows.Components {
 
     }
 
+    public interface ITextFormatter {
+
+        string Format(double value, string format);
+
+    }
+        
+    public struct TextFormatResolver {
+
+        public System.IFormatProvider provider;
+        public ITextFormatter customFormatter;
+
+        public string Format(double value, string valueFormat) {
+            if (this.customFormatter != null) return this.customFormatter.Format(value, valueFormat);
+            if (this.provider == null) return string.Format(valueFormat, value);
+            return string.Format(this.provider, valueFormat, value);
+        }
+
+        public bool IsValid() {
+            return this.provider != null || this.customFormatter != null;
+        }
+
+    }
+
     public partial class TextComponent : WindowComponent, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
 
         System.Type ISearchComponentByTypeEditor.GetSearchType() {
@@ -422,10 +445,10 @@ namespace UnityEngine.UI.Windows.Components {
 
         private struct ValueFormat : System.IEquatable<ValueFormat> {
 
-            public System.IFormatProvider provider;
+            public TextFormatResolver provider;
             public string valueFormat;
 
-            public ValueFormat(System.IFormatProvider provider, string valueFormat) {
+            public ValueFormat(TextFormatResolver provider, string valueFormat) {
                 this.provider = provider;
                 this.valueFormat = valueFormat;
             }
@@ -451,12 +474,11 @@ namespace UnityEngine.UI.Windows.Components {
             }
 
             public string Format(double value) {
-                if (this.provider == null) return string.Format(this.valueFormat, value);
-                return string.Format(this.provider, this.valueFormat, value);
+                return this.provider.Format(value, this.valueFormat);
             }
 
             public bool IsValid() {
-                return this.provider != null || string.IsNullOrEmpty(this.valueFormat) == false;
+                return this.provider.IsValid() == true || string.IsNullOrEmpty(this.valueFormat) == false;
             }
 
         }
@@ -470,7 +492,7 @@ namespace UnityEngine.UI.Windows.Components {
             return true;
         }
         
-        public bool SetValueFormat(System.IFormatProvider provider, string format) {
+        public bool SetValueFormat(TextFormatResolver provider, string format) {
             var f = new ValueFormat(provider, format);
             if (this.valueFormat == f) return false;
             this.valueFormat = f;

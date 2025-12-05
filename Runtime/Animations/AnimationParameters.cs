@@ -13,6 +13,19 @@
 
     public abstract class AnimationParameters : MonoBehaviour {
 
+        [System.Serializable]
+        public struct Delay {
+
+            public bool random;
+            public Vector2 randomFromTo;
+
+            public float GetValue(float defaultValue) {
+                if (this.random == false) return defaultValue;
+                return Random.Range(this.randomFromTo.x, this.randomFromTo.y);
+            }
+
+        }
+        
         [Tooltip("Use config file or parameters at this component")]
         public AnimationParametersConfig config;
         
@@ -20,7 +33,9 @@
         public float durationShow = 0.3f;
         public float durationHide = 0.3f;
         public float delayShow = 0f;
+        public Delay delayShowParameters;
         public float delayHide = 0f;
+        public Delay delayHideParameters;
         public Tweener.EaseFunction easeShow = Tweener.EaseFunction.Linear;
         public Tweener.EaseFunction easeHide = Tweener.EaseFunction.Linear;
 
@@ -58,11 +73,11 @@
             switch (animationState) {
 
                 case AnimationState.Show:
-                    delay = this.delayShow;
+                    delay = this.delayShowParameters.GetValue(this.delayShow);
                     break;
 
                 case AnimationState.Hide:
-                    delay = this.delayHide;
+                    delay = this.delayHideParameters.GetValue(this.delayHide);
                     break;
 
             }

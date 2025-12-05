@@ -123,6 +123,7 @@
                 };
                 UnityEngine.UI.Windows.Modules.WindowObjectAnimation.Play(
                     closure,
+                    this.windowComponent,
                     (UnityEngine.UI.Windows.Modules.AnimationState)animationTarget,
                     state.parameters.items,
                     transitionParameters,

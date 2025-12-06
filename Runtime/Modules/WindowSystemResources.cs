@@ -554,18 +554,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 }
 
                 case Resource.Type.CustomLoader: {
-                    if (resource.objectType == Resource.ObjectType.Component) {
-                        yield return this.LoadCustomLoader_INTERNAL<GameObject, T>(loadParameters, handler, resource, static go => {
-                            var result = go.GetComponent<T>();
-                            if (result == null && WindowSystem.GetResources().showLogs == true) {
-                                Debug.LogError($"[ UIWR ] Failed to load resource, gameObject loaded {go}, but component was not found with type {typeof(T)}");
-                            }
-
-                            return result;
-                        });
-                    } else {
-                        yield return this.LoadCustomLoader_INTERNAL<T, T>(loadParameters, handler, resource, r => r);
-                    }
+                    yield return this.LoadCustomLoader_INTERNAL<T>(loadParameters, handler, resource);
                     break;
                 }
 
@@ -578,7 +567,7 @@ namespace UnityEngine.UI.Windows.Modules {
             this.customLoader = loader;
         }
 
-        private IEnumerator LoadCustomLoader_INTERNAL<TResource, TResult>(LoadParameters loadParameters, object handler, Resource resource, System.Func<TResource, TResult> converter) where TResult : class {
+        private IEnumerator LoadCustomLoader_INTERNAL<TResource>(LoadParameters loadParameters, object handler, Resource resource) {
 
             var task = this.customLoader.Load<TResource>(loadParameters, resource.GetAddress());
             yield return task;
@@ -592,7 +581,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
                 } else {
 
-                    var result = converter.Invoke(asset);
+                    var result = asset;
                     this.AddObject(handler, result, null, resource, static (res, obj, _) => res.customLoader.Unload(obj));
                     this.CompleteTask(handler, resource, result);
 

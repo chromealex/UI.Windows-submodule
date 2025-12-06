@@ -25,7 +25,7 @@ namespace UnityEngine.UI.Windows {
 
     public interface ICustomLoader {
 
-        public Awaitable<T> Load<T>(UnityEngine.UI.Windows.Modules.WindowSystemResources.LoadParameters loadParameters, string address);
+        public Awaitable<T> Load<T>(UnityEngine.UI.Windows.Modules.WindowSystemResources.LoadParameters loadParameters, Resource resource);
         void Unload(object obj);
 
     }
@@ -569,7 +569,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         private IEnumerator LoadCustomLoader_INTERNAL<TResource>(LoadParameters loadParameters, object handler, Resource resource) {
 
-            var task = this.customLoader.Load<TResource>(loadParameters, resource.GetAddress());
+            var task = this.customLoader.Load<TResource>(loadParameters, resource);
             yield return task;
             
             if (task.GetAwaiter().IsCompleted == true) {

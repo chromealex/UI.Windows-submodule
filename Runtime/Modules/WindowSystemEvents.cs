@@ -347,7 +347,6 @@ namespace UnityEngine.UI.Windows.Modules {
             this.ClearRegistry(instance, this.registry);
             foreach (var item in this.registriesGeneric) this.ClearRegistry(instance, item);
             
-
         }
 
         public void RegisterOnce(WindowObject instance, WindowEvent windowEvent, System.Action<WindowObject> callback) {

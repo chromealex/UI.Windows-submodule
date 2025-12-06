@@ -13,12 +13,6 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static WindowSystemAudio GetAudio() {
-
-            return WindowSystem.instance?.audio;
-
-        }
-
         public static WindowSystemPools GetPools() {
 
             return WindowSystem.instance?.pools;

@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de236ba5b19934c3fa0fae98d99435cf, type: 3}
+  m_Name: DefaultWindowSystemAudio
+  m_EditorClassIdentifier: 
+  defaultButtonClickEvent: {fileID: 0}
+  audioSource: {fileID: 3375497419390765506, guid: 52df0e711070a4164b73774b147dfbf5, type: 3}

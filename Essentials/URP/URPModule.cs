@@ -4,7 +4,7 @@ using UnityEngine.Rendering.Universal;
 
 namespace UnityEngine.UI.Windows {
     
-    [CreateAssetMenu(menuName = "UI.Windows/URPModule")]
+    [CreateAssetMenu(menuName = "UI.Windows/Modules/URPModule")]
     public class URPModule : WindowSystemModule {
 
         private readonly System.Collections.Generic.List<Camera> cameras = new System.Collections.Generic.List<Camera>();

@@ -54,7 +54,7 @@ namespace UnityEngine.UI.Windows.Runtime.Modules.Audio {
         
         public void Play() {
 
-            var audio = UnityEngine.UI.Windows.WindowSystem.GetAudio();
+            var audio = WindowSystemAudio.Instance;
             if (audio == null) {
                 UnityEngine.Debug.LogWarning("No audio module found. Did you forget to add Audio Module to your WindowSystem initializer?");
                 return;
@@ -66,7 +66,7 @@ namespace UnityEngine.UI.Windows.Runtime.Modules.Audio {
 
         public void Stop() {
             
-            var audio = UnityEngine.UI.Windows.WindowSystem.GetAudio();
+            var audio = WindowSystemAudio.Instance;
             if (audio == null) {
                 UnityEngine.Debug.LogWarning("No audio module found. Did you forget to add Audio Module to your WindowSystem initializer?");
                 return;

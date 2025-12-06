@@ -116,7 +116,7 @@ namespace UnityEngine.UI.Windows {
 
             if (UnityEngine.Input.touchCount > 0) {
 
-                for (int i = 0; i < UnityEngine.Input.touches.Length; ++i) {
+                for (int i = 0; i < UnityEngine.Input.touchCount; ++i) {
 
                     var touch = UnityEngine.Input.GetTouch(i);
                     if (touch.phase == TouchPhase.Began) {

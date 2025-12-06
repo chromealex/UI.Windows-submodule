@@ -238,36 +238,7 @@ namespace UnityEditor.UI.Windows {
             if (newObj != null) {
 
                 // Apply objectType
-                var val = 0;
-                switch (newObj) {
-
-                    case GameObject objType:
-                        val = (int)Resource.ObjectType.GameObject;
-                        break;
-
-                    case Component objType:
-                        val = (int)Resource.ObjectType.Component;
-                        break;
-
-                    case ScriptableObject objType:
-                        val = (int)Resource.ObjectType.ScriptableObject;
-                        break;
-
-                    case Sprite objType:
-                        val = (int)Resource.ObjectType.Sprite;
-                        break;
-
-                    case Texture objType:
-                        val = (int)Resource.ObjectType.Texture;
-                        break;
-
-                    default:
-                        val = (int)Resource.ObjectType.Unknown;
-                        break;
-
-                }
-
-                resource.objectType = (Resource.ObjectType)val;
+                resource.objectType = WindowSystemResources.GetObjectType(newObj);
 
             }
 

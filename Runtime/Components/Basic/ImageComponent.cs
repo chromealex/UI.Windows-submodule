@@ -18,6 +18,8 @@ namespace UnityEngine.UI.Windows.Components {
 
         public UnloadResourceEventType autoUnloadResourcesOnEvent;
 
+        private Resource prevResourceLoad;
+
         private readonly struct Texture2DConstructor : IResourceConstructor<Texture2D> {
 
             private readonly int x;
@@ -131,8 +133,6 @@ namespace UnityEngine.UI.Windows.Components {
             
         }
         
-        private Resource prevResourceLoad;
-
         public void SetImage<T>(T provider, bool async = true) where T : IResourceProvider {
 
             if (provider == null) return;

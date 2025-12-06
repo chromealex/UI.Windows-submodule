@@ -23,6 +23,13 @@ namespace UnityEngine.UI.Windows {
 
     }
 
+    public interface ICustomLoader {
+
+        public Awaitable<T> Load<T>(UnityEngine.UI.Windows.Modules.WindowSystemResources.LoadParameters loadParameters, string address);
+        void Unload(object obj);
+
+    }
+
     [System.Serializable]
     public class Resource<T> : IResourceProvider where T : UnityEngine.Object {
         
@@ -44,15 +51,12 @@ namespace UnityEngine.UI.Windows {
 
         #if UNITY_EDITOR
         public void ValidateSource(T resource) {
-            
             var res = Resource<T>.Validate(resource);
             this.data = res.data;
             this.loaded = res.loaded;
-
         }
         
         public static Resource<T> Validate(T resource) {
-            
             var res = new Resource<T>();
             res.data.directRef = resource;
             res.data.objectType = Resource.ObjectType.Unknown;
@@ -60,16 +64,13 @@ namespace UnityEngine.UI.Windows {
             res.data.type = Resource.Type.Direct;
             res.data.validationRequired = true;
             return res;
-
         }
         #endif
 
         public T Load(object handler) {
-
             if (this.loaded != null) return this.loaded;
             this.loaded = WindowSystem.GetResources().Load<T>(handler, this.data);
             return this.loaded;
-
         }
         
         public void LoadAsync(object handler, System.Action<T> callback) {
@@ -91,31 +92,23 @@ namespace UnityEngine.UI.Windows {
         }
 
         public AssetReferenceT<T> AsAssetReference() {
-
             if (this.data.type == Resource.Type.Addressables) {
                 return new AssetReferenceT<T>(this.data.guid);
             }
-
             return null;
         }
 
         public T Get() {
-
             return this.loaded;
-
         }
 
         public void Unload(object handler) {
-
             WindowSystem.GetResources()?.Delete(handler, ref this.loaded);
             this.loaded = null;
-
         }
         
         public static implicit operator T(Resource<T> item) {
-
             return item.loaded;
-
         }
 
     }
@@ -124,22 +117,19 @@ namespace UnityEngine.UI.Windows {
     public struct Resource : System.IEquatable<Resource> {
 
         public enum ObjectType {
-
             Unknown = 0,
             GameObject,
             Component,
             ScriptableObject,
             Sprite,
             Texture,
-
         }
         
         public enum Type {
-
             Manual = 0,
             Direct,
             Addressables,
-
+            CustomLoader,
         }
 
         public Type type;
@@ -150,72 +140,56 @@ namespace UnityEngine.UI.Windows {
         public Object directRef;
         public bool validationRequired;
 
+        public static Resource Create<TObject>(string address) {
+            return new Resource() {
+                address = address,
+                objectType = UnityEngine.UI.Windows.Modules.WindowSystemResources.GetObjectType<TObject>(),
+                type = Type.CustomLoader,
+            };
+        }
+
         public bool Equals(Resource other) {
-
             return this.IsEquals(in other);
-
         }
 
         public string GetAddress() {
-
             var result = this.address;
             if (string.IsNullOrEmpty(this.guid) == false && string.IsNullOrEmpty(this.guid.Trim()) == false) result = this.guid;
-
-            if (string.IsNullOrEmpty(this.subObjectName) == false) {
-
-                return $"{result}[{this.subObjectName}]";
-
-            }
-
+            if (string.IsNullOrEmpty(this.subObjectName) == false) return $"{result}[{this.subObjectName}]";
             return result;
-
         }
 
         public override string ToString() {
-            
             return $"[Resource] Type: {this.type}, Object Type: {this.objectType}, GUID: {this.guid} ({this.address}, {this.subObjectName}), Direct Reference: {this.directRef}";
-            
         }
 
         public override int GetHashCode() {
-
             return (int)this.type ^ (int)this.objectType ^ (this.guid != null ? this.guid.GetHashCode() : 0);
-
         }
 
         public bool IsEquals(in Resource other) {
-
             return this.type == other.type &&
                    this.objectType == other.objectType &&
                    this.address == other.address &&
                    this.guid == other.guid &&
                    this.subObjectName == other.subObjectName &&
                    this.directRef == other.directRef;
-
         }
         
         public bool IsEmpty() {
-
             return this.directRef == null && string.IsNullOrEmpty(this.guid) == true;
-
         }
 
         public T GetEditorRef<T>() where T : Object {
-            
             return Resource.GetEditorRef<T>(this);
-
         }
 
         public static T GetEditorRef<T>(Resource resource) where T : Object {
-
             return Resource.GetEditorRef<T>(resource.guid, resource.subObjectName, resource.objectType, resource.directRef);
-
         }
 
         public static T GetEditorRef<T>(string guid, string subObjectName, ObjectType objectType, Object directRef) where T : Object {
-
             return Resource.GetEditorRef(guid, subObjectName, typeof(T), objectType, directRef) as T;
-
         }
 
         public static Object GetEditorRef(string guid, string subObjectName, System.Type type, ObjectType objectType, Object directRef) {
@@ -348,7 +322,7 @@ namespace UnityEngine.UI.Windows.Modules {
             public Resource resource;
             public List<object> references;
             public HashSet<object> handlers;
-            public System.Action<object, IResourceConstructor> deconstruct;
+            public System.Action<WindowSystemResources, object, IResourceConstructor> deconstruct;
             public IResourceConstructor resourceConstructor;
 
             public int referencesCount => this.references.Count;
@@ -491,9 +465,7 @@ namespace UnityEngine.UI.Windows.Modules {
             
             var closure = PoolClass<ClosureResult<T>>.Spawn();
             var op = this.Load_INTERNAL<T, ClosureResult<T>>(new LoadParameters() { async = false }, handler, closure, resource, static (asset, c) => {
-
                 c.result = asset;
-
             });
             while (op.MoveNext()) {}
             
@@ -502,17 +474,6 @@ namespace UnityEngine.UI.Windows.Modules {
             PoolClass<ClosureResult<T>>.Recycle(ref closure);
             return result;
 
-        }
-
-        private static void ReleaseAddressableAsset<T>(T obj) {
-
-            if (obj is Component component) {
-                UnityEngine.AddressableAssets.Addressables.Release(component.gameObject);
-                return;
-            }
-            
-            UnityEngine.AddressableAssets.Addressables.Release(obj);
-            
         }
 
         private bool IsLoaded(object handler, Resource resource) {
@@ -559,34 +520,24 @@ namespace UnityEngine.UI.Windows.Modules {
             switch (resource.type) {
                 
                 case Resource.Type.Manual: {
-
                     this.CompleteTask(handler, resource, default);
-
                     break;
 
                 }
 
                 case Resource.Type.Direct: {
-
                     if (resource.directRef is GameObject go && resource.objectType == Resource.ObjectType.Component) {
-
                         var direct = go.GetComponent<T>();
                         onComplete.Invoke(direct, closure);
                         yield break;
-
                     } else if (resource.directRef is T direct) {
-
                         onComplete.Invoke(direct, closure);
                         yield break;
-
                     }
-
                     break;
-
                 }
 
                 case Resource.Type.Addressables: {
-
                     if (resource.objectType == Resource.ObjectType.Component) {
                         yield return this.LoadAddressable_INTERNAL<GameObject, T>(loadParameters, handler, resource, static go => {
                             var result = go.GetComponent<T>();
@@ -599,13 +550,61 @@ namespace UnityEngine.UI.Windows.Modules {
                     } else {
                         yield return this.LoadAddressable_INTERNAL<T, T>(loadParameters, handler, resource, r => r);
                     }
-                    
                     break;
+                }
 
+                case Resource.Type.CustomLoader: {
+                    if (resource.objectType == Resource.ObjectType.Component) {
+                        yield return this.LoadCustomLoader_INTERNAL<GameObject, T>(loadParameters, handler, resource, static go => {
+                            var result = go.GetComponent<T>();
+                            if (result == null && WindowSystem.GetResources().showLogs == true) {
+                                Debug.LogError($"[ UIWR ] Failed to load resource, gameObject loaded {go}, but component was not found with type {typeof(T)}");
+                            }
+
+                            return result;
+                        });
+                    } else {
+                        yield return this.LoadCustomLoader_INTERNAL<T, T>(loadParameters, handler, resource, r => r);
+                    }
+                    break;
                 }
 
             }
 
+        }
+        
+        private ICustomLoader customLoader;
+        public void SetCustomLoader(ICustomLoader loader) {
+            this.customLoader = loader;
+        }
+
+        private IEnumerator LoadCustomLoader_INTERNAL<TResource, TResult>(LoadParameters loadParameters, object handler, Resource resource, System.Func<TResource, TResult> converter) where TResult : class {
+
+            var task = this.customLoader.Load<TResource>(loadParameters, resource.GetAddress());
+            yield return task;
+            
+            if (task.GetAwaiter().IsCompleted == true) {
+
+                var asset = task.GetAwaiter().GetResult();
+                if (asset == null) {
+
+                    this.CompleteTask(handler, resource, default);
+
+                } else {
+
+                    var result = converter.Invoke(asset);
+                    this.AddObject(handler, result, null, resource, static (res, obj, _) => res.customLoader.Unload(obj));
+                    this.CompleteTask(handler, resource, result);
+
+                }
+
+            } else {
+                
+                if (this.showLogs == true) Debug.LogError($"[ UIWR ] Resource failed while loading: {resource}");
+                this.CompleteTask(handler, resource, null);
+                
+            }
+            
         }
 
         private IEnumerator LoadAddressable_INTERNAL<TResource, TResult>(LoadParameters loadParameters, object handler, Resource resource, System.Func<TResource, TResult> converter) where TResult : class {
@@ -631,7 +630,13 @@ namespace UnityEngine.UI.Windows.Modules {
                 } else {
 
                     var result = converter.Invoke(asset);
-                    this.AddObject(handler, result, null, resource, static (obj, _) => WindowSystemResources.ReleaseAddressableAsset(obj));
+                    this.AddObject(handler, result, null, resource, static (_, obj, _) => {
+                        if (obj is Component component) {
+                            UnityEngine.AddressableAssets.Addressables.Release(component.gameObject);
+                            return;
+                        }
+                        UnityEngine.AddressableAssets.Addressables.Release(obj);
+                    });
                     this.CompleteTask(handler, resource, result);
 
                 }
@@ -646,8 +651,7 @@ namespace UnityEngine.UI.Windows.Modules {
             this.LoadEnd(handler, cancellationTask);
             
         }
-
-
+        
         private void LoadBegin(object handler, System.Action cancellationTask) {
 
             var key = handler.GetHashCode();
@@ -712,7 +716,7 @@ namespace UnityEngine.UI.Windows.Modules {
             if (handler == null) handler = this;
 
             var obj = resourceConstructor.Construct();
-            this.AddObject(handler, obj, resourceConstructor, new Resource() { type = Resource.Type.Manual }, static (o, resourceConstructor) => {
+            this.AddObject(handler, obj, resourceConstructor, new Resource() { type = Resource.Type.Manual }, static (_, o, resourceConstructor) => {
                 var obj = (T)o;
                 ((IResourceConstructor<T>)resourceConstructor).Deconstruct(ref obj);
             });
@@ -808,7 +812,7 @@ namespace UnityEngine.UI.Windows.Modules {
                         this.loadedObjCache.Remove(obj);
                         
                         intResource.handlers.Remove(handler);
-                        intResource.deconstruct?.Invoke(intResource.loaded, intResource.resourceConstructor);
+                        intResource.deconstruct?.Invoke(this, intResource.loaded, intResource.resourceConstructor);
                         PoolHashSet<object>.Recycle(ref intResource.handlers);
                         PoolList<object>.Recycle(ref intResource.references);
                         intResource.Reset();
@@ -825,7 +829,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        private void AddObject(object handler, object obj, IResourceConstructor resourceConstructor, Resource resource, System.Action<object, IResourceConstructor> deconstruct) {
+        private void AddObject(object handler, object obj, IResourceConstructor resourceConstructor, Resource resource, System.Action<WindowSystemResources, object, IResourceConstructor> deconstruct) {
 
             if (this.loaded.TryGetValue(resource, out var intResource) == false) {
 
@@ -844,6 +848,31 @@ namespace UnityEngine.UI.Windows.Modules {
             intResource.handlers.Add(handler);
             intResource.references.Add(handler);
 
+        }
+
+        public static Resource.ObjectType GetObjectType(Object obj) {
+            return GetObjectType(obj.GetType());
+        }
+
+        public static Resource.ObjectType GetObjectType<T>() {
+            return GetObjectType(typeof(T));
+        }
+
+        public static Resource.ObjectType GetObjectType(System.Type type) {
+            var val = Resource.ObjectType.Unknown;
+            if (type == typeof(GameObject)) {
+                val = Resource.ObjectType.GameObject;
+            } else if (type == typeof(Component)) {
+                val = Resource.ObjectType.Component;
+            } else if (type == typeof(ScriptableObject)) {
+                val = Resource.ObjectType.ScriptableObject;
+            } else if (type == typeof(Sprite)) {
+                val = Resource.ObjectType.Sprite;
+            } else if (type == typeof(Texture)) {
+                val = Resource.ObjectType.Texture;
+            }
+
+            return val;
         }
 
     }

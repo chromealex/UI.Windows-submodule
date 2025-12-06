@@ -175,8 +175,6 @@ namespace UnityEngine.UI.Windows {
         [Tooltip("Simultaneously means that current animation will be played together with the childs.\nOneByOne means that children played one-by-one.")]
         public ShowBehaviour showBehaviour;
         
-        //public CanvasGroup canvasGroupRender;
-
         [Tooltip("Should this object return in pool when window is hidden? Object will returns into pool only if parent object is not mark as `createPool`.")]
         public bool createPool;
         
@@ -415,9 +413,6 @@ namespace UnityEngine.UI.Windows {
             
         }
         
-        public virtual void OnPoolGet() {}
-        public virtual void OnPoolAdd() {}
-
         public void SetTransformAs(RectTransform rectTransform) {
 
             if (rectTransform == null) return;
@@ -459,13 +454,26 @@ namespace UnityEngine.UI.Windows {
             }
             
         }
-
+        
+        /// <summary>
+        /// Check object state is Showing or Shown in hierarchy
+        /// </summary>
+        /// <returns>TRUE - if object's state is Showing or Shown in hierarchy, otherwise FALSE</returns>
         public bool IsVisible() {
 
-            return this.IsVisibleSelf() == true && (this.rootObject != null ? this.rootObject.IsVisible() == true : true);
+            var obj = this;
+            while (obj != null) {
+                if (obj.IsVisibleSelf() == false) return false;
+                if (obj.rootObject != null) obj = obj.rootObject;
+            }
+            return true;
 
         }
 
+        /// <summary>
+        /// Check object state is Showing or Shown
+        /// </summary>
+        /// <returns>TRUE - if object's state is Showing or Shown, otherwise FALSE</returns>
         public bool IsVisibleSelf() {
 
             return this.objectState == ObjectState.Showing || this.objectState == ObjectState.Shown;
@@ -790,10 +798,27 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        /// <summary>
+        /// Similar to IsVisible, but check real object visibility (similar to gameObject.isActive)
+        /// </summary>
+        /// <returns>TRUE - if all objects are visible in hierarchy, otherwise FALSE</returns>
         public bool IsActive() {
 
-            return this.isActiveSelf == true && (this.rootObject == null || this.rootObject.IsActive() == true);
+            var obj = this;
+            while (obj != null) {
+                if (obj.IsActiveSelf() == false) return false;
+                if (obj.rootObject != null) obj = obj.rootObject;
+            }
+            return true;
 
+        }
+
+        /// <summary>
+        /// Similar to IsVisibleSelf, but check real object visibility (similar to gameObject.isActiveSelf)
+        /// </summary>
+        /// <returns>TRUE - if object is visible, otherwise FALSE</returns>
+        public bool IsActiveSelf() {
+            return this.isActiveSelf;
         }
         
         public void SetVisibleHierarchy() {
@@ -1717,6 +1742,10 @@ namespace UnityEngine.UI.Windows {
         public virtual void OnFocusTook() { }
 
         public virtual void OnFocusLost() { }
+        
+        public virtual void OnPoolGet() {}
+        
+        public virtual void OnPoolAdd() {}
         #endregion
 
     }

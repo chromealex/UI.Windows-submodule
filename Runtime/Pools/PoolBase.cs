@@ -9,7 +9,7 @@ namespace UnityEngine.UI.Windows {
 	#endif
 	public static class PoolClassInterface<T> where T : class {
 
-		private static PoolInternalBase pool = new PoolInternalBase(null, null);
+		private static readonly PoolInternalBase pool = new PoolInternalBase(null, null);
 
 		public static TReal Spawn<TReal>() where TReal : class, new() {
 		    
@@ -41,7 +41,7 @@ namespace UnityEngine.UI.Windows {
 	#endif
 	public static class PoolList<T> {
 
-		private static PoolInternalBase pool = new PoolInternalBase(() => new List<T>(), (h) => ((List<T>)h).Clear());
+		private static readonly PoolInternalBase pool = new PoolInternalBase(() => new List<T>(), (h) => ((List<T>)h).Clear());
 
 		public static List<T> Spawn() {
 		    
@@ -69,9 +69,39 @@ namespace UnityEngine.UI.Windows {
 	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.ArrayBoundsChecks, false),
 	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.DivideByZeroChecks, false)]
 	#endif
+	public static class PoolQueue<T> {
+
+		private static readonly PoolInternalBase pool = new PoolInternalBase(() => new Queue<T>(), (h) => ((Queue<T>)h).Clear());
+
+		public static Queue<T> Spawn() {
+		    
+			return (Queue<T>)PoolQueue<T>.pool.Spawn();
+		    
+		}
+
+		public static void Recycle(ref Queue<T> instance) {
+		    
+			PoolQueue<T>.pool.Recycle(instance);
+			instance = null;
+
+		}
+
+		public static void Recycle(Queue<T> instance) {
+		    
+			PoolQueue<T>.pool.Recycle(instance);
+		    
+		}
+
+	}
+
+	#if ECS_COMPILE_IL2CPP_OPTIONS
+	[Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.NullChecks, false),
+	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.ArrayBoundsChecks, false),
+	 Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute(Unity.IL2CPP.CompilerServices.Option.DivideByZeroChecks, false)]
+	#endif
 	public static class PoolHashSet<T> where T : class, new() {
 
-		private static PoolInternalBase pool = new PoolInternalBase(() => new HashSet<T>(), (h) => ((HashSet<T>)h).Clear());
+		private static readonly PoolInternalBase pool = new PoolInternalBase(() => new HashSet<T>(), (h) => ((HashSet<T>)h).Clear());
 
 		public static HashSet<T> Spawn() {
 		    
@@ -101,7 +131,7 @@ namespace UnityEngine.UI.Windows {
 	#endif
 	public static class PoolClass<T> where T : class, new() {
 
-		private static PoolInternalBase pool = new PoolInternalBase(() => new T(), null);
+		private static readonly PoolInternalBase pool = new PoolInternalBase(() => new T(), null);
 
 		public static T Spawn() {
 		    
@@ -131,7 +161,7 @@ namespace UnityEngine.UI.Windows {
 	#endif
 	public static class PoolClassCustom<T> where T : class {
 
-		private static PoolInternalBase poolCustom = new PoolInternalBase(null, null);
+		private static readonly PoolInternalBase poolCustom = new PoolInternalBase(null, null);
 
 		public static TCustom Spawn<TCustom>() where TCustom : class, T, new() {
 		    
@@ -157,7 +187,7 @@ namespace UnityEngine.UI.Windows {
 	#endif
 	public static class PoolClassMainThread<T> where T : class, new() {
 
-		private static PoolInternalBaseNoStackPool pool = new PoolInternalBaseNoStackPool(() => new T(), null);
+		private static readonly PoolInternalBaseNoStackPool pool = new PoolInternalBaseNoStackPool(() => new T(), null);
 
 		public static T Spawn() {
 		    
@@ -212,7 +242,7 @@ namespace UnityEngine.UI.Windows {
 	    public static int deallocated;
 	    public static int used;
 
-	    private static List<PoolInternalBaseNoStackPool> list = new List<PoolInternalBaseNoStackPool>();
+	    private static readonly List<PoolInternalBaseNoStackPool> list = new List<PoolInternalBaseNoStackPool>();
 
 	    public override string ToString() {
 		    
@@ -359,7 +389,7 @@ namespace UnityEngine.UI.Windows {
 	    protected int poolNewAllocated;
 	    protected int poolUsed;
 
-	    private static List<PoolInternalBase> list = new List<PoolInternalBase>();
+	    private static readonly List<PoolInternalBase> list = new List<PoolInternalBase>();
 	    
 	    public static int newAllocated;
 	    public static int allocated;

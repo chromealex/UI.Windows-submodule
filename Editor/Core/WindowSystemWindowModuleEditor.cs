@@ -16,6 +16,8 @@ namespace UnityEditor.UI.Windows {
         
         private SerializedProperty animationParameters;
         private SerializedProperty subObjects;
+        private SerializedProperty hideBehaviour;
+        private SerializedProperty showBehaviour;
 
         private SerializedProperty renderBehaviourOnHidden;
         
@@ -70,6 +72,8 @@ namespace UnityEditor.UI.Windows {
             this.renderBehaviourOnHidden = this.serializedObject.FindProperty("renderBehaviourOnHidden");
 
             this.subObjects = this.serializedObject.FindProperty("subObjects");
+            this.hideBehaviour = this.serializedObject.FindProperty("hideBehaviour");
+            this.showBehaviour = this.serializedObject.FindProperty("showBehaviour");
 
             this.allowRegisterInRoot = this.serializedObject.FindProperty("allowRegisterInRoot");
             this.autoRegisterSubObjects = this.serializedObject.FindProperty("autoRegisterSubObjects");
@@ -141,6 +145,9 @@ namespace UnityEditor.UI.Windows {
                     EditorGUILayout.PropertyField(this.animationParameters);
                     EditorGUILayout.PropertyField(this.subObjects);
                     
+                    GUILayoutExt.DrawHeader("Animations");
+                    EditorGUILayout.PropertyField(this.animationParameters);
+
                     GUILayoutExt.DrawHeader("Performance Options");
                     EditorGUILayout.PropertyField(this.createPool);
                     
@@ -152,8 +159,10 @@ namespace UnityEditor.UI.Windows {
                     GUILayoutExt.DrawHeader("Render Behaviour");
                     EditorGUILayout.PropertyField(this.renderBehaviourOnHidden);
 
-                    GUILayoutExt.DrawHeader("Animation");
+                    GUILayoutExt.DrawHeader("Animations");
                     EditorGUILayout.PropertyField(this.animationParameters);
+                    EditorGUILayout.PropertyField(this.hideBehaviour);
+                    EditorGUILayout.PropertyField(this.showBehaviour);
 
                     GUILayoutExt.DrawHeader("Graph");
                     EditorGUILayout.PropertyField(this.allowRegisterInRoot);

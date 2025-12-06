@@ -170,8 +170,10 @@ namespace UnityEngine.UI.Windows {
         public int canvasSortingOrderDelta;
         public RenderItem[] canvasRenderers = System.Array.Empty<RenderItem>();
 
-        [Tooltip("Simultaneously means that current animation will be played together with the childs.\nWaitForChild means that child animations played first, then played current one.")]
+        [Tooltip("Simultaneously means that current animation will be played together with the childs.\nWaitForChild means that child animations played first, then played current one.\nOneByOne means that children animation will be played one-by-one.")]
         public HideBehaviour hideBehaviour;
+        [Tooltip("Simultaneously means that current animation will be played together with the childs.\nOneByOne means that children played one-by-one.")]
+        public ShowBehaviour showBehaviour;
         
         //public CanvasGroup canvasGroupRender;
 
@@ -1390,6 +1392,10 @@ namespace UnityEngine.UI.Windows {
 
         internal void ShowInternal(TransitionParameters parameters = default) {
             
+            if (parameters.data.replaceShowBehaviour == false) {
+                parameters = parameters.ReplaceShowBehaviour(this.showBehaviour);
+            }
+
             if (this.hiddenByDefault == true || this.IsInternalManualTouch(parameters) == true) {
 
                 if (this.internalManualShow == false) {

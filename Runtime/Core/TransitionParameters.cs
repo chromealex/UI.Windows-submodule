@@ -9,13 +9,22 @@ namespace UnityEngine.UI.Windows {
 
     }
 
+    [System.Flags]
     public enum HideBehaviour {
 
         Simultaneously,
-        WaitForChild,
+        WaitForChild = 1 << 0,
+        OneByOne = 1 << 1,
 
     }
-    
+
+    public enum ShowBehaviour {
+
+        Simultaneously,
+        OneByOne,
+
+    }
+
     [System.Serializable]
     public struct TransitionParametersData {
 
@@ -33,6 +42,9 @@ namespace UnityEngine.UI.Windows {
 
         internal bool replaceHideBehaviour;
         internal HideBehaviour hideBehaviour;
+
+        internal bool replaceShowBehaviour;
+        internal ShowBehaviour showBehaviour;
 
         internal System.Action callback;
         internal System.Action<object> callbackUserData;
@@ -92,6 +104,15 @@ namespace UnityEngine.UI.Windows {
             var instance = this;
             instance.data.replaceHideBehaviour = true;
             instance.data.hideBehaviour = state;
+            return instance;
+
+        }
+
+        public TransitionParameters ReplaceShowBehaviour(ShowBehaviour state) {
+
+            var instance = this;
+            instance.data.replaceShowBehaviour = true;
+            instance.data.showBehaviour = state;
             return instance;
 
         }

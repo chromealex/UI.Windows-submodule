@@ -15,6 +15,7 @@ namespace UnityEditor.UI.Windows {
         
         private SerializedProperty animationParameters;
         private SerializedProperty hideBehaviour;
+        private SerializedProperty showBehaviour;
         private SerializedProperty subObjects;
         private SerializedProperty componentModules;
 
@@ -73,6 +74,7 @@ namespace UnityEditor.UI.Windows {
 
             this.animationParameters = this.serializedObject.FindProperty("animationParameters");
             this.hideBehaviour = this.serializedObject.FindProperty("hideBehaviour");
+            this.showBehaviour = this.serializedObject.FindProperty("showBehaviour");
             this.renderBehaviourOnHidden = this.serializedObject.FindProperty("renderBehaviourOnHidden");
 
             this.subObjects = this.serializedObject.FindProperty("subObjects");
@@ -303,6 +305,7 @@ namespace UnityEditor.UI.Windows {
                     GUILayoutExt.DrawHeader("Animations");
                     EditorGUILayout.PropertyField(this.animationParameters);
                     EditorGUILayout.PropertyField(this.hideBehaviour);
+                    EditorGUILayout.PropertyField(this.showBehaviour);
 
                     GUILayoutExt.DrawHeader("Graph");
                     GUILayoutExt.PropertyField(this.allowRegisterInRoot, (reg) => reg.holdAllowRegisterInRoot);

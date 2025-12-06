@@ -520,20 +520,16 @@ namespace UnityEngine.UI.Windows {
 
                 if (closure.parameters.data.replaceAffectChilds == false ||
                     closure.parameters.data.affectChilds == true) {
-
+                    
                     instance.BreakStateHierarchy();
                     
                     Coroutines.CallInSequence(ref closure, static (ref ShowHideClosureParametersClass p) => {
-
                         p.hierarchyComplete = true;
                         if (p.animationComplete == true && p.baseComplete == true) {
-
                             var pars = p.parameters;
                             p.Dispose();
                             pars.RaiseCallback();
-
                         }
-
                     }, instance.subObjects, static (WindowObject obj, Coroutines.ClosureDelegateCallback<ShowHideClosureParametersClass> cb, ref ShowHideClosureParametersClass p) => {
                         
                         var closure = PoolClass<ShowHideInstanceInternalClosure>.Spawn();
@@ -550,34 +546,27 @@ namespace UnityEngine.UI.Windows {
                         }
                         
                         if (p.internalCall == true) {
-
                             obj.ShowInternal(parameters);
-
                         } else {
-
                             obj.Show(parameters);
-
                         }
 
-                    });
-
+                    }, waitPrevious: instance.showBehaviour == ShowBehaviour.OneByOne);
+                    
                 } else {
                     
                     instance.BreakState();
-                    
                     closure.hierarchyComplete = true;
                     
                 }
-
+                
                 WindowObjectAnimation.Show(closure, instance, parameters, static (cParams) => {
                     
                     cParams.animationComplete = true;
                     if (cParams.hierarchyComplete == true && cParams.baseComplete == true) {
-                        
                         var pars = cParams.parameters;
                         cParams.Dispose();
                         pars.RaiseCallback();
-                        
                     }
                     
                 });
@@ -714,7 +703,7 @@ namespace UnityEngine.UI.Windows {
                     if (inst.parameters.data.replaceAffectChilds == false ||
                         inst.parameters.data.affectChilds == true) {
 
-                        if (inst.parameters.data.hideBehaviour == HideBehaviour.WaitForChild) {
+                        if ((inst.parameters.data.hideBehaviour & HideBehaviour.WaitForChild) != 0) {
                             
                             // hide sub objects first
                             Coroutines.CallInSequence(ref closure, static (ref ShowHideClosureParametersClass p) => {
@@ -746,18 +735,14 @@ namespace UnityEngine.UI.Windows {
                                 }
 
                                 if (p.internalCall == true) {
-
                                     obj.HideInternal(parameters);
-
                                 } else {
-
                                     obj.Hide(parameters);
-
                                 }
 
-                            });
+                            }, waitPrevious: (inst.instance.hideBehaviour & HideBehaviour.OneByOne) != 0);
 
-                        } else if (inst.parameters.data.hideBehaviour == HideBehaviour.Simultaneously) {
+                        } else {
                             
                             // do not wait current object - start hiding all subobjects
                             Coroutines.CallInSequence(ref closure, static (ref ShowHideClosureParametersClass p) => {
@@ -788,16 +773,12 @@ namespace UnityEngine.UI.Windows {
                                 }
 
                                 if (p.internalCall == true) {
-
                                     obj.HideInternal(parameters);
-
                                 } else {
-
                                     obj.Hide(parameters);
-
                                 }
 
-                            });
+                            }, waitPrevious: (inst.instance.hideBehaviour & HideBehaviour.OneByOne) != 0);
                             
                             WindowObjectAnimation.Hide(closure, closure.instance, closure.parameters, static (cParams) => {
                                 

@@ -42,6 +42,29 @@ namespace UnityEngine.UI.Windows.Components {
 
     }
 
+    public interface ITextFormatter {
+
+        string Format(double value, string format);
+
+    }
+        
+    public struct TextFormatResolver {
+
+        public System.IFormatProvider provider;
+        public ITextFormatter customFormatter;
+
+        public string Format(double value, string valueFormat) {
+            if (this.customFormatter != null) return this.customFormatter.Format(value, valueFormat);
+            if (this.provider == null) return string.Format(valueFormat, value);
+            return string.Format(this.provider, valueFormat, value);
+        }
+
+        public bool IsValid() {
+            return this.provider != null || this.customFormatter != null;
+        }
+
+    }
+
     public partial class TextComponent : WindowComponent, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
 
         System.Type ISearchComponentByTypeEditor.GetSearchType() {
@@ -420,6 +443,63 @@ namespace UnityEngine.UI.Windows.Components {
             if ((layer & CacheLayer.Value) != 0) this.lastValueData = default;
         }
 
+        private struct ValueFormat : System.IEquatable<ValueFormat> {
+
+            public TextFormatResolver provider;
+            public string valueFormat;
+
+            public ValueFormat(TextFormatResolver provider, string valueFormat) {
+                this.provider = provider;
+                this.valueFormat = valueFormat;
+            }
+
+            public bool Equals(ValueFormat other) {
+                return Equals(this.provider, other.provider) && this.valueFormat == other.valueFormat;
+            }
+
+            public override bool Equals(object obj) {
+                return obj is ValueFormat other && this.Equals(other);
+            }
+
+            public override int GetHashCode() {
+                return System.HashCode.Combine(this.provider, this.valueFormat);
+            }
+
+            public static bool operator ==(ValueFormat left, ValueFormat right) {
+                return left.Equals(right);
+            }
+
+            public static bool operator !=(ValueFormat left, ValueFormat right) {
+                return !(left == right);
+            }
+
+            public string Format(double value) {
+                return this.provider.Format(value, this.valueFormat);
+            }
+
+            public bool IsValid() {
+                return this.provider.IsValid() == true || string.IsNullOrEmpty(this.valueFormat) == false;
+            }
+
+        }
+
+        private ValueFormat valueFormat;
+        public bool SetValueFormat(string format) {
+            var f = new ValueFormat(this.valueFormat.provider, format);
+            if (this.valueFormat == f) return false;
+            this.valueFormat = f;
+            this.lastValueData = default;
+            return true;
+        }
+        
+        public bool SetValueFormat(TextFormatResolver provider, string format) {
+            var f = new ValueFormat(provider, format);
+            if (this.valueFormat == f) return false;
+            this.valueFormat = f;
+            this.lastValueData = default;
+            return true;
+        }
+
         public void SetValue(double value, SourceValue sourceValue = SourceValue.Digits, TimeResult timeValueResult = TimeResult.None, TimeResult timeShortestVariant = TimeResult.None) {
 
             if (this.SetValue_INTERNAL(value, out var strFormat, sourceValue, timeValueResult, timeShortestVariant) == true) {
@@ -480,7 +560,11 @@ namespace UnityEngine.UI.Windows.Components {
                     break;
 
                 case SourceValue.Digits:
-                    this.SetText_INTERNAL(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    if (this.valueFormat.IsValid() == true) {
+                        this.SetText_INTERNAL(this.valueFormat.Format(value)); 
+                    } else {
+                        this.SetText_INTERNAL(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    }
                     break;
 
                 case SourceValue.Seconds:

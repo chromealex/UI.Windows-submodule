@@ -39,10 +39,11 @@
         public struct Canvas {
 
             public RenderMode renderMode;
+            public string sortingLayerName;
 
         }
 
-        public Canvas canvas = new Canvas() { renderMode = RenderMode.ScreenSpaceCamera };
+        public Canvas canvas = new Canvas() { renderMode = RenderMode.ScreenSpaceCamera, sortingLayerName = "Default" };
 
         [System.Serializable]
         public struct Camera {

@@ -69,6 +69,7 @@ namespace UnityEngine.UI.Windows {
 
             this.order = order;
             this.canvas.sortingOrder = order;
+            this.canvas.sortingLayerName = WindowSystem.GetSettings().canvas.sortingLayerName;
 
         }
         

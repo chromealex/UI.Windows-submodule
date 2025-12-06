@@ -1024,6 +1024,60 @@ namespace UnityEditor.UI.Windows {
 
         }
 
+        private static Vector3[] tempLines = new Vector3[2];
+        private static Vector3[] tempBox = new Vector3[4];
+        public static void HandlesDrawBoxNotFilled(Rect rect, float size, Color color) {
+	        
+	        HandlesDrawLine(new Vector2(rect.x, rect.y), new Vector2(rect.x + rect.width, rect.y), size, color);
+	        HandlesDrawLine(new Vector2(rect.x + rect.width, rect.y), new Vector2(rect.x + rect.width, rect.y + rect.height), size, color);
+	        HandlesDrawLine(new Vector2(rect.x + rect.width, rect.y + rect.height), new Vector2(rect.x, rect.y + rect.height), size, color);
+	        HandlesDrawLine(new Vector2(rect.x, rect.y + rect.height), new Vector2(rect.x, rect.y), size, color);
+
+        }
+
+        public static void HandlesDrawBox(Vector2 center, float size, Color color) {
+
+	        var points = tempBox;
+	        var halfSize = size * 0.5f;
+	        points[0] = new Vector3(center.x - halfSize, center.y - halfSize, 0);
+	        points[1] = new Vector3(center.x + halfSize, center.y - halfSize, 0);
+	        points[2] = new Vector3(center.x + halfSize, center.y + halfSize, 0);
+	        points[3] = new Vector3(center.x - halfSize, center.y + halfSize, 0);
+	        Handles.color = color;
+	        Handles.DrawAAConvexPolygon(points);
+	        
+        }
+
+        public static void HandlesDrawCircle(Vector2 center, float size, Color color) {
+
+	        Handles.color = color;
+	        var points = tempBox;
+	        var halfSize = size;
+	        points[0] = new Vector3(center.x - halfSize, center.y, 0);
+	        points[1] = new Vector3(center.x, center.y - halfSize, 0);
+	        points[2] = new Vector3(center.x + halfSize, center.y, 0);
+	        points[3] = new Vector3(center.x, center.y + halfSize, 0);
+	        Handles.DrawAAConvexPolygon(points);
+	        
+        }
+
+        public static void HandlesDrawLine(Vector2 from, Vector2 to, float size, Color color) {
+
+	        Handles.color = color;
+	        var points = tempLines;
+	        points[0] = from;
+	        points[1] = to;
+	        Handles.DrawAAPolyLine(size, points);
+			
+        }
+
+        public static void HandlesDrawDottedLine(Vector2 from, Vector2 to, float size, Color color) {
+
+	        Handles.color = color;
+	        Handles.DrawDottedLine(from, to, size);
+			
+        }
+
         public static void DrawBoxNotFilled(Rect rect, float size, Color color, float padding = 0f) {
 	        
 	        var s1 = new Rect(rect);

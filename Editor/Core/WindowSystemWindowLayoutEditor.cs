@@ -98,7 +98,7 @@ namespace UnityEditor.UI.Windows {
             WindowLayout targetLayout = null;
             if (Selection.activeObject != null) {
                 var go = Selection.activeObject as GameObject;
-                var layout = go.GetComponentInParent<WindowLayout>(true);
+                var layout = go?.GetComponentInParent<WindowLayout>(true);
                 if (layout == null) return;
                 targetLayout = layout;
             } else {
@@ -120,6 +120,10 @@ namespace UnityEditor.UI.Windows {
 
                 var position = rectTransform.transform.position;
                 var scale = rectTransform.localScale.x;
+                var parentCanvas = rectTransform.parent?.GetComponentInParent<Canvas>(true);
+                if (parentCanvas != null) {
+                    scale = parentCanvas.transform.localScale.x;
+                }
                 if (scale <= 0f) return;
 
                 {
@@ -174,7 +178,7 @@ namespace UnityEditor.UI.Windows {
                         Handles.DrawAAPolyLine(1f, tempLines);
                     }
                     { // Draw outline
-                        const float offset = 10f;
+                        float offset = 10f * scale;
                         tempLines[0] = new Vector3(startX - offset, startY - offset, startZ);
                         tempLines[1] = new Vector3(startX - offset + gridSizeX + offset * 2f, startY - offset, startZ);
                         tempLines[2] = new Vector3(startX - offset + gridSizeX + offset * 2f, startY - offset, startZ);
@@ -186,10 +190,10 @@ namespace UnityEditor.UI.Windows {
                         Handles.color = new Color(1f, 1f, 1f, 0.1f);
                         Handles.DrawAAPolyLine(1f, tempLines);
                     }
-                    this.DrawLabel(sceneView, targetLayout.name, 30, scale, new Color(1f, 1f, 1f, 0.2f), new Vector3(startX - 10f, startY + (rect.height) * scale + 10f, startZ));
+                    this.DrawLabel(sceneView, targetLayout.name, 30, scale, new Color(1f, 1f, 1f, 0.2f), new Vector3(startX - 10f * scale, startY + (rect.height) * scale + 10f * scale, startZ), TextAnchor.LowerLeft);
                     
                     foreach (var layoutElement in targetLayout.layoutElements) {
-                        if (layoutElement.isActiveAndEnabled == false || layoutElement.hideInScreen == true) continue;
+                        if (layoutElement == null || layoutElement.isActiveAndEnabled == false || layoutElement.hideInScreen == true) continue;
                         this.DrawElement(sceneView, layoutElement, rectTransform, scale);
                     }
                 }
@@ -205,39 +209,48 @@ namespace UnityEditor.UI.Windows {
             var rect = rectTransform.rect;
             var position = rectTransform.position;
             var pivot = rectTransform.pivot;
+            var anchorMin = rectTransform.anchorMin;
+            var anchorMax = rectTransform.anchorMax;
             
             var startX = (-rect.width * pivot.x) * scale + position.x;
             var startY = (-rect.height * pivot.y) * scale + position.y;
             var startZ = 0f;
+
+            var alpha = layoutElement == ((GameObject)Selection.activeObject).GetComponent<WindowLayoutElement>() ? 1f : 0.5f;
             
-            var mainColor = new Color(0.08f, 0.6f, 1f, 1f);
-            var textColor = new Color(0.08f, 0.6f, 1f, 0.75f);
+            var mainColor = new Color(0.08f, 0.6f, 1f, 1f * alpha);
+            var textColor = new Color(0.08f, 0.6f, 1f, 0.75f * alpha);
+            var anchorColor = new Color(1f, 0.37f, 0.25f, 1f * alpha);
+            var stretchColor = new Color(0.14f, 0.6f, 1f, 1f * alpha);
+            var anchorPointColor = new Color(1f, 1f, 0f, 1f * alpha);
+            var borderColor = new Color(1f, 1f, 1f, 0.5f * alpha);
+            var pivotColor = new Color(0.14f, 0.6f, 1f, 1f * alpha);
+            
             var gridSizeX = rect.width * scale;
             var gridSizeY = rect.height * scale;
 
-            tempLines[0] = new Vector3(startX, startY, startZ);
-            tempLines[1] = new Vector3(startX + gridSizeX, startY, startZ);
-            tempLines[2] = new Vector3(startX + gridSizeX, startY, startZ);
-            tempLines[3] = new Vector3(startX + gridSizeX, startY + gridSizeY, startZ);
-            tempLines[4] = new Vector3(startX + gridSizeX, startY + gridSizeY, startZ);
-            tempLines[5] = new Vector3(startX, startY + gridSizeY, startZ);
-            tempLines[6] = new Vector3(startX, startY + gridSizeY, startZ);
-            tempLines[7] = new Vector3(startX, startY, startZ);
-            
-            Handles.color = mainColor;
-            Handles.DrawAAPolyLine(2f, tempLines);
+            GUILayoutExt.HandlesDrawBoxNotFilled(new Rect(startX, startY, gridSizeX, gridSizeY), 2f, borderColor);
+            if (anchorMin == anchorMax) {
+                GUILayoutExt.HandlesDrawDottedLine(new Vector2(startX + gridSizeX * anchorMin.x, startY), new Vector2(startX + gridSizeX * anchorMin.x, startY + gridSizeY), 2f, anchorColor);
+                GUILayoutExt.HandlesDrawDottedLine(new Vector2(startX, startY + gridSizeY * anchorMin.y), new Vector2(startX + gridSizeX, startY + gridSizeY * anchorMin.y), 2f, anchorColor);
+            } else {
+                GUILayoutExt.HandlesDrawLine(new Vector2(startX + gridSizeX * anchorMin.x, startY), new Vector2(startX + gridSizeX * anchorMin.x, startY + gridSizeY), 2f, stretchColor);
+                GUILayoutExt.HandlesDrawLine(new Vector2(startX, startY + gridSizeY * anchorMin.y), new Vector2(startX + gridSizeX, startY + gridSizeY * anchorMin.y), 2f, stretchColor);
+            }
+            GUILayoutExt.HandlesDrawCircle(new Vector2(startX + gridSizeX * pivot.x, startY + gridSizeY * pivot.y), 4f * scale, pivotColor);
+            GUILayoutExt.HandlesDrawBox(new Vector2(startX + gridSizeX * anchorMin.x, startY + gridSizeY * anchorMin.y), 4f * scale, anchorPointColor);
+            GUILayoutExt.HandlesDrawBox(new Vector2(startX + gridSizeX * anchorMax.x, startY + gridSizeY * anchorMax.y), 4f * scale, anchorPointColor);
 
             this.DrawLabel(sceneView, layoutElement.name, 100, scale, textColor, new Vector3(startX, startY + (rect.height) * scale, startZ));
 
         }
 
-        private void DrawLabel(SceneView sceneView, string text, float fontSize, float scale, Color textColor, Vector3 position) {
+        private void DrawLabel(SceneView sceneView, string text, float fontSize, float scale, Color textColor, Vector3 position, TextAnchor alignment = TextAnchor.UpperLeft) {
             
             Handles.BeginGUI();
 
             var style = labelStyle ?? new GUIStyle(EditorStyles.label) {
                 alignment = TextAnchor.UpperLeft,
-                fontSize = (int)(100 * scale),
                 richText = true,
                 normal = new GUIStyleState() {
                     textColor = textColor,
@@ -251,15 +264,16 @@ namespace UnityEditor.UI.Windows {
             style.normal.textColor = textColor;
             style.hover.textColor = textColor;
             style.fontSize = (int)(fontSize * scale);
+            style.alignment = alignment;
 
             var size = style.CalcSize(new GUIContent(text));
-            var r = new Rect(0f, 0f, size.x, size.y);
+            var r = new Rect(0f, 0f, size.x * 2f, size.y);
 
             var prev = GUI.matrix;
             var guiPos = HandleUtility.WorldToGUIPoint(position);
             var handleSize = HandleUtility.GetHandleSize(position);
             var prevColor = GUI.color;
-            GUI.matrix = Matrix4x4.TRS(guiPos, Quaternion.Inverse(sceneView.camera.transform.rotation), Vector3.one / handleSize * 20f);
+            GUI.matrix = Matrix4x4.TRS(guiPos, Quaternion.Inverse(sceneView.camera.transform.rotation), Vector3.one / handleSize * scale * 50f);
             GUI.color = textColor;
             GUI.Label(r, text, style);
             GUI.matrix = prev;

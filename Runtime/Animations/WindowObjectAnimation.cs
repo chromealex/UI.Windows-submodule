@@ -23,6 +23,7 @@
             public System.Action<T> onCancel;
             public T closureParameters;
             public TweenerCustomParameters customParameters;
+            public WindowObject instance;
 
             int Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.counter { get; set; }
             bool Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>>.completed { get; set; }
@@ -116,17 +117,18 @@
 
         public static void Show<T>(T closureParameters, WindowObject instance, TransitionParameters parameters, System.Action<T> onComplete) {
 
-            WindowObjectAnimation.Play(closureParameters, AnimationState.Show, instance.animationParameters.items, parameters, default, onComplete);
+            WindowObjectAnimation.Play(closureParameters, instance, AnimationState.Show, instance.animationParameters.items, parameters, default, onComplete);
 
         }
 
         public static void Hide<T>(T closureParameters, WindowObject instance, TransitionParameters parameters, System.Action<T> onComplete) {
 
-            WindowObjectAnimation.Play(closureParameters, AnimationState.Hide, instance.animationParameters.items, parameters, default, onComplete);
+            WindowObjectAnimation.Play(closureParameters, instance, AnimationState.Hide, instance.animationParameters.items, parameters, default, onComplete);
 
         }
 
         internal static void Play<T>(T closureParameters,
+                                     WindowObject instance,
                                      AnimationState animationState,
                                      AnimationParameters[] animationParameters,
                                      TransitionParameters parameters,
@@ -164,6 +166,7 @@
             }
 
             var animationGroupInfo = PoolClass<AnimationGroupInfo<T>>.Spawn();
+            animationGroupInfo.instance = instance;
             animationGroupInfo.transitionParameters = parameters;
             animationGroupInfo.animationState = animationState;
             animationGroupInfo.closureParameters = closureParameters;
@@ -202,6 +205,8 @@
                         closureParameters = state,
                     };
 
+                    var prevRandomState = Random.state;
+                    Random.InitState(Mathf.Abs(state.instance.GetInstanceID()));
                     var ease = (state.animationState == AnimationState.Show ? anim.easeShow : anim.easeHide);
                     var tweener = WindowSystem.GetTweener();
                     tweener.Stop(anim);
@@ -240,7 +245,9 @@
                         tween.Reflect();
 
                     }
-                    
+
+                    Random.state = prevRandomState;
+
                 } else {
                     
                     cb.Invoke(ref state);

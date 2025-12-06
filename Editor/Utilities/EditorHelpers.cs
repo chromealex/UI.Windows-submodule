@@ -498,12 +498,12 @@ namespace UnityEditor.UI.Windows {
             while (type != baseType) {
 
                 var parent = type;
-                var fi = parent.GetField(path);
+                var fi = parent.GetField(path, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 var paths = path.Split('.');
 
                 for (var i = 0; i < (path.Length > 0 ? 1 : paths.Length); i++) {
 
-                    fi = parent.GetField(paths[i]);
+                    fi = parent.GetField(paths[i], BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                     if (fi == null) {
                         return false;
                     }
@@ -543,12 +543,12 @@ namespace UnityEditor.UI.Windows {
         public static System.Reflection.FieldInfo GetFieldViaPath(System.Type type, string path, out System.Type parent) {
 
             parent = type;
-            var fi = parent.GetField(path);
+            var fi = parent.GetField(path, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             var paths = path.Split('.');
 
             for (var i = 0; i < paths.Length; i++) {
 
-                fi = parent.GetField(paths[i]);
+                fi = parent.GetField(paths[i], BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 if (fi == null) {
                     return null;
                 }

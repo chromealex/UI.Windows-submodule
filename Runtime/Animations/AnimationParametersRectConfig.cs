@@ -23,7 +23,9 @@ namespace UnityEngine.UI.Windows.Modules {
             scale = Vector3.one,
         };
 
-        private void OnValidate() {
+        protected override void OnValidate() {
+            
+            base.OnValidate();
             
             #pragma warning disable
             if (this.parameters == (RectAnimationParameters.AnimationParameter)(-1)) {
@@ -31,6 +33,10 @@ namespace UnityEngine.UI.Windows.Modules {
                 this.animatedParameters = RectAnimationParameters.AnimationParameter.Position | RectAnimationParameters.AnimationParameter.Rotation | RectAnimationParameters.AnimationParameter.Scale;
             }
             #pragma warning restore
+            
+            this.hiddenState.visible = this.animatedParameters;
+            this.shownState.visible = this.animatedParameters;
+            this.resetState.visible = this.animatedParameters;
 
         }
 

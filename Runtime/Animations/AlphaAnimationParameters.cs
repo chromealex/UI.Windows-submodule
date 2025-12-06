@@ -33,6 +33,7 @@
 
         public override void OnValidate() {
 
+            base.OnValidate();
             if (this.canvasGroup == null) this.canvasGroup = this.GetComponent<CanvasGroup>();
 
         }

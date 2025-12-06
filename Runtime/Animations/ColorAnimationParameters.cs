@@ -54,6 +54,8 @@
         private readonly ColorState currentState = new ColorState();
 
         public override void OnValidate() {
+            
+            base.OnValidate();
 
             if (this.resetState.items == null) this.resetState.items = System.Array.Empty<ColorState.Item>();
             

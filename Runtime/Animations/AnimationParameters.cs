@@ -14,14 +14,40 @@
     public abstract class AnimationParameters : MonoBehaviour {
 
         [System.Serializable]
+        public struct ShowHideParameters {
+
+            public float duration;
+            public Delay delay;
+            public Tweener.EaseFunction ease;
+
+            public ShowHideParameters(float duration, float delay, Delay additionalDelayParameters, Tweener.EaseFunction ease) {
+                this.duration = duration;
+                this.delay = additionalDelayParameters;
+                if (this.delay.random == true) {
+                    this.delay.randomFromTo.x = delay;
+                }
+                this.ease = ease;
+            }
+
+            public bool IsEmpty() {
+                return this.duration == 0f && this.delay.IsEmpty() == true && this.ease == default;
+            }
+
+        }
+
+        [System.Serializable]
         public struct Delay {
 
             public bool random;
             public Vector2 randomFromTo;
 
-            public float GetValue(float defaultValue) {
-                if (this.random == false) return defaultValue;
+            public float GetValue() {
+                if (this.random == false) return this.randomFromTo.x;
                 return Random.Range(this.randomFromTo.x, this.randomFromTo.y);
+            }
+
+            public bool IsEmpty() {
+                return this.random == false && this.randomFromTo == default;
             }
 
         }
@@ -30,14 +56,24 @@
         public AnimationParametersConfig config;
         
         [Space]
+        [HideInInspector][System.Obsolete("Use show instead")]
         public float durationShow = 0.3f;
+        [HideInInspector][System.Obsolete("Use hide instead")]
         public float durationHide = 0.3f;
+        [HideInInspector][System.Obsolete("Use show instead")]
         public float delayShow = 0f;
+        [HideInInspector][System.Obsolete("Use show instead")]
         public Delay delayShowParameters;
+        [HideInInspector][System.Obsolete("Use hide instead")]
         public float delayHide = 0f;
+        [HideInInspector][System.Obsolete("Use hide instead")]
         public Delay delayHideParameters;
+        [HideInInspector][System.Obsolete("Use show instead")]
         public Tweener.EaseFunction easeShow = Tweener.EaseFunction.Linear;
+        [HideInInspector][System.Obsolete("Use hide instead")]
         public Tweener.EaseFunction easeHide = Tweener.EaseFunction.Linear;
+        public ShowHideParameters show;
+        public ShowHideParameters hide;
 
         public abstract class State {
 
@@ -46,7 +82,12 @@
 
         }
 
-        public abstract void OnValidate();
+        public virtual void OnValidate() {
+            #pragma warning disable
+            if (this.show.IsEmpty() == true) this.show = new ShowHideParameters(this.durationShow, this.delayShow, this.delayShowParameters, this.easeShow);
+            if (this.hide.IsEmpty() == true) this.hide = new ShowHideParameters(this.durationHide, this.delayHide, this.delayHideParameters, this.easeHide);
+            #pragma warning restore
+        }
 
         public float GetDuration(AnimationState animationState) {
 
@@ -54,11 +95,11 @@
             switch (animationState) {
 
                 case AnimationState.Show:
-                    delay = this.durationShow;
+                    delay = this.show.duration;
                     break;
 
                 case AnimationState.Hide:
-                    delay = this.durationHide;
+                    delay = this.hide.duration;
                     break;
 
             }
@@ -73,11 +114,11 @@
             switch (animationState) {
 
                 case AnimationState.Show:
-                    delay = this.delayShowParameters.GetValue(this.delayShow);
+                    delay = this.show.delay.GetValue();
                     break;
 
                 case AnimationState.Hide:
-                    delay = this.delayHideParameters.GetValue(this.delayHide);
+                    delay = this.hide.delay.GetValue();
                     break;
 
             }

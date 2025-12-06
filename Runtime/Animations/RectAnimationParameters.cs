@@ -87,6 +87,8 @@
         private readonly RectState currentState = new RectState();
 
         public override void OnValidate() {
+            
+            base.OnValidate();
 
             #pragma warning disable
             if (this.parameters == (AnimationParameter)(-1)) {

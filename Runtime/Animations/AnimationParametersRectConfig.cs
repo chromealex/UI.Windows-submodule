@@ -3,7 +3,10 @@ namespace UnityEngine.UI.Windows.Modules {
     [CreateAssetMenu(menuName = "UI.Windows/Animations/Rect Parameters Config")]
     public class AnimationParametersRectConfig : AnimationParametersConfig {
 
-        public RectAnimationParameters.AnimationParameter parameters = (RectAnimationParameters.AnimationParameter)(-1);
+        [System.Obsolete("Use animatedParameters instead")]
+        [HideInInspector]
+        public RectAnimationParameters.AnimationParameter parameters = RectAnimationParameters.AnimationParameter.Position | RectAnimationParameters.AnimationParameter.Rotation | RectAnimationParameters.AnimationParameter.Scale;
+        public RectAnimationParameters.AnimationParameter animatedParameters = RectAnimationParameters.AnimationParameter.Position | RectAnimationParameters.AnimationParameter.Rotation | RectAnimationParameters.AnimationParameter.Scale;
         public RectAnimationParameters.RectState resetState = new RectAnimationParameters.RectState() {
             anchorPosition = new Vector2(0f, -100f),
             rotation = Vector3.zero,
@@ -19,7 +22,18 @@ namespace UnityEngine.UI.Windows.Modules {
             rotation = Vector3.zero,
             scale = Vector3.one,
         };
-        
+
+        private void OnValidate() {
+            
+            #pragma warning disable
+            if (this.parameters == (RectAnimationParameters.AnimationParameter)(-1)) {
+                // set default parameters as a part of migration
+                this.animatedParameters = RectAnimationParameters.AnimationParameter.Position | RectAnimationParameters.AnimationParameter.Rotation | RectAnimationParameters.AnimationParameter.Scale;
+            }
+            #pragma warning restore
+
+        }
+
         public override void Apply(AnimationParameters parameters) {
 
             base.Apply(parameters);
@@ -27,7 +41,7 @@ namespace UnityEngine.UI.Windows.Modules {
             var target = parameters as RectAnimationParameters;
             if (target == null) return;
 
-            target.parameters = this.parameters;
+            target.animatedParameters = this.animatedParameters;
             target.resetState.CopyFrom(this.resetState);
             target.shownState.CopyFrom(this.shownState);
             target.hiddenState.CopyFrom(this.hiddenState);

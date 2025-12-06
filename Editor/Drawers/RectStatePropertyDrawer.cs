@@ -12,7 +12,16 @@ namespace UnityEditor.UI.Windows {
             
             if (this.anchorPosState == false) return EditorGUIUtility.singleLineHeight;
 
-            const int lines = 3; // anchor, rotation, scale
+            int lines = 0;
+            var visible = (RectAnimationParameters.AnimationParameter)property.FindPropertyRelative(nameof(RectAnimationParameters.RectState.visible)).enumValueFlag;
+            if ((visible & RectAnimationParameters.AnimationParameter.Position) != 0) ++lines;
+            if ((visible & RectAnimationParameters.AnimationParameter.Rotation) != 0) ++lines;
+            if ((visible & RectAnimationParameters.AnimationParameter.Scale) != 0) ++lines;
+            if ((visible & RectAnimationParameters.AnimationParameter.Size) != 0) ++lines;
+            if ((visible & RectAnimationParameters.AnimationParameter.Pivot) != 0) ++lines;
+            if ((visible & RectAnimationParameters.AnimationParameter.AnchorsMin) != 0) ++lines;
+            if ((visible & RectAnimationParameters.AnimationParameter.AnchorsMax) != 0) ++lines;
+
             return EditorGUIUtility.singleLineHeight * (lines + 1) + EditorGUIUtility.standardVerticalSpacing * (lines + 1);
             
         }
@@ -21,7 +30,6 @@ namespace UnityEditor.UI.Windows {
             
             EditorGUI.BeginProperty(position, label, property);
 
-            // Calculate foldout rect and draw it
             Rect foldoutRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
             this.anchorPosState = EditorGUI.Foldout(foldoutRect, this.anchorPosState, property.displayName, true);
 
@@ -30,52 +38,47 @@ namespace UnityEditor.UI.Windows {
                 return;
             }
 
-            EditorGUI.indentLevel++;
+            ++EditorGUI.indentLevel;
             float lineHeight = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             position.y += lineHeight;
 
-            DrawVector2WithToggle(ref position, property, nameof(RectAnimationParameters.RectState.anchorPosition), nameof(RectAnimationParameters.RectState.useInitialAnchorPosition));
-            DrawVector3WithToggle(ref position, property, nameof(RectAnimationParameters.RectState.rotation), nameof(RectAnimationParameters.RectState.useInitialRotation));
-            DrawVector3WithToggle(ref position, property, nameof(RectAnimationParameters.RectState.scale), nameof(RectAnimationParameters.RectState.useInitialScale));
+            var parameters = property.FindPropertyRelative(nameof(RectAnimationParameters.RectState.parameters));
+            var visible = (RectAnimationParameters.AnimationParameter)property.FindPropertyRelative(nameof(RectAnimationParameters.RectState.visible)).enumValueFlag;
+            if ((visible & RectAnimationParameters.AnimationParameter.Position) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.anchorPosition), RectAnimationParameters.AnimationParameter.Position, parameters);
+            if ((visible & RectAnimationParameters.AnimationParameter.Rotation) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.rotation), RectAnimationParameters.AnimationParameter.Rotation, parameters);
+            if ((visible & RectAnimationParameters.AnimationParameter.Scale) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.scale), RectAnimationParameters.AnimationParameter.Scale, parameters);
+            if ((visible & RectAnimationParameters.AnimationParameter.Size) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.size), RectAnimationParameters.AnimationParameter.Size, parameters);
+            if ((visible & RectAnimationParameters.AnimationParameter.Pivot) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.pivot), RectAnimationParameters.AnimationParameter.Pivot, parameters);
+            if ((visible & RectAnimationParameters.AnimationParameter.AnchorsMin) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.anchorsMin), RectAnimationParameters.AnimationParameter.AnchorsMin, parameters);
+            if ((visible & RectAnimationParameters.AnimationParameter.AnchorsMax) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.anchorsMax), RectAnimationParameters.AnimationParameter.AnchorsMax, parameters);
 
-            EditorGUI.indentLevel--;
+            --EditorGUI.indentLevel;
             EditorGUI.EndProperty();
             
         }
         
-        private static void DrawVector2WithToggle(ref Rect position, SerializedProperty parent, string valueProp, string toggleProp) {
+        private static void DrawField(ref Rect position, SerializedProperty parent, string valueProp, RectAnimationParameters.AnimationParameter flag, SerializedProperty parameters) {
             
             var value = parent.FindPropertyRelative(valueProp);
-            var toggle = parent.FindPropertyRelative(toggleProp);
+            var flags = (RectAnimationParameters.AnimationParameter)parameters.enumValueFlag;
+            var isSet = (flags & flag) == 0;
 
             const float toggleWidth = 20f;
             Rect fieldRect = new Rect(position.x, position.y, position.width - toggleWidth, EditorGUIUtility.singleLineHeight);
             Rect toggleRect = new Rect(position.x + position.width - toggleWidth, position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
 
-            EditorGUI.BeginDisabledGroup(toggle.boolValue);
-            value.vector2Value = EditorGUI.Vector2Field(fieldRect, ObjectNames.NicifyVariableName(value.name), value.vector2Value);
+            EditorGUI.BeginDisabledGroup(isSet);
+            EditorGUI.PropertyField(fieldRect, value);
             EditorGUI.EndDisabledGroup();
 
-            toggle.boolValue = GUI.Toggle(toggleRect, toggle.boolValue, EditorGUIUtility.IconContent(toggle.boolValue ? "d_Linked" : "d_Unlinked"), GUIStyle.none);
-
-            position.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-            
-        }
-
-        private static void DrawVector3WithToggle(ref Rect position, SerializedProperty parent, string valueProp, string toggleProp) {
-            
-            var value = parent.FindPropertyRelative(valueProp);
-            var toggle = parent.FindPropertyRelative(toggleProp);
-
-            const float toggleWidth = 20f;
-            Rect fieldRect = new Rect(position.x, position.y, position.width - toggleWidth, EditorGUIUtility.singleLineHeight);
-            Rect toggleRect = new Rect(position.x + position.width - toggleWidth, position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
-
-            EditorGUI.BeginDisabledGroup(toggle.boolValue);
-            value.vector3Value = EditorGUI.Vector3Field(fieldRect, ObjectNames.NicifyVariableName(value.name), value.vector3Value);
-            EditorGUI.EndDisabledGroup();
-
-            toggle.boolValue = GUI.Toggle(toggleRect, toggle.boolValue, EditorGUIUtility.IconContent(toggle.boolValue ? "d_Linked" : "d_Unlinked"), GUIStyle.none);
+            var res = GUI.Toggle(toggleRect, isSet, EditorGUIUtility.IconContent(isSet == true ? "d_Linked" : "d_Unlinked"), GUIStyle.none);
+            if (res != isSet) {
+                if (res == true) {
+                    parameters.enumValueFlag &= ~(int)flag;
+                } else {
+                    parameters.enumValueFlag |= (int)flag;
+                }
+            }
 
             position.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             

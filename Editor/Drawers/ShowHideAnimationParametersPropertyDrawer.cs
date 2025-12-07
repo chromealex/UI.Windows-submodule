@@ -1,9 +1,274 @@
-﻿using UnityEditor.UIElements;
+﻿using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI.Windows.Modules;
-using UnityEngine.UIElements;
 
 namespace UnityEditor.UI.Windows {
+
+    [CustomPropertyDrawer(typeof(UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction))]
+    public class EaseAnimationParametersPropertyDrawer : PropertyDrawer {
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
+
+            return EditorGUIUtility.singleLineHeight;
+
+        }
+        
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+
+            EditorGUI.BeginProperty(position, label, property);
+            if (EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Passive, EditorStyles.toolbarDropDown) == true) {
+                PopupWindow.Show(position, new EaseEditorWindow() {
+                    onSelect = (ease) => {
+                        property.serializedObject.Update();
+                        property.enumValueIndex = (int)ease;
+                        property.serializedObject.ApplyModifiedProperties();
+                        property.serializedObject.Update();
+                    },
+                });
+            }
+
+            var lbl = property.enumDisplayNames[property.enumValueIndex];
+            EaseEditorWindow.Item.DrawProgress(new Rect(position.x + 1f, position.y + 1f, position.width - 20f, position.height - 2f), (UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction)property.enumValueIndex, -1f, lbl);
+            EditorGUI.EndProperty();
+            
+        }
+        
+    }
+
+    public class EaseEditorWindow : PopupWindowContent {
+
+        private const int COLUMNS = 4;
+        private const float ELEMENT_WIDTH = 100f;
+        private const float ELEMENT_HEIGHT = 40f;
+        private const float HEADER_HEIGHT = 20f;
+        private SerializedProperty property;
+        private readonly System.Collections.Generic.List<Item> items;
+        public System.Action<UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction> onSelect;
+
+        public static class Styles {
+
+            public static readonly GUIStyle headerLabel;
+            public static readonly GUIStyle label;
+            public static readonly GUIStyle sliderDot;
+
+            static Styles() {
+                
+                headerLabel = new GUIStyle(EditorStyles.miniBoldLabel);
+                headerLabel.alignment = TextAnchor.LowerLeft;
+                headerLabel.normal.textColor = new Color(1f, 1f, 1f, 0.5f);
+                if (EditorGUIUtility.isProSkin == false) {
+                    headerLabel.normal.textColor = new Color(0f, 0f, 0f, 0.5f);
+                }
+                
+                label = new GUIStyle(EditorStyles.miniLabel);
+                label.normal.textColor = new Color(1f, 1f, 1f, 0.3f);
+                label.alignment = TextAnchor.UpperLeft;
+                if (EditorGUIUtility.isProSkin == false) {
+                    label.normal.textColor = new Color(0f, 0f, 0f, 0.3f);
+                }
+
+                sliderDot = new GUIStyle((GUIStyle)"U2D.dragDot");
+
+            }
+
+        }
+
+        public class Item {
+
+            private readonly UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction type;
+            private readonly int order;
+            private readonly bool isGroup;
+            private readonly string groupHeader;
+            private double progress;
+            private double prevTime;
+            
+            public Item(UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction type) {
+                this.type = type;
+                var memInfo = type.GetType().GetMember(type.ToString());
+                {
+                    var attribute = memInfo[0].GetCustomAttribute(typeof(UnityEngine.UI.Windows.Utilities.Tweener.GroupAttribute), false);
+                    if (attribute is UnityEngine.UI.Windows.Utilities.Tweener.GroupAttribute groupAttribute) {
+                        this.groupHeader = groupAttribute.caption;
+                    }
+                    this.isGroup = attribute != null;
+                }
+                {
+                    var attribute = memInfo[0].GetCustomAttribute(typeof(UnityEngine.UI.Windows.Utilities.Tweener.InspectorOrderAttribute), false);
+                    if (attribute is UnityEngine.UI.Windows.Utilities.Tweener.InspectorOrderAttribute orderAttribute) {
+                        this.order = orderAttribute.order;
+                    }
+                }
+            }
+
+            public bool IsGroup() => this.isGroup;
+
+            public string GetCaption() {
+
+                return this.type.ToString();
+
+            }
+
+            public void OnGUI(Rect rect) {
+
+                DrawProgress(rect, this.type, (float)this.progress, this.GetCaption());
+
+            }
+
+            public static void DrawProgress(Rect rect, UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction func, float progress, string caption) {
+
+                const float sizeX = 10f;
+                const float sizeY = 10f;
+                const int precision = 100;
+
+                var funcEase = UnityEngine.UI.Windows.Utilities.Tweener.EaseFunctions.GetEase(func);
+
+                GUI.Box(rect, Texture2D.blackTexture);
+                if (string.IsNullOrEmpty(caption) == false) GUI.Label(rect, caption, Styles.label);
+
+                Handles.BeginGUI();
+                var selectedIndex = 0;
+                var points = System.Buffers.ArrayPool<Vector3>.Shared.Rent(precision);
+                var p1 = new Vector2(rect.x, rect.y + rect.height);
+                for (int i = 0; i < precision; ++i) {
+                    var p = i / (float)precision;
+                    var p2 = new Vector2(rect.x + rect.width * p, rect.y + rect.height - funcEase.Invoke(p, 0f, 1f, 1f) * rect.height);
+                    if (progress >= p) {
+                        selectedIndex = i;
+                    }
+                    points[i] = p1;
+                    p1 = p2;
+                }
+                Handles.color = Color.white;
+                Handles.DrawAAPolyLine(2f, precision, points);
+                Handles.color = Color.yellow;
+                Handles.DrawAAPolyLine(4f, selectedIndex, points);
+                System.Buffers.ArrayPool<Vector3>.Shared.Return(points);
+                Handles.EndGUI();
+
+                if (progress > 0f) {
+                    var boxRect = new Rect(rect.x + rect.width * progress - sizeX * 0.5f, rect.y + rect.height - funcEase.Invoke(progress, 0f, 1f, 1f) * rect.height - sizeY * 0.5f, sizeX, sizeY);
+                    GUI.Box(boxRect, string.Empty, Styles.sliderDot);
+                }
+
+            }
+            
+            public void Play() {
+
+                var time = EditorApplication.timeSinceStartup;
+                var deltaTime = time - this.prevTime;
+                this.prevTime = time;
+
+                this.progress += deltaTime;
+                if (this.progress >= 1d) {
+                    this.progress = 0d;
+                }
+
+            }
+
+            public void Pause() {
+
+                this.progress = 0d;
+                this.prevTime = 0d;
+
+            }
+
+            public UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction GetTypeValue() {
+                return this.type;
+            }
+
+            public string GetGroupHeader() {
+                return this.groupHeader;
+            }
+
+            public int GetOrder() {
+                return this.order;
+            }
+
+        }
+        
+        public EaseEditorWindow() {
+            var values = System.Enum.GetValues(typeof(UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction));
+            this.items = new System.Collections.Generic.List<Item>();
+            foreach (var value in values) {
+                this.items.Add(new Item((UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction)value));
+            }
+
+            this.items = this.items.OrderBy(x => x.GetOrder()).ToList();
+        }
+
+        public override Vector2 GetWindowSize() {
+
+            var xMax = 0;
+            var yMax = 0;
+            var x = 0;
+            var y = 0;
+            var captionsOffset = 0f;
+            for (var index = 0; index < this.items.Count; ++index) {
+                ++x;
+                var isGroup = (index < this.items.Count - 1 && this.items[index + 1].IsGroup());
+                if (isGroup == true) {
+                    captionsOffset += HEADER_HEIGHT;
+                }
+                if (x % COLUMNS == 0 || isGroup == true) {
+                    ++y;
+                    xMax = Mathf.Max(xMax, x);
+                    yMax = Mathf.Max(yMax, y);
+                    x = 0;
+                }
+            }
+
+            return new Vector2(ELEMENT_WIDTH * xMax, ELEMENT_HEIGHT * yMax + captionsOffset);
+            
+        }
+
+        public override void OnGUI(Rect rect) {
+            
+            base.OnGUI(rect);
+
+            const float spacing = 5f;
+            const float halfSpacing = spacing * 0.5f;
+
+            var captionsOffset = 0f;
+            var x = 0;
+            var y = 0;
+            for (var index = 0; index < this.items.Count; ++index) {
+                var item = this.items[index];
+                var elementRect = new UnityEngine.Rect(ELEMENT_WIDTH * x + halfSpacing, ELEMENT_HEIGHT * y + halfSpacing + captionsOffset, ELEMENT_WIDTH - spacing, ELEMENT_HEIGHT - spacing);
+                item.OnGUI(elementRect);
+                if (GUI.Button(elementRect, string.Empty, GUIStyle.none) == true) {
+                    if (this.onSelect != null) this.onSelect.Invoke(item.GetTypeValue());
+                    this.editorWindow.Close();
+                }
+
+                if (Event.current.type == EventType.Repaint) {
+                    if (elementRect.Contains(Event.current.mousePosition) == true) {
+                        // Start Anim
+                        item.Play();
+                    } else {
+                        // End Anim
+                        item.Pause();
+                    }
+                }
+
+                ++x;
+                var isGroup = (index < this.items.Count - 1 && this.items[index + 1].IsGroup());
+                if (isGroup == true) {
+                    captionsOffset += HEADER_HEIGHT;
+                    var headerRect = new Rect(halfSpacing, elementRect.y + elementRect.height, elementRect.width, HEADER_HEIGHT);
+                    GUI.Label(headerRect, this.items[index + 1].GetGroupHeader(), Styles.headerLabel);
+                }
+                if (x % COLUMNS == 0 || isGroup == true) {
+                    ++y;
+                    x = 0;
+                }
+            }
+
+            this.editorWindow.Repaint();
+            
+        }
+
+    }
 
     [CustomPropertyDrawer(typeof(UnityEngine.UI.Windows.Modules.AnimationParameters.ShowHideParameters))]
     public class ShowHideAnimationParametersPropertyDrawer : PropertyDrawer {
@@ -32,7 +297,7 @@ namespace UnityEditor.UI.Windows {
             headerLabel.alignment = TextAnchor.LowerCenter;
             
             EditorGUI.BeginProperty(position, label, property);
-            GUILayout.BeginArea(position, EditorStyles.toolbar);
+            GUILayout.BeginArea(position);
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
             {
@@ -42,7 +307,7 @@ namespace UnityEditor.UI.Windows {
                 GUILayout.Label("ease", headerLabel, GUILayout.Width(easeWidth));
             }
             GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+            GUILayout.BeginHorizontal(EditorStyles.toolbar, GUILayout.ExpandWidth(true));
             {
                 GUILayout.Label(label, GUILayout.Width(labelWidth));
                 EditorGUILayout.PropertyField(duration, GUIContent.none, GUILayout.ExpandWidth(true));

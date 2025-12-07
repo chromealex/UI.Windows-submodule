@@ -4,49 +4,80 @@ namespace UnityEngine.UI.Windows.Utilities {
 
     public class Tweener : MonoBehaviour {
 
+	    public class GroupAttribute : System.Attribute {
+
+		    public string caption;
+		    
+		    public GroupAttribute(string caption) {
+			    this.caption = caption;
+		    }
+
+	    }
+
+	    public class InspectorOrderAttribute : System.Attribute {
+
+		    public int order;
+		    
+		    public InspectorOrderAttribute(int order) {
+			    this.order = order;
+		    }
+
+	    }
+
         public enum EaseFunction : int {
 
-            Linear,
-            InQuad,
-            OutQuad,
-            InOutQuad,
-            InCubic,
-            OutCubic,
-            InOutCubic,
-            InQuart,
-            OutQuart,
-            InOutQuart,
-            InQuint,
-            OutQuint,
-            InOutQuint,
-            InSine,
-            OutSine, 
-            InOutSine, 
-            InExpo,
-            OutExpo, 
-            InOutExpo, 
-            InCirc,
-            OutCirc, 
-            InOutCirc,
-            InElastic,
-            OutElastic,
-            InOutElastic,
-            InBack,
-            OutBack,
-            InOutBack,
-            InBounce,
-            OutBounce,
-            InOutBounce,
-            OutInQuad,
-            OutInCubic,
-            OutInQuart,
-            OutInQuint,
-            OutInSine, 
-            OutInExpo, 
-            OutInCirc,
-            OutInElastic,
-            OutInBack,
-            OutInBounce,
+	        [InspectorOrder(0)] Linear,
+            [Group("Quad")]
+            [InspectorOrder(10)] InQuad,
+            [InspectorOrder(11)] OutQuad,
+            [InspectorOrder(12)] InOutQuad,
+            [Group("Cubic")]
+            [InspectorOrder(20)] InCubic,
+            [InspectorOrder(21)] OutCubic,
+            [InspectorOrder(22)] InOutCubic,
+            [Group("Quart")]
+            [InspectorOrder(31)] InQuart,
+            [InspectorOrder(32)] OutQuart,
+            [InspectorOrder(33)] InOutQuart,
+            [Group("Quint")]
+            [InspectorOrder(41)] InQuint,
+            [InspectorOrder(42)] OutQuint,
+            [InspectorOrder(43)] InOutQuint,
+            [Group("Sine")]
+            [InspectorOrder(51)] InSine,
+            [InspectorOrder(52)] OutSine, 
+            [InspectorOrder(53)] InOutSine,
+            [Group("Expo")]
+            [InspectorOrder(61)] InExpo,
+            [InspectorOrder(62)] OutExpo, 
+            [InspectorOrder(63)] InOutExpo,
+            [Group("Circ")]
+            [InspectorOrder(71)] InCirc,
+            [InspectorOrder(72)] OutCirc, 
+            [InspectorOrder(73)] InOutCirc,
+            [Group("Elastic")]
+            [InspectorOrder(81)] InElastic,
+            [InspectorOrder(82)] OutElastic,
+            [InspectorOrder(83)] InOutElastic,
+            [Group("Back")]
+            [InspectorOrder(91)] InBack,
+            [InspectorOrder(92)] OutBack,
+            [InspectorOrder(93)] InOutBack,
+            [Group("Bounce")]
+            [InspectorOrder(101)] InBounce,
+            [InspectorOrder(102)] OutBounce,
+            [InspectorOrder(103)] InOutBounce,
+            
+            [InspectorOrder(13)] OutInQuad,
+            [InspectorOrder(23)] OutInCubic,
+            [InspectorOrder(33)] OutInQuart,
+            [InspectorOrder(43)] OutInQuint,
+            [InspectorOrder(53)] OutInSine, 
+            [InspectorOrder(63)] OutInExpo, 
+            [InspectorOrder(73)] OutInCirc,
+            [InspectorOrder(83)] OutInElastic,
+            [InspectorOrder(93)] OutInBack,
+            [InspectorOrder(103)] OutInBounce,
 
         }
 

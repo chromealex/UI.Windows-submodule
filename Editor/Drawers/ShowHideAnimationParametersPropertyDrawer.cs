@@ -18,7 +18,7 @@ namespace UnityEditor.UI.Windows {
 
             EditorGUI.BeginProperty(position, label, property);
             if (EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Passive, EditorStyles.toolbarDropDown) == true) {
-                PopupWindow.Show(position, new EaseEditorWindow() {
+                PopupWindow.Show(position, new EaseEditorWindow((UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction)property.enumValueIndex) {
                     onSelect = (ease) => {
                         property.serializedObject.Update();
                         property.enumValueIndex = (int)ease;
@@ -29,7 +29,7 @@ namespace UnityEditor.UI.Windows {
             }
 
             var lbl = property.enumDisplayNames[property.enumValueIndex];
-            EaseEditorWindow.Item.DrawProgress(new Rect(position.x + 1f, position.y + 1f, position.width - 20f, position.height - 2f), (UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction)property.enumValueIndex, -1f, lbl);
+            EaseEditorWindow.Item.DrawProgress(new Rect(position.x + 1f, position.y + 1f, position.width - 20f, position.height - 2f), (UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction)property.enumValueIndex, -1f, lbl, false);
             EditorGUI.EndProperty();
             
         }
@@ -77,14 +77,16 @@ namespace UnityEditor.UI.Windows {
         public class Item {
 
             private readonly UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction type;
+            private readonly bool selected;
             private readonly int order;
             private readonly bool isGroup;
             private readonly string groupHeader;
             private double progress;
             private double prevTime;
             
-            public Item(UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction type) {
+            public Item(UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction type, bool selected) {
                 this.type = type;
+                this.selected = selected;
                 var memInfo = type.GetType().GetMember(type.ToString());
                 {
                     var attribute = memInfo[0].GetCustomAttribute(typeof(UnityEngine.UI.Windows.Utilities.Tweener.GroupAttribute), false);
@@ -104,18 +106,16 @@ namespace UnityEditor.UI.Windows {
             public bool IsGroup() => this.isGroup;
 
             public string GetCaption() {
-
                 return this.type.ToString();
-
             }
 
             public void OnGUI(Rect rect) {
 
-                DrawProgress(rect, this.type, (float)this.progress, this.GetCaption());
+                DrawProgress(rect, this.type, (float)this.progress, this.GetCaption(), this.selected);
 
             }
 
-            public static void DrawProgress(Rect rect, UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction func, float progress, string caption) {
+            public static void DrawProgress(Rect rect, UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction func, float progress, string caption, bool selected) {
 
                 const float sizeX = 10f;
                 const float sizeY = 10f;
@@ -125,6 +125,10 @@ namespace UnityEditor.UI.Windows {
 
                 GUI.Box(rect, Texture2D.blackTexture);
                 if (string.IsNullOrEmpty(caption) == false) GUI.Label(rect, caption, Styles.label);
+
+                if (selected == true) {
+                    GUILayoutExt.HandlesDrawBoxNotFilled(rect, 2f, new Color(0.04f, 0.97f, 1f, 0.7f));
+                }
 
                 Handles.BeginGUI();
                 var selectedIndex = 0;
@@ -187,11 +191,12 @@ namespace UnityEditor.UI.Windows {
 
         }
         
-        public EaseEditorWindow() {
+        public EaseEditorWindow(UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction selected) {
             var values = System.Enum.GetValues(typeof(UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction));
             this.items = new System.Collections.Generic.List<Item>();
             foreach (var value in values) {
-                this.items.Add(new Item((UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction)value));
+                var func = (UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction)value;
+                this.items.Add(new Item(func, func == selected));
             }
 
             this.items = this.items.OrderBy(x => x.GetOrder()).ToList();

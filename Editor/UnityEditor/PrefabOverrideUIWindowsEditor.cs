@@ -19,7 +19,7 @@ namespace UnityEditor.UI.Windows {
         }
 
         void OnDisable() {
-            if (this.builtInEditor != null) DestroyImmediate(this.builtInEditor);
+            if (this.builtInEditor is not null && this.builtInEditor != null) DestroyImmediate(this.builtInEditor);
         }
 
         protected override void OnHeaderGUI() {

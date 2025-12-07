@@ -21,8 +21,7 @@ namespace UnityEditor.UI.Windows {
             var ease = property.FindPropertyRelative(nameof(AnimationParameters.ShowHideParameters.ease));
 
             const float offset = 15f;
-            const float labelWidth = 120f;
-            const float durationWidth = 80f;
+            const float labelWidth = 80f;
             const float easeWidth = 120f;
             
             position.x += offset;
@@ -38,7 +37,7 @@ namespace UnityEditor.UI.Windows {
             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
             {
                 GUILayout.Label(string.Empty, headerLabel, GUILayout.Width(labelWidth));
-                GUILayout.Label("duration", headerLabel, GUILayout.Width(durationWidth));
+                GUILayout.Label("duration", headerLabel, GUILayout.ExpandWidth(true));
                 GUILayout.Label("delay", headerLabel, GUILayout.ExpandWidth(true));
                 GUILayout.Label("ease", headerLabel, GUILayout.Width(easeWidth));
             }
@@ -46,7 +45,7 @@ namespace UnityEditor.UI.Windows {
             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
             {
                 GUILayout.Label(label, GUILayout.Width(labelWidth));
-                EditorGUILayout.PropertyField(duration, GUIContent.none, GUILayout.Width(durationWidth));
+                EditorGUILayout.PropertyField(duration, GUIContent.none, GUILayout.ExpandWidth(true));
                 EditorGUILayout.PropertyField(delay, GUIContent.none, GUILayout.ExpandWidth(true));
                 EditorGUILayout.PropertyField(ease, GUIContent.none, GUILayout.Width(easeWidth));
             }
@@ -59,8 +58,8 @@ namespace UnityEditor.UI.Windows {
         
     }
 
-    [CustomPropertyDrawer(typeof(UnityEngine.UI.Windows.Modules.AnimationParameters.Delay))]
-    public class DelayAnimationParametersPropertyDrawer : PropertyDrawer {
+    [CustomPropertyDrawer(typeof(UnityEngine.UI.Windows.Modules.AnimationParameters.RandomValue))]
+    public class RandomValueAnimationParametersPropertyDrawer : PropertyDrawer {
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
             
@@ -70,7 +69,7 @@ namespace UnityEditor.UI.Windows {
         
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
             
-            var randomFromTo = property.FindPropertyRelative(nameof(AnimationParameters.Delay.randomFromTo));
+            var randomFromTo = property.FindPropertyRelative(nameof(AnimationParameters.RandomValue.randomFromTo));
             var random = property.FindPropertyRelative(nameof(AnimationParameters.ShowHideParameters.delay.random));
             
             const float buttonSize = 20f;
@@ -80,14 +79,16 @@ namespace UnityEditor.UI.Windows {
             
             EditorGUI.BeginProperty(position, label, property);
             if (random.boolValue == true) {
-                //EditorGUILayout.PropertyField(delayFromTo, GUIContent.none, GUILayout.ExpandWidth(true));
-                var x = EditorGUI.FloatField(new Rect(position.x, position.y, position.width * 0.5f, position.height), string.Empty, randomFromTo.vector2Value.x);
-                var y = EditorGUI.FloatField(new Rect(position.x + position.width * 0.5f, position.y, position.width * 0.5f, position.height), string.Empty, randomFromTo.vector2Value.y);
-                if (x != randomFromTo.vector2Value.x || y != randomFromTo.vector2Value.y) {
-                    randomFromTo.vector2Value = new Vector2(x, y);
+                const float spacing = 12f;
+                var lblStyle = new GUIStyle(EditorStyles.miniBoldLabel);
+                lblStyle.alignment = TextAnchor.MiddleCenter;
+                var x = EditorGUI.DelayedFloatField(new Rect(position.x, position.y, position.width * 0.5f - spacing * 0.5f, position.height), string.Empty, randomFromTo.vector2Value.x);
+                GUI.Label(new Rect(position.x + position.width * 0.5f - spacing * 0.5f, position.y, spacing, position.height), "..", lblStyle);
+                var y = EditorGUI.DelayedFloatField(new Rect(position.x + position.width * 0.5f + spacing * 0.5f, position.y, position.width * 0.5f, position.height), string.Empty, randomFromTo.vector2Value.y);
+                if (GUI.changed == true) {
+                    randomFromTo.vector2Value = this.Validate(new Vector2(x, y), x != randomFromTo.vector2Value.x);
                 }
             } else {
-                //EditorGUILayout.PropertyField(delay, GUIContent.none, GUILayout.ExpandWidth(true));
                 var newValue = EditorGUI.FloatField(position, randomFromTo.vector2Value.x);
                 if (newValue != randomFromTo.vector2Value.x) {
                     var v = randomFromTo.vector2Value;
@@ -107,6 +108,7 @@ namespace UnityEditor.UI.Windows {
                 genericMenu.AddItem(new GUIContent("Random"), random.boolValue == true, () => {
                     property.serializedObject.Update();
                     random.boolValue = true;
+                    randomFromTo.vector2Value = this.Validate(randomFromTo.vector2Value, true);
                     property.serializedObject.ApplyModifiedProperties();
                     property.serializedObject.Update();
                 });
@@ -115,7 +117,19 @@ namespace UnityEditor.UI.Windows {
             EditorGUI.EndProperty();
             
         }
-        
+
+        private Vector2 Validate(Vector2 value, bool xChanged) {
+            if (value.x < 0f) {
+                value.x = 0f;
+            }
+            if (xChanged == true) {
+                if (value.x > value.y) value.y = value.x;
+            } else {
+                if (value.y < value.x) value.x = value.y;
+            }
+            return value;
+        }
+
     }
 
 }

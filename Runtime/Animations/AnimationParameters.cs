@@ -16,12 +16,12 @@
         [System.Serializable]
         public struct ShowHideParameters {
 
-            public float duration;
-            public Delay delay;
+            public RandomValue duration;
+            public RandomValue delay;
             public Tweener.EaseFunction ease;
 
-            public ShowHideParameters(float duration, float delay, Delay additionalDelayParameters, Tweener.EaseFunction ease) {
-                this.duration = duration;
+            public ShowHideParameters(float duration, float delay, RandomValue additionalDelayParameters, Tweener.EaseFunction ease) {
+                this.duration = new RandomValue() { randomFromTo = new Vector2(duration, 0f) };
                 this.delay = additionalDelayParameters;
                 if (this.delay.random == true) {
                     this.delay.randomFromTo.x = delay;
@@ -30,13 +30,13 @@
             }
 
             public bool IsEmpty() {
-                return this.duration == 0f && this.delay.IsEmpty() == true && this.ease == default;
+                return this.duration.IsEmpty() == true && this.delay.IsEmpty() == true && this.ease == default;
             }
 
         }
 
         [System.Serializable]
-        public struct Delay {
+        public struct RandomValue {
 
             public bool random;
             public Vector2 randomFromTo;
@@ -63,11 +63,11 @@
         [HideInInspector][System.Obsolete("Use show instead")]
         public float delayShow = 0f;
         [HideInInspector][System.Obsolete("Use show instead")]
-        public Delay delayShowParameters;
+        public RandomValue delayShowParameters;
         [HideInInspector][System.Obsolete("Use hide instead")]
         public float delayHide = 0f;
         [HideInInspector][System.Obsolete("Use hide instead")]
-        public Delay delayHideParameters;
+        public RandomValue delayHideParameters;
         [HideInInspector][System.Obsolete("Use show instead")]
         public Tweener.EaseFunction easeShow = Tweener.EaseFunction.Linear;
         [HideInInspector][System.Obsolete("Use hide instead")]
@@ -95,11 +95,11 @@
             switch (animationState) {
 
                 case AnimationState.Show:
-                    delay = this.show.duration;
+                    delay = this.show.duration.GetValue();
                     break;
 
                 case AnimationState.Hide:
-                    delay = this.hide.duration;
+                    delay = this.hide.duration.GetValue();
                     break;
 
             }

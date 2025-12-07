@@ -13,11 +13,11 @@ namespace UnityEngine.UI.Windows.Modules {
         [HideInInspector][System.Obsolete("Use show instead")]
         public float delayShow = 0f;
         [HideInInspector][System.Obsolete("Use show instead")]
-        public AnimationParameters.Delay delayShowParameters;
+        public AnimationParameters.RandomValue delayShowParameters;
         [HideInInspector][System.Obsolete("Use hide instead")]
         public float delayHide = 0f;
         [HideInInspector][System.Obsolete("Use hide instead")]
-        public AnimationParameters.Delay delayHideParameters;
+        public AnimationParameters.RandomValue delayHideParameters;
         [HideInInspector][System.Obsolete("Use show instead")]
         public Tweener.EaseFunction easeShow = Tweener.EaseFunction.Linear;
         [HideInInspector][System.Obsolete("Use hide instead")]

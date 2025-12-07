@@ -207,7 +207,7 @@
 
                     var prevRandomState = Random.state;
                     Random.InitState(Mathf.Abs(state.instance.GetInstanceID()));
-                    var ease = (state.animationState == AnimationState.Show ? anim.easeShow : anim.easeHide);
+                    var ease = (state.animationState == AnimationState.Show ? anim.show.ease : anim.hide.ease);
                     var tweener = WindowSystem.GetTweener();
                     tweener.Stop(anim);
                     var tween = tweener.Add(animationInfo, anim.GetDuration(state.animationState), 0f, 1f);

@@ -89,7 +89,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 	        }
 	        
-            private static System.Func<float, float, float, float, float>[] easings = new System.Func<float, float, float, float, float>[] {
+            private static readonly System.Func<float, float, float, float, float>[] easings = new System.Func<float, float, float, float, float>[] {
 	            Linear,
 	            InQuad,
 	            OutQuad,

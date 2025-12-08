@@ -807,7 +807,7 @@ namespace UnityEngine.UI.Windows {
             var obj = this;
             while (obj != null) {
                 if (obj.IsActiveSelf() == false) return false;
-                if (obj.rootObject != null) obj = obj.rootObject;
+                obj = obj.rootObject;
             }
             return true;
 

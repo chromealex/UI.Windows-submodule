@@ -37,7 +37,9 @@ namespace UnityEngine.UI.Windows {
         private ME.Taptic.ITapticEngine taptic;
 
         private readonly System.Collections.Generic.Dictionary<UIWSAudioEvent, ClipInfo> playingSounds = new System.Collections.Generic.Dictionary<UIWSAudioEvent, ClipInfo>();
-        
+        private float sfxVolume;
+        private float musicVolume;
+
         public override void OnStart() {
 
             Instance = this;
@@ -118,6 +120,7 @@ namespace UnityEngine.UI.Windows {
                     this.sfxSource.volume = volume;
                     changed = true;
                 }
+                this.sfxVolume = volume;
             } else if (eventType == EventType.Music) {
                 for (int i = 1; i < CHANNELS_COUNT; ++i) {
                     var source = this.musicSources[i - 1];
@@ -126,9 +129,17 @@ namespace UnityEngine.UI.Windows {
                         changed = true;
                     }
                 }
+                this.musicVolume = volume;
             }
-            this.audioSource.volume = volume;
             return changed;
+        }
+        
+        public float GetVolume(EventType eventType) {
+            switch (eventType) {
+                case EventType.Music: return this.musicVolume;
+                case EventType.SFX:   return this.sfxVolume;
+            }
+            return default;
         }
 
         /// <summary>
@@ -223,13 +234,12 @@ namespace UnityEngine.UI.Windows {
             }
 
             if (parameters.changeVolume == true) {
-                if (parameters.randomVolume == true) {
-                    source.volume = Random.Range(parameters.randomVolumeValue.x, parameters.randomVolumeValue.y);
-                } else {
-                    source.volume = parameters.volumeValue;
-                }
+                var volume = parameters.randomVolume == true
+                                 ? source.volume = Random.Range(parameters.randomVolumeValue.x, parameters.randomVolumeValue.y)
+                                 : parameters.volumeValue;
+                source.volume = volume * this.GetVolume(clip.eventType);
             } else {
-                source.volume = this.audioSource.volume;
+                source.volume = this.GetVolume(clip.eventType);
             }
 
             source.loop = parameters.loop;

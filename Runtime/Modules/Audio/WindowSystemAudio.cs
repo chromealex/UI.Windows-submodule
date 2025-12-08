@@ -1,7 +1,7 @@
 ﻿using UIWSAudioEvent = UnityEngine.UI.Windows.Runtime.Modules.Audio.UIWSAudioEvent;
 
 namespace UnityEngine.UI.Windows {
-    
+
     using Components;
 
     public interface IAudioComponentModule { }
@@ -37,7 +37,9 @@ namespace UnityEngine.UI.Windows {
         private ME.Taptic.ITapticEngine taptic;
 
         private readonly System.Collections.Generic.Dictionary<UIWSAudioEvent, ClipInfo> playingSounds = new System.Collections.Generic.Dictionary<UIWSAudioEvent, ClipInfo>();
-        
+        private float sfxVolume;
+        private float musicVolume;
+
         public override void OnStart() {
 
             Instance = this;
@@ -63,39 +65,37 @@ namespace UnityEngine.UI.Windows {
         }
 
         public override void OnUpdate() {
-
             var dt = Time.unscaledDeltaTime;
-            
+
             var pairs = UnityEngine.Pool.ListPool<System.Collections.Generic.KeyValuePair<UIWSAudioEvent, ClipInfo>>.Get();
             foreach (var kv in this.playingSounds) {
                 pairs.Add(kv);
             }
-            for (int i = 0; i < pairs.Count; ++i) {
+
+            for (var i = 0; i < pairs.Count; ++i) {
                 var pair = pairs[i];
-                for (int j = pair.Value.timers.Count - 1; j >= 0; --j) {
+                for (var j = pair.Value.timers.Count - 1; j >= 0; --j) {
                     var timer = pair.Value.timers[j];
                     timer -= dt;
                     if (timer <= 0f) {
                         pair.Value.timers.RemoveAt(j);
                         continue;
                     }
+
                     pair.Value.timers[j] = timer;
                 }
             }
+
             UnityEngine.Pool.ListPool<System.Collections.Generic.KeyValuePair<UIWSAudioEvent, ClipInfo>>.Release(pairs);
-            
+
             this.taptic.Update();
-            
         }
 
         public override void OnDestroy() {
-            
             WindowSystem.RemoveCallbackOnAnyInteractable(this.OnAnyInteractable);
-            
         }
 
         private void OnAnyInteractable(UnityEngine.UI.Windows.Components.IInteractable obj) {
-
             if (obj is ButtonComponent button) {
                 if (button.GetModule<IAudioComponentModule>() == null) {
                     if (this.defaultButtonClickEvent != null) {
@@ -103,7 +103,6 @@ namespace UnityEngine.UI.Windows {
                     }
                 }
             }
-            
         }
 
         /// <summary>
@@ -118,19 +117,28 @@ namespace UnityEngine.UI.Windows {
                     this.sfxSource.volume = volume;
                     changed = true;
                 }
+                this.sfxVolume = volume;
             } else if (eventType == EventType.Music) {
-                for (int i = 1; i < CHANNELS_COUNT; ++i) {
+                for (var i = 1; i < CHANNELS_COUNT; ++i) {
                     var source = this.musicSources[i - 1];
                     if (source.volume != volume) {
                         source.volume = volume;
                         changed = true;
                     }
                 }
+                this.musicVolume = volume;
             }
-            this.audioSource.volume = volume;
             return changed;
         }
 
+        public float GetVolume(EventType eventType) {
+            switch (eventType) {
+                case EventType.Music: return this.musicVolume;
+                case EventType.SFX: return this.sfxVolume;
+            }
+            return default;
+        }
+        
         /// <summary>
         /// Set vibration state
         /// </summary>
@@ -143,11 +151,11 @@ namespace UnityEngine.UI.Windows {
                 this.taptic.Mute();
                 return true;
             }
+
             return false;
         }
-        
-        public void Play(UIWSAudioEvent clip) {
 
+        public void Play(UIWSAudioEvent clip) {
             if (clip.eventType == EventType.SFX) {
                 AudioClip audioClip = null;
                 if (clip.randomClips?.Length > 0) {
@@ -157,12 +165,17 @@ namespace UnityEngine.UI.Windows {
                     this.ApplyParameters(this.sfxSource, clip);
                     audioClip = clip.audioClip;
                 }
-                if (this.TryAdd(clip, audioClip) == false) return;
+
+                if (this.TryAdd(clip, audioClip) == false) {
+                    return;
+                }
+
                 this.sfxSource.PlayOneShot(audioClip);
             } else if (clip.eventType == EventType.Music) {
                 if (clip.behaviour == Behaviour.StopOtherChannels) {
                     this.StopAllChannels();
                 }
+
                 var source = this.GetChannel(clip.musicChannel);
                 this.ApplyParameters(source, clip);
                 source.clip = clip.audioClip;
@@ -176,18 +189,22 @@ namespace UnityEngine.UI.Windows {
                     this.taptic.PlaySingle(clip.taptic);
                 }
             }
-
         }
 
         private bool TryAdd(UIWSAudioEvent clip, AudioClip audioClip) {
+            if (audioClip == null) {
+                return false;
+            }
 
-            if (audioClip == null) return false;
-            if (clip.parameters.maxCount <= 0) return true;
+            if (clip.parameters.maxCount <= 0) {
+                return true;
+            }
 
             if (this.playingSounds.TryGetValue(clip, out var info) == true) {
                 if (info.timers.Count >= clip.parameters.maxCount) {
                     return false;
                 }
+
                 info.timers.Add(audioClip.length * clip.parameters.lengthFactor);
                 this.playingSounds[clip] = info;
             } else {
@@ -199,18 +216,16 @@ namespace UnityEngine.UI.Windows {
             }
 
             return true;
-
         }
 
         public void StopAllChannels() {
-            for (int i = 0; i < this.musicSources.Length; ++i) {
+            for (var i = 0; i < this.musicSources.Length; ++i) {
                 var source = this.musicSources[i];
                 source.Stop();
             }
         }
 
         private void ApplyParameters(AudioSource source, UIWSAudioEvent clip) {
-
             var parameters = clip.parameters;
             if (parameters.changePitch == true) {
                 if (parameters.randomPitch == true) {
@@ -223,28 +238,24 @@ namespace UnityEngine.UI.Windows {
             }
 
             if (parameters.changeVolume == true) {
-                if (parameters.randomVolume == true) {
-                    source.volume = Random.Range(parameters.randomVolumeValue.x, parameters.randomVolumeValue.y);
-                } else {
-                    source.volume = parameters.volumeValue;
-                }
+                var volume = parameters.randomVolume == true
+                                 ? source.volume = Random.Range(parameters.randomVolumeValue.x, parameters.randomVolumeValue.y)
+                                 : parameters.volumeValue;
+                source.volume = volume * this.GetVolume(clip.eventType);
             } else {
-                source.volume = this.audioSource.volume;
+                source.volume = this.GetVolume(clip.eventType);
             }
 
             source.loop = parameters.loop;
-            
         }
 
         public void Stop(UIWSAudioEvent clip) {
-
             if (clip.eventType == EventType.SFX) {
                 this.sfxSource.Stop();
             } else if (clip.eventType == EventType.Music) {
                 var source = this.GetChannel(clip.musicChannel);
                 source.Stop();
             }
-            
         }
 
         private AudioSource GetChannel(int musicChannel) {
@@ -267,23 +278,24 @@ namespace UnityEngine.UI.Windows {
 
         private System.Action<WindowObject> onPlayCallback;
         private System.Action<WindowObject> onStopCallback;
-        
-        public void Initialize(WindowObject handler) {
 
-            if (this.play == WindowEvent.None && this.stop == WindowEvent.None) return;
+        public void Initialize(WindowObject handler) {
+            if (this.play == WindowEvent.None && this.stop == WindowEvent.None) {
+                return;
+            }
 
             this.onPlayCallback = this.DoPlay;
             this.onStopCallback = this.DoStop;
-            
+
             var events = WindowSystem.GetEvents();
             events.Register(handler, this.play, this.onPlayCallback);
             events.Register(handler, this.stop, this.onStopCallback);
-
         }
 
         public void DeInitialize(WindowObject handler) {
-            
-            if (this.play == WindowEvent.None && this.stop == WindowEvent.None) return;
+            if (this.play == WindowEvent.None && this.stop == WindowEvent.None) {
+                return;
+            }
 
             var events = WindowSystem.GetEvents();
             events.UnRegister(handler, this.play, this.onPlayCallback);
@@ -291,35 +303,28 @@ namespace UnityEngine.UI.Windows {
 
             this.onPlayCallback = null;
             this.onStopCallback = null;
-
         }
 
         public void DoPlay(WindowObject obj) {
-            
             #if FMOD_SUPPORT
             this.fmodAudioComponent.Play();
             #else
             this.clip.Play();
             #endif
-
         }
 
         public void DoStop(WindowObject obj) {
-            
             #if FMOD_SUPPORT
             this.fmodAudioComponent.Stop();
             #else
             this.clip.Stop();
             #endif
-
         }
 
         public void DoRelease() {
-            
             #if FMOD_SUPPORT
             this.fmodAudioComponent.Release();
             #endif
-
         }
 
     }
@@ -344,7 +349,8 @@ namespace UnityEngine.UI.Windows {
         public bool autoRelease;
         public float autoReleaseDuration;
 
-        private static FMOD.Studio.EventInstance GetInstance(FMODUnity.EventReference audioEvent, FMOD.Studio.EventDescription eventDescription, bool stopOthersOnPlay = false) {
+        private static FMOD.Studio.EventInstance GetInstance(FMODUnity.EventReference audioEvent, FMOD.Studio.EventDescription eventDescription, bool stopOthersOnPlay
+ = false) {
             
             if (eventDescription.getInstanceCount(out var count) == FMOD.RESULT.OK) {
 
@@ -545,7 +551,8 @@ namespace UnityEngine.UI.Windows {
         public bool autoRelease;
         public float autoReleaseDuration;
 
-        private static FMOD.Studio.EventInstance GetInstance(string audioEvent, FMOD.Studio.EventDescription eventDescription, bool stopOthersOnPlay = false) {
+        private static FMOD.Studio.EventInstance GetInstance(string audioEvent, FMOD.Studio.EventDescription eventDescription, bool stopOthersOnPlay
+ = false) {
             
             if (eventDescription.getInstanceCount(out var count) == FMOD.RESULT.OK) {
 
@@ -752,5 +759,5 @@ namespace UnityEngine.UI.Windows {
         
     }
     #endif
-    
+
 }

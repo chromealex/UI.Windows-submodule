@@ -174,6 +174,8 @@ namespace UnityEngine.UI.Windows {
         public HideBehaviour hideBehaviour;
         [Tooltip("Simultaneously means that current animation will be played together with the childs.\nOneByOne means that children played one-by-one.")]
         public ShowBehaviour showBehaviour;
+        [Tooltip("Show behaviour custom delay. If 0 - default animation will be used.")]
+        public float showBehaviourOneByOneDelay;
         
         [Tooltip("Should this object return in pool when window is hidden? Object will returns into pool only if parent object is not mark as `createPool`.")]
         public bool createPool;

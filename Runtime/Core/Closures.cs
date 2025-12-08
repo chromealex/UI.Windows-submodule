@@ -138,6 +138,8 @@ namespace UnityEngine.UI.Windows {
 
     public class ShowHideClosureParametersClass : Coroutines.ICallInSequenceClosure<WindowObject, ShowHideClosureParametersClass> {
 
+        public int index { get; set; }
+
         public WindowObject instance;
         public TransitionParameters parameters;
         public bool internalCall;
@@ -171,6 +173,8 @@ namespace UnityEngine.UI.Windows {
     }
 
     public class DoLoadScreenClosure<TState> : Coroutines.ICallInSequenceClosure<WindowObject, DoLoadScreenClosure<TState>> {
+
+        public int index { get; set; }
 
         public WindowObject component;
         public InitialParameters initialParameters;

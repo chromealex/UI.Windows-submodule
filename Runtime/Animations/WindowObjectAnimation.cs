@@ -16,6 +16,7 @@
 
         private class AnimationGroupInfo<T> : Coroutines.ICallInSequenceClosure<AnimationParameters, AnimationGroupInfo<T>> {
 
+            public int index { get; set; }
             public TransitionParameters transitionParameters;
             public AnimationState animationState;
             public System.Action<T> onComplete;

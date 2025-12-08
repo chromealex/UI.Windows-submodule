@@ -522,37 +522,80 @@ namespace UnityEngine.UI.Windows {
                     closure.parameters.data.affectChilds == true) {
                     
                     instance.BreakStateHierarchy();
-                    
-                    Coroutines.CallInSequence(ref closure, static (ref ShowHideClosureParametersClass p) => {
-                        p.hierarchyComplete = true;
-                        if (p.animationComplete == true && p.baseComplete == true) {
-                            var pars = p.parameters;
-                            p.Dispose();
-                            pars.RaiseCallback();
-                        }
-                    }, instance.subObjects, static (WindowObject obj, Coroutines.ClosureDelegateCallback<ShowHideClosureParametersClass> cb, ref ShowHideClosureParametersClass p) => {
-                        
-                        var closure = PoolClass<ShowHideInstanceInternalClosure>.Spawn();
-                        closure.cb = cb;
-                        closure.data = p;
 
-                        var parameters = p.parameters.ReplaceCallback(closure, static (obj) => {
-                            var d = (ShowHideInstanceInternalClosure)obj;
-                            d.cb.Invoke(ref d.data);
-                            PoolClass<ShowHideInstanceInternalClosure>.Recycle(d);
-                        });
-                        if (p.parameters.data.replaceDelay == true) {
-                            parameters = parameters.ReplaceDelay(0f);
-                        }
-                        
-                        if (p.internalCall == true) {
-                            obj.ShowInternal(parameters);
-                        } else {
-                            obj.Show(parameters);
-                        }
+                    if (instance.showBehaviour == ShowBehaviour.OneByOne && instance.showBehaviourOneByOneDelay > 0f) {
+                        Coroutines.CallInSequence(
+                            ref closure,
+                            static (ref ShowHideClosureParametersClass p) => {
+                                p.hierarchyComplete = true;
+                                if (p.animationComplete == true && p.baseComplete == true) {
+                                    var pars = p.parameters;
+                                    p.Dispose();
+                                    pars.RaiseCallback();
+                                }
+                            },
+                            instance.subObjects,
+                            static (WindowObject obj, Coroutines.ClosureDelegateCallback<ShowHideClosureParametersClass> cb, ref ShowHideClosureParametersClass p) => {
 
-                    }, waitPrevious: instance.showBehaviour == ShowBehaviour.OneByOne);
-                    
+                                var closure = PoolClass<ShowHideInstanceInternalClosure>.Spawn();
+                                closure.cb = cb;
+                                closure.data = p;
+
+                                var parameters = p.parameters.ReplaceCallback(
+                                    closure,
+                                    static (obj) => {
+                                        var d = (ShowHideInstanceInternalClosure)obj;
+                                        d.cb.Invoke(ref d.data);
+                                        PoolClass<ShowHideInstanceInternalClosure>.Recycle(d);
+                                    });
+                                if (p.parameters.data.replaceDelay == true) {
+                                    parameters = parameters.ReplaceDelay(0f);
+                                } else {
+                                    parameters = parameters.ReplaceDelay(p.instance.showBehaviourOneByOneDelay * p.index);
+                                }
+
+                                if (p.internalCall == true) {
+                                    obj.ShowInternal(parameters);
+                                } else {
+                                    obj.Show(parameters);
+                                }
+
+                            }, waitPrevious: false);
+                    } else {
+                        Coroutines.CallInSequence(ref closure,
+                                                  static (ref ShowHideClosureParametersClass p) => {
+                                                      p.hierarchyComplete = true;
+                                                      if (p.animationComplete == true && p.baseComplete == true) {
+                                                          var pars = p.parameters;
+                                                          p.Dispose();
+                                                          pars.RaiseCallback();
+                                                      }
+                                                  }, instance.subObjects, static (WindowObject obj, Coroutines.ClosureDelegateCallback<ShowHideClosureParametersClass> cb, ref ShowHideClosureParametersClass p) => {
+
+                                                      var closure = PoolClass<ShowHideInstanceInternalClosure>.Spawn();
+                                                      closure.cb = cb;
+                                                      closure.data = p;
+
+                                                      var parameters = p.parameters.ReplaceCallback(
+                                                          closure,
+                                                          static (obj) => {
+                                                              var d = (ShowHideInstanceInternalClosure)obj;
+                                                              d.cb.Invoke(ref d.data);
+                                                              PoolClass<ShowHideInstanceInternalClosure>.Recycle(d);
+                                                          });
+                                                      if (p.parameters.data.replaceDelay == true) {
+                                                          parameters = parameters.ReplaceDelay(0f);
+                                                      }
+
+                                                      if (p.internalCall == true) {
+                                                          obj.ShowInternal(parameters);
+                                                      } else {
+                                                          obj.Show(parameters);
+                                                      }
+
+                                                  }, waitPrevious: instance.showBehaviour == ShowBehaviour.OneByOne);
+                    }
+
                 } else {
                     
                     instance.BreakState();

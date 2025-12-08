@@ -162,6 +162,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 		public interface ICallInSequenceClosure<T, TClosure> {
 
 			internal int counter { get; set; }
+			public int index { get; set; }
 			internal bool completed { get; set; }
 			internal ClosureDelegateCallback<TClosure> callback { get; set; }
 			internal ClosureDelegateEachCallback<T, TClosure> each { get; set; }
@@ -221,6 +222,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 								
 								cParams.callbackItem.Invoke(ref cParams);
 								cParams.doNext(ref cParams);
+								++cParams.index;
 
 							}, ref cParamsInner);
 
@@ -228,6 +230,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
 							cParamsInner.callbackItem.Invoke(ref cParamsInner);
 							cParamsInner.doNext.Invoke(ref cParamsInner);
+							++cParamsInner.index;
 
 						}
 
@@ -236,14 +239,17 @@ namespace UnityEngine.UI.Windows.Utilities {
 					}
 
 				};
+				closure.index = 0;
 				closure.doNext = doNext;
 				doNext.Invoke(ref closure);
 
 			} else {
 
 				var ie = collection.GetEnumerator();
+				var idx = 0;
 				while (Coroutines.MoveNext(ref ie, collection) == true) {
 
+					closure.index = idx;
 					if (ie.Current != null) {
 
 						each.Invoke(ie.Current, callbackItem, ref closure);
@@ -255,6 +261,8 @@ namespace UnityEngine.UI.Windows.Utilities {
 					}
 
 					if (closure.completed == true) break;
+
+					++idx;
 
 				}
 				ie.Dispose();

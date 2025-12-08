@@ -18,6 +18,7 @@ namespace UnityEditor.UI.Windows {
         private SerializedProperty subObjects;
         private SerializedProperty hideBehaviour;
         private SerializedProperty showBehaviour;
+        private SerializedProperty showBehaviourOneByOneDelay;
 
         private SerializedProperty renderBehaviourOnHidden;
         
@@ -74,6 +75,7 @@ namespace UnityEditor.UI.Windows {
             this.subObjects = this.serializedObject.FindProperty("subObjects");
             this.hideBehaviour = this.serializedObject.FindProperty("hideBehaviour");
             this.showBehaviour = this.serializedObject.FindProperty("showBehaviour");
+            this.showBehaviourOneByOneDelay = this.serializedObject.FindProperty("showBehaviourOneByOneDelay");
 
             this.allowRegisterInRoot = this.serializedObject.FindProperty("allowRegisterInRoot");
             this.autoRegisterSubObjects = this.serializedObject.FindProperty("autoRegisterSubObjects");
@@ -163,6 +165,11 @@ namespace UnityEditor.UI.Windows {
                     EditorGUILayout.PropertyField(this.animationParameters);
                     EditorGUILayout.PropertyField(this.hideBehaviour);
                     EditorGUILayout.PropertyField(this.showBehaviour);
+                    if ((ShowBehaviour)this.showBehaviour.enumValueIndex == ShowBehaviour.OneByOne) {
+                        var newValue = EditorGUILayout.FloatField(this.showBehaviourOneByOneDelay.displayName, this.showBehaviourOneByOneDelay.floatValue);
+                        newValue = Mathf.Max(newValue, 0f);
+                        this.showBehaviourOneByOneDelay.floatValue = newValue;
+                    }
 
                     GUILayoutExt.DrawHeader("Graph");
                     EditorGUILayout.PropertyField(this.allowRegisterInRoot);

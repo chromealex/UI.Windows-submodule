@@ -138,14 +138,6 @@ namespace UnityEngine.UI.Windows {
             }
             return default;
         }
-
-        public float GetVolume(EventType eventType) {
-            switch (eventType) {
-                case EventType.Music: return this.musicVolume;
-                case EventType.SFX: return this.sfxVolume;
-            }
-            return default;
-        }
         
         /// <summary>
         /// Set vibration state

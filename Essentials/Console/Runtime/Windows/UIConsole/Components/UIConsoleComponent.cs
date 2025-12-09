@@ -163,13 +163,10 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
                     this.linePopupComponent.IsVisible() == true) {
                     return;
                 }
-                
-                if (this.commandField.focusController == null ||
-                    this.commandField.focusController.focusedElement != this.commandField.ElementAt(0)) {
 
-                    this.commandField.ElementAt(0).Focus();
-
-                }
+                this.commandField.schedule.Execute(() => {
+                    this.commandField.Focus();
+                });
 
             }
 

@@ -34,7 +34,7 @@
 
         public CanvasScalerData canvasScalerData = CanvasScalerData.Default;
 
-        public void Apply(UnityEngine.UI.CanvasScaler canvasScaler) {
+        public virtual void Apply(UnityEngine.UI.CanvasScaler canvasScaler) {
 
             canvasScaler.scaleFactor = this.canvasScalerData.scaleFactor;
             canvasScaler.physicalUnit = this.canvasScalerData.physicalUnit;

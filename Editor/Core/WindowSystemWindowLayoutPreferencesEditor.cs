@@ -69,6 +69,9 @@ namespace UnityEditor.UI.Windows {
                 s_Styles = new Styles();
 
             var settings = WindowSystem.GetSettings();
+            if (settings == null) {
+                return;
+            }
             var canvasSettings = settings.canvas;
             
             //bool allAreRoot = true;

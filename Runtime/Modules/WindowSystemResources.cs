@@ -25,7 +25,11 @@ namespace UnityEngine.UI.Windows {
 
     public interface ICustomLoader {
 
+        #if UNITY_6000_0_OR_NEWER
         public Awaitable<T> Load<T>(UnityEngine.UI.Windows.Modules.WindowSystemResources.LoadParameters loadParameters, Resource resource);
+        #else
+        public Task<T> Load<T>(UnityEngine.UI.Windows.Modules.WindowSystemResources.LoadParameters loadParameters, Resource resource);
+        #endif
         void Unload(object obj);
 
     }
@@ -448,9 +452,9 @@ namespace UnityEngine.UI.Windows.Modules {
             yield return this.Load_INTERNAL(new LoadParameters() { async = true }, handler, closure, resource, onComplete);
             
         }
-
+        
+        #if UNITY_6000_0_OR_NEWER
         public async Awaitable<T> LoadAsync<T>(object handler, Resource resource) where T : class {
-
             var tcs = PoolClass<TaskCompletionSource<T>>.Spawn();
             var op = this.Load_INTERNAL<T, TaskCompletionSource<T>>(new LoadParameters() { async = true }, handler, tcs, resource, static (asset, s) => s.SetResult(asset));
             while (op.MoveNext() == true) {
@@ -460,6 +464,18 @@ namespace UnityEngine.UI.Windows.Modules {
             PoolClass<TaskCompletionSource<T>>.Recycle(tcs);
             return result;
         }
+        #else
+        public async Task<T> LoadAsync<T>(object handler, Resource resource) where T : class {
+            var tcs = PoolClass<TaskCompletionSource<T>>.Spawn();
+            var op = this.Load_INTERNAL<T, TaskCompletionSource<T>>(new LoadParameters() { async = true }, handler, tcs, resource, static (asset, s) => s.SetResult(asset));
+            while (op.MoveNext() == true) {
+                await Task.Yield();
+            }
+            var result = tcs.Task.Result;
+            PoolClass<TaskCompletionSource<T>>.Recycle(tcs);
+            return result;
+        }
+        #endif
 
         public T Load<T>(object handler, Resource resource) where T : class {
             

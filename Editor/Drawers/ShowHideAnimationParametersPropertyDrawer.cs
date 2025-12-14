@@ -280,7 +280,7 @@ namespace UnityEditor.UI.Windows {
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
             
-            return (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 2 + 10f;
+            return (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 2f;
             
         }
         
@@ -293,15 +293,86 @@ namespace UnityEditor.UI.Windows {
             const float offset = 15f;
             const float labelWidth = 80f;
             const float easeWidth = 120f;
+            var s = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             
-            position.x += offset;
-            position.width *= 2f;
-            position.width -= offset;
-
             var headerLabel = new GUIStyle(EditorStyles.miniBoldLabel);
             headerLabel.alignment = TextAnchor.LowerCenter;
             
             EditorGUI.BeginProperty(position, label, property);
+            Rect durationRect = default;
+            {
+                var rect = position;
+                rect.height -= s;
+                rect.x += labelWidth;
+                rect.width -= labelWidth;
+                rect.width -= easeWidth;
+                rect.width /= 2f;
+                durationRect = rect;
+                GUI.Label(rect, "duration", headerLabel);
+            }
+            {
+                var rect = position;
+                rect.height -= s;
+                rect.x += labelWidth + durationRect.width;
+                rect.width -= labelWidth;
+                rect.width -= easeWidth;
+                rect.width /= 2f;
+                GUI.Label(rect, "delay", headerLabel);
+            }
+            {
+                var rect = position;
+                rect.height -= s;
+                rect.x += labelWidth + durationRect.width * 2f;
+                rect.width = easeWidth;
+                GUI.Label(rect, "ease", headerLabel);
+            }
+            {
+                var rect = position;
+                rect.height -= s;
+                rect.y += s;
+                GUI.Box(rect, string.Empty, EditorStyles.toolbar);
+            }
+            {
+                var rect = position;
+                rect.height -= s;
+                rect.y += s;
+                rect.width = labelWidth;
+                GUI.Label(rect, label);
+            }
+            {
+                var rect = position;
+                rect.y += s;
+                rect.height -= s;
+                rect.x += labelWidth;
+                rect.width -= labelWidth;
+                rect.width -= easeWidth;
+                rect.width /= 2f;
+                EditorGUI.PropertyField(rect, duration, GUIContent.none);
+            }
+            {
+                var rect = position;
+                rect.y += s;
+                rect.height -= s;
+                rect.x += labelWidth + durationRect.width;
+                rect.width -= labelWidth;
+                rect.width -= easeWidth;
+                rect.width /= 2f;
+                EditorGUI.PropertyField(rect, delay, GUIContent.none);
+            }
+            {
+                var rect = position;
+                rect.y += s;
+                rect.height -= s;
+                rect.x += labelWidth + durationRect.width * 2f;
+                rect.width = easeWidth;
+                EditorGUI.PropertyField(rect, ease, GUIContent.none);
+            }
+            
+            /*
+            position.x += offset;
+            position.width *= 2f;
+            position.width -= offset;
+
             GUILayout.BeginArea(position);
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
@@ -323,6 +394,7 @@ namespace UnityEditor.UI.Windows {
             GUILayout.EndVertical();
             GUILayout.EndArea();
             EditorGUI.EndProperty();
+            */
             
         }
         

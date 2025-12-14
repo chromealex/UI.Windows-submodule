@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.U2D;
@@ -130,9 +131,33 @@ namespace UnityEditor.UI.Windows {
 
         }
         
-        private Dictionary<WindowBase, HashSet<UsedResource>> usedResources = new Dictionary<WindowBase, HashSet<UsedResource>>();
-        private HashSet<AtlasData> usedAtlases = new HashSet<AtlasData>();
+        private readonly Dictionary<WindowBase, HashSet<UsedResource>> usedResources = new Dictionary<WindowBase, HashSet<UsedResource>>();
+        private readonly HashSet<AtlasData> usedAtlases = new HashSet<AtlasData>();
         private bool dependenciesState;
+
+        public class Temp : ScriptableObject {
+
+            public Object[] targetDirsObjects;
+
+        }
+        
+        private SerializedObject temporarySerializedObject;
+
+        [System.Serializable]
+        public struct TargetDirs {
+
+            public string[] dirs;
+
+        }
+        
+        private string targetDirs {
+            get {
+                return EditorPrefs.GetString("UIWS.TargetDir");
+            }
+            set {
+                EditorPrefs.SetString("UIWS.TargetDir", value);
+            }
+        }
 
         public override void OnInspectorGUI() {
 
@@ -184,7 +209,45 @@ namespace UnityEditor.UI.Windows {
                 new GUITab("Windows", () => {
 
                     var count = this.registeredPrefabs.arraySize;
-                    EditorGUILayout.PropertyField(this.registeredPrefabs, new GUIContent("Registered Prefabs (" + count + ")"));
+                    EditorGUILayout.PropertyField(this.registeredPrefabs, new GUIContent($"Registered Prefabs ({count})"));
+
+                    var json = this.targetDirs;
+                    TargetDirs targetDirs;
+                    try {
+                        targetDirs = JsonUtility.FromJson<TargetDirs>(json);
+                    } catch (System.Exception) {
+                        targetDirs = new TargetDirs() {
+                            dirs = System.Array.Empty<string>(),
+                        };
+                    }
+
+                    {
+                        if (this.temporarySerializedObject == null) {
+                            var so = new SerializedObject(Temp.CreateInstance<Temp>());
+                            this.temporarySerializedObject = so;
+                        }
+
+                        var dirsProp = this.temporarySerializedObject.FindProperty(nameof(Temp.targetDirsObjects));
+                        dirsProp.arraySize = targetDirs.dirs.Length;
+                        for (var index = 0; index < targetDirs.dirs.Length; ++index) {
+                            var dir = targetDirs.dirs[index];
+                            var folder = AssetDatabase.LoadAssetAtPath<Object>(dir);
+                            dirsProp.GetArrayElementAtIndex(index).objectReferenceValue = folder;
+                        }
+
+                        EditorGUILayout.PropertyField(dirsProp);
+                        if (GUI.changed == true) {
+                            this.temporarySerializedObject.ApplyModifiedProperties();
+                            this.temporarySerializedObject.Update();
+                            System.Array.Resize(ref targetDirs.dirs, dirsProp.arraySize);
+                            for (int i = 0; i < dirsProp.arraySize; ++i) {
+                                var folder = dirsProp.GetArrayElementAtIndex(i).objectReferenceValue;
+                                var dir = AssetDatabase.GetAssetPath(folder);
+                                targetDirs.dirs[i] = dir;
+                            }
+                            this.targetDirs = JsonUtility.ToJson(targetDirs);
+                        }
+                    }
 
                     GUILayout.Space(10f);
                     GUILayout.BeginHorizontal();
@@ -192,7 +255,7 @@ namespace UnityEditor.UI.Windows {
                     if (GUILayout.Button("Collect Prefabs", GUILayout.Width(200f), GUILayout.Height(30f)) == true) {
 
                         var list = new List<WindowBase>();
-                        var gameObjects = AssetDatabase.FindAssets("t:GameObject");
+                        var gameObjects = AssetDatabase.FindAssets("t:GameObject", targetDirs.dirs);
                         foreach (var guid in gameObjects) {
 
                             var path = AssetDatabase.GUIDToAssetPath(guid);

@@ -433,12 +433,15 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
 
-            public void ForEach<T>(System.Action<T, TClosure> onItem) where T : WindowComponent {
+            public void ForEach<T>(System.Action<T, Parameters<TClosure>> onItem) where T : WindowComponent {
                 
                 for (int i = 0; i < this.list.Count; ++i) {
-                    
-                    if (this.list.items[i] is T item) onItem.Invoke(item, this.state);
-                    
+                    if (this.list.items[i] is T item) {
+                        var parameters = new Parameters<TClosure>();
+                        parameters.data = this.state;
+                        parameters.index = i;
+                        onItem.Invoke(item, parameters);
+                    }
                 }
                 
             }

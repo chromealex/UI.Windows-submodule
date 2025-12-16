@@ -873,7 +873,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 val = Resource.ObjectType.ScriptableObject;
             } else if (type == typeof(Sprite)) {
                 val = Resource.ObjectType.Sprite;
-            } else if (type == typeof(Texture)) {
+            } else if (typeof(Texture).IsAssignableFrom(type) == true) {
                 val = Resource.ObjectType.Texture;
             }
 

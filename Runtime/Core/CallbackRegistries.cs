@@ -50,6 +50,8 @@ namespace UnityEngine.UI.Windows {
         
         private CallbackData data;
         
+        public bool IsCreated => this.data != null;
+
         public void Set<T>(WindowObject windowObject, T data, System.Action<T> callback) where T : class {
             this.data = PoolClass<CallbackData>.Spawn();
             this.data.obj = data;
@@ -63,13 +65,14 @@ namespace UnityEngine.UI.Windows {
         }
 
         public void Dispose() {
+            if (this.IsCreated == false) return;
             this.data.Dispose();
             PoolClass<CallbackData>.Recycle(this.data);
             this = default;
         }
         
         public void Invoke() {
-            this.data.callback.Invoke(this);
+            this.data?.callback?.Invoke(this);
         }
 
         public bool Equals(Callback other) {
@@ -84,6 +87,11 @@ namespace UnityEngine.UI.Windows {
             return (this.data != null ? this.data.GetHashCode() : 0);
         }
 
+        public void InvokeOnce() {
+            this.Invoke();
+            this.Dispose();
+        }
+        
     }
 
     public struct CallbackRegistries : System.IEquatable<CallbackRegistries> {

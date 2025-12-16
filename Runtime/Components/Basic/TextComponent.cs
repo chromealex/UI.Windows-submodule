@@ -674,7 +674,12 @@ namespace UnityEngine.UI.Windows.Components {
             #endif
 
             this.ForEachModule<TextComponentModule, System.ValueTuple<string, string>>((prevText.s0, text), static (c, state) => c.OnSetText(state.Item1, state.Item2));
-            this.ForEachModule<TextComponentModule, string>(text, static (c, state) => c.SetText(state));
+            var results = PoolList<TextComponentModule>.Spawn();
+            this.GetModules(results);
+            foreach (var item in results) {
+                text = item.SetText(text);
+            }
+            PoolList<TextComponentModule>.Recycle(results);
 
             this.SetText_INTERNAL(text);
 

@@ -248,7 +248,7 @@ namespace UnityEditor.UI.Windows {
             GUILayoutExt.HandlesDrawBox(new Vector2(startX + gridSizeX * anchorMin.x, startY + gridSizeY * anchorMin.y), 4f * scale, anchorPointColor);
             GUILayoutExt.HandlesDrawBox(new Vector2(startX + gridSizeX * anchorMax.x, startY + gridSizeY * anchorMax.y), 4f * scale, anchorPointColor);
 
-            this.DrawLabel(sceneView, layoutElement.name, 100, scale, textColor, new Vector3(startX, startY + (rect.height) * scale, startZ));
+            this.DrawLabel(sceneView, layoutElement.name, 40, scale, textColor, new Vector3(startX, startY + (rect.height) * scale, startZ));
 
         }
 

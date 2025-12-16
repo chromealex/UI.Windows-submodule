@@ -14,7 +14,7 @@
 
         }
 
-        public override void SetText(string text) {
+        public override void OnSetText(string prevText, string text) {
             
             foreach (var other in this.others) {
                 other.SetText(text);

@@ -64,7 +64,7 @@ namespace UnityEngine.UI.Windows {
             });
         }
 
-        public void Dispose() {
+        private void Dispose() {
             if (this.IsCreated == false) return;
             this.data.Dispose();
             PoolClass<CallbackData>.Recycle(this.data);
@@ -87,11 +87,6 @@ namespace UnityEngine.UI.Windows {
             return (this.data != null ? this.data.GetHashCode() : 0);
         }
 
-        public void InvokeOnce() {
-            this.Invoke();
-            this.Dispose();
-        }
-        
     }
 
     public struct CallbackRegistries : System.IEquatable<CallbackRegistries> {

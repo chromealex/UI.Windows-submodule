@@ -156,25 +156,40 @@ namespace UnityEngine.UI.Windows.Modules {
 
             public override void Clear(WindowObject instance, int eventsCount) {
 
+                var list = PoolList<System.ValueTuple<long, T>>.Spawn();
                 foreach (var kv in this.cache) {
                     for (int i = 0; i <= eventsCount; ++i) {
                         var key = UIWSMath.GetKey(instance.GetHashCode(), i);
                         if (kv.Key.Item1 == key) {
-                            this.cache[kv.Key] = null;
+                            list.Add(kv.Key);
                             this.objects.Remove(key);
                         }
                     }
                 }
 
+                foreach (var item in list) {
+                    this.cache[item] = null;
+                }
+
+                list.Clear();
+                
                 foreach (var kv in this.cacheOnce) {
                     for (int i = 0; i <= eventsCount; ++i) {
                         var key = UIWSMath.GetKey(instance.GetHashCode(), i);
                         if (kv.Key.Item1 == key) {
-                            this.cacheOnce[kv.Key] = null;
+                            list.Add(kv.Key);
                             this.objects.Remove(key);
                         }
                     }
                 }
+
+                foreach (var item in list) {
+                    this.cacheOnce[item] = null;
+                }
+
+                list.Clear();
+
+                PoolList<System.ValueTuple<long, T>>.Recycle(list);
 
             }
 

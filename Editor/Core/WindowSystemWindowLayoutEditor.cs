@@ -118,6 +118,7 @@ namespace UnityEditor.UI.Windows {
             {
 
                 var rectTransform = targetLayout.rectTransform;
+                if (rectTransform == null) return;
 
                 var rect = rectTransform.rect;
                 if (rect.width <= 0f || rect.height <= 0f) {

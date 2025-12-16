@@ -1,5 +1,91 @@
 namespace UnityEngine.UI.Windows {
 
+    public struct Callback : System.IEquatable<Callback> {
+
+        private class CallbackData : System.IEquatable<CallbackData> {
+
+            public object obj;
+            public object callbackObj;
+            public System.Action<Callback> callback;
+
+            public void Dispose() {
+                this.callback = null;
+                this.obj = null;
+                this.callbackObj = null;
+            }
+
+            public bool Equals(CallbackData other) {
+                if (other is null) {
+                    return false;
+                }
+
+                if (ReferenceEquals(this, other)) {
+                    return true;
+                }
+
+                return Equals(this.obj, other.obj) && Equals(this.callbackObj, other.callbackObj) && Equals(this.callback, other.callback);
+            }
+
+            public override bool Equals(object obj) {
+                if (obj is null) {
+                    return false;
+                }
+
+                if (ReferenceEquals(this, obj)) {
+                    return true;
+                }
+
+                if (obj.GetType() != this.GetType()) {
+                    return false;
+                }
+
+                return this.Equals((CallbackData)obj);
+            }
+
+            public override int GetHashCode() {
+                return System.HashCode.Combine(this.obj, this.callbackObj, this.callback);
+            }
+
+        }
+        
+        private CallbackData data;
+        
+        public void Set<T>(WindowObject windowObject, T data, System.Action<T> callback) where T : class {
+            this.data = PoolClass<CallbackData>.Spawn();
+            this.data.obj = data;
+            this.data.callbackObj = callback;
+            this.data.callback = static (x) => {
+                ((System.Action<T>)x.data.callbackObj)?.Invoke((T)x.data.obj);
+            };
+            WindowSystem.GetEvents().RegisterOnce(this, windowObject, WindowEvent.OnHideEnd, static (x, obj) => {
+                obj.Dispose();
+            });
+        }
+
+        public void Dispose() {
+            this.data.Dispose();
+            PoolClass<CallbackData>.Recycle(this.data);
+            this = default;
+        }
+        
+        public void Invoke() {
+            this.data.callback.Invoke(this);
+        }
+
+        public bool Equals(Callback other) {
+            return Equals(this.data, other.data);
+        }
+
+        public override bool Equals(object obj) {
+            return obj is Callback other && this.Equals(other);
+        }
+
+        public override int GetHashCode() {
+            return (this.data != null ? this.data.GetHashCode() : 0);
+        }
+
+    }
+
     public struct CallbackRegistries : System.IEquatable<CallbackRegistries> {
 
         public abstract class RegistryBase {

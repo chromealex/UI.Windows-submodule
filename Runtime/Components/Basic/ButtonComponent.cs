@@ -187,6 +187,12 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        public void SetCallback(Callback callback) {
+
+            this.SetCallback(callback, static x => x.Invoke());
+
+        }
+
         public void SetCallback(System.Action callback) {
 
             this.RemoveCallbacks();

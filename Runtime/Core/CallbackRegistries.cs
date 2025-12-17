@@ -2,48 +2,32 @@ namespace UnityEngine.UI.Windows {
 
     public struct Callback : System.IEquatable<Callback> {
 
-        private class CallbackData : System.IEquatable<CallbackData> {
+        private abstract class CallbackData {
 
-            public object obj;
             public object callbackObj;
             public System.Action<Callback> callback;
 
-            public void Dispose() {
-                this.callback = null;
-                this.obj = null;
+            public virtual void Dispose() {
                 this.callbackObj = null;
             }
 
-            public bool Equals(CallbackData other) {
-                if (other is null) {
-                    return false;
-                }
-
-                if (ReferenceEquals(this, other)) {
-                    return true;
-                }
-
-                return Equals(this.obj, other.obj) && Equals(this.callbackObj, other.callbackObj) && Equals(this.callback, other.callback);
-            }
-
-            public override bool Equals(object obj) {
-                if (obj is null) {
-                    return false;
-                }
-
-                if (ReferenceEquals(this, obj)) {
-                    return true;
-                }
-
-                if (obj.GetType() != this.GetType()) {
-                    return false;
-                }
-
-                return this.Equals((CallbackData)obj);
-            }
-
             public override int GetHashCode() {
-                return System.HashCode.Combine(this.obj, this.callbackObj, this.callback);
+                return System.HashCode.Combine(this.callbackObj, this.callback);
+            }
+
+        }
+        
+        private class CallbackData<T> : CallbackData {
+            
+            public T obj;
+            
+            public override void Dispose() {
+                base.Dispose();
+                PoolClass<CallbackData<T>>.Recycle(this);
+            }
+            
+            public override int GetHashCode() {
+                return System.HashCode.Combine(this.callbackObj, this.callback, this.obj);
             }
 
         }
@@ -52,12 +36,13 @@ namespace UnityEngine.UI.Windows {
         
         public bool IsCreated => this.data != null;
 
-        public void Set<T>(WindowObject windowObject, T data, System.Action<T> callback) where T : class {
-            this.data = PoolClass<CallbackData>.Spawn();
-            this.data.obj = data;
+        public void Set<T>(WindowObject windowObject, T data, System.Action<T> callback) {
+            var inst = PoolClass<CallbackData<T>>.Spawn();
+            inst.obj = data;
+            this.data = inst;
             this.data.callbackObj = callback;
             this.data.callback = static (x) => {
-                ((System.Action<T>)x.data.callbackObj)?.Invoke((T)x.data.obj);
+                ((System.Action<T>)x.data.callbackObj)?.Invoke(((CallbackData<T>)x.data).obj);
             };
             WindowSystem.GetEvents().RegisterOnce(this, windowObject, WindowEvent.OnHideEnd, static (x, obj) => {
                 obj.Dispose();
@@ -67,7 +52,6 @@ namespace UnityEngine.UI.Windows {
         private void Dispose() {
             if (this.IsCreated == false) return;
             this.data.Dispose();
-            PoolClass<CallbackData>.Recycle(this.data);
             this = default;
         }
         

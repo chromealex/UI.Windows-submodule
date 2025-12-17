@@ -12,7 +12,7 @@ namespace UnityEngine.UI.Windows {
     [System.Flags]
     public enum HideBehaviour {
 
-        Simultaneously,
+        Simultaneously = 0,
         WaitForChild = 1 << 0,
         OneByOne = 1 << 1,
 

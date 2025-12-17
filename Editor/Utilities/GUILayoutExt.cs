@@ -253,7 +253,7 @@ namespace UnityEditor.UI.Windows {
 
 	    }
 	    
-	    public static void DrawSafeAreaFields(UnityEngine.Object target, SerializedProperty useSafeZone, SerializedProperty safeZone) {
+	    public static void DrawSafeAreaFields(UnityEngine.Object target, SerializedProperty useSafeZone, SerializedProperty safeZone, SerializedProperty safeZoneRectTransform) {
 		    
 		    EditorGUILayout.PropertyField(useSafeZone);
 		    if (useSafeZone.boolValue == true) {
@@ -263,6 +263,13 @@ namespace UnityEditor.UI.Windows {
 				    EditorGUILayout.PropertyField(safeZone);
 				    if (safeZone.objectReferenceValue == null) {
 
+					    var obj = (Component)target;
+					    if (PrefabUtility.IsPartOfAnyPrefab(obj) == true && safeZoneRectTransform.objectReferenceValue == null) {
+						    EditorGUILayout.HelpBox("To set up safe-area transform container open prefab", MessageType.Warning);
+					    } else {
+						    EditorGUILayout.PropertyField(safeZoneRectTransform);
+					    }
+					    
 					    GUILayoutExt.Box(2f, 2f, () => {
                             
 						    GUILayout.BeginHorizontal();
@@ -275,14 +282,14 @@ namespace UnityEditor.UI.Windows {
 								    var path = AssetDatabase.GetAssetPath(obj.gameObject);
 								    using (var edit = new EditPrefabAssetScope(path)) {
 
-									    EditorHelpers.AddSafeZone(edit.prefabRoot.transform);
+									    edit.prefabRoot.transform.GetComponent<UnityEngine.UI.Windows.WindowLayout>().safeZone = EditorHelpers.AddSafeZone(edit.prefabRoot.transform);
                                 
 								    }
                             
 							    } else {
 
 								    var root = obj.gameObject;
-								    EditorHelpers.AddSafeZone(root.transform);
+								    root.transform.GetComponent<UnityEngine.UI.Windows.WindowLayout>().safeZone = EditorHelpers.AddSafeZone((Transform)safeZoneRectTransform.objectReferenceValue ?? root.transform);
                             
 							    }
                         
@@ -295,14 +302,14 @@ namespace UnityEditor.UI.Windows {
 								    var path = AssetDatabase.GetAssetPath(obj.gameObject);
 								    using (var edit = new EditPrefabAssetScope(path)) {
 
-									    EditorHelpers.AddSafeZone(edit.prefabRoot.transform, true);
+									    edit.prefabRoot.transform.GetComponent<UnityEngine.UI.Windows.WindowLayout>().safeZone = EditorHelpers.AddSafeZone(edit.prefabRoot.transform, true);
                                 
 								    }
                             
 							    } else {
 
 								    var root = obj.gameObject;
-								    EditorHelpers.AddSafeZone(root.transform, true);
+								    root.transform.GetComponent<UnityEngine.UI.Windows.WindowLayout>().safeZone = EditorHelpers.AddSafeZone((Transform)safeZoneRectTransform.objectReferenceValue ?? root.transform, true);
                             
 							    }
                         
@@ -1305,6 +1312,32 @@ namespace UnityEditor.UI.Windows {
 			
 	        return EditorGUI.DropdownButton(position, content, focusType);
 
+        }
+
+        public static void DrawHideBehaviour(SerializedProperty hideBehaviour, SerializedProperty hideBehaviourOneByOneDelay) {
+	        var prevFlags = (UnityEngine.UI.Windows.HideBehaviour)hideBehaviour.enumValueFlag;
+	        var flags = (UnityEngine.UI.Windows.HideBehaviour)EditorGUILayout.EnumFlagsField(hideBehaviour.displayName, prevFlags);
+	        if (prevFlags != flags) {
+		        hideBehaviour.enumValueFlag = (int)flags;
+		        hideBehaviour.serializedObject.ApplyModifiedProperties();
+		        hideBehaviour.serializedObject.Update();
+	        }
+	        //EditorGUILayout.PropertyField(hideBehaviour);
+	        if (((UnityEngine.UI.Windows.HideBehaviour)hideBehaviour.enumValueFlag & UnityEngine.UI.Windows.HideBehaviour.OneByOne) != 0) {
+		        var newValue = EditorGUILayout.FloatField(hideBehaviourOneByOneDelay.displayName, hideBehaviourOneByOneDelay.floatValue);
+		        newValue = Mathf.Max(newValue, 0f);
+		        hideBehaviourOneByOneDelay.floatValue = newValue;
+	        }
+
+        }
+
+        public static void DrawShowBehaviour(SerializedProperty showBehaviour, SerializedProperty showBehaviourOneByOneDelay) {
+	        EditorGUILayout.PropertyField(showBehaviour);
+	        if ((UnityEngine.UI.Windows.ShowBehaviour)showBehaviour.enumValueIndex == UnityEngine.UI.Windows.ShowBehaviour.OneByOne) {
+		        var newValue = EditorGUILayout.FloatField(showBehaviourOneByOneDelay.displayName, showBehaviourOneByOneDelay.floatValue);
+		        newValue = Mathf.Max(newValue, 0f);
+		        showBehaviourOneByOneDelay.floatValue = newValue;
+	        }
         }
 
     }

@@ -15,6 +15,7 @@ namespace UnityEngine.UI.Windows {
 
         public bool useSafeZone;
         public WindowLayoutSafeZone safeZone;
+        public RectTransform safeZoneRectTransform;
 
         private int order;
         private Dictionary<int, WindowComponent> loadedComponents = new Dictionary<int, WindowComponent>();
@@ -161,11 +162,11 @@ namespace UnityEngine.UI.Windows {
 
             this.canvas.renderMode = WindowSystem.GetSettings().canvas.renderMode;
 
-            this.ApplyTags(prevElements);
+            this.ApplyTagsEditor(prevElements);
             
         }
 
-        private void ApplyTags(WindowLayoutElement[] prevElements) {
+        private void ApplyTagsEditor(WindowLayoutElement[] prevElements) {
 
             foreach (var element in this.layoutElements) {
 

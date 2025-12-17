@@ -16,7 +16,7 @@
         [SearchAssetsByTypePopup(typeof(WindowSystemTarget), menuName: "Targets", noneOption: "Any")]
         public WindowSystemTarget target;
 
-        public bool IsValid(TargetData data) {
+        public readonly bool IsValid(TargetData data) {
 
             if (this.target == null) return true;
 

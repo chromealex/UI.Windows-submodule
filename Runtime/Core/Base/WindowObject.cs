@@ -172,6 +172,8 @@ namespace UnityEngine.UI.Windows {
 
         [Tooltip("Simultaneously means that current animation will be played together with the childs.\nWaitForChild means that child animations played first, then played current one.\nOneByOne means that children animation will be played one-by-one.")]
         public HideBehaviour hideBehaviour;
+        [Tooltip("Hide behaviour custom delay. If 0 - default animation will be used.")]
+        public float hideBehaviourOneByOneDelay;
         [Tooltip("Simultaneously means that current animation will be played together with the childs.\nOneByOne means that children played one-by-one.")]
         public ShowBehaviour showBehaviour;
         [Tooltip("Show behaviour custom delay. If 0 - default animation will be used.")]

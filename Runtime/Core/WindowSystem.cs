@@ -549,7 +549,7 @@ namespace UnityEngine.UI.Windows {
                                         PoolClass<ShowHideInstanceInternalClosure>.Recycle(d);
                                     });
                                 if (p.parameters.data.replaceDelay == true) {
-                                    parameters = parameters.ReplaceDelay(0f);
+                                    parameters = parameters.ReplaceDelay(p.parameters.data.delay);
                                 } else {
                                     parameters = parameters.ReplaceDelay(p.instance.showBehaviourOneByOneDelay * p.index);
                                 }
@@ -584,7 +584,7 @@ namespace UnityEngine.UI.Windows {
                                                               PoolClass<ShowHideInstanceInternalClosure>.Recycle(d);
                                                           });
                                                       if (p.parameters.data.replaceDelay == true) {
-                                                          parameters = parameters.ReplaceDelay(0f);
+                                                          parameters = parameters.ReplaceDelay(p.parameters.data.delay);
                                                       }
 
                                                       if (p.internalCall == true) {
@@ -746,6 +746,8 @@ namespace UnityEngine.UI.Windows {
                     if (inst.parameters.data.replaceAffectChilds == false ||
                         inst.parameters.data.affectChilds == true) {
 
+                        var waitForNext = ((inst.instance.hideBehaviour & HideBehaviour.OneByOne) != 0 && inst.instance.hideBehaviourOneByOneDelay <= 0f);
+                        
                         if ((inst.parameters.data.hideBehaviour & HideBehaviour.WaitForChild) != 0) {
                             
                             // hide sub objects first
@@ -775,6 +777,8 @@ namespace UnityEngine.UI.Windows {
                                 });
                                 if (p.parameters.data.replaceDelay == true) {
                                     parameters = parameters.ReplaceDelay(p.parameters.data.delay);
+                                } else if ((p.instance.hideBehaviour & HideBehaviour.OneByOne) != 0 && p.instance.hideBehaviourOneByOneDelay > 0f) { 
+                                    parameters = parameters.ReplaceDelay(p.instance.hideBehaviourOneByOneDelay * p.index);
                                 }
 
                                 if (p.internalCall == true) {
@@ -783,7 +787,7 @@ namespace UnityEngine.UI.Windows {
                                     obj.Hide(parameters);
                                 }
 
-                            }, waitPrevious: (inst.instance.hideBehaviour & HideBehaviour.OneByOne) != 0);
+                            }, waitPrevious: waitForNext);
 
                         } else {
                             
@@ -813,6 +817,8 @@ namespace UnityEngine.UI.Windows {
                                 });
                                 if (p.parameters.data.replaceDelay == true) {
                                     parameters = parameters.ReplaceDelay(p.parameters.data.delay);
+                                } else if ((p.instance.hideBehaviour & HideBehaviour.OneByOne) != 0 && p.instance.hideBehaviourOneByOneDelay > 0f) { 
+                                    parameters = parameters.ReplaceDelay(p.instance.hideBehaviourOneByOneDelay * p.index);
                                 }
 
                                 if (p.internalCall == true) {
@@ -821,7 +827,7 @@ namespace UnityEngine.UI.Windows {
                                     obj.Hide(parameters);
                                 }
 
-                            }, waitPrevious: (inst.instance.hideBehaviour & HideBehaviour.OneByOne) != 0);
+                            }, waitPrevious: waitForNext);
                             
                             WindowObjectAnimation.Hide(closure, closure.instance, closure.parameters, static (cParams) => {
                                 

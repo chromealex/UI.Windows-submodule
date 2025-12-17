@@ -3,6 +3,10 @@
     public class WindowLayoutSafeZone : WindowComponent {
 
         [ContextMenu("Apply")]
+        public void ContextApply() {
+            this.Apply();
+        }
+        
         public virtual void Apply() {
             
             var rect = this.rectTransform;

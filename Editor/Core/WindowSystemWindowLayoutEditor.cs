@@ -17,6 +17,7 @@ namespace UnityEditor.UI.Windows {
         private SerializedProperty animationParameters;
         private SerializedProperty subObjects;
         private SerializedProperty hideBehaviour;
+        private SerializedProperty hideBehaviourOneByOneDelay;
         private SerializedProperty showBehaviour;
         private SerializedProperty showBehaviourOneByOneDelay;
 
@@ -28,6 +29,7 @@ namespace UnityEditor.UI.Windows {
         
         private SerializedProperty useSafeZone;
         private SerializedProperty safeZone;
+        private SerializedProperty safeZoneRectTransform;
 
         private int selectedTab {
             get {
@@ -74,6 +76,7 @@ namespace UnityEditor.UI.Windows {
             this.hideBehaviour = this.serializedObject.FindProperty("hideBehaviour");
             this.showBehaviour = this.serializedObject.FindProperty("showBehaviour");
             this.showBehaviourOneByOneDelay = this.serializedObject.FindProperty("showBehaviourOneByOneDelay");
+            this.hideBehaviourOneByOneDelay = this.serializedObject.FindProperty("hideBehaviourOneByOneDelay");
 
             this.allowRegisterInRoot = this.serializedObject.FindProperty("allowRegisterInRoot");
             this.autoRegisterSubObjects = this.serializedObject.FindProperty("autoRegisterSubObjects");
@@ -81,6 +84,7 @@ namespace UnityEditor.UI.Windows {
         
             this.useSafeZone = this.serializedObject.FindProperty("useSafeZone");
             this.safeZone = this.serializedObject.FindProperty("safeZone");
+            this.safeZoneRectTransform = this.serializedObject.FindProperty("safeZoneRectTransform");
             
             EditorHelpers.SetFirstSibling(this.targets);
 
@@ -135,7 +139,7 @@ namespace UnityEditor.UI.Windows {
 
                 {
                     var handleSize = HandleUtility.GetHandleSize(position);
-                    var alpha = 1f - Mathf.Clamp01(handleSize / 300f);
+                    var alpha = 1f - Mathf.Clamp01(handleSize / 800f);
                     var gridSizeX = rect.width * scale;
                     var gridSizeY = rect.height * scale;
                     var startX = (-rect.width * 0.5f) * scale + position.x;
@@ -372,13 +376,8 @@ namespace UnityEditor.UI.Windows {
 
                     GUILayoutExt.DrawHeader("Animations");
                     EditorGUILayout.PropertyField(this.animationParameters);
-                    EditorGUILayout.PropertyField(this.hideBehaviour);
-                    EditorGUILayout.PropertyField(this.showBehaviour);
-                    if ((ShowBehaviour)this.showBehaviour.enumValueIndex == ShowBehaviour.OneByOne) {
-                        var newValue = EditorGUILayout.FloatField(this.showBehaviourOneByOneDelay.displayName, this.showBehaviourOneByOneDelay.floatValue);
-                        newValue = Mathf.Max(newValue, 0f);
-                        this.showBehaviourOneByOneDelay.floatValue = newValue;
-                    }
+                    GUILayoutExt.DrawHideBehaviour(this.hideBehaviour, this.hideBehaviourOneByOneDelay);
+                    GUILayoutExt.DrawShowBehaviour(this.showBehaviour, this.showBehaviourOneByOneDelay);
 
                     GUILayoutExt.DrawHeader("Graph");
                     EditorGUILayout.PropertyField(this.allowRegisterInRoot);
@@ -412,7 +411,7 @@ namespace UnityEditor.UI.Windows {
             
             GUILayout.Space(10f);
 
-            if (this.targets.Length == 1) GUILayoutExt.DrawSafeAreaFields(this.target, this.useSafeZone, this.safeZone);
+            if (this.targets.Length == 1) GUILayoutExt.DrawSafeAreaFields(this.target, this.useSafeZone, this.safeZone, this.safeZoneRectTransform);
             
             GUILayout.Space(10f);
 

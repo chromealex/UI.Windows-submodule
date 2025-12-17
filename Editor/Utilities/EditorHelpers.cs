@@ -410,7 +410,7 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        public static void AddSafeZone(Transform root, bool extended = false) {
+        public static UnityEngine.UI.Windows.WindowLayoutSafeZone AddSafeZone(Transform root, bool extended = false) {
             
             var safeGo = new GameObject("SafeZone", extended == true ? typeof(UnityEngine.UI.Windows.WindowLayoutSafeZoneExtended) : typeof(UnityEngine.UI.Windows.WindowLayoutSafeZone));
             safeGo.transform.SetParent(root);
@@ -426,7 +426,7 @@ namespace UnityEditor.UI.Windows {
 
             }
 
-            root.GetComponent<UnityEngine.UI.Windows.WindowLayout>().safeZone = safeGo.GetComponent<UnityEngine.UI.Windows.WindowLayoutSafeZone>();
+            return safeGo.GetComponent<UnityEngine.UI.Windows.WindowLayoutSafeZone>();
 
         }
         

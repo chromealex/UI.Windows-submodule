@@ -1,45 +1,56 @@
 namespace UnityEngine.UI.Windows {
 
-    public class WindowLayoutSafeZoneExtended : WindowLayoutSafeZone {
+    public class WindowLayoutSafeZoneExtended : WindowLayoutSafeZone, ILateUpdate {
 
+        [System.Serializable]
+        public struct CustomPadding {
+
+            public WindowSystemTargets targets;
+            public Rect paddingPixels;
+            public Rect paddingPercent;
+
+        }
+        
         [System.Flags]
         public enum PaddingType {
-
-            None = 0b00,
-            DeviceScreenTop = 0b01,
-            DeviceScreenBottom = 0b10,
-            All = 0b11,
-
+            None = 0,
+            Top = 1 << 0,
+            Bottom = 1 << 2,
+            Left = 1 << 3,
+            Right = 1 << 4,
+            All = -1,
         }
 
         public PaddingType paddingType = PaddingType.All;
-        public bool ignoreVertSafePaddings = false;
+        public CustomPadding[] customPadding;
 
         private ScreenOrientation savedOrientation;
+        private Rect savedSafeArea;
 
         public override void OnShowBegin() {
-
             base.OnShowBegin();
+            this.SetDirty();
+        }
 
+        public void SetDirty() {
             this.UpdateOrientation();
+            this.UpdateSafeArea();
+            this.Apply();
+        }
 
+        private void UpdateSafeArea() {
+            this.savedSafeArea = Screen.safeArea;
         }
 
         private void UpdateOrientation() {
-
             this.savedOrientation = Screen.orientation;
-            this.Apply();
-
         }
 
-        private void LateUpdate() {
-
-            if (this.GetState() == ObjectState.Shown && Screen.orientation != this.savedOrientation) {
-
-                this.UpdateOrientation();
-
+        public void OnLateUpdate(float dt) {
+            if (Screen.orientation != this.savedOrientation ||
+                Screen.safeArea != this.savedSafeArea) {
+                this.SetDirty();
             }
-
         }
 
         public override void Apply() {
@@ -57,20 +68,23 @@ namespace UnityEngine.UI.Windows {
             var anchorMin = Vector2.zero;
             var anchorMax = Vector2.one;
 
-            this.ApplyHorAnchors(ref anchorMin, ref anchorMax, safeZone);
+            if ((this.paddingType & PaddingType.Top) == 0) safeZone.yMax = 1f;
+            if ((this.paddingType & PaddingType.Bottom) == 0) safeZone.yMin = 0f;
+            if ((this.paddingType & PaddingType.Left) == 0) safeZone.xMin = 0f;
+            if ((this.paddingType & PaddingType.Right) == 0) safeZone.xMax = 1f;
 
-            if (this.ignoreVertSafePaddings == true) {
+            var customPadding = this.GetCustomPadding();
+            
+            anchorMin.x = safeZone.xMin;
+            anchorMax.x = safeZone.xMax;
+            anchorMin.y = safeZone.yMin;
+            anchorMax.y = safeZone.yMax;
 
-                anchorMin.y = 0;
-                anchorMax.y = 1;
-
-            } else {
-
-                anchorMin.y = safeZone.yMin;
-                anchorMax.y = safeZone.yMax;
-
-            }
-
+            anchorMin.x += customPadding.paddingPixels.xMin / w + customPadding.paddingPercent.xMin;
+            anchorMax.x += customPadding.paddingPixels.xMax / w + customPadding.paddingPercent.xMax;
+            anchorMin.y += customPadding.paddingPixels.yMin / h + customPadding.paddingPercent.yMin;
+            anchorMax.y += customPadding.paddingPixels.yMax / h + customPadding.paddingPercent.yMax;
+            
             rect.anchorMin = anchorMin;
             rect.anchorMax = anchorMax;
             rect.sizeDelta = Vector2.zero;
@@ -78,27 +92,12 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        private void ApplyHorAnchors(ref Vector2 anchorMin, ref Vector2 anchorMax, Rect safeZone) {
-
-            if ((this.paddingType & PaddingType.DeviceScreenTop) != 0) {
-
-                if (Screen.orientation == ScreenOrientation.LandscapeLeft) {
-                    anchorMin.x = safeZone.xMin;
-                } else if (Screen.orientation == ScreenOrientation.LandscapeRight) {
-                    anchorMax.x = safeZone.xMax;
-                }
+        private CustomPadding GetCustomPadding() {
+            var targetData = WindowSystem.GetTargetData();
+            foreach (var item in this.customPadding) {
+                if (item.targets.IsValid(targetData) == true) return item;
             }
-
-            if ((this.paddingType & PaddingType.DeviceScreenBottom) != 0) {
-
-                if (Screen.orientation == ScreenOrientation.LandscapeLeft) {
-                    anchorMax.x = safeZone.xMax;
-                } else if (Screen.orientation == ScreenOrientation.LandscapeRight) {
-                    anchorMin.x = safeZone.xMin;
-                }
-
-            }
-
+            return default;
         }
 
     }

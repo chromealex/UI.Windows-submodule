@@ -515,12 +515,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        private class EmitLoaded {
-
-            public int loaded;
-
-        }
-
         private struct EmitClosure<T, TClosure> : IListClosureParameters where T : WindowComponent where TClosure : IListClosureParameters {
 
             public int index { get; set; }
@@ -530,7 +524,8 @@ namespace UnityEngine.UI.Windows.Components {
             public System.Action<TClosure, bool> onComplete;
             public TClosure data;
             public System.Func<TClosure, TClosure> onClosure;
-            public EmitLoaded loadedCounter;
+            public int offset;
+            public int count;
 
         }
         private void Emit<T, TClosure>(int count, Resource source, System.Action<T, TClosure> onItem, TClosure closure, System.Action<TClosure, bool> onComplete = null, System.Func<TClosure, TClosure> onClosure = null) where T : WindowComponent where TClosure : IListClosureParameters {
@@ -543,43 +538,43 @@ namespace UnityEngine.UI.Windows.Components {
 
             }
             
-            var loadedCounter = PoolClass<EmitLoaded>.Spawn();
-            loadedCounter.loaded = 0;
+            var offset = this.Count;
+            
             var closureInner = new EmitClosure<T, TClosure>();
             closureInner.data = closure;
             closureInner.onItem = onItem;
             closureInner.onComplete = onComplete;
             closureInner.list = this;
             closureInner.onClosure = onClosure;
-            closureInner.requiredCount = count;
-            closureInner.loadedCounter = loadedCounter;
+            closureInner.offset = offset;
+            closureInner.count = count;
             
             this.isLoadingRequest = true;
-            var offset = this.Count;
-            for (int i = 0; i < count; ++i) {
-
-                var index = i + offset;
-                closureInner.index = index;
-                
-                this.AddItemInternal<T, EmitClosure<T, TClosure>>(source, closureInner, static (item, c) => {
-
-                    c.data.index = c.index;
-                    if (c.onClosure != null) c.data = c.onClosure.Invoke(c.data);
-                    c.onItem.Invoke(item, c.data);
-                    
-                    ++c.loadedCounter.loaded;
-                    if (c.loadedCounter.loaded == c.requiredCount) {
-                        
-                        if (c.onComplete != null) c.onComplete.Invoke(c.data, true);
-                        c.list.isLoadingRequest = false;
-                        PoolClass<EmitLoaded>.Recycle(ref c.loadedCounter);
-                        
-                    }
-                    
-                });
-                
-            }
             
+            var resources = WindowSystem.GetResources();
+            Coroutines.Run(resources.LoadAsyncWait<T, EmitClosure<T, TClosure>>(this, closureInner, source, static (asset, innerClosure) => {
+
+                for (int i = 0; i < innerClosure.count; ++i) {
+
+                    var index = i + innerClosure.offset;
+                    innerClosure.index = index;
+                    
+                    var data = new AddItemClosure<T, EmitClosure<T, TClosure>>() {
+                        data = innerClosure,
+                        component = innerClosure.list,
+                    };
+                    var instance = ListBaseComponent.SetupLoadedAsset(asset, data);
+                    innerClosure.data.index = innerClosure.index;
+                    if (innerClosure.onClosure != null) innerClosure.data = innerClosure.onClosure.Invoke(innerClosure.data);
+                    innerClosure.onItem.Invoke(instance, innerClosure.data);
+                    
+                }
+                
+                if (innerClosure.onComplete != null) innerClosure.onComplete.Invoke(innerClosure.data, true);
+                innerClosure.list.isLoadingRequest = false;
+                
+            }));
+
         }
         
         private void NotifyModulesComponentAdded(WindowComponent component) {

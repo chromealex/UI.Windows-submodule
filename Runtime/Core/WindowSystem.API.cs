@@ -228,7 +228,7 @@ namespace UnityEngine.UI.Windows {
             
         }
         
-        public static void HideAll<T>(TransitionParameters parameters = default) where T : WindowBase {
+        public static void HideAll<T>(TransitionParameters parameters = default) where T : class {
 
             WindowSystem.HideAll_INTERNAL(false, static (x, _) => x is T, parameters);
 
@@ -252,13 +252,13 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static void HideAll<T, TState>(TState state, System.Func<T, TState, bool> predicate, TransitionParameters parameters = default) where T : WindowBase {
+        public static void HideAll<T, TState>(TState state, System.Func<T, TState, bool> predicate, TransitionParameters parameters = default) where T : class {
 
             WindowSystem.HideAll_INTERNAL((state, predicate), static (w, s) => w is T type && s.predicate.Invoke(type, s.state), parameters);
 
         }
 
-        public static void HideAllAndClean<T>(TransitionParameters parameters = default) where T : WindowBase {
+        public static void HideAllAndClean<T>(TransitionParameters parameters = default) where T : class {
             
             WindowSystem.HideAllAndClean(static (w) => w is T, parameters);
             

@@ -1159,16 +1159,17 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public T GetWindow<T>() where T : WindowBase {
-
-            return (T)this.GetWindow();
-
+        public T TryGetWindow<T>() where T : class {
+            if (this.IsWindow<T>() == false) return null;
+            return (T)(object)this.GetWindow();
         }
 
-        public bool IsWindow<T>() where T : WindowBase {
+        public T GetWindow<T>() where T : class {
+            return (T)(object)this.GetWindow();
+        }
 
+        public bool IsWindow<T>() where T : class {
             return (this.GetWindow() as T) != null;
-
         }
 
         public void SetResetStateHierarchy() {

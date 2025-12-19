@@ -6,18 +6,18 @@
 
         public ImageComponent[] others;
 
-        public override void SetImage(Sprite sprite) {
+        public override void SetImage(Sprite prevSprite, Sprite newSprite) {
 
             foreach (var other in this.others) {
-                other.SetImage(sprite);
+                other.SetImage(newSprite);
             }
 
         }
 
-        public override void SetImage(Texture sprite) {
+        public override void SetImage(Texture prevTexture, Texture newTexture) {
 
             foreach (var other in this.others) {
-                other.SetImage(sprite);
+                other.SetImage(newTexture);
             }
 
         }

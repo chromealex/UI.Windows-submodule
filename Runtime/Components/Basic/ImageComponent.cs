@@ -205,9 +205,12 @@ namespace UnityEngine.UI.Windows.Components {
             
             if (this.graphics is UnityEngine.UI.Image image) {
 
+                var prevImage = image.sprite;
                 image.sprite = sprite;
                 image.preserveAspect = this.preserveAspect;
                 image.useSpriteMesh = this.useSpriteMesh;
+
+                this.ForEachModule<ImageComponentModule, System.ValueTuple<Sprite, Sprite>>((prevImage, sprite), static (c, texture) => c.SetImage(texture.Item1, texture.Item2));
 
             } else if (this.graphics is UnityEngine.UI.RawImage rawImage) {
 
@@ -218,12 +221,13 @@ namespace UnityEngine.UI.Windows.Components {
                 var block = tex.GetPixels((int)sprite.rect.x, (int)sprite.rect.y, size.x, size.y);
                 tex.SetPixels(block);
                 tex.Apply();
+                var prevImage = rawImage.texture;
                 rawImage.texture = sprite.texture;
                 
+                this.ForEachModule<ImageComponentModule, System.ValueTuple<Texture, Texture>>((prevImage, tex), static (c, texture) => c.SetImage(texture.Item1, texture.Item2));
+
             }
 
-            this.ForEachModule<ImageComponentModule, Sprite>(sprite, static (c, sprite) => c.SetImage(sprite));
-            
         }
 
         public void SetImage(Texture texture) {
@@ -232,20 +236,24 @@ namespace UnityEngine.UI.Windows.Components {
 
             if (this.graphics is UnityEngine.UI.RawImage rawImage) {
 
+                var prevImage = rawImage.texture;
                 rawImage.texture = texture;
+
+                this.ForEachModule<ImageComponentModule, System.ValueTuple<Texture, Texture>>((prevImage, texture), static (c, texture) => c.SetImage(texture.Item1, texture.Item2));
 
             } else if (this.graphics is UnityEngine.UI.Image image && texture is Texture2D tex2d) {
 
                 var resources = WindowSystem.GetResources();
 
                 var sprite = resources.New<Sprite, SpriteConstructor>(this, new SpriteConstructor(tex2d, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f)));
+                var prevImage = image.sprite;
                 image.sprite = sprite;
                 image.preserveAspect = this.preserveAspect;
                 image.useSpriteMesh = this.useSpriteMesh;
 
-            }
+                this.ForEachModule<ImageComponentModule, System.ValueTuple<Sprite, Sprite>>((prevImage, sprite), static (c, texture) => c.SetImage(texture.Item1, texture.Item2));
 
-            this.ForEachModule<ImageComponentModule, Texture>(texture, static (c, texture) => c.SetImage(texture));
+            }
 
 		}
 

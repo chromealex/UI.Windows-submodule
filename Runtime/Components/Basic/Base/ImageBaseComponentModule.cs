@@ -12,11 +12,11 @@
             
         }
 
-        public virtual void SetImage(Sprite sprite) {
+        public virtual void SetImage(Sprite prevSprite, Sprite newSprite) {
             
         }
 
-        public virtual void SetImage(Texture texture) {
+        public virtual void SetImage(Texture prevTexture, Texture newTexture) {
             
         }
 

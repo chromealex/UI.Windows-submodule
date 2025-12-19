@@ -1617,11 +1617,11 @@ namespace UnityEngine.UI.Windows {
             }
 
             public void LoadAsync<T>(Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
-                this.windowObject.LoadAsync(this.state, resource, onComplete);
+                this.windowObject.LoadAsync(this.state, resource, onComplete, async);
             }
 
             public void LoadAsync<T>(Resource resource, System.Action<TState> onComplete = null, bool async = true) where T : WindowObject {
-                this.windowObject.LoadAsync<T, TState>(this.state, resource, onComplete);
+                this.windowObject.LoadAsync<T, TState>(this.state, resource, onComplete, async);
             }
 
         }

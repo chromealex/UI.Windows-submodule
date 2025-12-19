@@ -72,11 +72,11 @@
             }
 
             public void LoadAsync<T>(Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
-                this.baseClosure.LoadAsync(resource, onComplete);
+                this.baseClosure.LoadAsync(resource, onComplete, async);
             }
 
             public void LoadAsync<T>(Resource resource, System.Action<TState> onComplete = null, bool async = true) where T : WindowObject {
-                this.baseClosure.LoadAsync<T>(resource, onComplete);
+                this.baseClosure.LoadAsync<T>(resource, onComplete, async);
             }
 
         }

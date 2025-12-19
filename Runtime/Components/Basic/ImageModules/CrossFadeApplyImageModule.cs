@@ -35,10 +35,12 @@
             // set prev texture to the original container
             var img = (Image)this.imageComponent.graphics;
             img.sprite = prevSprite;
+            img.enabled = prevSprite != null;
             
             // set new texture to the cross-fade container
             var curImg = (Image)this.graphics;
             curImg.sprite = newSprite;
+            curImg.enabled = newSprite != null;
             
             // fade out new texture
             var startColor = this.graphics.color;
@@ -53,6 +55,7 @@
                    }).OnComplete(static (obj) => {
                        // set new texture to the original container
                        obj.img.sprite = obj.newSprite;
+                       obj.img.enabled = true;
                        // reset cross-fade container
                        ((Image)obj.module.graphics).sprite = null;
                        obj.module.HideContainer();
@@ -60,6 +63,7 @@
                    }).OnCancel(static (obj) => {
                        // set new texture to the original container
                        obj.img.sprite = obj.newSprite;
+                       obj.img.enabled = true;
                        // reset cross-fade container
                        ((Image)obj.module.graphics).sprite = null;
                        obj.module.HideContainer();
@@ -73,10 +77,12 @@
             // set prev texture to the original container
             var img = (RawImage)this.imageComponent.graphics;
             img.texture = prevTexture;
+            img.enabled = prevTexture != null;
             
             // set new texture to the cross-fade container
             var curImg = (RawImage)this.graphics;
             curImg.texture = newTexture;
+            curImg.enabled = newTexture != null;
             
             // fade out new texture
             var startColor = this.graphics.color;
@@ -91,6 +97,7 @@
                    }).OnComplete(static (obj) => {
                        // set new texture to the original container
                        obj.img.texture = obj.newTexture;
+                       obj.img.enabled = true;
                        // reset cross-fade container
                        ((RawImage)obj.module.graphics).texture = null;
                        obj.module.HideContainer();
@@ -98,6 +105,7 @@
                    }).OnCancel(static (obj) => {
                        // set new texture to the original container
                        obj.img.texture = obj.newTexture;
+                       obj.img.enabled = true;
                        // reset cross-fade container
                        ((RawImage)obj.module.graphics).texture = null;
                        obj.module.HideContainer();
@@ -110,6 +118,7 @@
             var color = this.imageComponent.graphics.color;
             color.a = 0f;
             this.graphics.color = color;
+            this.graphics.enabled = false;
         }
 
     }

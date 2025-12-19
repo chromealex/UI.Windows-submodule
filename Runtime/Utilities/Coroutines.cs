@@ -390,7 +390,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 				this.index = -1;
 			} 
 		}
-		
+
     }
 
 }

@@ -143,10 +143,12 @@ namespace UnityEngine.UI.Windows.Components {
         private readonly struct LoadClosure {
 
             public readonly ImageComponent component;
+            public readonly Resource resource;
             public readonly System.Action onSetImageComplete;
 
-            public LoadClosure(ImageComponent component, System.Action onSetImageComplete) {
+            public LoadClosure(ImageComponent component, Resource resource, System.Action onSetImageComplete) {
                 this.component = component;
+                this.resource = resource;
                 this.onSetImageComplete = onSetImageComplete;
             }
 
@@ -161,37 +163,39 @@ namespace UnityEngine.UI.Windows.Components {
 
                     case Resource.ObjectType.Sprite: {
                         if (async == true) {
-                            resources.LoadAsync<Sprite, LoadClosure>(this, new LoadClosure(this, onSetImageComplete), resource, static (asset, data) => {
+                            resources.LoadAsync<Sprite, LoadClosure>(this, new LoadClosure(this, resource, onSetImageComplete), resource, static (asset, data) => {
                                 if (data.component != null) {
                                     data.component.SetImage(asset);
+                                    data.component.prevResourceLoad = data.resource;
                                     data.onSetImageComplete?.Invoke();
                                 }
                             });
                         } else {
                             this.SetImage(resources.Load<Sprite>(this, resource));
                             onSetImageComplete?.Invoke();
+                            this.prevResourceLoad = resource;
                         }
                     } 
                         break;
 
                     case Resource.ObjectType.Texture: {
                         if (async == true) {
-                            resources.LoadAsync<Texture, LoadClosure>(this, new LoadClosure(this, onSetImageComplete), resource, static (asset, data) => {
+                            resources.LoadAsync<Texture, LoadClosure>(this, new LoadClosure(this, resource, onSetImageComplete), resource, static (asset, data) => {
                                 if (data.component != null) {
                                     data.component.SetImage(asset);
+                                    data.component.prevResourceLoad = data.resource;
                                     data.onSetImageComplete?.Invoke();
                                 }
                             });
                         } else {
                             this.SetImage(resources.Load<Texture>(this, resource));
                             onSetImageComplete?.Invoke();
+                            this.prevResourceLoad = resource;
                         }
                     }
                         break;
 
                 }
-
-                this.prevResourceLoad = resource;
 
             } else {
                 onSetImageComplete?.Invoke();
@@ -199,63 +203,113 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        private class Counter {
+
+            public int value;
+
+        }
+
         public void SetImage(Sprite sprite) {
 
-            this.UnloadCurrentResources();
-            
-            if (this.graphics is UnityEngine.UI.Image image) {
+            if (this.graphics is UnityEngine.UI.Image) {
 
-                var prevImage = image.sprite;
-                image.sprite = sprite;
-                image.preserveAspect = this.preserveAspect;
-                image.useSpriteMesh = this.useSpriteMesh;
-
-                this.ForEachModule<ImageComponentModule, System.ValueTuple<Sprite, Sprite>>((prevImage, sprite), static (c, texture) => c.SetImage(texture.Item1, texture.Item2));
-
-            } else if (this.graphics is UnityEngine.UI.RawImage rawImage) {
+                this.SetImage_INTERNAL(sprite);
+                
+            } else if (this.graphics is UnityEngine.UI.RawImage) {
 
                 var resources = WindowSystem.GetResources();
-
                 var size = new Vector2Int((int)sprite.rect.width, (int)sprite.rect.height);
                 var tex = resources.New<Texture2D, Texture2DConstructor>(this, new Texture2DConstructor(size.x, size.y));
                 var block = tex.GetPixels((int)sprite.rect.x, (int)sprite.rect.y, size.x, size.y);
                 tex.SetPixels(block);
                 tex.Apply();
-                var prevImage = rawImage.texture;
-                rawImage.texture = sprite.texture;
                 
-                this.ForEachModule<ImageComponentModule, System.ValueTuple<Texture, Texture>>((prevImage, tex), static (c, texture) => c.SetImage(texture.Item1, texture.Item2));
-
+                this.SetImage_INTERNAL(tex);
+                
             }
 
         }
 
         public void SetImage(Texture texture) {
 
-            this.UnloadCurrentResources();
+            if (this.graphics is UnityEngine.UI.RawImage) {
 
-            if (this.graphics is UnityEngine.UI.RawImage rawImage) {
-
-                var prevImage = rawImage.texture;
-                rawImage.texture = texture;
-
-                this.ForEachModule<ImageComponentModule, System.ValueTuple<Texture, Texture>>((prevImage, texture), static (c, texture) => c.SetImage(texture.Item1, texture.Item2));
-
-            } else if (this.graphics is UnityEngine.UI.Image image && texture is Texture2D tex2d) {
-
+                this.SetImage_INTERNAL(texture);
+                
+            } else if (this.graphics is UnityEngine.UI.Image && texture is Texture2D tex2d) {
+                
                 var resources = WindowSystem.GetResources();
-
                 var sprite = resources.New<Sprite, SpriteConstructor>(this, new SpriteConstructor(tex2d, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f)));
-                var prevImage = image.sprite;
-                image.sprite = sprite;
-                image.preserveAspect = this.preserveAspect;
-                image.useSpriteMesh = this.useSpriteMesh;
-
-                this.ForEachModule<ImageComponentModule, System.ValueTuple<Sprite, Sprite>>((prevImage, sprite), static (c, texture) => c.SetImage(texture.Item1, texture.Item2));
-
+                this.SetImage_INTERNAL(sprite);
+                
             }
 
 		}
+
+        private void SetImage_INTERNAL(Texture texture) {
+            
+            var prevImage = ((RawImage)this.graphics).texture;
+            System.Action<ImageComponent, Texture> onComplete = static (img, texture) => {
+                img.UnloadCurrentResources();
+                ((RawImage)img.graphics).texture = texture;
+            };
+                
+            var results = PoolList<ImageComponentModule>.Spawn();
+            this.GetModules(results);
+            if (results.Count > 0) {
+                var counter = PoolClass<Counter>.Spawn();
+                counter.value = results.Count;
+                foreach (var item in results) {
+                    item.SetImage((counter, onComplete, component: this), prevImage, texture, static (data, texture) => {
+                        --data.counter.value;
+                        if (data.counter.value == 0) {
+                            PoolClass<Counter>.Recycle(data.counter);
+                            data.onComplete.Invoke(data.component, texture);
+                        }
+                    });
+                }
+                PoolList<ImageComponentModule>.Recycle(results);
+            } else {
+                onComplete.Invoke(this, texture);
+            }
+
+            this.ForEachModule<ImageComponentModule, System.ValueTuple<Texture, Texture>>((prevImage, texture), static (c, texture) => c.SetImage(texture.Item1, texture.Item2));
+            
+        }
+
+        private void SetImage_INTERNAL(Sprite sprite) {
+            
+            var prevImage = ((Image)this.graphics).sprite;
+            System.Action<ImageComponent, Sprite> onComplete = static (img, sprite) => {
+                img.UnloadCurrentResources();
+                var graphics = ((Image)img.graphics);
+                graphics.preserveAspect = img.preserveAspect;
+                graphics.useSpriteMesh = img.useSpriteMesh;
+                graphics.sprite = sprite;
+            };
+                
+            var results = PoolList<ImageComponentModule>.Spawn();
+            this.GetModules(results);
+            if (results.Count > 0) {
+                var counter = PoolClass<Counter>.Spawn();
+                counter.value = results.Count;
+                foreach (var item in results) {
+                    item.SetImage((counter, onComplete, component: this), prevImage, sprite, static (data, texture) => {
+                        --data.counter.value;
+                        if (data.counter.value == 0) {
+                            PoolClass<Counter>.Recycle(data.counter);
+                            data.onComplete.Invoke(data.component, texture);
+                        }
+                    });
+                }
+                PoolList<ImageComponentModule>.Recycle(results);
+            } else {
+                onComplete.Invoke(this, sprite);
+            }
+
+            this.ForEachModule<ImageComponentModule, System.ValueTuple<Sprite, Sprite>>((prevImage, sprite), static (c, texture) => c.SetImage(texture.Item1, texture.Item2));
+            
+        }
 
         public override void ValidateEditor() {
             

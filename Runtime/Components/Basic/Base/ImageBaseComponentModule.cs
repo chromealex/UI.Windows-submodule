@@ -20,6 +20,14 @@
             
         }
 
+        public virtual void SetImage<TClosure>(TClosure closure, Sprite prevSprite, Sprite newSprite, System.Action<TClosure, Sprite> onFinished) {
+            onFinished?.Invoke(closure, newSprite);
+        }
+
+        public virtual void SetImage<TClosure>(TClosure closure, Texture prevTexture, Texture newTexture, System.Action<TClosure, Texture> onFinished) {
+            onFinished?.Invoke(closure, newTexture);
+        }
+
     }
     
 }

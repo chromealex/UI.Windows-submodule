@@ -217,6 +217,11 @@ namespace UnityEngine.UI.Windows.Components {
                 
             } else if (this.graphics is UnityEngine.UI.RawImage) {
 
+                if (WindowSystem.IsStrictMode() == true) {
+                    WindowSystem.StrictWarning(this, sprite);
+                    return;
+                }
+                
                 var resources = WindowSystem.GetResources();
                 var size = new Vector2Int((int)sprite.rect.width, (int)sprite.rect.height);
                 var tex = resources.New<Texture2D, Texture2DConstructor>(this, new Texture2DConstructor(size.x, size.y));
@@ -225,7 +230,7 @@ namespace UnityEngine.UI.Windows.Components {
                 tex.Apply();
                 
                 this.SetImage_INTERNAL(tex);
-                
+
             }
 
         }
@@ -238,6 +243,11 @@ namespace UnityEngine.UI.Windows.Components {
                 
             } else if (this.graphics is UnityEngine.UI.Image && texture is Texture2D tex2d) {
                 
+                if (WindowSystem.IsStrictMode() == true) {
+                    WindowSystem.StrictWarning(this, texture);
+                    return;
+                }
+
                 var resources = WindowSystem.GetResources();
                 var sprite = resources.New<Sprite, SpriteConstructor>(this, new SpriteConstructor(tex2d, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f)));
                 this.SetImage_INTERNAL(sprite);

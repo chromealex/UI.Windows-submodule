@@ -375,6 +375,16 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public static bool IsStrictMode() {
+            var settings = WindowSystem.GetSettings();
+            if (settings == null) return false;
+            return settings.strictMode;
+        }
+
+        public static void StrictWarning<T>(WindowObject context, T obj) {
+            Debug.LogWarning($"[ UIWS ] Failed to use object {obj} on object {context} in strict mode", context);
+        }
+
     }
 
 }

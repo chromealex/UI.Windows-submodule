@@ -4,28 +4,28 @@
 
     public class CrossFadeApplyImageModule : ImageComponentModule {
 
-        private static readonly UnityEngine.Pool.ObjectPool<Image> crossFadeApplyImagePool = new UnityEngine.Pool.ObjectPool<Image>(() => {
+        private static readonly UnityEngine.Pool.ObjectPool<Image> crossFadeApplyImagePool = new UnityEngine.Pool.ObjectPool<Image>(static () => {
             var name = "[InternalCopy] Image";
             var go = new GameObject(name);
             go.AddComponent<RectTransform>();
             return go.AddComponent<Image>();
-        }, actionOnGet: (img) => {
+        }, actionOnGet: static (img) => {
             img.gameObject.SetActive(true);
-        }, actionOnRelease: (img) => {
+        }, actionOnRelease: static (img) => {
             img.sprite = null;
             img.gameObject.SetActive(false);
             var poolRoot = WindowSystem.GetPools().transform;
             img.transform.SetParent(poolRoot);
         });
         
-        private static readonly UnityEngine.Pool.ObjectPool<RawImage> crossFadeApplyRawImagePool = new UnityEngine.Pool.ObjectPool<RawImage>(() => {
+        private static readonly UnityEngine.Pool.ObjectPool<RawImage> crossFadeApplyRawImagePool = new UnityEngine.Pool.ObjectPool<RawImage>(static () => {
             var name = "[InternalCopy] RawImage";
             var go = new GameObject(name);
             go.AddComponent<RectTransform>();
             return go.AddComponent<RawImage>();
-        }, actionOnGet: (img) => {
+        }, actionOnGet: static (img) => {
             img.gameObject.SetActive(true);
-        }, actionOnRelease: (img) => {
+        }, actionOnRelease: static (img) => {
             img.texture = null;
             img.gameObject.SetActive(false);
             var poolRoot = WindowSystem.GetPools().transform;

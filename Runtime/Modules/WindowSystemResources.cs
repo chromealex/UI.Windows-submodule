@@ -546,8 +546,11 @@ namespace UnityEngine.UI.Windows.Modules {
                         var direct = go.GetComponent<T>();
                         onComplete.Invoke(direct, closure);
                         yield break;
-                    } else if (typeof(T).IsAssignableFrom(resource.directRef.GetType()) == true) {
+                    } else if (WindowSystem.IsStrictMode() == false && typeof(T).IsAssignableFrom(resource.directRef.GetType()) == true) {
                         onComplete.Invoke((T)(object)resource.directRef, closure);
+                        yield break;
+                    } else if (WindowSystem.IsStrictMode() == true && resource.directRef is T obj) {
+                        onComplete.Invoke(obj, closure);
                         yield break;
                     }
                     break;

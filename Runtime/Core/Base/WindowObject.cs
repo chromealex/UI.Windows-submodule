@@ -1606,6 +1606,30 @@ namespace UnityEngine.UI.Windows {
             
         }
         
+        public readonly struct ClosureAPI<TState> {
+
+            private readonly TState state;
+            private readonly WindowObject windowObject;
+
+            public ClosureAPI(TState state, WindowObject windowObject) {
+                this.state = state;
+                this.windowObject = windowObject;
+            }
+
+            public void LoadAsync<T>(Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
+                this.windowObject.LoadAsync(this.state, resource, onComplete);
+            }
+
+            public void LoadAsync<T>(Resource resource, System.Action<TState> onComplete = null, bool async = true) where T : WindowObject {
+                this.windowObject.LoadAsync<T, TState>(this.state, resource, onComplete);
+            }
+
+        }
+
+        public ClosureAPI<TState> Closure<TState>(TState state) {
+            return new ClosureAPI<TState>(state, this);
+        }
+
         public void LoadAsync<T, TState>(TState state, Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
             
             this.LoadAsync_YIELD<T, LoadAsyncClosure<T, TState>>(new LoadAsyncClosure<T, TState>() {

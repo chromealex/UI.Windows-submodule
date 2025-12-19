@@ -51,7 +51,41 @@
             
         }
 
-        private struct Closure<T> {
+        public readonly struct LinkerClosureAPI<TState> {
+
+            private readonly TState state;
+            private readonly LinkerComponent linkerComponent;
+            private readonly ClosureAPI<TState> baseClosure; 
+
+            public LinkerClosureAPI(TState state, LinkerComponent linkerComponent) {
+                this.state = state;
+                this.linkerComponent = linkerComponent;
+                this.baseClosure = new ClosureAPI<TState>(state, linkerComponent);
+            }
+
+            public void LoadAsync<T>(System.Action<T, TState> onComplete = null) where T : WindowObject {
+                this.linkerComponent.LoadAsync(this.state, onComplete);
+            }
+
+            public void ReloadAsync<T>(System.Action<T, TState> onComplete) where T : WindowObject {
+                this.linkerComponent.ReloadAsync(this.state, onComplete);
+            }
+
+            public void LoadAsync<T>(Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
+                this.baseClosure.LoadAsync(resource, onComplete);
+            }
+
+            public void LoadAsync<T>(Resource resource, System.Action<TState> onComplete = null, bool async = true) where T : WindowObject {
+                this.baseClosure.LoadAsync<T>(resource, onComplete);
+            }
+
+        }
+
+        new public LinkerClosureAPI<TState> Closure<TState>(TState state) {
+            return new LinkerClosureAPI<TState>(state, this);
+        }
+        
+        private struct ClosureData<T> {
 
             public System.Action<T> onComplete;
             public LinkerComponent component;
@@ -60,7 +94,7 @@
 
         public void LoadAsync<T>(System.Action<T> onComplete = null) where T : WindowObject {
             
-            this.LoadAsync<T, Closure<T>>(new Closure<T>() {
+            this.LoadAsync<T, ClosureData<T>>(new ClosureData<T>() {
                 onComplete = onComplete,
                 component = this,
             }, this.prefab, static (asset, state) => {
@@ -85,7 +119,7 @@
 
         public T LoadSync<T>() where T : WindowObject {
             
-            this.LoadAsync<T, Closure<T>>(new Closure<T>() {
+            this.LoadAsync<T, ClosureData<T>>(new ClosureData<T>() {
                 component = this,
             }, this.prefab, static (asset, state) => {
 

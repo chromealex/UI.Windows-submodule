@@ -1,22 +1,59 @@
 ﻿namespace UnityEngine.UI.Windows {
+    
+    using UnityEngine.UI.Windows.Utilities;
 
     public class CrossFadeApplyImageModule : ImageComponentModule {
 
-        public float duration = 0.5f;
-        
-        private Graphic graphics;
-
-        public override void OnInit() {
-            base.OnInit();
-            // Create a copy
-            #if UNITY_EDITOR
-            var name = $"[InternalCopy] {this.imageComponent.name}";
-            #else
-            var name = "[InternalCopy]";
-            #endif
+        private static readonly UnityEngine.Pool.ObjectPool<Image> crossFadeApplyImagePool = new UnityEngine.Pool.ObjectPool<Image>(() => {
+            var name = "[InternalCopy] Image";
             var go = new GameObject(name);
-            go.layer = this.imageComponent.gameObject.layer;
-            var tr = go.AddComponent<RectTransform>();
+            go.AddComponent<RectTransform>();
+            return go.AddComponent<Image>();
+        }, actionOnGet: (img) => {
+            img.gameObject.SetActive(true);
+        }, actionOnRelease: (img) => {
+            img.sprite = null;
+            img.gameObject.SetActive(false);
+            var poolRoot = WindowSystem.GetPools().transform;
+            img.transform.SetParent(poolRoot);
+        });
+        
+        private static readonly UnityEngine.Pool.ObjectPool<RawImage> crossFadeApplyRawImagePool = new UnityEngine.Pool.ObjectPool<RawImage>(() => {
+            var name = "[InternalCopy] RawImage";
+            var go = new GameObject(name);
+            go.AddComponent<RectTransform>();
+            return go.AddComponent<RawImage>();
+        }, actionOnGet: (img) => {
+            img.gameObject.SetActive(true);
+        }, actionOnRelease: (img) => {
+            img.texture = null;
+            img.gameObject.SetActive(false);
+            var poolRoot = WindowSystem.GetPools().transform;
+            img.transform.SetParent(poolRoot);
+        });
+        
+        public float duration = 0.5f;
+        public Tweener.EaseFunction easeFunction;
+        
+        private Image GetImageInstance() {
+            return this.GetInstance(crossFadeApplyImagePool);
+        }
+
+        private RawImage GetRawImageInstance() {
+            return this.GetInstance(crossFadeApplyRawImagePool);
+        }
+
+        private void ReleaseImageInstance(Image image) {
+            crossFadeApplyImagePool.Release(image);
+        }
+
+        private void ReleaseRawImageInstance(RawImage image) {
+            crossFadeApplyRawImagePool.Release(image);
+        }
+
+        private T GetInstance<T>(UnityEngine.Pool.ObjectPool<T> pool) where T : Graphic {
+            var instance = pool.Get();
+            var tr = instance.rectTransform;
             tr.SetParent(this.imageComponent.graphics.transform);
             tr.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             tr.anchorMin = Vector2.zero;
@@ -25,9 +62,8 @@
             tr.anchoredPosition = Vector2.zero;
             tr.sizeDelta = Vector2.zero;
             tr.localScale = Vector3.one;
-            this.graphics = (Graphic)go.AddComponent(this.imageComponent.graphics.GetType());
-            this.graphics.raycastTarget = false;
-            this.HideContainer();
+            instance.raycastTarget = false;
+            return instance;
         }
 
         public override void SetImage<TClosure>(TClosure closure, Sprite prevSprite, Sprite newSprite, System.Action<TClosure, Sprite> onFinished) {
@@ -38,35 +74,27 @@
             img.enabled = prevSprite != null;
             
             // set new texture to the cross-fade container
-            var curImg = (Image)this.graphics;
+            var curImg = this.GetImageInstance();
             curImg.sprite = newSprite;
             curImg.enabled = newSprite != null;
             
             // fade out new texture
-            var startColor = this.graphics.color;
+            var startColor = curImg.color;
+            startColor.a = 0f;
             var tweener = WindowSystem.GetTweener();
-            tweener.Stop(this.graphics);
-            tweener.Add((img, startColor, newSprite, module: this, closure, onFinished), this.duration, 0f, 1f)
-                   .Tag(this.graphics)
+            tweener.Add((img, startColor, newSprite, curImg, module: this, closure, onFinished), this.duration, 0f, 1f)
+                   .Tag(this.imageComponent)
+                   .Ease(this.easeFunction)
                    .OnUpdate(static (obj, value) => {
-                       var targetColor = obj.module.graphics.color;
+                       var targetColor = obj.curImg.color;
                        targetColor.a = 1f;
-                       obj.module.graphics.color = Color.Lerp(obj.startColor, targetColor, value);
+                       obj.curImg.color = Color.Lerp(obj.startColor, targetColor, value);
                    }).OnComplete(static (obj) => {
                        // set new texture to the original container
                        obj.img.sprite = obj.newSprite;
                        obj.img.enabled = true;
                        // reset cross-fade container
-                       ((Image)obj.module.graphics).sprite = null;
-                       obj.module.HideContainer();
-                       obj.onFinished.Invoke(obj.closure, obj.newSprite);
-                   }).OnCancel(static (obj) => {
-                       // set new texture to the original container
-                       obj.img.sprite = obj.newSprite;
-                       obj.img.enabled = true;
-                       // reset cross-fade container
-                       ((Image)obj.module.graphics).sprite = null;
-                       obj.module.HideContainer();
+                       obj.module.ReleaseImageInstance(obj.curImg);
                        obj.onFinished.Invoke(obj.closure, obj.newSprite);
                    });
             
@@ -80,45 +108,30 @@
             img.enabled = prevTexture != null;
             
             // set new texture to the cross-fade container
-            var curImg = (RawImage)this.graphics;
+            var curImg = this.GetRawImageInstance();
             curImg.texture = newTexture;
             curImg.enabled = newTexture != null;
             
             // fade out new texture
-            var startColor = this.graphics.color;
+            var startColor = curImg.color;
+            startColor.a = 0f;
             var tweener = WindowSystem.GetTweener();
-            tweener.Stop(this.graphics);
-            tweener.Add((img, startColor, newTexture, module: this, closure, onFinished), this.duration, 0f, 1f)
-                   .Tag(this.graphics)
+            tweener.Add((img, startColor, newTexture, curImg, module: this, closure, onFinished), this.duration, 0f, 1f)
+                   .Tag(this.imageComponent)
+                   .Ease(this.easeFunction)
                    .OnUpdate(static (obj, value) => {
-                       var targetColor = obj.module.graphics.color;
+                       var targetColor = obj.curImg.color;
                        targetColor.a = 1f;
-                       obj.module.graphics.color = Color.Lerp(obj.startColor, targetColor, value);
+                       obj.curImg.color = Color.Lerp(obj.startColor, targetColor, value);
                    }).OnComplete(static (obj) => {
                        // set new texture to the original container
                        obj.img.texture = obj.newTexture;
                        obj.img.enabled = true;
                        // reset cross-fade container
-                       ((RawImage)obj.module.graphics).texture = null;
-                       obj.module.HideContainer();
-                       obj.onFinished.Invoke(obj.closure, obj.newTexture);
-                   }).OnCancel(static (obj) => {
-                       // set new texture to the original container
-                       obj.img.texture = obj.newTexture;
-                       obj.img.enabled = true;
-                       // reset cross-fade container
-                       ((RawImage)obj.module.graphics).texture = null;
-                       obj.module.HideContainer();
+                       obj.module.ReleaseRawImageInstance(obj.curImg);
                        obj.onFinished.Invoke(obj.closure, obj.newTexture);
                    });
 
-        }
-
-        private void HideContainer() {
-            var color = this.imageComponent.graphics.color;
-            color.a = 0f;
-            this.graphics.color = color;
-            this.graphics.enabled = false;
         }
 
     }

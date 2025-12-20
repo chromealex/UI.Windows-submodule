@@ -93,9 +93,9 @@ namespace UnityEditor.UI.Windows {
                     rect.y += rect.height;
                     rect.height = 10f;
                     #if USE_PROPERTY_DRAWERS_OVERRIDE
-                    GUI.Label(rect, "Only this directories must be used for resources.", EditorStyles.miniLabel);
+                    GUI.Label(rect, "Only these directories must be used for resources.", EditorStyles.miniLabel);
                     #else
-                    GUI.Label(rect, "Only this directories must be used for resources. Add USE_PROPERTY_DRAWERS_OVERRIDE define to use this feature.", EditorStyles.miniLabel);
+                    GUI.Label(rect, "Only these directories must be used for resources. Add USE_PROPERTY_DRAWERS_OVERRIDE define to use this feature.", EditorStyles.miniLabel);
                     #endif
                 };
             

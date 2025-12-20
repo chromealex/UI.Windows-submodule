@@ -60,7 +60,7 @@ namespace UnityEngine.UI.Windows {
     
     public partial class WindowSystem {
 
-        public struct ClosureAPI<TClosure> {
+        public ref struct ClosureAPI<TClosure> {
 
             public TClosure data;
 

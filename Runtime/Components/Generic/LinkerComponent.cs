@@ -51,7 +51,7 @@
             
         }
 
-        public readonly struct LinkerClosureAPI<TState> {
+        public readonly ref struct LinkerClosureAPI<TState> {
 
             private readonly TState state;
             private readonly LinkerComponent linkerComponent;

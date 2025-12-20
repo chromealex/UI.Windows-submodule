@@ -1606,7 +1606,7 @@ namespace UnityEngine.UI.Windows {
             
         }
         
-        public readonly struct ClosureAPI<TState> {
+        public readonly ref struct ClosureAPI<TState> {
 
             private readonly TState state;
             private readonly WindowObject windowObject;

@@ -71,6 +71,10 @@
                 this.linkerComponent.ReloadAsync(this.state, onComplete);
             }
 
+            public void ReloadAsync<T>(Resource prefab, System.Action<T, TState> onComplete) where T : WindowObject {
+                this.linkerComponent.ReloadAsync(this.state, prefab, onComplete);
+            }
+
             public void LoadAsync<T>(Resource resource, System.Action<T, TState> onComplete = null, bool async = true) where T : WindowObject {
                 this.baseClosure.LoadAsync(resource, onComplete, async);
             }
@@ -130,11 +134,21 @@
 
         }
 
+        public void ReloadAsync<T>(Resource prefab, System.Action<T> onComplete) where T : WindowObject {
+            this.prefab = prefab;
+            this.ReloadAsync(onComplete);
+        }
+
         public void ReloadAsync<T>(System.Action<T> onComplete) where T : WindowObject {
             if (this.loadedAsset != null) {
                 this.Unload();
             }
             this.LoadAsync(onComplete);
+        }
+
+        public void ReloadAsync<T, TState>(TState state, Resource prefab, System.Action<T, TState> onComplete) where T : WindowObject {
+            this.prefab = prefab;
+            this.ReloadAsync(state, onComplete);
         }
 
         public void ReloadAsync<T, TState>(TState state, System.Action<T, TState> onComplete) where T : WindowObject {

@@ -448,7 +448,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public virtual ListClosureAPI<T> Closure<T>(T closure) {
+        new public ListClosureAPI<T> Closure<T>(T closure) {
             return new ListClosureAPI<T>() {
                 list = this,
                 state = closure,

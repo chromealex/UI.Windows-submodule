@@ -1,5 +1,6 @@
 namespace UnityEngine.UI.Windows.Editor {
 
+    #if UNITY_EDITOR
     public class EditorRefLocks : ScriptableObject {
 
         [System.Serializable]
@@ -49,5 +50,6 @@ namespace UnityEngine.UI.Windows.Editor {
         }
 
     }
+    #endif
 
 }

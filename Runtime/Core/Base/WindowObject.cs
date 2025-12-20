@@ -47,32 +47,6 @@ namespace UnityEngine.UI.Windows {
 
     }
 
-    [System.Serializable]
-    public struct DebugStateLog {
-
-        [System.Serializable]
-        public struct Item {
-
-            public ObjectState state;
-            public string stackTrace;
-
-        }
-        
-        public List<Item> items;
-        
-        public void Add(ObjectState state) {
-            
-            if (this.items == null) this.items = new List<Item>();
-            var trace = StackTraceUtility.ExtractStackTrace();
-            this.items.Add(new Item() {
-                state = state,
-                stackTrace = trace
-            });
-            
-        }
-
-    }
-
     public interface IHolder {
 
         void ValidateEditor();
@@ -158,7 +132,6 @@ namespace UnityEngine.UI.Windows {
 
         public RectTransform rectTransform;
 
-        public bool hasObjectCanvas;
         public Canvas objectCanvas;
         public int canvasSortingOrderDelta;
         public RenderItem[] canvasRenderers = System.Array.Empty<RenderItem>();
@@ -172,14 +145,13 @@ namespace UnityEngine.UI.Windows {
         [Tooltip("Show behaviour custom delay. If 0 - default animation will be used.")]
         public float showBehaviourOneByOneDelay;
         
-        [Tooltip("Should this object return in pool when window is hidden? Object will returns into pool only if parent object is not mark as `createPool`.")]
-        public bool createPool;
-        
         [AnimationParameters]
         public AnimationParametersContainer animationParameters;
         
         [Tooltip("Render behaviour when hidden state set or if hiddenByDefault is true.")]
         public RenderBehaviourSettings renderBehaviourOnHidden = RenderBehaviourSettings.UseSettings;
+        
+        public bool hasObjectCanvas;
         
         [Tooltip("Allow root to register this object in subObjects array.")]
         public bool allowRegisterInRoot = true;
@@ -188,8 +160,9 @@ namespace UnityEngine.UI.Windows {
         [Tooltip("Make this object is hidden by default.\nWorks only on window showing state, check if this object must be hidden by default it breaks branch graph on this node. After it works current object state will be Initialized.")]
         public bool hiddenByDefault = false;
 
-        public DebugStateLog debugStateLog;
-        
+        [Tooltip("Should this object return in pool when window is hidden? Object will returns into pool only if parent object is not mark as `createPool`.")]
+        public bool createPool;
+
         public bool isObjectRoot;
         public WindowObject rootObject;
         public WindowObject prefabSource;
@@ -204,14 +177,15 @@ namespace UnityEngine.UI.Windows {
         private bool isActiveSelf;
         private ObjectState objectState;
         
+        public List<EditorParametersRegistry> registry = null;
+
         public bool IsReadyToHide() => this.readyToHide;
 
         public void SetReadyToHide(bool state) => this.readyToHide = state;
 
         public void SetState(ObjectState state) {
 
-            var isDebug = WindowSystem.GetSettings().collectDebugInfo;
-            if (isDebug == true) this.debugStateLog.Add(state);
+            UnityEngine.UI.Windows.Editor.ComponentsDebugLog.Add(this, state);
             this.objectState = state;
             
             if (state == ObjectState.Initializing) this.SetResetState();
@@ -289,8 +263,6 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        public List<EditorParametersRegistry> registry = null;
-        
         public void AddEditorParametersRegistry(EditorParametersRegistry param) {
 
             if (this.registry == null) this.registry = new List<EditorParametersRegistry>();
@@ -352,8 +324,6 @@ namespace UnityEngine.UI.Windows {
                     if (this != null) this.ValidateEditor();
                     
                 };
-
-                this.debugStateLog = default;
 
             }
 

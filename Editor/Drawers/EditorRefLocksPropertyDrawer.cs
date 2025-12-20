@@ -1,41 +1,33 @@
+using System.Linq;
+
 namespace UnityEditor.UI.Windows {
 
     using UnityEngine.UI.Windows;
     using UnityEngine;
     
-    [CustomPropertyDrawer(typeof(EditorRefLocks))]
-    public class EditorRefLocksPropertyDrawer : PropertyDrawer {
+    public static class EditorRefLocksPropertyDrawer {
 
-        private UnityEditorInternal.ReorderableList editorRefLocksList;
+        private static UnityEditorInternal.ReorderableList editorRefLocksList;
+        private static SerializedObject serializedObject;
 
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
+        public static void Draw(SerializedObject serializedObject) {
+            
+            if (editorRefLocksList == null || EditorRefLocksPropertyDrawer.serializedObject != serializedObject) {
 
-            this.Validate(property);
-            return this.editorRefLocksList.GetHeight();
-            
-        }
-
-        public override void OnGUI(UnityEngine.Rect position, SerializedProperty property, UnityEngine.GUIContent label) {
-            
-            this.Validate(property);
-            
-            this.editorRefLocksList.DoList(position);
-            
-        }
-
-        public void Validate(SerializedProperty property) {
-            
-            if (this.editorRefLocksList == null) {
+                EditorRefLocksPropertyDrawer.serializedObject = serializedObject;
                 
-                var componentsProp = property.FindPropertyRelative("directories");
-                this.editorRefLocksList = new UnityEditorInternal.ReorderableList(componentsProp.serializedObject, componentsProp, true, true, true, true);
-                this.editorRefLocksList.elementHeight = 40f;
-                this.editorRefLocksList.onAddCallback = (rList) => {
+                var component = serializedObject.targetObject as WindowObject;
+                if (component == null) return;
+
+                var componentsProp = WindowSystemEditor.GetRefLockProperty(component);
+                editorRefLocksList = new UnityEditorInternal.ReorderableList(componentsProp.serializedObject, componentsProp, true, true, true, true);
+                editorRefLocksList.elementHeight = 40f;
+                editorRefLocksList.onAddCallback = (rList) => {
 
                     if (rList.serializedProperty != null) {
 
-                        ++rList.serializedProperty.arraySize;
-                        rList.index = rList.serializedProperty.arraySize - 1;
+                        ++componentsProp.arraySize;
+                        rList.index = componentsProp.arraySize - 1;
                         var idx = rList.index;
                         var prop = componentsProp.GetArrayElementAtIndex(idx);
                         prop.stringValue = null;
@@ -43,7 +35,17 @@ namespace UnityEditor.UI.Windows {
                     }
 
                 };
-                this.editorRefLocksList.drawElementBackgroundCallback = (rect, index, active, focused) => {
+                editorRefLocksList.onRemoveCallback = list => {
+
+                    foreach (var index in list.selectedIndices.Reverse()) {
+                        componentsProp.DeleteArrayElementAtIndex(index);
+                    }
+                    componentsProp.serializedObject.ApplyModifiedProperties();
+                    componentsProp.serializedObject.Update();
+                    WindowSystemEditor.ValidateRefLock();
+                    
+                };
+                editorRefLocksList.drawElementBackgroundCallback = (rect, index, active, focused) => {
 
                     if (focused == true || active == true) {
 
@@ -56,12 +58,12 @@ namespace UnityEditor.UI.Windows {
                     }
 
                 };
-                this.editorRefLocksList.elementHeightCallback = (index) => {
+                editorRefLocksList.elementHeightCallback = (index) => {
 
                     return EditorGUIUtility.singleLineHeight;
 
                 };
-                this.editorRefLocksList.drawElementCallback = (rect, index, active, focused) => {
+                editorRefLocksList.drawElementCallback = (rect, index, active, focused) => {
 
                     var prop = componentsProp.GetArrayElementAtIndex(index);
                     var val = prop.stringValue;
@@ -75,16 +77,17 @@ namespace UnityEditor.UI.Windows {
                     if (newDir != dir) {
 
                         var path = (newDir == null ? null : AssetDatabase.GetAssetPath(newDir));
-                        componentsProp.serializedObject.Update();
+                        prop = componentsProp.GetArrayElementAtIndex(index);
                         prop.stringValue = (string.IsNullOrEmpty(path) == false ? AssetDatabase.AssetPathToGUID(path) : null);
                         componentsProp.serializedObject.ApplyModifiedProperties();
-
+                        componentsProp.serializedObject.Update();
+                        
                     }
 
                 };
-                this.editorRefLocksList.headerHeight = 32f;
+                editorRefLocksList.headerHeight = 32f;
                 UnityEditorInternal.ReorderableList.defaultBehaviours.headerBackground.fixedHeight = 0f;
-                this.editorRefLocksList.drawHeaderCallback = (rect) => {
+                editorRefLocksList.drawHeaderCallback = (rect) => {
                     rect.height = EditorGUIUtility.singleLineHeight;
                     GUI.Label(rect, "Resource Directories");
                     rect.y += rect.height;
@@ -97,6 +100,9 @@ namespace UnityEditor.UI.Windows {
                 };
             
             }
+            
+            editorRefLocksList.DoLayoutList();
+
             
         }
 

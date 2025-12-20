@@ -798,6 +798,61 @@ namespace UnityEditor.UI.Windows {
 
         }
 
+        private const string EDITOR_REF_LOCKS_PATH = "Assets/EditorResources/UI.Windows/EditorRefLocks.asset";
+        
+        public static ref List<string> GetRefLock(WindowObject obj) {
+
+            ValidateRefLock();
+            var refLocks = AssetDatabase.LoadAssetAtPath<UnityEngine.UI.Windows.Editor.EditorRefLocks>(EDITOR_REF_LOCKS_PATH);
+            return ref refLocks.GetItem(obj).directories;
+
+        }
+
+        public static void ValidateRefLock() {
+
+            var refLocks = AssetDatabase.LoadAssetAtPath<UnityEngine.UI.Windows.Editor.EditorRefLocks>(EDITOR_REF_LOCKS_PATH);
+            if (refLocks == null) {
+                var instance = ScriptableObject.CreateInstance<UnityEngine.UI.Windows.Editor.EditorRefLocks>();
+                instance.items = System.Array.Empty<UnityEngine.UI.Windows.Editor.EditorRefLocks.Item>();
+                var dir = System.IO.Path.GetDirectoryName(EDITOR_REF_LOCKS_PATH);
+                if (System.IO.Directory.Exists(dir) == false) {
+                    System.IO.Directory.CreateDirectory(dir);
+                }
+                AssetDatabase.CreateAsset(instance, EDITOR_REF_LOCKS_PATH);
+            } else {
+                var removed = 0;
+                for (int i = 0; i < refLocks.items.Length; ++i) {
+                    ref var item = ref refLocks.items[i];
+                    if (item.obj == null || item.directories == null || item.directories.Count == 0) {
+                        item = refLocks.items[refLocks.items.Length - 1];
+                        ++removed;
+                    }
+                }
+                System.Array.Resize(ref refLocks.items, refLocks.items.Length - removed);
+                EditorUtility.SetDirty(refLocks);
+            }
+
+        }
+
+        private static SerializedObject refLockSo;
+        public static SerializedProperty GetRefLockProperty(WindowObject component) {
+            
+            ValidateRefLock();
+            var refLocks = AssetDatabase.LoadAssetAtPath<UnityEngine.UI.Windows.Editor.EditorRefLocks>(EDITOR_REF_LOCKS_PATH);
+            var isNew = refLocks.GetItem(component, out var index);
+            if (refLockSo == null) {
+                var so = new SerializedObject(refLocks);
+                refLockSo = so;
+            }
+
+            if (isNew == true) {
+                refLockSo.Update();
+            }
+
+            return refLockSo.FindProperty("items").GetArrayElementAtIndex(index).FindPropertyRelative("directories");
+            
+        }
+
     }
 
 }

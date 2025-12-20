@@ -28,7 +28,7 @@ namespace UnityEditor.UI.Windows {
 
     public class ObjDrawer : PropertyDrawer {
 
-        private System.Collections.Generic.List<string> list = new System.Collections.Generic.List<string>();
+        private readonly System.Collections.Generic.List<string> list = new System.Collections.Generic.List<string>();
         private GameObject prevSelected;
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
@@ -163,7 +163,10 @@ namespace UnityEditor.UI.Windows {
                 this.list.Clear();
                 foreach (var component in components) {
 
-                    if (component.editorRefLocks.directories != null) this.list.AddRange(component.editorRefLocks.directories);
+                    var list = WindowSystemEditor.GetRefLock(component);
+                    if (list != null) {
+                        this.list.AddRange(list);
+                    }
 
                 }
 
@@ -179,7 +182,10 @@ namespace UnityEditor.UI.Windows {
                         if (screen != null) {
 
                             var window = screen.GetComponent<WindowBase>();
-                            if (window.editorRefLocks.directories != null) this.list.AddRange(window.editorRefLocks.directories);
+                            var list = WindowSystemEditor.GetRefLock(window);
+                            if (list != null) {
+                                this.list.AddRange(list);
+                            }
 
                         }
 

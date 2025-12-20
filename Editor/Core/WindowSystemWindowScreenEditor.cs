@@ -21,8 +21,6 @@ namespace UnityEditor.UI.Windows {
         
         private SerializedProperty audioEvents;
 
-        private SerializedProperty editorRefLocks;
-
         private int selectedTab {
             get {
                 return EditorPrefs.GetInt("UnityEditor.UI.Windows.WindowBase.TabIndex");
@@ -68,8 +66,6 @@ namespace UnityEditor.UI.Windows {
             this.layouts = this.serializedObject.FindProperty("layouts");
 
             this.audioEvents = this.serializedObject.FindProperty("audioEvents");
-
-            this.editorRefLocks = this.serializedObject.FindProperty("editorRefLocks");
 
             var moduleItems = this.modules.FindPropertyRelative("modules");
             this.listModules = new UnityEditorInternal.ReorderableList(this.serializedObject, moduleItems, false, false, true, true);
@@ -276,7 +272,7 @@ namespace UnityEditor.UI.Windows {
 
                     GUILayoutExt.Box(4f, 4f, () => {
 
-                        EditorGUILayout.PropertyField(this.editorRefLocks);
+                        EditorRefLocksPropertyDrawer.Draw(this.serializedObject);
                         
                     });
 

@@ -48,13 +48,6 @@ namespace UnityEngine.UI.Windows {
     }
 
     [System.Serializable]
-    public struct EditorRefLocks {
-
-        public string[] directories;
-        
-    }
-
-    [System.Serializable]
     public struct DebugStateLog {
 
         [System.Serializable]
@@ -195,7 +188,6 @@ namespace UnityEngine.UI.Windows {
         [Tooltip("Make this object is hidden by default.\nWorks only on window showing state, check if this object must be hidden by default it breaks branch graph on this node. After it works current object state will be Initialized.")]
         public bool hiddenByDefault = false;
 
-        public EditorRefLocks editorRefLocks;
         public DebugStateLog debugStateLog;
         
         public bool isObjectRoot;

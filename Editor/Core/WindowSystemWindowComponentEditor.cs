@@ -32,8 +32,6 @@ namespace UnityEditor.UI.Windows {
 
         private SerializedProperty audioEvents;
 
-        private SerializedProperty editorRefLocks;
-
         private UnityEditorInternal.ReorderableList listModules;
 
         private int selectedTab {
@@ -93,8 +91,6 @@ namespace UnityEditor.UI.Windows {
             
             this.audioEvents = this.serializedObject.FindProperty("audioEvents");
             
-            this.editorRefLocks = this.serializedObject.FindProperty("editorRefLocks");
-
             if (this.listModules == null) {
                 
                 var componentsProp = this.componentModules.FindPropertyRelative("modules");
@@ -323,7 +319,7 @@ namespace UnityEditor.UI.Windows {
                     this.DrawCanvas();
 
                 }),
-                new GUITab("Modules (" + this.componentModules.FindPropertyRelative("modules").arraySize + ")", () => {
+                new GUITab($"Modules ({this.componentModules.FindPropertyRelative("modules").arraySize})", () => {
                     
                     this.listModules.DoLayoutList();
 
@@ -346,7 +342,7 @@ namespace UnityEditor.UI.Windows {
 
                     GUILayoutExt.Box(4f, 4f, () => {
 
-                        EditorGUILayout.PropertyField(this.editorRefLocks);
+                        EditorRefLocksPropertyDrawer.Draw(this.serializedObject);
                         
                     });
 
@@ -364,8 +360,7 @@ namespace UnityEditor.UI.Windows {
                         
                     });
                     
-                })
-                );
+                }));
             this.tabScrollPosition = scroll;
 
             GUILayout.Space(10f);

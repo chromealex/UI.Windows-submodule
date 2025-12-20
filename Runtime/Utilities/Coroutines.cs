@@ -8,18 +8,36 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         private static Coroutines instance;
 
+        public class EndOfFrameUpdateLoop { }
+
         public void Awake() {
 
             Coroutines.instance = this;
+            
+            var loop = UnityEngine.LowLevel.PlayerLoop.GetDefaultPlayerLoop();
+            // Create a custom update system to replace an existing one
+            var endOfFrameUpdate = new UnityEngine.LowLevel.PlayerLoopSystem() {
+	            updateDelegate = this.EndOfFrameUpdate,
+	            type = typeof(EndOfFrameUpdateLoop),
+            };
+            var index = 7;
+            loop.subSystemList[index].subSystemList = loop.subSystemList[index].subSystemList.Append(endOfFrameUpdate).ToArray();
+            UnityEngine.LowLevel.PlayerLoop.SetPlayerLoop(loop);
 
         }
 
         public void Update() {
 	        
-			WaitTasks.Update();
+	        WaitTasks.Update();
 			
         }
-        
+
+        public void EndOfFrameUpdate() {
+	        
+	        WaitTasks.EndOfFrameUpdate();
+			
+        }
+
         private struct WaitFrameClosure {
 
 	        public System.Action callback;
@@ -95,6 +113,30 @@ namespace UnityEngine.UI.Windows.Utilities {
         public static void Wait<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
 
 	        WaitTasks.Add(state, waitFor, callback);
+	        
+        }
+
+        public static void WaitEndOfFrame<T>(T state, System.Action<T> callback) {
+	        
+	        WaitTasks.AddEndOfFrame(state, static s => true, callback);
+
+        }
+
+        public static void WaitEndOfFrame(System.Action callback) {
+	        
+	        WaitTasks.AddEndOfFrame(static () => true, callback);
+
+        }
+
+        public static void WaitEndOfFrame(System.Func<bool> waitFor, System.Action callback) {
+
+	        WaitTasks.AddEndOfFrame(waitFor, callback);
+	        
+        }
+
+        public static void WaitEndOfFrame<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+
+	        WaitTasks.AddEndOfFrame(state, waitFor, callback);
 	        
         }
 

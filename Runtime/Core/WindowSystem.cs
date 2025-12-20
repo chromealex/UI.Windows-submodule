@@ -252,14 +252,10 @@ namespace UnityEngine.UI.Windows {
             this.breadcrumbs.Initialize();
 
             foreach (var item in this.registeredPrefabs) {
-
                 var key = item.GetType();
                 if (this.hashToPrefabs.TryAdd(key, item) != true) {
-                    
                     Debug.LogWarning($"Window with hash `{key}` already exists in windows hash map!");
-                    
                 }
-
             }
 
         }
@@ -267,13 +263,9 @@ namespace UnityEngine.UI.Windows {
         public virtual void Start() {
 
             if (this.modules != null) {
-
                 for (int i = 0; i < this.modules.Count; ++i) {
-
                     this.modules[i]?.OnStart();
-
                 }
-
             }
 
             if (this.showRootOnStart == true) WindowSystem.ShowRoot();
@@ -283,13 +275,9 @@ namespace UnityEngine.UI.Windows {
         public void OnDestroy() {
             
             if (this.modules != null) {
-
                 for (int i = this.modules.Count - 1; i >= 0; --i) {
-
                     this.modules[i]?.OnDestroy();
-
                 }
-
             }
 
             WindowSystem._instance = null;
@@ -455,7 +443,6 @@ namespace UnityEngine.UI.Windows {
         public static int GetNextCanvasDepth(UIWSLayer layer) {
 
             var settings = WindowSystem.GetSettings();
-            var layerInfo = settings.GetLayerInfo(layer.value);
 
             if (WindowSystem.instance.topWindowsByLayer.TryGetValue(layer.value, out var instance) == true) {
 
@@ -862,69 +849,6 @@ namespace UnityEngine.UI.Windows {
                         
                     }
 
-                    /*
-                    WindowObjectAnimation.Hide(closure, inst.instance, inst.parameters, static (cParams) => {
-
-                        if (cParams.parameters.data.replaceAffectChilds == false ||
-                            cParams.parameters.data.affectChilds == true) {
-
-                            Coroutines.CallInSequence(ref cParams, static (ref ShowHideClosureParametersClass p) => {
-
-                                p.hierarchyComplete = true;
-
-                                if (p.animationComplete == true) {
-
-                                    var pars = p.parameters;
-                                    p.Dispose();
-                                    pars.RaiseCallback();
-
-                                }
-
-                            }, cParams.instance.subObjects, static (WindowObject obj, Coroutines.ClosureDelegateCallback<ShowHideClosureParametersClass> cb,
-                                                                    ref ShowHideClosureParametersClass p) => {
-
-                                var closure = PoolClass<ShowHideInstanceInternalClosure>.Spawn();
-                                closure.cb = cb;
-                                closure.data = p;
-
-                                var parameters = p.parameters.ReplaceCallback(closure, static (obj) => {
-                                    var d = (ShowHideInstanceInternalClosure)obj;
-                                    d.cb.Invoke(ref d.data);
-                                    PoolClass<ShowHideInstanceInternalClosure>.Recycle(d);
-                                });
-                                if (p.parameters.data.replaceDelay == true) {
-                                    parameters = parameters.ReplaceDelay(0f);
-                                }
-
-                                if (p.internalCall == true) {
-
-                                    obj.HideInternal(parameters);
-
-                                } else {
-
-                                    obj.Hide(parameters);
-
-                                }
-
-                            });
-
-                        } else {
-
-                            cParams.hierarchyComplete = true;
-
-                        }
-
-                        cParams.animationComplete = true;
-                        if (cParams.hierarchyComplete == true) {
-
-                            var pars = cParams.parameters;
-                            cParams.Dispose();
-                            pars.RaiseCallback();
-
-                        }
-
-                    });*/
-
                 }
 
             });
@@ -937,14 +861,6 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public class HideAllClosure {
-
-            public TransitionParameters parameters;
-            public int ptr;
-            public int filteredCount;
-
-        }
-        
         private static void HideAll_INTERNAL<TState>(TState state, System.Func<WindowBase, TState, bool> predicate, TransitionParameters parameters, System.Action<WindowBase, TState> onWindow = null) {
 
             var currentList = WindowSystem.instance.currentWindows;
@@ -1123,9 +1039,7 @@ namespace UnityEngine.UI.Windows {
         private WindowHandler<T> Show_INTERNAL<T, TState>(TState closure, WindowBase source, InitialParameters initialParameters, System.Action<T, TState> onInitialized, TransitionParameters transitionParameters) where T : WindowBase {
 
             if (source == null) {
-
                 throw new System.Exception("Window Source is null, did you forget to collect your screens?");
-
             }
 
             #if UNITY_WEBGL
@@ -1135,37 +1049,25 @@ namespace UnityEngine.UI.Windows {
             }
             #else
             if (source.preferences.forceSyncLoad == true && initialParameters.showSync == false) {
-
                 initialParameters.showSync = true;
-
             }
             #endif
             
             WindowBase instance;
             var singleInstance = source.preferences.singleInstance;
             if (initialParameters.overrideSingleInstance == true) {
-
                 singleInstance = initialParameters.singleInstance;
-
             }
 
             if (singleInstance == true) {
-
                 if (this.IsOpenedBySource_INTERNAL(source, out instance, maximumState: ObjectState.Shown) == true) {
-
                     if (onInitialized != null) {
-                        
                         onInitialized.Invoke((T)instance, closure);
-                        
                     } else {
-                        
                         instance.OnEmptyPass();
-                        
                     }
                     return WindowHandler<T>.Create((T)instance);
-
                 }
-
             }
 
             if (source.createPool == true) this.pools.CreatePool(source);
@@ -1185,15 +1087,12 @@ namespace UnityEngine.UI.Windows {
 
                     WindowEvent state = WindowEvent.None;
                     switch (instance.preferences.showInSequenceEvent) {
-
                         case SequenceEvent.OnHideBegin:
                             state = WindowEvent.OnHideBegin;
                             break;
-
                         case SequenceEvent.OnHideEnd:
                             state = WindowEvent.OnHideEnd;
                             break;
-
                     }
 
                     WindowSystem.RegisterActionOnce(new ShowInstanceClosure<T, TState>() {
@@ -1219,9 +1118,7 @@ namespace UnityEngine.UI.Windows {
             };
 
             if (instance.preferences.addInHistory == true) {
-                
                 this.breadcrumbs.Add(item);
-                
             }
             this.currentWindows.Add(item);
 
@@ -1232,29 +1129,19 @@ namespace UnityEngine.UI.Windows {
                 instance.Setup(instance);
                 this.TryAddTopWindow(instance.preferences.layer, instance);
                 if (this.windowsCountByLayer.TryGetValue(instance.preferences.layer.value, out var count) == true) {
-
                     this.windowsCountByLayer[instance.preferences.layer.value] = count + 1;
-
                 } else {
-
                     this.windowsCountByLayer.Add(instance.preferences.layer.value, 1);
-
                 }
 
             }
 
             if (initialParameters.showSync == true) {
-
                 if (onInitialized != null) {
-                    
                     onInitialized.Invoke((T)instance, closure);
-                    
                 } else {
-                    
                     instance.OnEmptyPass();
-                    
                 }
-
             }
 
             instance.LoadAsync(new ShowLoadAsyncClosure<T, TState>() {
@@ -1267,25 +1154,28 @@ namespace UnityEngine.UI.Windows {
             }, initialParameters, static (state) => {
             
                 if (state.initialParameters.showSync == false) {
-
                     if (state.onInitialized != null) {
-
                         state.onInitialized.Invoke((T)state.instance, state.closure);
-
                     } else {
-
                         state.instance.OnEmptyPass();
-
                     }
-
                 }
 
-                var tr = state.transitionParameters.ReplaceCallbackWithContext(static (obj, tr, i) => {
+                var closure = PoolClass<WindowObjectClosure>.Spawn();
+                closure.instance = state.instance;
+                closure.tr = state.transitionParameters;
+                var tr = state.transitionParameters.ReplaceCallback(closure, static (data) => {
 
-                    Coroutines.Run(WindowSystem.WaitForLayoutBuildComplete((WindowBase)obj));
-                    tr.RaiseCallback();
+                    var closure = (WindowObjectClosure)data;
+                    var obj = closure.instance;
+                    Coroutines.WaitEndOfFrame(obj, static (obj) => {
+                        obj.DoLayoutReady();
+                    });
+                    closure.tr.RaiseCallback();
+                    closure.Dispose();
+                    PoolClass<WindowObjectClosure>.Recycle(closure);
                     
-                }, state.instance, state.transitionParameters, true);
+                });
                 
                 state.instance.DoInit(new DoInitClosure() {
                     component = state.instance,
@@ -1296,13 +1186,6 @@ namespace UnityEngine.UI.Windows {
 
             return WindowHandler<T>.Create((T)instance);
 
-        }
-
-        private static System.Collections.IEnumerator WaitForLayoutBuildComplete(WindowBase instance) {
-            
-            yield return new WaitForEndOfFrame();
-            instance.DoLayoutReady();
-            
         }
 
     }

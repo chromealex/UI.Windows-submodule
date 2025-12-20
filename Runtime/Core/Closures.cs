@@ -3,6 +3,26 @@ namespace UnityEngine.UI.Windows {
     using Modules;
     using UnityEngine.UI.Windows.Utilities;
     
+    public class WindowObjectClosure {
+
+        public WindowObject instance;
+        public TransitionParameters tr;
+
+        public void Dispose() {
+            this.instance = null;
+            this.tr = default;
+        }
+            
+    }
+
+    public class HideAllClosure {
+
+        public TransitionParameters parameters;
+        public int ptr;
+        public int filteredCount;
+
+    }
+
     public class InitLoader<TState> {
 
         public bool loaded;

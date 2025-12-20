@@ -23,6 +23,7 @@ namespace UnityEngine.UI.Windows.Utilities {
         }
 
         private static readonly List<IUpdate> updates = new List<IUpdate>();
+        private static readonly List<IUpdate> endOfFrameUpdates = new List<IUpdate>();
         
         public static void Add<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
             if (waitFor.Invoke(state) == true) {
@@ -46,9 +47,37 @@ namespace UnityEngine.UI.Windows.Utilities {
             CacheType.instance.Add(waitFor, callback);
         }
 
+        public static void AddEndOfFrame<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+            if (waitFor.Invoke(state) == true) {
+                callback.Invoke(state);
+                return;
+            }
+            if (CacheType<TState>.instance == null) {
+                endOfFrameUpdates.Add(CacheType<TState>.instance = new WaitTasks<TState>());
+            }
+            CacheType<TState>.instance.Add(state, waitFor, callback);
+        }
+
+        public static void AddEndOfFrame(System.Func<bool> waitFor, System.Action callback) {
+            if (waitFor.Invoke() == true) {
+                callback.Invoke();
+                return;
+            }
+            if (CacheType.instance == null) {
+                endOfFrameUpdates.Add(CacheType.instance = new WaitTasksEmpty());
+            }
+            CacheType.instance.Add(waitFor, callback);
+        }
+
         public static void Update() {
             for (int i = updates.Count - 1; i >= 0; --i) {
                 updates[i].Update();
+            }
+        }
+
+        public static void EndOfFrameUpdate() {
+            for (int i = endOfFrameUpdates.Count - 1; i >= 0; --i) {
+                endOfFrameUpdates[i].Update();
             }
         }
 

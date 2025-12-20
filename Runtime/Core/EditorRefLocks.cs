@@ -13,22 +13,15 @@ namespace UnityEngine.UI.Windows.Editor {
 
         public Item[] items;
 
-        public ref Item GetItem(WindowObject obj) {
+        public Item GetItemOrNull(WindowObject obj) {
             var guid = UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(obj));
             for (var index = 0; index < this.items.Length; ++index) {
                 ref var item = ref this.items[index];
                 if (item.obj == guid) {
-                    return ref item;
+                    return item;
                 }
             }
-
-            if (this.items == null) this.items = System.Array.Empty<Item>();
-            System.Array.Resize(ref this.items, this.items.Length + 1);
-            this.items[this.items.Length - 1] = new Item() {
-                obj = guid,
-                directories = new System.Collections.Generic.List<string>(),
-            };
-            return ref this.items[this.items.Length - 1];
+            return default;
         }
 
         public bool GetItem(WindowObject obj, out int index) {

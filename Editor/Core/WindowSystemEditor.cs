@@ -800,11 +800,11 @@ namespace UnityEditor.UI.Windows {
 
         private const string EDITOR_REF_LOCKS_PATH = "Assets/EditorResources/UI.Windows/EditorRefLocks.asset";
         
-        public static ref List<string> GetRefLock(WindowObject obj) {
+        public static List<string> GetRefLock(WindowObject obj) {
 
             ValidateRefLock();
             var refLocks = AssetDatabase.LoadAssetAtPath<UnityEngine.UI.Windows.Editor.EditorRefLocks>(EDITOR_REF_LOCKS_PATH);
-            return ref refLocks.GetItem(obj).directories;
+            return refLocks.GetItemOrNull(obj).directories;
 
         }
 

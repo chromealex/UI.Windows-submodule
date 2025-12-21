@@ -329,11 +329,11 @@ namespace UnityEngine.UI.Windows.Components {
                 onComplete = onComplete,
                 component = this,
             };
-            Coroutines.Run(resources.LoadAsyncWait<T, AddItemClosure<T, TClosure>>(this, data, source, static (asset, innerClosure) => {
+            resources.LoadAsync<T, AddItemClosure<T, TClosure>>(this, data, source, static (asset, innerClosure) => {
 
                 ListBaseComponent.SetupLoadedAsset(asset, innerClosure);
                 
-            }));
+            });
 
         }
 
@@ -552,7 +552,7 @@ namespace UnityEngine.UI.Windows.Components {
             this.isLoadingRequest = true;
             
             var resources = WindowSystem.GetResources();
-            Coroutines.Run(resources.LoadAsyncWait<T, EmitClosure<T, TClosure>>(this, closureInner, source, static (asset, innerClosure) => {
+            resources.LoadAsync<T, EmitClosure<T, TClosure>>(this, closureInner, source, static (asset, innerClosure) => {
 
                 for (int i = 0; i < innerClosure.count; ++i) {
 
@@ -573,7 +573,7 @@ namespace UnityEngine.UI.Windows.Components {
                 if (innerClosure.onComplete != null) innerClosure.onComplete.Invoke(innerClosure.data, true);
                 innerClosure.list.isLoadingRequest = false;
                 
-            }));
+            });
 
         }
         

@@ -87,10 +87,13 @@ namespace UnityEngine.UI.Windows {
                     callback = callback,
                 };
                 
-                Coroutines.Run(WindowSystem.GetResources().Load_INTERNAL<T, AsyncClosure>(new UnityEngine.UI.Windows.Modules.WindowSystemResources.LoadParameters() { async = true }, handler, closure, this.data, static (asset, p) => {
+                var preloadResult = WindowSystem.GetResources().Load_INTERNAL<T, AsyncClosure>(new UnityEngine.UI.Windows.Modules.WindowSystemResources.LoadParameters() { async = true }, handler, closure, this.data, static (asset, p) => {
                     p.resource.loaded = asset;
                     p.callback.Invoke(p.resource.loaded);
-                }));
+                });
+                if (preloadResult.result == false) {
+                    Coroutines.Run(preloadResult.op);
+                }
             }
 
         }
@@ -386,8 +389,6 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        public bool showLogs;
-
         public struct CallbackList {
 
             private List<ObjBase> callbackRegistries;
@@ -447,37 +448,31 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        private readonly Dictionary<InternalTask, CallbackList> tasks = new Dictionary<InternalTask, CallbackList>();
-        private readonly Dictionary<int, HashSet<System.Action>> handlerToTasks = new Dictionary<int, HashSet<System.Action>>();
-        private readonly Dictionary<Resource, IntResource> loaded = new Dictionary<Resource, IntResource>(new ResourceComparer());
-        private readonly Dictionary<object, IntResource> loadedObjCache = new Dictionary<object, IntResource>();
-        private readonly List<object> internalDeleteAllCache = new List<object>();
-
-        public Dictionary<Resource, IntResource> GetAllObjects() {
-
-            return this.loaded;
-
-        }
-
-        public int GetAllocatedCount() {
-
-            return this.loaded.Count;
-
-        }
-
-        public Dictionary<InternalTask, CallbackList> GetTasks() {
-
-            return this.tasks;
-
-        }
-
         private struct RequestLoadItem<T, TClosure> {
 
             public TClosure data;
             public System.Action<T, TClosure> onComplete;
 
         }
-        
+
+        private readonly Dictionary<InternalTask, CallbackList> tasks = new Dictionary<InternalTask, CallbackList>();
+        private readonly Dictionary<int, HashSet<System.Action>> handlerToTasks = new Dictionary<int, HashSet<System.Action>>();
+        private readonly Dictionary<Resource, IntResource> loaded = new Dictionary<Resource, IntResource>(new ResourceComparer());
+        private readonly Dictionary<object, IntResource> loadedObjCache = new Dictionary<object, IntResource>();
+        private readonly List<object> internalDeleteAllCache = new List<object>();
+        public bool showLogs;
+
+        private ICustomLoader customLoader;
+        public void SetCustomLoader(ICustomLoader loader) {
+            this.customLoader = loader;
+        }
+
+        public Dictionary<Resource, IntResource> GetAllObjects() => this.loaded;
+
+        public int GetAllocatedCount() => this.loaded.Count;
+
+        public Dictionary<InternalTask, CallbackList> GetTasks() => this.tasks;
+
         private bool RequestLoad<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
             
             var item = new InternalTask(resource);
@@ -524,7 +519,10 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public void LoadAsync<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
 
-            Coroutines.Run(this.Load_INTERNAL(loadParameters, handler, closure, resource, onComplete));
+            var preloadResult = this.Load_INTERNAL(loadParameters, handler, closure, resource, onComplete);
+            if (preloadResult.result == false) {
+                Coroutines.Run(preloadResult.op);
+            }
             
         }
 
@@ -536,28 +534,33 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public void LoadAsync<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
             
-            Coroutines.Run(this.Load_INTERNAL(new LoadParameters() { async = true }, handler, closure, resource, onComplete));
+            var preloadResult = this.Load_INTERNAL(new LoadParameters() { async = true }, handler, closure, resource, onComplete);
+            if (preloadResult.result == false) {
+                Coroutines.Run(preloadResult.op);
+            }
             
         }
 
-        public IEnumerator LoadAsyncWait<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        public (bool result, IEnumerator op) LoadAsyncWait<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
             
-            yield return this.Load_INTERNAL(loadParameters, handler, closure, resource, onComplete);
+            return this.Load_INTERNAL(loadParameters, handler, closure, resource, onComplete);
             
         }
 
-        public IEnumerator LoadAsyncWait<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        public (bool result, IEnumerator op) LoadAsyncWait<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
             
-            yield return this.Load_INTERNAL(new LoadParameters() { async = true }, handler, closure, resource, onComplete);
+            return this.Load_INTERNAL(new LoadParameters() { async = true }, handler, closure, resource, onComplete);
             
         }
         
         #if UNITY_6000_0_OR_NEWER
         public async Awaitable<T> LoadAsync<T>(object handler, Resource resource) where T : class {
             var tcs = PoolClass<TaskCompletionSource<T>>.Spawn();
-            var op = this.Load_INTERNAL<T, TaskCompletionSource<T>>(new LoadParameters() { async = true }, handler, tcs, resource, static (asset, s) => s.SetResult(asset));
-            while (op.MoveNext() == true) {
-                await Awaitable.NextFrameAsync();
+            var preloadResult = this.Load_INTERNAL<T, TaskCompletionSource<T>>(new LoadParameters() { async = true }, handler, tcs, resource, static (asset, s) => s.SetResult(asset));
+            if (preloadResult.result == false) {
+                while (preloadResult.op.MoveNext() == true) {
+                    await Awaitable.NextFrameAsync();
+                }
             }
             var result = tcs.Task.Result;
             PoolClass<TaskCompletionSource<T>>.Recycle(tcs);
@@ -566,10 +569,13 @@ namespace UnityEngine.UI.Windows.Modules {
         #else
         public async Task<T> LoadAsync<T>(object handler, Resource resource) where T : class {
             var tcs = PoolClass<TaskCompletionSource<T>>.Spawn();
-            var op = this.Load_INTERNAL<T, TaskCompletionSource<T>>(new LoadParameters() { async = true }, handler, tcs, resource, static (asset, s) => s.SetResult(asset));
-            while (op.MoveNext() == true) {
-                await Task.Yield();
+            var preloadResult = this.Load_INTERNAL<T, TaskCompletionSource<T>>(new LoadParameters() { async = true }, handler, tcs, resource, static (asset, s) => s.SetResult(asset));
+            if (preloadResult.result == false) {
+                while (preloadResult.op.MoveNext() == true) {
+                    await Task.Yield();
+                }
             }
+
             var result = tcs.Task.Result;
             PoolClass<TaskCompletionSource<T>>.Recycle(tcs);
             return result;
@@ -579,10 +585,12 @@ namespace UnityEngine.UI.Windows.Modules {
         public T Load<T>(object handler, Resource resource) where T : class {
             
             var closure = PoolClass<ClosureResult<T>>.Spawn();
-            var op = this.Load_INTERNAL<T, ClosureResult<T>>(new LoadParameters() { async = false }, handler, closure, resource, static (asset, c) => {
+            var preloadResult = this.Load_INTERNAL<T, ClosureResult<T>>(new LoadParameters() { async = false }, handler, closure, resource, static (asset, c) => {
                 c.result = asset;
             });
-            while (op.MoveNext()) {}
+            if (preloadResult.result == false) {
+                while (preloadResult.op.MoveNext()) {}
+            }
             
             var result = closure.result;
             closure.result = null;
@@ -605,8 +613,8 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        internal IEnumerator Load_INTERNAL<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
-
+        internal (bool result, IEnumerator op) Load_INTERNAL<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+            
             if (typeof(Component).IsAssignableFrom(typeof(T)) == true) {
                 resource.objectType = Resource.ObjectType.Component;
             }
@@ -615,11 +623,11 @@ namespace UnityEngine.UI.Windows.Modules {
                 
                 if (this.RequestLoad(handler, closure, resource, onComplete) == true) {
                     // We have already subscribed - just quit
-                    yield break;
+                    return (true, null);
                 }
 
                 if (this.IsLoaded(handler, resource) == true) {
-                    yield break;
+                    return (true, null);
                 }
                 
             }
@@ -635,16 +643,30 @@ namespace UnityEngine.UI.Windows.Modules {
                     if (resource.directRef is GameObject go && resource.objectType == Resource.ObjectType.Component) {
                         var direct = go.GetComponent<T>();
                         onComplete.Invoke(direct, closure);
-                        yield break;
+                        return (true, null);
                     } else if (WindowSystem.IsStrictMode() == false && typeof(T).IsAssignableFrom(resource.directRef.GetType()) == true) {
                         onComplete.Invoke((T)(object)resource.directRef, closure);
-                        yield break;
+                        return (true, null);
                     } else if (WindowSystem.IsStrictMode() == true && resource.directRef is T obj) {
                         onComplete.Invoke(obj, closure);
-                        yield break;
+                        return (true, null);
                     }
                     break;
                 }
+                
+                default:
+                    var op = this.Load_INTERNAL_YIELD(loadParameters, handler, closure, resource, onComplete);
+                    return (false, op);
+
+            }
+
+            return (true, null);
+
+        }
+
+        internal IEnumerator Load_INTERNAL_YIELD<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+
+            switch (resource.type) {
 
                 case Resource.Type.Addressables: {
                     if (resource.objectType == Resource.ObjectType.Component) {
@@ -666,14 +688,9 @@ namespace UnityEngine.UI.Windows.Modules {
                     yield return this.LoadCustomLoader_INTERNAL<T>(loadParameters, handler, resource);
                     break;
                 }
-
+                
             }
 
-        }
-        
-        private ICustomLoader customLoader;
-        public void SetCustomLoader(ICustomLoader loader) {
-            this.customLoader = loader;
         }
 
         private IEnumerator LoadCustomLoader_INTERNAL<TResource>(LoadParameters loadParameters, object handler, Resource resource) {

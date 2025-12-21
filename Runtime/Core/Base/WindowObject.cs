@@ -509,7 +509,7 @@ namespace UnityEngine.UI.Windows {
         public void ValidateEditor(bool updateParentObjects, bool updateChildObjects = false) {
             
             var helper = new DirtyHelper(this);
-            this.ValidateEditor(helper, updateParentObjects: false, updateChildObjects: false);
+            this.ValidateEditor(helper, updateParentObjects, updateChildObjects);
             helper.Apply();
             
         }

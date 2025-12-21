@@ -55,7 +55,7 @@ namespace UnityEditor.UI.Windows {
 
                                 var internalTask = task.Key;
                                 GUILayoutExt.DrawHeader($"Resource Id: {internalTask.resourceId}");
-                                EditorGUILayout.LabelField($"Pending count: {task.Value?.GetInvocationList().Length}");
+                                EditorGUILayout.LabelField($"Pending count: {task.Value.Count}");
                                 EditorGUILayout.SelectableLabel(internalTask.resourceSource.ToString());
                                 
                             }

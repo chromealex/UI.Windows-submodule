@@ -14,7 +14,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
             Coroutines.instance = this;
             
-            var loop = UnityEngine.LowLevel.PlayerLoop.GetDefaultPlayerLoop();
+            var loop = UnityEngine.LowLevel.PlayerLoop.GetCurrentPlayerLoop();
             // Create a custom update system to replace an existing one
             var endOfFrameUpdate = new UnityEngine.LowLevel.PlayerLoopSystem() {
 	            updateDelegate = this.EndOfFrameUpdate,

@@ -568,6 +568,23 @@ namespace UnityEngine.UI.Windows.Components {
 
         #endif
 
+        public virtual void SetText(char[] charArray) {
+            
+            if (this.graphics is UnityEngine.UI.Text textGraphic) {
+
+                textGraphic.text = new string(charArray);
+
+            }
+            #if TEXTMESHPRO_SUPPORT
+            else if (this.graphics is TMPro.TMP_Text textGraphicTmp) {
+
+                textGraphicTmp.SetCharArray(charArray);
+
+            }
+            #endif
+            
+        }
+
         public virtual void SetText(string text) {
 
             if (this.lastData.s0 == text) {

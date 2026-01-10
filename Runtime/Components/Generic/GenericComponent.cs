@@ -7,7 +7,7 @@
         public WindowComponent[] components;
         private readonly Dictionary<System.Type, int> requestedIndexes = new Dictionary<System.Type, int>();
 
-        public struct ClosureAPI<TClosure> {
+        new public struct ClosureAPI<TClosure> {
 
             internal GenericComponent genericComponent;
             internal TClosure data;
@@ -29,7 +29,7 @@
 
         }
 
-        public ClosureAPI<TClosure> Closure<TClosure>(TClosure data) {
+        new public ClosureAPI<TClosure> Closure<TClosure>(TClosure data) {
             return new ClosureAPI<TClosure>() {
                 genericComponent = this,
                 data = data,

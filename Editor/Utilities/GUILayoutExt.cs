@@ -726,7 +726,7 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        public static void PropertyField(SerializedProperty property, System.Func<UnityEngine.UI.Windows.WindowObject.EditorParametersRegistry, bool> regCheck = null) {
+        public static void PropertyField(SerializedProperty property, System.Func<UnityEngine.UI.Windows.EditorParametersRegistry, bool> regCheck = null) {
 
 	        var hasAnyReg = false;
 	        var description = string.Empty;
@@ -741,9 +741,10 @@ namespace UnityEditor.UI.Windows {
 
 			        if (target is UnityEngine.UI.Windows.WindowObject windowObject) {
 
-				        if (windowObject.registry != null) {
+				        var registry = UnityEngine.UI.Windows.Editor.WindowObjectRegistry.GetRegistry(windowObject);
+				        if (registry != null) {
 
-					        foreach (var reg in windowObject.registry) {
+					        foreach (var reg in registry) {
 
 						        if (reg.GetHolder() == null) continue;
 						        if (regCheck.Invoke(reg) == false) continue;

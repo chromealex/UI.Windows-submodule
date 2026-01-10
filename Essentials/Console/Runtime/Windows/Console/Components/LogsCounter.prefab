@@ -54,7 +54,6 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 2128896337007598665}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers:
@@ -62,17 +61,17 @@ MonoBehaviour:
     graphics: {fileID: 6314189137780160040}
     rectMask: {fileID: 0}
   hideBehaviour: 0
-  createPool: 0
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 1
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 0
   rootObject: {fileID: 7804158160238293149}
   prefabSource: {fileID: 0}
@@ -81,11 +80,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry:
-  - holder: {fileID: 7804158160238293149}
-    moduleHolder: {fileID: 0}
-    holdHiddenByDefault: 1
-    holdAllowRegisterInRoot: 0
   componentModules:
     windowComponent: {fileID: 4197786770380717785}
     modules: []
@@ -201,7 +195,6 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 8841690891984972678}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers:
@@ -209,17 +202,17 @@ MonoBehaviour:
     graphics: {fileID: 1848503922998661631}
     rectMask: {fileID: 0}
   hideBehaviour: 0
-  createPool: 0
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 1
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 0
   rootObject: {fileID: 7466443270484645655}
   prefabSource: {fileID: 0}
@@ -228,11 +221,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry:
-  - holder: {fileID: 7466443270484645655}
-    moduleHolder: {fileID: 0}
-    holdHiddenByDefault: 1
-    holdAllowRegisterInRoot: 0
   componentModules:
     windowComponent: {fileID: 6833781871846278415}
     modules: []
@@ -350,7 +338,6 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 370067804142031923}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers:
@@ -364,17 +351,17 @@ MonoBehaviour:
     graphics: {fileID: 5927208229175502218}
     rectMask: {fileID: 0}
   hideBehaviour: 0
-  createPool: 0
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 0
   rootObject: {fileID: 3971340159860270996}
   prefabSource: {fileID: 0}
@@ -383,7 +370,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry: []
   componentModules:
     windowComponent: {fileID: 831554429323187497}
     modules: []
@@ -507,22 +493,21 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 4072449349731362688}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
   hideBehaviour: 0
-  createPool: 0
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 1
   rootObject: {fileID: 0}
   prefabSource: {fileID: 0}
@@ -534,7 +519,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry: []
   componentModules:
     windowComponent: {fileID: 5124798591967899215}
     modules: []
@@ -971,7 +955,6 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 7510286717129027931}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers:
@@ -979,17 +962,17 @@ MonoBehaviour:
     graphics: {fileID: 9095722440103318886}
     rectMask: {fileID: 0}
   hideBehaviour: 0
-  createPool: 0
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 1
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 0
   rootObject: {fileID: 7804158160238293149}
   prefabSource: {fileID: 0}
@@ -998,11 +981,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry:
-  - holder: {fileID: 7804158160238293149}
-    moduleHolder: {fileID: 0}
-    holdHiddenByDefault: 1
-    holdAllowRegisterInRoot: 0
   componentModules:
     windowComponent: {fileID: 6345068461756449684}
     modules: []
@@ -1214,7 +1192,6 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 5945798244817622022}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers:
@@ -1222,17 +1199,17 @@ MonoBehaviour:
     graphics: {fileID: 882476441730932037}
     rectMask: {fileID: 0}
   hideBehaviour: 0
-  createPool: 0
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 1
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 0
   rootObject: {fileID: 7466443270484645655}
   prefabSource: {fileID: 0}
@@ -1241,11 +1218,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry:
-  - holder: {fileID: 7466443270484645655}
-    moduleHolder: {fileID: 0}
-    holdHiddenByDefault: 1
-    holdAllowRegisterInRoot: 0
   componentModules:
     windowComponent: {fileID: 4031078733982494185}
     modules: []
@@ -1363,7 +1335,6 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 3295080239299309594}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers:
@@ -1377,17 +1348,17 @@ MonoBehaviour:
     graphics: {fileID: 3946599848712371387}
     rectMask: {fileID: 0}
   hideBehaviour: 0
-  createPool: 0
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 0
   rootObject: {fileID: 7804158160238293149}
   prefabSource: {fileID: 0}
@@ -1396,7 +1367,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry: []
   componentModules:
     windowComponent: {fileID: 2530473048899682478}
     modules: []
@@ -1521,22 +1491,21 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 4727120795715246228}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
   hideBehaviour: 0
-  createPool: 0
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 0
   rootObject: {fileID: 5124798591967899215}
   prefabSource: {fileID: 0}
@@ -1548,7 +1517,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry: []
   componentModules:
     windowComponent: {fileID: 3971340159860270996}
     modules: []
@@ -1685,7 +1653,6 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 2405045969076973068}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers:
@@ -1699,17 +1666,17 @@ MonoBehaviour:
     graphics: {fileID: 8478983632266749481}
     rectMask: {fileID: 0}
   hideBehaviour: 0
-  createPool: 0
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 0
   rootObject: {fileID: 7466443270484645655}
   prefabSource: {fileID: 0}
@@ -1718,7 +1685,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry: []
   componentModules:
     windowComponent: {fileID: 5943618713721513522}
     modules: []
@@ -1843,22 +1809,21 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 5492694295995556602}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
   hideBehaviour: 0
-  createPool: 0
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 0
   rootObject: {fileID: 5124798591967899215}
   prefabSource: {fileID: 0}
@@ -1870,7 +1835,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry: []
   componentModules:
     windowComponent: {fileID: 7804158160238293149}
     modules: []
@@ -2086,22 +2050,21 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 3754852264144203633}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
   hideBehaviour: 0
-  createPool: 0
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 0
   rootObject: {fileID: 5124798591967899215}
   prefabSource: {fileID: 0}
@@ -2113,7 +2076,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry: []
   componentModules:
     windowComponent: {fileID: 7466443270484645655}
     modules: []
@@ -2248,7 +2210,6 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 88139223208046502}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers:
@@ -2256,17 +2217,17 @@ MonoBehaviour:
     graphics: {fileID: 4640888817173578484}
     rectMask: {fileID: 0}
   hideBehaviour: 0
-  createPool: 0
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 1
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 0
   rootObject: {fileID: 3971340159860270996}
   prefabSource: {fileID: 0}
@@ -2275,11 +2236,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry:
-  - holder: {fileID: 3971340159860270996}
-    moduleHolder: {fileID: 0}
-    holdHiddenByDefault: 1
-    holdAllowRegisterInRoot: 0
   componentModules:
     windowComponent: {fileID: 6082993202206570708}
     modules: []
@@ -2395,7 +2351,6 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 198287987895350801}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers:
@@ -2403,17 +2358,17 @@ MonoBehaviour:
     graphics: {fileID: 2941801337068209366}
     rectMask: {fileID: 0}
   hideBehaviour: 0
-  createPool: 0
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 1
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 0
   rootObject: {fileID: 3971340159860270996}
   prefabSource: {fileID: 0}
@@ -2422,11 +2377,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry:
-  - holder: {fileID: 3971340159860270996}
-    moduleHolder: {fileID: 0}
-    holdHiddenByDefault: 1
-    holdAllowRegisterInRoot: 0
   componentModules:
     windowComponent: {fileID: 2796891722474037899}
     modules: []

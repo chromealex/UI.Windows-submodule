@@ -52,22 +52,21 @@ MonoBehaviour:
   windowId: -280176936
   window: {fileID: 0}
   rectTransform: {fileID: 1960064754754543746}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
   hideBehaviour: 0
-  createPool: 1
+  hideBehaviourOneByOneDelay: 0
+  showBehaviour: 0
+  showBehaviourOneByOneDelay: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 1
   isObjectRoot: 1
   rootObject: {fileID: 0}
   prefabSource: {fileID: 0}
@@ -76,7 +75,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry: []
   preferences:
     layer:
       value: 10

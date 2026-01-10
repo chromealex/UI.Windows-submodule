@@ -56,7 +56,6 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 1817090086723872307}
-  hasObjectCanvas: 1
   objectCanvas: {fileID: 3002262861325224963}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
@@ -64,17 +63,14 @@ MonoBehaviour:
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  createPool: 1
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 1
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 1
   isObjectRoot: 1
   rootObject: {fileID: 0}
   prefabSource: {fileID: 0}
@@ -84,7 +80,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry: []
   canvas: {fileID: 3002262861325224963}
   canvasScaler: {fileID: 4562398388743874407}
   isRootLayout: 1
@@ -102,7 +97,7 @@ Canvas:
   m_GameObject: {fileID: 2835211755995118023}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -222,7 +217,6 @@ MonoBehaviour:
   windowId: 0
   window: {fileID: 0}
   rectTransform: {fileID: 84540096282021974}
-  hasObjectCanvas: 0
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers:
@@ -233,17 +227,14 @@ MonoBehaviour:
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  createPool: 0
   animationParameters:
     items: []
   renderBehaviourOnHidden: 0
+  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
-  editorRefLocks:
-    directories: []
-  debugStateLog:
-    items: []
+  createPool: 0
   isObjectRoot: 0
   rootObject: {fileID: 9075030843538608721}
   prefabSource: {fileID: 0}
@@ -252,7 +243,6 @@ MonoBehaviour:
     play: 0
     stop: 0
     clip: {fileID: 0}
-  registry: []
   componentModules:
     windowComponent: {fileID: 5470113545036599192}
     modules: []

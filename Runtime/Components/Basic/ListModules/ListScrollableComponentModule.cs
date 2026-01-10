@@ -23,10 +23,10 @@
 
                 this.fadeBottom.hiddenByDefault = true;
                 this.fadeBottom.allowRegisterInRoot = false;
-                this.fadeBottom.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                this.fadeBottom.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
                     holdHiddenByDefault = true,
                 });
-                this.fadeBottom.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                this.fadeBottom.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
                     holdAllowRegisterInRoot = true,
                 });
 
@@ -36,10 +36,10 @@
                 
                 this.fadeTop.hiddenByDefault = true;
                 this.fadeTop.allowRegisterInRoot = false;
-                this.fadeTop.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                this.fadeTop.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
                     holdHiddenByDefault = true,
                 });
-                this.fadeTop.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                this.fadeTop.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
                     holdAllowRegisterInRoot = true,
                 });
                 
@@ -49,10 +49,10 @@
                 
                 this.fadeRight.hiddenByDefault = true;
                 this.fadeRight.allowRegisterInRoot = false;
-                this.fadeRight.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                this.fadeRight.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
                     holdHiddenByDefault = true,
                 });
-                this.fadeRight.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                this.fadeRight.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
                     holdAllowRegisterInRoot = true,
                 });
                 
@@ -62,10 +62,10 @@
                 
                 this.fadeLeft.hiddenByDefault = true;
                 this.fadeLeft.allowRegisterInRoot = false;
-                this.fadeLeft.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                this.fadeLeft.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
                     holdHiddenByDefault = true,
                 });
-                this.fadeLeft.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                this.fadeLeft.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
                     holdAllowRegisterInRoot = true,
                 });
                 

@@ -177,8 +177,6 @@ namespace UnityEngine.UI.Windows {
         private bool isActiveSelf;
         private ObjectState objectState;
         
-        public List<EditorParametersRegistry> registry = null;
-
         public bool IsReadyToHide() => this.readyToHide;
 
         public void SetReadyToHide(bool state) => this.readyToHide = state;
@@ -192,102 +190,16 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        [System.Serializable]
-        public struct EditorParametersRegistry : System.IEquatable<EditorParametersRegistry> {
-
-            [SerializeField]
-            private WindowObject holder;
-            [SerializeField]
-            private WindowComponentModule moduleHolder;
-            
-            public bool holdHiddenByDefault;
-            public bool holdAllowRegisterInRoot;
-
-            public IHolder GetHolder() {
-
-                if (this.holder == null) return this.moduleHolder;
-                return this.holder;
-                
-            }
-
-            public string GetHolderName() {
-                if (this.moduleHolder != null) return this.moduleHolder.name;
-                return this.holder.name;
-            }
-
-            public EditorParametersRegistry(WindowObject holder) {
-
-                this.holder = holder;
-                this.moduleHolder = null;
-                
-                this.holdHiddenByDefault = default;
-                this.holdAllowRegisterInRoot = default;
-
-            }
-
-            public EditorParametersRegistry(WindowComponentModule holder) {
-
-                this.holder = holder.windowComponent;
-                this.moduleHolder = holder;
-                
-                this.holdHiddenByDefault = default;
-                this.holdAllowRegisterInRoot = default;
-
-            }
-
-            public bool IsEquals(EditorParametersRegistry other) {
-
-                return this.holder == other.holder &&
-                       this.holdHiddenByDefault == other.holdHiddenByDefault &&
-                       this.holdAllowRegisterInRoot == other.holdAllowRegisterInRoot;
-
-            }
-
-            public bool Equals(EditorParametersRegistry other) {
-                return Equals(this.holder, other.holder) && Equals(this.moduleHolder, other.moduleHolder) && this.holdHiddenByDefault == other.holdHiddenByDefault && this.holdAllowRegisterInRoot == other.holdAllowRegisterInRoot;
-            }
-
-            public override bool Equals(object obj) {
-                return obj is EditorParametersRegistry other && Equals(other);
-            }
-
-            public override int GetHashCode() {
-                unchecked {
-                    var hashCode = (this.holder != null ? this.holder.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (this.moduleHolder != null ? this.moduleHolder.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ this.holdHiddenByDefault.GetHashCode();
-                    hashCode = (hashCode * 397) ^ this.holdAllowRegisterInRoot.GetHashCode();
-                    return hashCode;
-                }
-            }
-
-        }
-        
         public void AddEditorParametersRegistry(EditorParametersRegistry param) {
-
-            if (this.registry == null) this.registry = new List<EditorParametersRegistry>();
-
-            var found = false;
-            foreach (var item in this.registry) {
-                if (item.IsEquals(param) == true) {
-                    found = true;
-                    break;
-                }
-            }
-            if (found == false) {
-
-                this.registry.Add(param);
-
-            }
-
+            UnityEngine.UI.Windows.Editor.WindowObjectRegistry.Add(this, param);
         }
 
         private void ValidateRegistry(DirtyHelper dirtyHelper) {
-            
-            if (this.registry != null && this.registry.Count > 0) {
+            ref var registry = ref UnityEngine.UI.Windows.Editor.WindowObjectRegistry.GetRegistry(this);
+            if (registry != null && registry.Count > 0) {
 
                 var holders = new List<IHolder>();
-                foreach (var reg in this.registry) {
+                foreach (var reg in registry) {
 
                     if (reg.GetHolder() != null) {
                         
@@ -297,17 +209,17 @@ namespace UnityEngine.UI.Windows {
                     
                 }
                 
-                var prevRegistry = this.registry.ToList();
-                this.registry.Clear();
+                var prevRegistry = registry.ToList();
+                registry.Clear();
                 foreach (var holder in holders) {
                     
                     if ((MonoBehaviour)holder != this) holder.ValidateEditor();
                     
                 }
 
-                var newRegistry = this.registry;
-                this.registry = prevRegistry;
-                dirtyHelper.Set(ref this.registry, newRegistry);
+                var newRegistry = registry;
+                registry = prevRegistry;
+                dirtyHelper.Set(ref registry, newRegistry);
 
             }
             
@@ -493,6 +405,8 @@ namespace UnityEngine.UI.Windows {
         }
 
         [ContextMenu("Validate")]
+        public void CallValidate() => this.ValidateEditor();
+        
         public virtual void ValidateEditor() {
 
             #if UNITY_EDITOR

@@ -29,7 +29,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial.ComponentModules {
             if (this.highlight != null) {
 
                 this.highlight.hiddenByDefault = true;
-                this.highlight.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                this.highlight.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
                     holdHiddenByDefault = true,
                 });
 

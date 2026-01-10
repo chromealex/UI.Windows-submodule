@@ -12,7 +12,7 @@
             if (this.content != null) {
 
                 this.content.hiddenByDefault = true;
-                this.content.AddEditorParametersRegistry(new WindowObject.EditorParametersRegistry(this) {
+                this.content.AddEditorParametersRegistry(new EditorParametersRegistry(this) {
                     holdHiddenByDefault = true,
                 });
 

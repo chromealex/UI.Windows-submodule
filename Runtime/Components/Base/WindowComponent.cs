@@ -6,8 +6,6 @@
         [System.Serializable]
         public struct ComponentModules {
 
-            public WindowComponent windowComponent;
-            
             [UnityEngine.UI.Windows.Utilities.SearchComponentsByTypePopup(typeof(WindowComponentModule), "Window Component Module", allowClassOverrides: true, singleOnly: false)]
             public WindowComponentModule[] modules;
 
@@ -42,7 +40,7 @@
 
             }
             
-            public void ValidateEditor() {
+            public void ValidateEditor(WindowComponent windowComponent) {
 
                 if (this.modules == null) return;
                 
@@ -50,7 +48,7 @@
 
                     if (this.modules[i] != null) {
 
-                        this.modules[i].windowComponent = this.windowComponent;
+                        this.modules[i].windowComponent = windowComponent;
                         this.modules[i].ValidateEditor();
 
                     }
@@ -204,7 +202,7 @@
             
             base.ValidateEditor();
 
-            this.componentModules.ValidateEditor();
+            this.componentModules.ValidateEditor(this);
 
         }
 

@@ -456,7 +456,34 @@ namespace UnityEditor.UI.Windows {
             }
             
         }
-        
+
+        public static void SetLastSibling<T>(Object[] objects, int siblingIndexTarget = 0) where T : Component {
+
+            foreach (var obj in objects) {
+
+                var comp = obj as Component;
+                var comps = comp.GetComponents<T>();
+                var countPrev = 0;
+                foreach (var c in comps) {
+
+                    if (c == obj) break;
+                    ++countPrev;
+
+                }
+
+                --countPrev;
+                var target = countPrev - siblingIndexTarget;
+                
+                for (int i = 0; i < target; ++i) {
+
+                    UnityEditorInternal.ComponentUtility.MoveComponentDown(comp);
+
+                }
+
+            }
+            
+        }
+
         public static Rect FitRect(Rect rect, Rect root) {
 
             if (rect.width > rect.height) {

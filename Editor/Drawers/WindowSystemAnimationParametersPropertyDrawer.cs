@@ -7,7 +7,7 @@ namespace UnityEditor.UI.Windows {
 
     using UnityEngine.UI.Windows;
 
-    [CustomPropertyDrawer(typeof(UnityEngine.UI.Windows.Utilities.AnimationParametersAttribute))]
+    [CustomPropertyDrawer(typeof(WindowObject.AnimationParametersContainer))]
     public class WindowSystemAnimationParametersPropertyDrawer : PropertyDrawer {
 
         private Dictionary<string, UnityEditorInternal.ReorderableList> dicList = new Dictionary<string, UnityEditorInternal.ReorderableList>();

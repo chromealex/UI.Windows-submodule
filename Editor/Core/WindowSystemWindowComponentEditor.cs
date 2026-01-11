@@ -95,12 +95,6 @@ namespace UnityEditor.UI.Windows {
                 
                 var componentsProp = this.componentModules.FindPropertyRelative("modules");
                 
-                if (this.componentModules.FindPropertyRelative("windowComponent").objectReferenceValue != this.componentModules.serializedObject.targetObject) {
-                    this.serializedObject.Update();
-                    this.componentModules.FindPropertyRelative("windowComponent").objectReferenceValue = this.componentModules.serializedObject.targetObject;
-                    this.serializedObject.ApplyModifiedProperties();
-                }
-                
                 this.listModules = new UnityEditorInternal.ReorderableList(componentsProp.serializedObject, componentsProp, true, true, true, true);
                 this.listModules.elementHeight = 40f;
                 this.listModules.onAddCallback = (rList) => {

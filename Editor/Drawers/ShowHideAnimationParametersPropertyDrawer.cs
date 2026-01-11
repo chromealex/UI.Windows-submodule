@@ -285,7 +285,7 @@ namespace UnityEditor.UI.Windows {
         }
         
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
-            
+
             var duration = property.FindPropertyRelative(nameof(AnimationParameters.ShowHideParameters.duration));
             var delay = property.FindPropertyRelative(nameof(AnimationParameters.ShowHideParameters.delay));
             var ease = property.FindPropertyRelative(nameof(AnimationParameters.ShowHideParameters.ease));

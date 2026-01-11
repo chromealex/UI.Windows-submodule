@@ -129,12 +129,15 @@ namespace UnityEngine.UI.Windows {
         internal int windowId;
         [SerializeField]
         internal WindowBase window;
-
         public RectTransform rectTransform;
 
+        public bool hasObjectCanvas => this.objectCanvas != null;
         public Canvas objectCanvas;
         public int canvasSortingOrderDelta;
+        
         public RenderItem[] canvasRenderers = System.Array.Empty<RenderItem>();
+
+        public AnimationParametersContainer animationParameters;
 
         [Tooltip("Simultaneously means that current animation will be played together with the childs.\nWaitForChild means that child animations played first, then played current one.\nOneByOne means that children animation will be played one-by-one.")]
         public HideBehaviour hideBehaviour;
@@ -145,13 +148,8 @@ namespace UnityEngine.UI.Windows {
         [Tooltip("Show behaviour custom delay. If 0 - default animation will be used.")]
         public float showBehaviourOneByOneDelay;
         
-        [AnimationParameters]
-        public AnimationParametersContainer animationParameters;
-        
         [Tooltip("Render behaviour when hidden state set or if hiddenByDefault is true.")]
         public RenderBehaviourSettings renderBehaviourOnHidden = RenderBehaviourSettings.UseSettings;
-        
-        public bool hasObjectCanvas;
         
         [Tooltip("Allow root to register this object in subObjects array.")]
         public bool allowRegisterInRoot = true;
@@ -436,7 +434,6 @@ namespace UnityEngine.UI.Windows {
             var up = (this.transform.parent != null ? this.transform.parent.GetComponentsInParent<WindowObject>(true) : null);
             dirtyHelper.Set(ref this.isObjectRoot, up == null || up.Length == 0);
             dirtyHelper.SetObj(ref this.objectCanvas, this.GetComponent<Canvas>());
-            dirtyHelper.Set(ref this.hasObjectCanvas, (this.objectCanvas != null));
 
             { // Collect render items
 

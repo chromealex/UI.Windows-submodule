@@ -14,7 +14,6 @@
 
             [Space(2f)]
             public int stateId;
-            [UnityEngine.UI.Windows.Utilities.AnimationParameters]
             public WindowObject.AnimationParametersContainer parameters;
             public UnityEngine.UI.Windows.Modules.WindowObjectAnimation.TweenerCustomParameters tweenerParameters;
 

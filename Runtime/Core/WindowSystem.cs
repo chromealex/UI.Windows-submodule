@@ -1144,10 +1144,9 @@ namespace UnityEngine.UI.Windows {
                 }
             }
 
-            instance.LoadAsync(new ShowLoadAsyncClosure<T, TState>() {
+            instance.LoadAsync(new ShowLoadAsyncClosure<TState>() {
                 instance = instance,
                 onInitialized = onInitialized,
-                state = (T)instance,
                 closure = closure,
                 transitionParameters = transitionParameters,
                 initialParameters = initialParameters,
@@ -1155,7 +1154,7 @@ namespace UnityEngine.UI.Windows {
             
                 if (state.initialParameters.showSync == false) {
                     if (state.onInitialized != null) {
-                        state.onInitialized.Invoke((T)state.instance, state.closure);
+                        ((System.Action<T, TState>)state.onInitialized).Invoke((T)state.instance, state.closure);
                     } else {
                         state.instance.OnEmptyPass();
                     }

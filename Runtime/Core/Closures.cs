@@ -136,13 +136,10 @@ namespace UnityEngine.UI.Windows {
 
     }
 
-    public struct ShowLoadAsyncClosure<TState, TStateClosure> {
+    public struct ShowLoadAsyncClosure<TStateClosure> {
 
-        public UnityEngine.UI.Windows.WindowTypes.LayoutWindowType component;
-        public System.Action<TState> onComplete;
-        public TState state;
         public TStateClosure closure;
-        public System.Action<TState, TStateClosure> onInitialized;
+        public object onInitialized;
         public InitialParameters initialParameters;
         public WindowBase instance;
         public TransitionParameters transitionParameters;
@@ -239,6 +236,15 @@ namespace UnityEngine.UI.Windows {
         public InitialParameters initialParameters;
         public TState state;
             
+    }
+
+    public struct LoadAsyncClosure<T> {
+
+        public UnityEngine.UI.Windows.WindowTypes.LayoutWindowType component;
+        public System.Action<T> onComplete;
+        public InitialParameters initialParameters;
+        public T state;
+
     }
 
 }

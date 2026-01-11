@@ -224,14 +224,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 2884325997705751108}
     graphics: {fileID: 1626494841347365779}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -246,12 +245,11 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 5590231133715331329}
     modules:
     - {fileID: 3200967013095831660}
   source:
     type: 1
-    objectType: 2
+    objectType: 0
     address: 
     guid: 
     subObjectName: 
@@ -537,14 +535,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 6829510560483908229}
     graphics: {fileID: 3783671350493353326}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 0
   autoRegisterSubObjects: 1
   hiddenByDefault: 1
@@ -560,7 +557,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 8199301820935925453}
     modules: []
   components:
   - {fileID: 8576729277486409703}
@@ -730,14 +726,13 @@ MonoBehaviour:
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -751,11 +746,10 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 7484497161558636500}
     modules: []
   source:
     type: 1
-    objectType: 2
+    objectType: 0
     address: 
     guid: 
     subObjectName: 
@@ -837,14 +831,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 9176201299077987064}
     graphics: {fileID: 1565843327551206096}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 0
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -858,7 +851,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 1192130305656968135}
     modules: []
   graphics: {fileID: 1565843327551206096}
   preserveAspect: 0
@@ -1036,14 +1028,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 3016808032470598225}
     graphics: {fileID: 4070916238433496631}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -1057,7 +1048,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 8576729277486409703}
     modules: []
   graphics: {fileID: 4070916238433496631}
 --- !u!222 &3016808032470598225
@@ -1247,14 +1237,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 8255237959279564958}
     graphics: {fileID: 1384774512373395475}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 1
@@ -1268,7 +1257,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 3698054247781445246}
     modules: []
   components: []
   button: {fileID: 2971869650739828598}

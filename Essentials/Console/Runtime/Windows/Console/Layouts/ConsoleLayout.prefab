@@ -59,14 +59,13 @@ MonoBehaviour:
   objectCanvas: {fileID: 3002262861325224963}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 1
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -223,14 +222,13 @@ MonoBehaviour:
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -244,7 +242,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 3255332376146199288}
     modules: []
   tagId: 5
   innerLayout: {fileID: 0}
@@ -325,14 +322,13 @@ MonoBehaviour:
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -346,7 +342,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 4118133958301854147}
     modules: []
   tagId: 8
   innerLayout: {fileID: 0}
@@ -461,14 +456,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 6814757248635304782}
     graphics: {fileID: 4709774183522539103}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -482,7 +476,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 1542688171465374743}
     modules: []
   tagId: 3
   innerLayout: {fileID: 0}
@@ -614,14 +607,13 @@ MonoBehaviour:
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -635,7 +627,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 1900920675354936357}
     modules: []
   tagId: 7
   innerLayout: {fileID: 0}
@@ -730,14 +721,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 655753805049513386}
     graphics: {fileID: 4474234672382369725}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -754,7 +744,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 5470113545036599192}
     modules: []
   tagId: 1
   innerLayout: {fileID: 0}
@@ -893,14 +882,13 @@ MonoBehaviour:
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -916,7 +904,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 52396318872534020}
     modules: []
   tagId: 6
   innerLayout: {fileID: 0}

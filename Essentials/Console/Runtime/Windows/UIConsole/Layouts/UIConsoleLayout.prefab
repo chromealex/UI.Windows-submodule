@@ -59,14 +59,13 @@ MonoBehaviour:
   objectCanvas: {fileID: 3002262861325224963}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 1
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -223,14 +222,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 8981599760317165295}
     graphics: {fileID: 2691108726531136768}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -244,7 +242,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 5470113545036599192}
     modules: []
   tagId: 1
   innerLayout: {fileID: 0}

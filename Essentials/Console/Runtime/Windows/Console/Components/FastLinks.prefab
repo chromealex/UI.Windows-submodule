@@ -139,14 +139,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 187328808415091051}
     graphics: {fileID: 1510928645366896860}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -160,7 +159,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 4876203065588919837}
     modules: []
 --- !u!222 &187328808415091051
 CanvasRenderer:
@@ -281,14 +279,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 8598621504161075244}
     graphics: {fileID: 1811432932708070664}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -302,7 +299,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 3702011091554380859}
     modules: []
   graphics: {fileID: 1811432932708070664}
   preserveAspect: 0
@@ -439,14 +435,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 5134317747072014846}
     graphics: {fileID: 3507672037771594362}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -460,7 +455,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 8556863168935618024}
     modules: []
   graphics: {fileID: 3507672037771594362}
 --- !u!222 &5134317747072014846
@@ -597,14 +591,13 @@ MonoBehaviour:
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -619,11 +612,10 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 1068094537600266531}
     modules: []
   source:
     type: 1
-    objectType: 2
+    objectType: 0
     address: 
     guid: 
     subObjectName: 
@@ -725,14 +717,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 8628079719964482520}
     graphics: {fileID: 3345907960335286615}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 0
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -751,7 +742,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 3695580543768649993}
     modules: []
   components:
   - {fileID: 8556863168935618024}
@@ -928,14 +918,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 8553865800101407361}
     graphics: {fileID: 8550837243106613752}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 1
@@ -949,7 +938,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 2041170896813225387}
     modules: []
   graphics: {fileID: 8550837243106613752}
   preserveAspect: 0
@@ -1073,14 +1061,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 8786907243304502384}
     graphics: {fileID: 2079145967574470093}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 1
@@ -1094,7 +1081,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 213425025972884344}
     modules: []
   graphics: {fileID: 2079145967574470093}
   preserveAspect: 0
@@ -1294,14 +1280,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 6629783878981450413}
     graphics: {fileID: 266258842016809682}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -1315,7 +1300,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 1250138211036181806}
     modules: []
   graphics: {fileID: 266258842016809682}
 --- !u!114 &7960427236799832925

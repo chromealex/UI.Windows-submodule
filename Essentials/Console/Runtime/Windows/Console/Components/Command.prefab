@@ -64,14 +64,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 4597125719989322073}
     graphics: {fileID: 2368193167506531856}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -85,7 +84,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 8957172461844523635}
     modules: []
   components: []
   button: {fileID: 4894572811452702635}
@@ -309,14 +307,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 1053871952593780424}
     graphics: {fileID: 5048931175835979990}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -330,7 +327,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 8315637883405603250}
     modules: []
   graphics: {fileID: 5048931175835979990}
 --- !u!222 &1053871952593780424
@@ -520,14 +516,13 @@ MonoBehaviour:
   - canvasRenderer: {fileID: 1131759301774170057}
     graphics: {fileID: 6860704351555833948}
     rectMask: {fileID: 0}
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -543,7 +538,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 7157483974793182015}
     modules: []
   components:
   - {fileID: 8957172461844523635}

@@ -916,7 +916,7 @@ namespace UnityEngine.UI.Windows.Modules {
                         
                         intResource.handlers.Remove(handler);
                         intResource.deconstruct?.Invoke(this, intResource.loaded, intResource.resourceConstructor);
-                        intResource.resourceConstructor.Dispose();
+                        intResource.resourceConstructor?.Dispose();
                         PoolHashSet<object>.Recycle(ref intResource.handlers);
                         PoolList<object>.Recycle(ref intResource.references);
                         intResource.Reset();

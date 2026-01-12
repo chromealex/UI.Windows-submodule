@@ -60,14 +60,13 @@ MonoBehaviour:
   objectCanvas: {fileID: 3002262861325224963}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 1
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -98,7 +97,7 @@ Canvas:
   m_GameObject: {fileID: 2835211755995118023}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -231,14 +230,13 @@ MonoBehaviour:
   objectCanvas: {fileID: 0}
   canvasSortingOrderDelta: 0
   canvasRenderers: []
+  animationParameters:
+    items: []
   hideBehaviour: 0
   hideBehaviourOneByOneDelay: 0
   showBehaviour: 0
   showBehaviourOneByOneDelay: 0
-  animationParameters:
-    items: []
   renderBehaviourOnHidden: 0
-  hasObjectCanvas: 0
   allowRegisterInRoot: 1
   autoRegisterSubObjects: 1
   hiddenByDefault: 0
@@ -252,7 +250,6 @@ MonoBehaviour:
     stop: 0
     clip: {fileID: 0}
   componentModules:
-    windowComponent: {fileID: 5470113545036599192}
     modules: []
   tagId: 1
   innerLayout: {fileID: 0}

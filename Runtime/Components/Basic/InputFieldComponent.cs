@@ -4,14 +4,17 @@ namespace UnityEngine.UI.Windows.Components {
     
     using Utilities;
 
-    public partial class InputFieldComponent : GenericComponent, IInteractable, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
+    public partial class InputFieldComponent : GenericComponent, IInteractable, ILateUpdate, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
 
         System.Type ISearchComponentByTypeEditor.GetSearchType() { return typeof(InputFieldComponentModule); }
         IList ISearchComponentByTypeSingleEditor.GetSearchTypeArray() { return this.componentModules.modules;}
 
         [RequiredReference]
         public Selectable inputField;
+        [Space]
         public TextComponent placeholder;
+        public ButtonComponent clearTextButton;
+        public WindowComponent focusedContainer;
         
         private System.Action<string> callbackOnEditEnd;
         private System.Action<string> callbackOnChanged;
@@ -133,6 +136,8 @@ namespace UnityEngine.UI.Windows.Components {
             this.AddEndEditListener(this.OnEndEdit);
             this.AddValidateCharListener();
             
+            if (this.clearTextButton != null) this.clearTextButton.SetCallback(this, static (obj) => obj.Clear());
+            
         }
 
         internal override void OnDeInitInternal() {
@@ -200,6 +205,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         private void OnValueChanged(string value) {
             
+            if (this.clearTextButton != null) this.clearTextButton.ShowHide(string.IsNullOrEmpty(value) == false);
             if (this.callbackOnChanged != null) this.callbackOnChanged.Invoke(value);
 
         }
@@ -376,6 +382,14 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.inputField == null) this.inputField = this.GetComponent<TMPro.TMP_InputField>();
             #endif
 
+        }
+
+        public void OnLateUpdate(float dt) {
+            if (this.IsFocused() == true) {
+                this.focusedContainer?.Show();
+            } else {
+                this.focusedContainer?.Hide();
+            }
         }
 
     }

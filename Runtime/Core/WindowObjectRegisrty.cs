@@ -43,6 +43,7 @@ namespace UnityEngine.UI.Windows.Editor {
 
         }
 
+        [ContextMenu("Call OnValidate")]
         public void PostValidate() {
             var temp = this.items.ToList();
             for (int i = 0; i < temp.Count; ++i) {

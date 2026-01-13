@@ -104,13 +104,17 @@ public static class ScriptTemplates {
     internal static void Create(string path, string fileName, string templateName, System.Collections.Generic.Dictionary<string, string> customDefines = null, bool allowRename = true, System.Action<Object> onCreated = null) {
 
         var stateTypeStr = "StateClassType";
-        
-        var templatePath = Resources.Load<TextAsset>(templateName);
-        if (templatePath == null) {
-            
-            Debug.LogError("Template was not found at path " + templateName);
-            return;
 
+        TextAsset templatePath = null;
+        var customTemplatePath = Resources.Load<TextAsset>(templateName + "-Custom");
+        if (customTemplatePath == null) {
+            templatePath = Resources.Load<TextAsset>(templateName);
+            if (templatePath == null) {
+                Debug.LogError($"Template was not found at path {templateName}");
+                return;
+            }
+        } else {
+            templatePath = customTemplatePath;
         }
 
         var content = templatePath.text;

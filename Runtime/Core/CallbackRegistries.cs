@@ -2,7 +2,7 @@ namespace UnityEngine.UI.Windows {
 
     public struct Callback : System.IEquatable<Callback> {
 
-        private abstract class CallbackData {
+        public abstract class CallbackData {
 
             public object callbackObj;
             public System.Action<Callback> callback;
@@ -17,7 +17,7 @@ namespace UnityEngine.UI.Windows {
 
         }
         
-        private class CallbackData<T> : CallbackData {
+        public class CallbackData<T> : CallbackData {
             
             public T obj;
             
@@ -36,7 +36,7 @@ namespace UnityEngine.UI.Windows {
         
         public bool IsCreated => this.data != null;
 
-        public void Set<T>(WindowObject windowObject, T data, System.Action<T> callback) {
+        public CallbackData<T> Set<T>(WindowObject windowObject, T data, System.Action<T> callback) {
             var inst = PoolClass<CallbackData<T>>.Spawn();
             inst.obj = data;
             this.data = inst;
@@ -47,6 +47,7 @@ namespace UnityEngine.UI.Windows {
             WindowSystem.GetEvents().RegisterOnce(this, windowObject, WindowEvent.OnHideEnd, static (x, obj) => {
                 obj.Dispose();
             });
+            return inst;
         }
 
         private void Dispose() {

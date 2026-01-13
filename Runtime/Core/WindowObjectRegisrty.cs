@@ -23,6 +23,7 @@ namespace UnityEngine.UI.Windows.Editor {
         public static void Add(WindowObject windowObject, EditorParametersRegistry param) {
 
             #if UNITY_EDITOR
+            if (windowObject == null) return;
             {
                 var obj = Validate();
                 ref var item = ref obj.GetItem(windowObject);
@@ -78,6 +79,8 @@ namespace UnityEngine.UI.Windows.Editor {
                 UnityEditor.EditorApplication.delayCall += () => obj.PostValidate();
                 return obj;
             }
+            #else
+            return null;
             #endif
 
         }

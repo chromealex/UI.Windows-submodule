@@ -225,7 +225,7 @@ namespace UnityEngine.UI.Windows.Components {
                 var resources = WindowSystem.GetResources();
                 var size = new Vector2Int((int)sprite.rect.width, (int)sprite.rect.height);
                 var tex = resources.New<Texture2D, Texture2DConstructor>(this, new Texture2DConstructor(size.x, size.y));
-                var block = tex.GetPixels((int)sprite.rect.x, (int)sprite.rect.y, size.x, size.y);
+                var block = sprite.texture.GetPixels((int)sprite.rect.x, (int)sprite.rect.y, size.x, size.y);
                 tex.SetPixels(block);
                 tex.Apply();
                 

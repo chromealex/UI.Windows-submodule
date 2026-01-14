@@ -543,6 +543,8 @@ MonoBehaviour:
   - {fileID: 8957172461844523635}
   inputField: {fileID: 2614940734484374613}
   placeholder: {fileID: 8315637883405603250}
+  clearTextButton: {fileID: 0}
+  focusedContainer: {fileID: 0}
 --- !u!114 &2614940734484374613
 MonoBehaviour:
   m_ObjectHideFlags: 0

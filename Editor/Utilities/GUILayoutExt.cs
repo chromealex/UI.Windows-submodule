@@ -294,26 +294,6 @@ namespace UnityEditor.UI.Windows {
 							    }
                         
 						    }
-						    if (GUILayout.Button("Generate Extended", GUILayout.Width(140f), GUILayout.Height(30f)) == true) {
-
-							    var obj = (Component)target;
-							    if (PrefabUtility.IsPartOfAnyPrefab(obj) == true) {
-
-								    var path = AssetDatabase.GetAssetPath(obj.gameObject);
-								    using (var edit = new EditPrefabAssetScope(path)) {
-
-									    edit.prefabRoot.transform.GetComponent<UnityEngine.UI.Windows.WindowLayout>().safeZone = EditorHelpers.AddSafeZone(edit.prefabRoot.transform, true);
-                                
-								    }
-                            
-							    } else {
-
-								    var root = obj.gameObject;
-								    root.transform.GetComponent<UnityEngine.UI.Windows.WindowLayout>().safeZone = EditorHelpers.AddSafeZone((Transform)safeZoneRectTransform.objectReferenceValue ?? root.transform, true);
-                            
-							    }
-                        
-						    }
 						    GUILayout.FlexibleSpace();
 						    GUILayout.EndHorizontal();
                             

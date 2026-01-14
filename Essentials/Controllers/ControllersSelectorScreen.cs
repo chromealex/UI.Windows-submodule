@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace UnityEngine.UI.Windows.Modules.Controllers {
 
-    public class ControllersSelectorScreen : LayoutWindowType, IControllersSelectorScreen {
+    public class ControllersSelectorScreen : LayoutWindowType, IControllersSelectorScreen, ILateUpdate {
 
         private readonly Dictionary<int, IInteractableNavigation> selections = new Dictionary<int, IInteractableNavigation>();
         private WindowComponent selection;
@@ -13,18 +13,14 @@ namespace UnityEngine.UI.Windows.Modules.Controllers {
         public override void OnInit() {
             base.OnInit();
             this.GetLayoutComponent(out this.selection);
-        }
-
-        public override void OnShowBegin() {
-            base.OnShowBegin();
             WindowSystem.GetEvents().Register(WindowEvent.OnFocusTook, this.OnObjectFocusTook);
             WindowSystem.GetEvents().Register(WindowEvent.OnHideEnd, this.OnObjectHideEnd);
         }
 
-        public override void OnHideEnd() {
+        public override void OnDeInit() {
             WindowSystem.GetEvents().UnRegister(WindowEvent.OnFocusTook, this.OnObjectFocusTook);
             WindowSystem.GetEvents().UnRegister(WindowEvent.OnHideEnd, this.OnObjectHideEnd);
-            base.OnHideEnd();
+            base.OnDeInit();
         }
 
         private void OnObjectHideEnd(WindowObject component) {
@@ -75,8 +71,8 @@ namespace UnityEngine.UI.Windows.Modules.Controllers {
             }
         }
         
-        public void Button(ControllerButton button) {
-            this.currentSelection.DoAction(button);
+        public ButtonControl Button(ControllerButton button) {
+            return this.currentSelection.DoAction(button);
         }
         
         public IInteractableNavigation GetCurrentSelection() {
@@ -84,15 +80,17 @@ namespace UnityEngine.UI.Windows.Modules.Controllers {
         }
 
         private void UpdateSelection(bool immediately) {
-            // selection has been changed
-            // move selection
+            if (this.currentSelection == null) return;
             var component = ((WindowComponent)this.currentSelection);
             var rect = component.rectTransform;
-            var pos = HUDItem.Reposition(rect.position, component.GetWindow().workCamera, this.GetWindow().workCamera);
-            pos.z = 0f;
-            this.selection.rectTransform.position = pos;
-            this.selection.rectTransform.sizeDelta = rect.sizeDelta;
+            HUDItem.Reposition(this.selection.rectTransform, rect.position, component.GetWindow().workCamera, this.GetWindow().workCamera);
+            this.selection.rectTransform.pivot = rect.pivot;
+            this.selection.rectTransform.sizeDelta = new Vector2(rect.rect.width, rect.rect.height);
             this.selection.Show();
+        }
+
+        public void OnLateUpdate(float dt) {
+            this.UpdateSelection(immediately: true);
         }
 
     }

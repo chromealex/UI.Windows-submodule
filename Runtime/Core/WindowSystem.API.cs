@@ -385,6 +385,12 @@ namespace UnityEngine.UI.Windows {
             Debug.LogWarning($"[ UIWS ] Failed to use object {obj} on object {context} in strict mode", context);
         }
 
+        public static void UseRTL(bool state) {
+            instance.useRTL = state;
+        }
+
+        public static bool IsRTL() => instance.useRTL;
+
     }
 
 }

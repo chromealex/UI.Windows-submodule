@@ -19,10 +19,15 @@ namespace UnityEngine.UI.Windows {
         Right,
     }
 
+    public enum ButtonControl {
+        None,
+        Used,
+    }
+
     public interface IInteractableNavigation {
 
         IInteractableNavigation GetNext(Vector2 direction);
-        void DoAction(ControllerButton button);
+        ButtonControl DoAction(ControllerButton button);
 
     }
 

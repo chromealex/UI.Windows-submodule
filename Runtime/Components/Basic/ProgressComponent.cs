@@ -18,12 +18,26 @@ namespace UnityEngine.UI.Windows.Components {
 
         IInteractableNavigation IInteractableNavigation.GetNext(Vector2 direction) => WindowSystem.GetNavigation(this.slider, direction);
 
-        void IInteractableNavigation.DoAction(ControllerButton button) {
-            if (button == ControllerButton.Left) {
-                this.SetValue(this.GetValue() - WindowSystem.GetSettings().controllers.sliderStep);
-            } else if (button == ControllerButton.Right) {
-                this.SetValue(this.GetValue() + WindowSystem.GetSettings().controllers.sliderStep);
+        ButtonControl IInteractableNavigation.DoAction(ControllerButton button) {
+            var horizontal = (this.slider.direction == Slider.Direction.LeftToRight || this.slider.direction == Slider.Direction.RightToLeft);
+            if (horizontal == true) {
+                if (button == ControllerButton.Left) {
+                    this.SetValue(this.GetValue() - WindowSystem.GetSettings().controllers.sliderStep);
+                    return ButtonControl.Used;
+                } else if (button == ControllerButton.Right) {
+                    this.SetValue(this.GetValue() + WindowSystem.GetSettings().controllers.sliderStep);
+                    return ButtonControl.Used;
+                }
+            } else {
+                if (button == ControllerButton.Up) {
+                    this.SetValue(this.GetValue() + WindowSystem.GetSettings().controllers.sliderStep);
+                    return ButtonControl.Used;
+                } else if (button == ControllerButton.Down) {
+                    this.SetValue(this.GetValue() - WindowSystem.GetSettings().controllers.sliderStep);
+                    return ButtonControl.Used;
+                }
             }
+            return ButtonControl.None;
         }
 
         internal override void OnInitInternal() {

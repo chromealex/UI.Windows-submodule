@@ -199,6 +199,7 @@ namespace UnityEngine.UI.Windows {
         private bool loaderShowBegin;
         private WindowBase loaderInstance;
         private int nextWindowId;
+        private bool useRTL;
 
         internal static WindowSystem _instance;
 

@@ -148,7 +148,8 @@ namespace UnityEngine.UI.Windows {
 
         public static IInteractable GetNavigation(Selectable selectable, Vector2 direction) {
             var navigationElement = selectable;
-            var horizontal = Mathf.Abs(direction.x) > Mathf.Abs(direction.y);
+            navigationElement = selectable.FindSelectable(direction);
+            /*var horizontal = Mathf.Abs(direction.x) > Mathf.Abs(direction.y);
             if (horizontal == true) {
                 if (direction.x < 0f) {
                     navigationElement = selectable.navigation.selectOnLeft;
@@ -161,7 +162,7 @@ namespace UnityEngine.UI.Windows {
                 } else if (direction.y > 0f) {
                     navigationElement = selectable.navigation.selectOnUp;
                 }
-            }
+            }*/
 
             if (navigationElement == null) return null;
             return navigationElement.GetComponentInParent<IInteractable>(true);

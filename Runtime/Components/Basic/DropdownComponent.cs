@@ -66,8 +66,8 @@ namespace UnityEngine.UI.Windows.Components {
         
         IInteractableNavigation IInteractableNavigation.GetNext(Vector2 direction) => ((IInteractable)this.label).GetNext(direction);
 
-        void IInteractableNavigation.DoAction(ControllerButton button) {
-            ((IInteractableNavigation)this.label).DoAction(button);
+        ButtonControl IInteractableNavigation.DoAction(ControllerButton button) {
+            return ((IInteractableNavigation)this.label).DoAction(button);
         }
 
         internal override void OnInitInternal() {

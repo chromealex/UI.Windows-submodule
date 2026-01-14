@@ -46,10 +46,11 @@ namespace UnityEngine.UI.Windows.Components {
         
         IInteractableNavigation IInteractableNavigation.GetNext(Vector2 direction) => WindowSystem.GetNavigation(this.button, direction);
 
-        void IInteractableNavigation.DoAction(ControllerButton button) {
+        ButtonControl IInteractableNavigation.DoAction(ControllerButton button) {
             if (button == ControllerButton.Click) {
                 this.DoClick();
             }
+            return ButtonControl.None;
         }
         
         internal override void OnInitInternal() {

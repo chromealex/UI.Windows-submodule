@@ -22,11 +22,12 @@ namespace UnityEngine.UI.Windows.Components {
 
         IInteractableNavigation IInteractableNavigation.GetNext(Vector2 direction) => WindowSystem.GetNavigation(this.inputField, direction);
 
-        void IInteractableNavigation.DoAction(ControllerButton button) {
+        ButtonControl IInteractableNavigation.DoAction(ControllerButton button) {
             if (button == ControllerButton.Click) {
                 // Call keyboard
                 WindowSystem.ShowSystemKeyboard(this);
             }
+            return ButtonControl.None;
         }
 
         private void AddValueChangedListener(UnityEngine.Events.UnityAction<string> action) {

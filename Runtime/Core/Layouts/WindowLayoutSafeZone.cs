@@ -6,6 +6,24 @@
         public void ContextApply() {
             this.Apply();
         }
+
+        public struct ScreenCache {
+
+            private ScreenOrientation savedOrientation;
+            private Rect savedSafeArea;
+            private int width;
+            private int height;
+
+            public bool HasChanged => Screen.width != this.width || Screen.height != this.height || Screen.orientation != this.savedOrientation || Screen.safeArea != this.savedSafeArea;
+
+            public void Update() {
+                this.width = Screen.width;
+                this.height = Screen.height;
+                this.savedOrientation = Screen.orientation;
+                this.savedSafeArea = Screen.safeArea;
+            }
+
+        }
         
         [System.Serializable]
         public struct CustomPadding {
@@ -45,8 +63,7 @@
         public PaddingType paddingType = PaddingType.All;
         public CustomPaddings customPaddings;
 
-        private ScreenOrientation savedOrientation;
-        private Rect savedSafeArea;
+        private ScreenCache screenCache;
 
         public override void OnShowBegin() {
             base.OnShowBegin();
@@ -54,22 +71,12 @@
         }
 
         public void SetDirty() {
-            this.UpdateOrientation();
-            this.UpdateSafeArea();
+            this.screenCache.Update();
             this.Apply();
         }
 
-        private void UpdateSafeArea() {
-            this.savedSafeArea = Screen.safeArea;
-        }
-
-        private void UpdateOrientation() {
-            this.savedOrientation = Screen.orientation;
-        }
-
         public void OnLateUpdate(float dt) {
-            if (Screen.orientation != this.savedOrientation ||
-                Screen.safeArea != this.savedSafeArea) {
+            if (this.screenCache.HasChanged == true) {
                 this.SetDirty();
             }
         }

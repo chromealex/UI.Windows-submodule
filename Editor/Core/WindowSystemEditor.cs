@@ -289,6 +289,12 @@ namespace UnityEditor.UI.Windows {
                     caption = "Tools",
                     onDraw = () => {
                         
+                        GUILayoutExt.Box(4f, 4f, () => {
+
+                            EditorRefLocksPropertyDrawer.Draw(this.serializedObject);
+                        
+                        });
+
                         GUILayout.Space(10f);
                         GUILayout.BeginHorizontal();
                         GUILayout.FlexibleSpace();
@@ -800,7 +806,7 @@ namespace UnityEditor.UI.Windows {
 
         private const string EDITOR_REF_LOCKS_PATH = "Assets/EditorResources/UI.Windows/EditorRefLocks.asset";
         
-        public static List<string> GetRefLock(WindowObject obj) {
+        public static List<string> GetRefLock(Object obj) {
 
             ValidateRefLock();
             var refLocks = AssetDatabase.LoadAssetAtPath<UnityEngine.UI.Windows.Editor.EditorRefLocks>(EDITOR_REF_LOCKS_PATH);
@@ -835,7 +841,7 @@ namespace UnityEditor.UI.Windows {
         }
 
         private static SerializedObject refLockSo;
-        public static SerializedProperty GetRefLockProperty(WindowObject component) {
+        public static SerializedProperty GetRefLockProperty(Object component) {
             
             ValidateRefLock();
             var refLocks = AssetDatabase.LoadAssetAtPath<UnityEngine.UI.Windows.Editor.EditorRefLocks>(EDITOR_REF_LOCKS_PATH);

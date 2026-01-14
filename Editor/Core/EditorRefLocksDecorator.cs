@@ -170,6 +170,13 @@ namespace UnityEditor.UI.Windows {
 
                 }
 
+                {
+                    var list = WindowSystemEditor.GetRefLock(null);
+                    if (list != null) {
+                        this.list.AddRange(list);
+                    }
+                }
+
                 if (usePrefabMode == true) {
                     
                     var splitted = path.Split(new[] { "/Components" }, System.StringSplitOptions.RemoveEmptyEntries);

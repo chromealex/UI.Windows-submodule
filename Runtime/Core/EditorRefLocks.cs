@@ -13,8 +13,8 @@ namespace UnityEngine.UI.Windows.Editor {
 
         public Item[] items;
 
-        public Item GetItemOrNull(WindowObject obj) {
-            var guid = UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(obj));
+        public Item GetItemOrNull(Object obj) {
+            var guid = (obj == null ? "UIWS" : UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(obj)));
             for (var index = 0; index < this.items.Length; ++index) {
                 ref var item = ref this.items[index];
                 if (item.obj == guid) {
@@ -24,8 +24,8 @@ namespace UnityEngine.UI.Windows.Editor {
             return default;
         }
 
-        public bool GetItem(WindowObject obj, out int index) {
-            var guid = UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(obj));
+        public bool GetItem(Object obj, out int index) {
+            var guid = (obj == null ? "UIWS" : UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(obj)));
             for (index = 0; index < this.items.Length; ++index) {
                 ref var item = ref this.items[index];
                 if (item.obj == guid) {

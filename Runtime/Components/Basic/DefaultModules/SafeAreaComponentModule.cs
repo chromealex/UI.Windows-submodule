@@ -13,6 +13,8 @@
         public RectTransform rectTransform;
         public LayoutGroup layoutGroup;
         
+        private WindowLayoutSafeZone.ScreenCache screenCache;
+
         public override void ValidateEditor() {
             base.ValidateEditor();
             if (this.layoutGroup == null) this.layoutGroup = this.GetComponentInChildren<LayoutGroup>(true);
@@ -28,7 +30,16 @@
             this.UpdateSafeArea();
         }
 
+        private void LateUpdate() {
+            if (this.windowComponent.IsVisible() == false) return;
+            if (this.screenCache.HasChanged == true) {
+                this.UpdateSafeArea();
+            }
+        }
+
         private void UpdateSafeArea() {
+            
+            this.screenCache.Update();
 
             if (this.targetType == TargetType.RectTransformAnchors) {
                 var (anchorMin, anchorMax) = WindowLayoutSafeZone.GetAnchors(this.paddingType, this.customPaddings);

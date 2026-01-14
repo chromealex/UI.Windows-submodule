@@ -13,11 +13,11 @@ namespace UnityEngine.UI.Windows {
         }
 
         public void Hide() {
-            this.instance.Hide();
+            this.instance?.Hide();
         }
 
         public void Hide(TransitionParameters transitionParameters) {
-            this.instance.Hide(transitionParameters);
+            this.instance?.Hide(transitionParameters);
         }
 
         public ObjectState GetState() => this.instance.GetState();
@@ -42,11 +42,11 @@ namespace UnityEngine.UI.Windows {
         public T screen => this.instance;
 
         public void Hide() {
-            this.instance.Hide();
+            this.instance?.Hide();
         }
 
         public void Hide(TransitionParameters transitionParameters) {
-            this.instance.Hide(transitionParameters);
+            this.instance?.Hide(transitionParameters);
         }
 
         public ObjectState GetState() => this.instance.GetState();

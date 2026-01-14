@@ -1,13 +1,19 @@
 using UnityEngine.UI.Windows.Utilities;
+using UnityEngine.UI.Windows.Components;
 
 namespace UnityEngine.UI.Windows {
 
     public partial class WindowSystem {
 
+        private System.Action<WindowComponent> showSystemKeyboard;
         private Vector2 pointerScreenPosition;
         private bool hasPointerUpThisFrame;
         private bool hasPointerDownThisFrame;
         private float lastPointerActionTime;
+
+        public static void RegisterSystemKeyboard(System.Action<WindowComponent> callback) {
+            WindowSystem.instance.showSystemKeyboard = callback;
+        }
 
         public static Vector2 GetPointerPosition() {
 
@@ -138,6 +144,31 @@ namespace UnityEngine.UI.Windows {
             }
             #endif
             
+        }
+
+        public static IInteractable GetNavigation(Selectable selectable, Vector2 direction) {
+            var navigationElement = selectable;
+            var horizontal = Mathf.Abs(direction.x) > Mathf.Abs(direction.y);
+            if (horizontal == true) {
+                if (direction.x < 0f) {
+                    navigationElement = selectable.navigation.selectOnLeft;
+                } else if (direction.x > 0f) {
+                    navigationElement = selectable.navigation.selectOnRight;
+                }
+            } else {
+                if (direction.y < 0f) {
+                    navigationElement = selectable.navigation.selectOnDown;
+                } else if (direction.y > 0f) {
+                    navigationElement = selectable.navigation.selectOnUp;
+                }
+            }
+
+            if (navigationElement == null) return null;
+            return navigationElement.GetComponentInParent<IInteractable>(true);
+        }
+
+        public static void ShowSystemKeyboard(WindowComponent component) {
+            WindowSystem.instance.showSystemKeyboard.Invoke(component);
         }
 
     }

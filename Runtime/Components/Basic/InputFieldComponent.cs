@@ -20,6 +20,15 @@ namespace UnityEngine.UI.Windows.Components {
         private System.Action<string> callbackOnChanged;
         private System.Func<string, int, char, char> callbackValidateChar;
 
+        IInteractableNavigation IInteractableNavigation.GetNext(Vector2 direction) => WindowSystem.GetNavigation(this.inputField, direction);
+
+        void IInteractableNavigation.DoAction(ControllerButton button) {
+            if (button == ControllerButton.Click) {
+                // Call keyboard
+                WindowSystem.ShowSystemKeyboard(this);
+            }
+        }
+
         private void AddValueChangedListener(UnityEngine.Events.UnityAction<string> action) {
 
             if (this.inputField is InputField inputField) {

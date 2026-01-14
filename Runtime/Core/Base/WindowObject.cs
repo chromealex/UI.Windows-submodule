@@ -344,16 +344,16 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public virtual T FindComponent<T>(System.Func<T, bool> filter = null) where T : WindowObject {
+        public virtual T FindComponent<T>(System.Func<T, bool> filter = null) where T : class {
 
             return this.FindComponent<T, System.Func<T, bool>>(filter, static (fn, c) => {
                 if (fn != null) return fn.Invoke(c);
-                return c;
+                return c != null;
             });
 
         }
 
-        public virtual T FindComponent<T, TState>(TState state, System.Func<TState, T, bool> filter = null) where T : WindowObject {
+        public virtual T FindComponent<T, TState>(TState state, System.Func<TState, T, bool> filter = null) where T : class {
 
             if (this is T instance) {
 
@@ -374,16 +374,16 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public virtual T FindComponentParent<T>(System.Func<T, bool> filter = null) where T : WindowObject {
+        public virtual T FindComponentParent<T>(System.Func<T, bool> filter = null) where T : class {
 
             return this.FindComponentParent<T, System.Func<T, bool>>(filter, static (fn, c) => {
                 if (fn != null) return fn.Invoke(c);
-                return c;
+                return c != null;
             });
 
         }
 
-        public virtual T FindComponentParent<T, TState>(TState state, System.Func<TState, T, bool> filter = null) where T : WindowObject {
+        public virtual T FindComponentParent<T, TState>(TState state, System.Func<TState, T, bool> filter = null) where T : class {
 
             if (this is T instance) {
 

@@ -16,6 +16,16 @@ namespace UnityEngine.UI.Windows.Components {
         private System.Action<ProgressComponent, float> callbackWithInstance;
         private bool ignoreCallbacks;
 
+        IInteractableNavigation IInteractableNavigation.GetNext(Vector2 direction) => WindowSystem.GetNavigation(this.slider, direction);
+
+        void IInteractableNavigation.DoAction(ControllerButton button) {
+            if (button == ControllerButton.Left) {
+                this.SetValue(this.GetValue() - WindowSystem.GetSettings().controllers.sliderStep);
+            } else if (button == ControllerButton.Right) {
+                this.SetValue(this.GetValue() + WindowSystem.GetSettings().controllers.sliderStep);
+            }
+        }
+
         internal override void OnInitInternal() {
             
             base.OnInitInternal();

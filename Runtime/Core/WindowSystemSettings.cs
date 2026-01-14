@@ -72,6 +72,17 @@
             perspectiveFarClippingPlane = 1000f,
         };
 
+        [System.Serializable]
+        public struct Controllers {
+
+            public float sliderStep;
+
+        }
+
+        public Controllers controllers = new Controllers() {
+            sliderStep = 0.1f,
+        };
+
         [Tooltip("In StrictMode all API's will not cast objects automatically (for example ImageComponent::SetImage(sprite) will set in Image component only).")]
         public bool strictMode;
         public bool collectDebugInfo;

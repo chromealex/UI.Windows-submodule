@@ -4,7 +4,7 @@ namespace UnityEngine.UI.Windows.Components {
 
     using Utilities;
 
-    public interface IInteractable {
+    public interface IInteractable : IInteractableNavigation {
 
         bool IsInteractable();
         void SetInteractable(bool state);
@@ -43,6 +43,14 @@ namespace UnityEngine.UI.Windows.Components {
         public Button button;
 
         private CallbackRegistries callbackRegistries;
+        
+        IInteractableNavigation IInteractableNavigation.GetNext(Vector2 direction) => WindowSystem.GetNavigation(this.button, direction);
+
+        void IInteractableNavigation.DoAction(ControllerButton button) {
+            if (button == ControllerButton.Click) {
+                this.DoClick();
+            }
+        }
         
         internal override void OnInitInternal() {
             

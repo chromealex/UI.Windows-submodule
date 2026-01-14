@@ -64,6 +64,12 @@ namespace UnityEngine.UI.Windows.Components {
 
         private DrivenRectTransformTracker drivenRectTransformTracker;
         
+        IInteractableNavigation IInteractableNavigation.GetNext(Vector2 direction) => ((IInteractable)this.label).GetNext(direction);
+
+        void IInteractableNavigation.DoAction(ControllerButton button) {
+            ((IInteractableNavigation)this.label).DoAction(button);
+        }
+
         internal override void OnInitInternal() {
             
             base.OnInitInternal();

@@ -373,7 +373,7 @@ namespace UnityEditor.UI.Windows {
         }
 
         public static void UpdateLayoutWindow(UnityEngine.UI.Windows.Utilities.DirtyHelper helper, UnityEngine.UI.Windows.WindowTypes.LayoutWindowType layoutWindowType) {
-        
+            
             var itemsLayout = layoutWindowType.layouts.items;
             if (itemsLayout != null) {
 

@@ -406,6 +406,10 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
+        public void UpdateCurrentPreferences() {
+            this.ApplyLayoutPreferences(this.layoutPreferences);
+        }
+
     }
 
     [System.Serializable]
@@ -468,6 +472,32 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         };
 
         private readonly Dictionary<int, int> requestedIndexes = new Dictionary<int, int>();
+
+        #if UNITY_EDITOR
+        private WindowLayoutSafeZone.ScreenCache screenCache;
+        #endif
+        public void UpdateCurrentPreferences() {
+            if (this.screenCache.HasChanged == true) {
+                this.screenCache.Update();
+                foreach (var layout in this.layouts.items) {
+                    layout.UpdateCurrentPreferences();
+                }
+            }
+        }
+
+        internal override void OnShowBeginInternal() {
+            base.OnShowBeginInternal();
+            #if UNITY_EDITOR
+            UnityEditor.EditorApplication.update += this.UpdateCurrentPreferences;
+            #endif
+        }
+
+        internal override void OnHideBeginInternal() {
+            base.OnHideBeginInternal();
+            #if UNITY_EDITOR
+            UnityEditor.EditorApplication.update -= this.UpdateCurrentPreferences;
+            #endif
+        }
 
         internal override void OnDeInitInternal() {
             
@@ -785,7 +815,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             helper.Apply();
 
         }
-
+        
     }
 
 }

@@ -13,14 +13,21 @@
             private Rect savedSafeArea;
             private int width;
             private int height;
+            private string deviceName;
 
-            public bool HasChanged => Screen.width != this.width || Screen.height != this.height || Screen.orientation != this.savedOrientation || Screen.safeArea != this.savedSafeArea;
+            public bool HasChanged {
+                get {
+                    if (this.deviceName != Device.SystemInfo.deviceName) return false;
+                    return Screen.width != this.width || Screen.height != this.height || Screen.orientation != this.savedOrientation || Screen.safeArea != this.savedSafeArea;
+                }
+            }
 
             public void Update() {
                 this.width = Screen.width;
                 this.height = Screen.height;
                 this.savedOrientation = Screen.orientation;
                 this.savedSafeArea = Screen.safeArea;
+                this.deviceName = Device.SystemInfo.deviceName;
             }
 
         }

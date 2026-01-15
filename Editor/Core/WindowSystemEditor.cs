@@ -291,7 +291,7 @@ namespace UnityEditor.UI.Windows {
                         
                         GUILayoutExt.Box(4f, 4f, () => {
 
-                            EditorRefLocksPropertyDrawer.Draw(this.serializedObject);
+                            EditorRefLocksPropertyDrawer.Draw(this.serializedObject, true);
                         
                         });
 

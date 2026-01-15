@@ -223,6 +223,7 @@
                     })
                     .OnComplete((obj) => {
 
+                        obj.animationParameters.ApplyState(obj.toState);
                         obj.fromState.Recycle(); 
                         obj.onComplete.Invoke(ref obj.closureParameters);
                        

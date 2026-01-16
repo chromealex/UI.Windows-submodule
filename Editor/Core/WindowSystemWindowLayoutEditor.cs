@@ -103,6 +103,8 @@ namespace UnityEditor.UI.Windows {
             
         }
 
+        private static Vector3[] tempGridSubLineSegments;
+        private static Vector3[] tempGridMainLineSegments;
         private void OnSceneDraw(SceneView sceneView) {
 
             WindowLayout targetLayout = null;
@@ -147,30 +149,13 @@ namespace UnityEditor.UI.Windows {
                     var startZ = 0f;
                     var subColor = new Color(1f, 1f, 1f, 0.01f * alpha);
                     var mainColor = new Color(1f, 1f, 1f, 0.025f * alpha);
+
                     try {
                         var smallStep = 10f * scale;
-                        var largeStep = 5;
-
-                        for (float x = startX, stepX = 0; x <= gridSizeX + startX; x += smallStep, ++stepX) {
-                            if (stepX % largeStep == 0) {
-                                Handles.color = mainColor;
-                            } else {
-                                Handles.color = subColor;
-                            }
-
-                            Handles.DrawLine(new Vector3(x, startY, startZ), new Vector3(x, startY + gridSizeY, startZ));
-                        }
-
-                        for (float y = startY, stepY = 0; y <= gridSizeY + startY; y += smallStep, ++stepY) {
-                            if (stepY % largeStep == 0) {
-                                Handles.color = mainColor;
-                            } else {
-                                Handles.color = subColor;
-                            }
-
-                            Handles.DrawLine(new Vector3(startX, y, startZ), new Vector3(startX + gridSizeX, y, startZ));
-                        }
-
+                        var largeStep = 5 * smallStep;
+                        
+                        DrawGrid(ref tempGridSubLineSegments, smallStep, gridSizeX, gridSizeY, startX, startY, startZ, subColor);
+                        DrawGrid(ref tempGridMainLineSegments, largeStep, gridSizeX, gridSizeY, startX, startY, startZ, mainColor);
                     } catch (System.Exception ex) {
                         Debug.LogException(ex);
                     }
@@ -210,6 +195,31 @@ namespace UnityEditor.UI.Windows {
                 }
             }
 
+        }
+
+        private static void DrawGrid(ref Vector3[] tmpGrid, float step, float gridSizeX, float gridSizeY, float startX, float startY, float startZ, Color gridColor) {
+            
+            var totalSubLinesCount = ((int)(gridSizeX / step) + (int)(gridSizeY / step) + 2) * 2;
+            if (tmpGrid == null || tmpGrid.Length != totalSubLinesCount) {
+                tmpGrid = new Vector3[totalSubLinesCount];
+            }
+
+            var index = 0;
+            for (float x = startX; x <= gridSizeX + startX; x += step) {
+                tmpGrid[index] = new Vector3(x, startY, startZ);
+                tmpGrid[index + 1] = new Vector3(x, startY + gridSizeY, startZ);
+                index += 2;
+            }
+
+            for (float y = startY; y <= gridSizeY + startY; y += step) {
+                tmpGrid[index] = new Vector3(startX, y, startZ);
+                tmpGrid[index + 1] = new Vector3(startX + gridSizeX, y, startZ);
+                index += 2;
+            }
+
+            Handles.color = gridColor;
+            Handles.DrawLines(tmpGrid);
+            
         }
 
         private static GUIStyle labelStyle;

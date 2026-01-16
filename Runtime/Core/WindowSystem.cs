@@ -147,6 +147,10 @@ namespace UnityEngine.UI.Windows {
 
     }
 
+    public class RTLModeChangedEvent {
+        public bool state;
+    }
+    
     [DefaultExecutionOrder(-1000)]
     public partial class WindowSystem : MonoBehaviour {
 

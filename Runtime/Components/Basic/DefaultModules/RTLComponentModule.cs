@@ -22,6 +22,13 @@
             this.UpdateRTL();
         }
 
+        public override void OnEvent<T>(T data) {
+            base.OnEvent(data);
+            if (data is RTLModeChangedEvent) {
+                this.UpdateRTL();
+            }
+        }
+
         private void UpdateRTL() {
             this.layoutGroup.reverseArrangement = WindowSystem.IsRTL() == true ? !this.defaultAlignment : this.defaultAlignment;
         }

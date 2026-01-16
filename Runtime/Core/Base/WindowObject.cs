@@ -953,7 +953,7 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        protected internal virtual void SendEvent<T>(T data) {
+        protected internal virtual void SendEvent<T>(T data) where T : class {
             
             this.OnEvent(data);
 
@@ -961,10 +961,6 @@ namespace UnityEngine.UI.Windows {
                 if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
                 this.subObjects[i].SendEvent(data);
             }
-            
-        }
-
-        public virtual void OnEvent<T>(T data) {
             
         }
 
@@ -1430,6 +1426,8 @@ namespace UnityEngine.UI.Windows {
         internal virtual void OnHideEndInternal() { }
 
         #region Public Override Events
+        public virtual void OnEvent<T>(T data) where T : class { }
+
         public virtual void OnLayoutReady() { }
         
         public virtual void OnInit() { }

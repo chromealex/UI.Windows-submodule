@@ -4,11 +4,11 @@ namespace UnityEngine.UI.Windows {
 
     public partial class WindowSystem {
 
-        public static void SendEvent<T>(T data) {
+        public static void SendEvent<T>(T data) where T : class {
 
             foreach (var item in WindowSystem.instance.currentWindows) {
                 
-                item.instance.SendEvent<T>(data);
+                item.instance.SendEvent(data);
                 
             }
             

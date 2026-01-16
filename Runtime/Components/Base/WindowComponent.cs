@@ -165,9 +165,26 @@
 
             }
 
+            public void OnEvent<T>(T data) where T : class {
+                
+                if (this.modules == null) return;
+
+                for (int i = 0; i < this.modules.Length; ++i) {
+                    
+                    if (this.modules[i] != null) this.modules[i].OnEvent(data);
+                    
+                }
+
+            }
+
         }
         
         public ComponentModules componentModules;
+
+        protected internal override void SendEvent<T>(T data) {
+            base.SendEvent(data);
+            this.componentModules.OnEvent(data);
+        }
 
         public T GetModule<T>() {
 
@@ -307,6 +324,8 @@
             
         }
 
+        public virtual void OnEvent<T>(T data) where T : class { }
+        
         public virtual void OnInteractableChanged(bool state) {
             
         }

@@ -386,7 +386,14 @@ namespace UnityEngine.UI.Windows {
         }
 
         public static void UseRTL(bool state) {
+            var changed = (instance.useRTL != state);
             instance.useRTL = state;
+            if (changed == true) {
+                var evt = PoolClass<RTLModeChangedEvent>.Spawn();
+                evt.state = state;
+                WindowSystem.SendEvent(evt);
+                PoolClass<RTLModeChangedEvent>.Recycle(evt);
+            }
         }
 
         public static bool IsRTL() => instance.useRTL;

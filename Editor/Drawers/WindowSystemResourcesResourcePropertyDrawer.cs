@@ -12,6 +12,8 @@ namespace UnityEditor.UI.Windows {
     [CustomPropertyDrawer(typeof(Resource<>))]
     public class WindowSystemResourcesResourceGenericPropertyDrawer : PropertyDrawer {
 
+        private ObjDrawerCache prevSelected;
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
 
             System.Type type = null;
@@ -22,7 +24,7 @@ namespace UnityEditor.UI.Windows {
             }
 
             var res = property.FindPropertyRelative("data");
-            WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, res, label, type, UnityEngine.UI.Windows.Utilities.RequiredType.None);
+            WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, ref this.prevSelected, res, label, type, UnityEngine.UI.Windows.Utilities.RequiredType.None);
             
         }
 
@@ -30,6 +32,8 @@ namespace UnityEditor.UI.Windows {
 
     [CustomPropertyDrawer(typeof(Resource))]
     public class WindowSystemResourcesResourcePropertyDrawer : PropertyDrawer {
+
+        private ObjDrawerCache prevSelected;
 
         public struct Result {
 
@@ -58,7 +62,7 @@ namespace UnityEditor.UI.Windows {
 
         }
         
-        public static Result DrawGUI(Rect position, GUIContent label, Resource value, bool hasMultipleDifferentValues, System.Type type = null, UnityEngine.UI.Windows.Utilities.RequiredType requiredType = UnityEngine.UI.Windows.Utilities.RequiredType.None) {
+        public static Result DrawGUI(SerializedProperty property, ref ObjDrawerCache prevSelected, Rect position, GUIContent label, Resource value, bool hasMultipleDifferentValues, System.Type type = null, UnityEngine.UI.Windows.Utilities.RequiredType requiredType = UnityEngine.UI.Windows.Utilities.RequiredType.None) {
 
             var result = new Result() {
                 resource = value,
@@ -115,6 +119,10 @@ namespace UnityEditor.UI.Windows {
                 
             }
 
+            if (ObjDrawer.IsValid(property.serializedObject.targetObject as GameObject, newObj, ref prevSelected) == false) {
+                GUILayoutExt.DrawRect(new Rect(position.x, position.y + position.height - 2f, position.width, 2f), Color.red);
+            }
+
             var tooltip = "This object will be stored through GUID link.";
             if (newObj != null) {
 
@@ -147,7 +155,7 @@ namespace UnityEditor.UI.Windows {
 
         }
 
-        public static void DrawGUI(Rect position, SerializedProperty property, GUIContent label, System.Type type, UnityEngine.UI.Windows.Utilities.RequiredType requiredType) {
+        public static void DrawGUI(Rect position, ref ObjDrawerCache prevSelected, SerializedProperty property, GUIContent label, System.Type type, UnityEngine.UI.Windows.Utilities.RequiredType requiredType) {
             
             var address = property.FindPropertyRelative("address");
             var guid = property.FindPropertyRelative("guid");
@@ -156,7 +164,7 @@ namespace UnityEditor.UI.Windows {
             var directRef = property.FindPropertyRelative("directRef");
             var validationRequired = property.FindPropertyRelative("validationRequired");
 
-            var newRes = WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, label, new Resource() {
+            var newRes = WindowSystemResourcesResourcePropertyDrawer.DrawGUI(property, ref prevSelected, position, label, new Resource() {
                 guid = guid.stringValue,
                 type = (Resource.Type)loadType.enumValueIndex,
                 objectType = (Resource.ObjectType)objectType.enumValueIndex,
@@ -184,7 +192,7 @@ namespace UnityEditor.UI.Windows {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
 
             var type = WindowSystemResourcesResourcePropertyDrawer.GetTypeByAttr(this.fieldInfo, out var requiredType);
-            WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, property, label, type, requiredType);
+            WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, ref this.prevSelected, property, label, type, requiredType);
 
         }
 

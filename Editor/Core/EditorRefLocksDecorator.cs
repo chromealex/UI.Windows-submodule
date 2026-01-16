@@ -24,55 +24,39 @@ namespace UnityEditor.UI.Windows {
     public class MaterialDrawer : ObjDrawer {
 
     }
+    
+    [CustomPropertyDrawer(typeof(UnityEngine.Font), true)]
+    public class FontDrawer : ObjDrawer {
+
+    }
+    
+    #if TEXTMESHPRO_SUPPORT
+    [CustomPropertyDrawer(typeof(TMPro.TMP_FontAsset), true)]
+    public class TmpFontDrawer : ObjDrawer {
+
+    }
     #endif
+    #endif
+
+    public struct ObjDrawerCache {
+
+        public System.Collections.Generic.List<string> list;
+        public GameObject go;
+
+    }
 
     public class ObjDrawer : PropertyDrawer {
 
-        private readonly System.Collections.Generic.List<string> list = new System.Collections.Generic.List<string>();
-        private GameObject prevSelected;
+        private ObjDrawerCache prevSelected;
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
 
-            var dirs = this.GetDirectories(property);
             var h = EditorGUI.GetPropertyHeight(property, label);
-            if (dirs == null) {
-
+            if (IsValid(property, ref this.prevSelected) == true) {
                 return h;
-
-            } else {
-
-                var isValid = true;
-                var val = property.objectReferenceValue;
-                if (val != null) {
-
-                    isValid = false;
-                    var path = AssetDatabase.GetAssetPath(val);
-                    for (int i = 0; i < dirs.Count; ++i) {
-
-                        var dirPath = AssetDatabase.GUIDToAssetPath(dirs[i]);
-                        if (string.IsNullOrEmpty(dirPath) == true) continue;
-                        if (path.StartsWith(dirPath) == true) {
-
-                            isValid = true;
-                            break;
-                            
-                        }
-                        
-                    }
-
-                }
-
-                if (isValid == true) {
-
-                    return h;
-
-                } else {
-
-                    return h + 3f;
-
-                }
-
             }
+            
+            return h + 3f;
             
         }
 
@@ -80,11 +64,20 @@ namespace UnityEditor.UI.Windows {
 
             var source = position;
             position.height = EditorGUI.GetPropertyHeight(property, label);
-            var dirs = this.GetDirectories(property);
-            if (dirs == null) {
-                
+            if (IsValid(property, ref this.prevSelected) == true) {
                 EditorGUI.PropertyField(position, property, label);
-                
+            } else {
+                GUILayoutExt.DrawRect(new Rect(source.x, source.y + source.height - 2f, source.width, 2f), Color.red); 
+                EditorGUI.PropertyField(position, property, new GUIContent(label.text, label.image, "This resource path is invalid. Check `Resource Directories` section."));
+            }
+
+        }
+
+        public static bool IsValid(SerializedProperty property, ref ObjDrawerCache prevSelected) {
+            
+            var dirs = GetDirectories(property, ref prevSelected);
+            if (dirs == null) {
+                return true;
             } else {
 
                 var isValid = true;
@@ -101,29 +94,62 @@ namespace UnityEditor.UI.Windows {
 
                             isValid = true;
                             break;
-                            
+
                         }
-                        
+
                     }
 
                 }
 
-                if (isValid == true) {
-
-                    EditorGUI.PropertyField(position, property, label);
-
-                } else {
-
-                    GUILayoutExt.DrawRect(new Rect(source.x, source.y + source.height - 2f, source.width, 2f), Color.red); 
-                    EditorGUI.PropertyField(position, property, new GUIContent(label.text, label.image, "This resource path is invalid. Check `Resource Directories` section."));
-                    
-                }
+                return isValid;
 
             }
-
+            
         }
 
-        public System.Collections.Generic.List<string> GetDirectories(SerializedProperty property) {
+        public static bool IsValid(GameObject obj, Object targetObj, ref ObjDrawerCache prevSelected) {
+            
+            var dirs = GetDirectories(obj, ref prevSelected);
+            if (dirs == null) {
+                return true;
+            } else {
+
+                var isValid = true;
+                var val = targetObj;
+                if (val != null) {
+
+                    isValid = false;
+                    var path = AssetDatabase.GetAssetPath(val);
+                    for (int i = 0; i < dirs.Count; ++i) {
+
+                        var dirPath = AssetDatabase.GUIDToAssetPath(dirs[i]);
+                        if (string.IsNullOrEmpty(dirPath) == true) continue;
+                        if (path.StartsWith(dirPath) == true) {
+
+                            isValid = true;
+                            break;
+
+                        }
+
+                    }
+
+                }
+
+                return isValid;
+
+            }
+            
+        }
+
+        public static System.Collections.Generic.List<string> GetDirectories(SerializedProperty property, ref ObjDrawerCache prevSelected) {
+            return GetDirectories((property.serializedObject.targetObject as Component)?.gameObject, ref prevSelected);
+        }
+
+        public static System.Collections.Generic.List<string> GetDirectories(GameObject go, ref ObjDrawerCache prevSelected) {
+
+            if (prevSelected.list == null) {
+                prevSelected.list = new System.Collections.Generic.List<string>();
+            }
             
             var activeObject = Selection.activeObject as GameObject;
             var usePrefabMode = true;
@@ -131,13 +157,13 @@ namespace UnityEditor.UI.Windows {
                 (EditorSceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null &&
                  activeObject != null &&
                  activeObject.scene.IsValid() == true)) {
-                activeObject = (property.serializedObject.targetObject as Component)?.gameObject;
+                activeObject = go;
                 usePrefabMode = false;
                 if (activeObject == null) return null;
             }
 
-            if (this.prevSelected == activeObject) return this.list.Count > 0 ? this.list : null;
-            this.prevSelected = activeObject;
+            if (prevSelected.go == activeObject) return prevSelected.list.Count > 0 ? prevSelected.list : null;
+            prevSelected.go = activeObject;
             
             var components = activeObject.GetComponentsInParent<WindowObject>(true);
             if (components.Length > 0) {
@@ -160,12 +186,12 @@ namespace UnityEditor.UI.Windows {
 
                 }
 
-                this.list.Clear();
+                prevSelected.list.Clear();
                 foreach (var component in components) {
 
                     var list = WindowSystemEditor.GetRefLock(component);
                     if (list != null) {
-                        this.list.AddRange(list);
+                        prevSelected.list.AddRange(list);
                     }
 
                 }
@@ -173,35 +199,33 @@ namespace UnityEditor.UI.Windows {
                 {
                     var list = WindowSystemEditor.GetRefLock(null);
                     if (list != null) {
-                        this.list.AddRange(list);
+                        prevSelected.list.AddRange(list);
                     }
                 }
 
                 if (usePrefabMode == true) {
                     
                     var splitted = path.Split(new[] { "/Components" }, System.StringSplitOptions.RemoveEmptyEntries);
-                    var rootPath = splitted[0] + "/Screens";
-                    var objs = AssetDatabase.FindAssets("t:prefab", new[] { rootPath });
-                    foreach (var obj in objs) {
-
-                        var screenPath = AssetDatabase.GUIDToAssetPath(obj);
-                        var screen = AssetDatabase.LoadAssetAtPath<GameObject>(screenPath);
-                        if (screen != null) {
-
-                            var window = screen.GetComponent<WindowBase>();
-                            var list = WindowSystemEditor.GetRefLock(window);
-                            if (list != null) {
-                                this.list.AddRange(list);
+                    if (splitted.Length == 2) {
+                        var rootPath = $"{splitted[0]}/Screens";
+                        var objs = AssetDatabase.FindAssets("t:prefab", new[] { rootPath });
+                        foreach (var obj in objs) {
+                            var screenPath = AssetDatabase.GUIDToAssetPath(obj);
+                            var screen = AssetDatabase.LoadAssetAtPath<GameObject>(screenPath);
+                            if (screen != null) {
+                                var window = screen.GetComponent<WindowBase>();
+                                var list = WindowSystemEditor.GetRefLock(window);
+                                if (list != null) {
+                                    prevSelected.list.AddRange(list);
+                                }
                             }
-
                         }
-
                     }
 
                 }
 
                 //EditorGUI.LabelField(position, "OBJ: " + component + " :: " + list.Count);
-                return this.list.Count > 0 ? this.list : null;
+                return prevSelected.list.Count > 0 ? prevSelected.list : null;
 
             }
 

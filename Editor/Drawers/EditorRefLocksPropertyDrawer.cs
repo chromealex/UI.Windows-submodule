@@ -103,7 +103,6 @@ namespace UnityEditor.UI.Windows {
             
             editorRefLocksList.DoLayoutList();
 
-            
         }
 
     }

@@ -5,13 +5,13 @@ namespace UnityEngine.UI.Windows {
 
     [RequireComponent(typeof(Canvas))]
     [RequireComponent(typeof(UnityEngine.UI.CanvasScaler))]
-    public class WindowLayout : WindowObject, IHasPreview {
+    public class WindowLayout : WindowObject, IHasPreview, ISerializationCallbackReceiver {
 
         public Canvas canvas;
         public UnityEngine.UI.CanvasScaler canvasScaler;
 
         public bool isRootLayout = true;
-        public WindowLayoutElement[] layoutElements;
+        public WindowLayoutElement[] layoutElements = System.Array.Empty<WindowLayoutElement>();
 
         public bool useSafeZone;
         public WindowLayoutSafeZone safeZone;
@@ -157,77 +157,88 @@ namespace UnityEngine.UI.Windows {
 
             this.canvas = this.GetComponent<Canvas>();
             this.canvasScaler = this.GetComponent<UnityEngine.UI.CanvasScaler>();
-            var prevElements = this.layoutElements;
-            this.layoutElements = this.GetComponentsInChildren<WindowLayoutElement>(true);
-
             this.canvas.renderMode = WindowSystem.GetSettings().canvas.renderMode;
 
-            this.ApplyTagsEditor(prevElements);
+            if (this.ApplyTagsEditor() == true) {
+                #if UNITY_EDITOR
+                UnityEditor.EditorUtility.SetDirty(this.gameObject);
+                #endif
+            }
             
         }
 
-        private void ApplyTagsEditor(WindowLayoutElement[] prevElements) {
+        internal bool ApplyTagsEditor() {
+            var prevElements = this.layoutElements;
+            this.layoutElements = this.GetComponentsInChildren<WindowLayoutElement>(true);
+            return this.ApplyTagsEditor(prevElements);
+        }
 
+        private bool ApplyTagsEditor(WindowLayoutElement[] prevElements) {
+
+            var changed = false;
             foreach (var element in this.layoutElements) {
-
                 if (element.tagId != 0) {
-
-                    if (this.layoutElements.Count(x => x.tagId == element.tagId) > 1 && prevElements.Contains(element) == false) {
-
+                    if (Count(this, element.tagId) > 1 && prevElements.Contains(element) == false) {
                         element.tagId = 0;
-
+                        changed = true;
                     }
-                    
                 }
-                
             }
 
             var localTagId = 0;
             foreach (var element in this.layoutElements) {
-
                 element.windowId = this.windowId;
                 if (element.tagId == 0) {
-
                     var reqId = ++localTagId;
-                    while (this.layoutElements.Any(x => x.tagId == reqId)) {
-
+                    while (HasAnyTag(this, reqId) == true) {
                         ++reqId;
-
                     }
-
-                    element.tagId = ++localTagId;
-
+                    element.tagId = reqId;
+                    changed = true;
                 } else {
-
-                    
                     localTagId = element.tagId;
-
                 }
+            }
 
+            return changed;
+
+            static bool HasAnyTag(WindowLayout layout, int tagId) {
+                foreach (var item in layout.layoutElements) {
+                    if (item.tagId == tagId) return true;
+                }
+                return false;
+            }
+
+            static int Count(WindowLayout layout, int tagId) {
+                var count = 0;
+                foreach (var item in layout.layoutElements) {
+                    if (item.tagId == tagId) ++count;
+                }
+                return count;
             }
 
         }
 
         public WindowLayoutElement GetLayoutElementByTagId(int tagId) {
-
             for (int i = 0; i < this.layoutElements.Length; ++i) {
-
                 if (this.layoutElements[i].tagId == tagId) {
-
                     return this.layoutElements[i];
-
                 }
-
             }
-
             return default;
-
         }
 
         public bool HasLayoutElementByTagId(int tagId) {
-
             return this.GetLayoutElementByTagId(tagId) != null;
+        }
 
+        public void OnBeforeSerialize() {
+            if (this == null) return;
+            this.ApplyTagsEditor();
+        }
+        
+        public void OnAfterDeserialize() {
+            
         }
 
     }

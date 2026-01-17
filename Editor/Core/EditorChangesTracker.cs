@@ -20,25 +20,35 @@ namespace UnityEditor.UI.Windows {
                     stream.GetCreateGameObjectHierarchyEvent(i, out var data);
                     var obj = UnityEditor.EditorUtility.InstanceIDToObject(data.instanceId) as GameObject;
                     if (obj == null) continue;
-                    var layout = obj.GetComponentInParent<uiws::WindowLayout>(true);
-                    if (layout.ApplyTagsEditor() == true) {
-                        UnityEditor.EditorUtility.SetDirty(layout.gameObject);
+                    {
+                        var layout = obj.GetComponentInParent<uiws::WindowLayout>(true);
+                        if (layout?.ApplyTagsEditor() == true) {
+                            UnityEditor.EditorUtility.SetDirty(layout.gameObject);
+                        }
                     }
                 } else if (evt == UnityEditor.ObjectChangeKind.ChangeGameObjectStructure) {
                     stream.GetChangeGameObjectStructureEvent(i, out var data);
                     var obj = UnityEditor.EditorUtility.InstanceIDToObject(data.instanceId) as GameObject;
                     if (obj == null) continue;
-                    var layout = obj.GetComponentInParent<uiws::WindowLayout>(true);
-                    if (layout.ApplyTagsEditor() == true) {
-                        UnityEditor.EditorUtility.SetDirty(layout.gameObject);
+                    {
+                        var layout = obj.GetComponentInParent<uiws::WindowLayout>(true);
+                        if (layout?.ApplyTagsEditor() == true) {
+                            UnityEditor.EditorUtility.SetDirty(layout.gameObject);
+                        }
+                    }
+                    {
+                        var component =  obj.GetComponent<uiws::WindowObject>();
+                        component.ValidateEditor(false, false);
                     }
                 } else if (evt == UnityEditor.ObjectChangeKind.DestroyGameObjectHierarchy) {
                     stream.GetChangeGameObjectStructureEvent(i, out var data);
                     var obj = UnityEditor.EditorUtility.InstanceIDToObject(data.instanceId) as GameObject;
                     if (obj == null) continue;
-                    var layout = obj.GetComponentInParent<uiws::WindowLayout>(true);
-                    if (layout.ApplyTagsEditor() == true) {
-                        UnityEditor.EditorUtility.SetDirty(layout.gameObject);
+                    {
+                        var layout = obj.GetComponentInParent<uiws::WindowLayout>(true);
+                        if (layout?.ApplyTagsEditor() == true) {
+                            UnityEditor.EditorUtility.SetDirty(layout.gameObject);
+                        }
                     }
                 }
             }

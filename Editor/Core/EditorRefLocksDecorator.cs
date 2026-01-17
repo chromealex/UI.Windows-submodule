@@ -108,7 +108,14 @@ namespace UnityEditor.UI.Windows {
         }
 
         public static bool IsValid(GameObject obj, Object targetObj, ref ObjDrawerCache prevSelected) {
-            
+
+            if (targetObj is Component comp) {
+                var prefabType = PrefabUtility.GetPrefabAssetType(comp.gameObject);
+                if (prefabType == PrefabAssetType.NotAPrefab) {
+                    return true;
+                }
+            }
+
             var dirs = GetDirectories(obj, ref prevSelected);
             if (dirs == null) {
                 return true;

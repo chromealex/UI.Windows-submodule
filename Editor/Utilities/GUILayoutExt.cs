@@ -1322,7 +1322,7 @@ namespace UnityEditor.UI.Windows {
         }
 
         public static void DrawInvalid(Rect position) {
-	        const string iconPath = "warning_icon";
+	        const string iconPath = "error_icon";
 	        var icon = Resources.Load<Texture>($"EditorAssets/{iconPath}");
 	        var iconSize = new Vector2(20f, 18f);
 	        var lineRect = new Rect(position.x, position.y + position.height - 2f, position.width, 2f);

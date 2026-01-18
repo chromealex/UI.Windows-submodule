@@ -74,8 +74,8 @@ namespace UnityEditor.UI.Windows {
             var labelSize = 40f;
 
             var objRect = position;
-            objRect.x -= EditorGUI.indentLevel * 14f;
-            objRect.width += -labelSize + EditorGUI.indentLevel * 14f;
+            //objRect.x -= EditorGUI.indentLevel * 14f;
+            objRect.width += -labelSize;// + EditorGUI.indentLevel * 14f;
 
             var labelPadding = 3f;
             var labelRect = position;
@@ -120,7 +120,7 @@ namespace UnityEditor.UI.Windows {
             }
 
             if (ObjDrawer.IsValid(property.serializedObject.targetObject as GameObject, newObj, ref prevSelected) == false) {
-                GUILayoutExt.DrawRect(new Rect(position.x, position.y + position.height - 2f, position.width, 2f), Color.red);
+                GUILayoutExt.DrawInvalid(position);
             }
 
             var tooltip = "This object will be stored through GUID link.";

@@ -62,12 +62,11 @@ namespace UnityEditor.UI.Windows {
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
 
-            var source = position;
             position.height = EditorGUI.GetPropertyHeight(property, label);
             if (IsValid(property, ref this.prevSelected) == true) {
                 EditorGUI.PropertyField(position, property, label);
             } else {
-                GUILayoutExt.DrawRect(new Rect(source.x, source.y + source.height - 2f, source.width, 2f), Color.red); 
+                GUILayoutExt.DrawInvalid(position);
                 EditorGUI.PropertyField(position, property, new GUIContent(label.text, label.image, "This resource path is invalid. Check `Resource Directories` section."));
             }
 

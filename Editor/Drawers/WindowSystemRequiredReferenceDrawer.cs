@@ -46,7 +46,7 @@ namespace UnityEditor.UI.Windows {
 
             }
             
-            var icon = Resources.Load<Texture>("EditorAssets/" + iconPath);
+            var icon = Resources.Load<Texture>($"EditorAssets/{iconPath}");
             var iconRect = fieldRect;
             iconRect.width = iconRect.height;
             iconRect.x = fieldRect.width - iconRect.width;

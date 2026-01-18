@@ -1321,6 +1321,19 @@ namespace UnityEditor.UI.Windows {
 	        }
         }
 
+        public static void DrawInvalid(Rect position) {
+	        const string iconPath = "warning_icon";
+	        var icon = Resources.Load<Texture>($"EditorAssets/{iconPath}");
+	        var iconSize = new Vector2(20f, 18f);
+	        var lineRect = new Rect(position.x, position.y + position.height - 2f, position.width, 2f);
+	        var texRect = new Rect(position.x - iconSize.x, position.y, iconSize.x, iconSize.y);
+	        var color = GUI.color;
+	        GUI.color = Color.red;
+	        GUI.Label(texRect, new GUIContent(icon, "This reference is invalid because it's used out of valid directories scope.\nMove this asset to the valid directory."));
+	        GUILayoutExt.DrawRect(lineRect, GUI.color);
+	        GUI.color = color;
+        }
+
     }
 
     public class PopupWindowAnim : EditorWindow {

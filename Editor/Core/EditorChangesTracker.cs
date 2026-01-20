@@ -26,6 +26,10 @@ namespace UnityEditor.UI.Windows {
                             UnityEditor.EditorUtility.SetDirty(layout.gameObject);
                         }
                     }
+                    {
+                        var component =  obj.GetComponent<uiws::WindowObject>();
+                        component.ValidateEditor(true, false);
+                    }
                 } else if (evt == UnityEditor.ObjectChangeKind.ChangeGameObjectStructure) {
                     stream.GetChangeGameObjectStructureEvent(i, out var data);
                     var obj = UnityEditor.EditorUtility.InstanceIDToObject(data.instanceId) as GameObject;
@@ -38,7 +42,7 @@ namespace UnityEditor.UI.Windows {
                     }
                     {
                         var component =  obj.GetComponent<uiws::WindowObject>();
-                        component.ValidateEditor(false, false);
+                        component.ValidateEditor(true, false);
                     }
                 } else if (evt == UnityEditor.ObjectChangeKind.DestroyGameObjectHierarchy) {
                     stream.GetChangeGameObjectStructureEvent(i, out var data);
@@ -49,6 +53,10 @@ namespace UnityEditor.UI.Windows {
                         if (layout?.ApplyTagsEditor() == true) {
                             UnityEditor.EditorUtility.SetDirty(layout.gameObject);
                         }
+                    }
+                    {
+                        var component =  obj.GetComponent<uiws::WindowObject>();
+                        component.ValidateEditor(true, false);
                     }
                 }
             }

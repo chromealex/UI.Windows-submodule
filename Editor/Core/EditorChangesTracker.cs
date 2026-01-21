@@ -45,7 +45,7 @@ namespace UnityEditor.UI.Windows {
                         component?.ValidateEditor(true, false);
                     }
                 } else if (evt == UnityEditor.ObjectChangeKind.DestroyGameObjectHierarchy) {
-                    stream.GetChangeGameObjectStructureEvent(i, out var data);
+                    stream.GetDestroyGameObjectHierarchyEvent(i, out var data);
                     var obj = UnityEditor.EditorUtility.InstanceIDToObject(data.instanceId) as GameObject;
                     if (obj == null) continue;
                     {

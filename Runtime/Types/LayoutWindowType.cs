@@ -475,7 +475,6 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         #if UNITY_EDITOR
         private WindowLayoutSafeZone.ScreenCache screenCache;
-        #endif
         public void UpdateCurrentPreferences() {
             if (this.screenCache.HasChanged == true) {
                 this.screenCache.Update();
@@ -484,6 +483,7 @@ namespace UnityEngine.UI.Windows.WindowTypes {
                 }
             }
         }
+        #endif
 
         internal override void OnShowBeginInternal() {
             base.OnShowBeginInternal();

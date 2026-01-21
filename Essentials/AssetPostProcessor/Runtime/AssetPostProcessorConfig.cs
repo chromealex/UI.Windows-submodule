@@ -9,8 +9,8 @@ namespace UnityEngine.UI.Windows.Essentials.AssetPostProcessor.Runtime {
 
             [LabelAttribute]
             public string label;
-            [Space]
             #if UNITY_EDITOR
+            [Space]
             public UnityEditor.Presets.Preset preset;
             #endif
             
@@ -32,10 +32,12 @@ namespace UnityEngine.UI.Windows.Essentials.AssetPostProcessor.Runtime {
 
         public string[] labels;
 
+        #if UNITY_EDITOR
         [ContextMenu("Update Labels")]
         public void UpdateLabels() {
             UnityEditor.AssetDatabase.SetLabels(this, this.labels);
         }
+        #endif
 
     }
 

@@ -24,6 +24,8 @@
         
         public virtual void OnSetText(string prevText, string text) { }
 
+        public virtual void OnSetColor(Color color) { }
+
     }
     
 }

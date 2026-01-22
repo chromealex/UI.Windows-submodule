@@ -27,7 +27,7 @@ namespace UnityEditor.UI.Windows {
                         }
                     }
                     {
-                        var component =  obj.GetComponent<uiws::WindowObject>();
+                        var component = obj.GetComponent<uiws::WindowObject>();
                         component?.ValidateEditor(true, false);
                     }
                 } else if (evt == UnityEditor.ObjectChangeKind.ChangeGameObjectStructure) {
@@ -41,7 +41,7 @@ namespace UnityEditor.UI.Windows {
                         }
                     }
                     {
-                        var component =  obj.GetComponent<uiws::WindowObject>();
+                        var component = obj.GetComponent<uiws::WindowObject>();
                         component?.ValidateEditor(true, false);
                     }
                 } else if (evt == UnityEditor.ObjectChangeKind.DestroyGameObjectHierarchy) {
@@ -55,7 +55,7 @@ namespace UnityEditor.UI.Windows {
                         }
                     }
                     {
-                        var component =  obj.GetComponent<uiws::WindowObject>();
+                        var component = obj.GetComponent<uiws::WindowObject>();
                         component?.ValidateEditor(true, false);
                     }
                 }

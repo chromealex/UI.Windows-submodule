@@ -28,6 +28,8 @@
             onFinished?.Invoke(closure, newTexture);
         }
 
+        public virtual void OnSetColor(Color color) { }
+
     }
     
 }

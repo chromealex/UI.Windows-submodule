@@ -354,6 +354,8 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.graphics == null) return;
             this.graphics.color = color;
 
+            this.ForEachModule<ImageComponentModule, Color>(color, static (c, state) => c.OnSetColor(state));
+
         }
 
         public Color GetColor() {

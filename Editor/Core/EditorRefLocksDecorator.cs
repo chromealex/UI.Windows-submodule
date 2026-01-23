@@ -203,7 +203,7 @@ namespace UnityEditor.UI.Windows {
                 }
 
                 {
-                    var list = WindowSystemEditor.GetRefLock(null);
+                    var list = WindowSystemEditor.GetRefLock("UIWS");
                     if (list != null) {
                         prevSelected.list.AddRange(list);
                     }

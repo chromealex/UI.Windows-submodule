@@ -14,7 +14,7 @@ namespace UnityEngine.UI.Windows.Essentials.AssetPostProcessor.Runtime {
             public UnityEditor.Presets.Preset preset;
             #endif
             
-            public bool IsValid => string.IsNullOrEmpty(this.label) == false;
+            public bool IsValid => string.IsNullOrEmpty(this.label) == false && this.preset != null;
 
         }
 

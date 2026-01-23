@@ -9,17 +9,19 @@ namespace UnityEditor.UI.Windows {
 
         private static UnityEditorInternal.ReorderableList editorRefLocksList;
         private static SerializedObject serializedObject;
+        private static string lastGuid;
 
-        public static void Draw(SerializedObject serializedObject, bool core = false) {
+        public static void Draw(SerializedObject serializedObject, string guid = null) {
             
-            if (editorRefLocksList == null || EditorRefLocksPropertyDrawer.serializedObject != serializedObject) {
+            if (editorRefLocksList == null || EditorRefLocksPropertyDrawer.serializedObject != serializedObject || EditorRefLocksPropertyDrawer.lastGuid != guid) {
 
                 EditorRefLocksPropertyDrawer.serializedObject = serializedObject;
+                EditorRefLocksPropertyDrawer.lastGuid = guid;
                 
                 var component = serializedObject.targetObject;
                 if (component == null) return;
 
-                var componentsProp = WindowSystemEditor.GetRefLockProperty(core == true ? null : component);
+                var componentsProp = WindowSystemEditor.GetRefLockProperty(guid != null ? guid : UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(component)));
                 editorRefLocksList = new UnityEditorInternal.ReorderableList(componentsProp.serializedObject, componentsProp, true, true, true, true);
                 editorRefLocksList.elementHeight = 40f;
                 editorRefLocksList.onAddCallback = (rList) => {

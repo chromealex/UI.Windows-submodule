@@ -24,6 +24,16 @@ namespace UnityEngine.UI.Windows.Components {
         void RemoveCallbacks();
 
     }
+
+    public interface IButtonExtended {
+
+        public void AddListener(System.Action callback);
+        public void RemoveListener(System.Action callback);
+        public void AddListener<T>(T data, System.Action<T> callback) where T : System.IEquatable<T>;
+        public void RemoveListener<T>(T data, System.Action<T> callback) where T : System.IEquatable<T>;
+        public void RemoveAllListeners();
+
+    }
     
     public class ButtonComponent : GenericComponent, IInteractableButton, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
 
@@ -54,8 +64,13 @@ namespace UnityEngine.UI.Windows.Components {
         }
         
         internal override void OnInitInternal() {
-            
-            this.button.onClick.AddListener(this.DoClickInternal);
+
+            if (this.button is IButtonExtended buttonExtended) {
+                buttonExtended.AddListener((button: this, _: 0), static x => x.button.DoClickInternal());
+            } else {
+                this.button.onClick.AddListener(this.DoClickInternal);
+            }
+
             this.callbackRegistries.Initialize();
             
             base.OnInitInternal();

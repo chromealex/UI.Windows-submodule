@@ -135,30 +135,6 @@ namespace UnityEditor.UI.Windows {
         private readonly HashSet<AtlasData> usedAtlases = new HashSet<AtlasData>();
         private bool dependenciesState;
 
-        public class Temp : ScriptableObject {
-
-            public Object[] targetDirsObjects;
-
-        }
-        
-        private SerializedObject temporarySerializedObject;
-
-        [System.Serializable]
-        public struct TargetDirs {
-
-            public string[] dirs;
-
-        }
-        
-        private string targetDirs {
-            get {
-                return EditorPrefs.GetString("UIWS.TargetDir");
-            }
-            set {
-                EditorPrefs.SetString("UIWS.TargetDir", value);
-            }
-        }
-
         public override void OnInspectorGUI() {
 
             this.serializedObject.Update();
@@ -211,51 +187,16 @@ namespace UnityEditor.UI.Windows {
                     var count = this.registeredPrefabs.arraySize;
                     EditorGUILayout.PropertyField(this.registeredPrefabs, new GUIContent($"Registered Prefabs ({count})"));
 
-                    var json = this.targetDirs;
-                    TargetDirs targetDirs;
-                    try {
-                        targetDirs = JsonUtility.FromJson<TargetDirs>(json);
-                    } catch (System.Exception) {
-                        targetDirs = new TargetDirs() {
-                            dirs = System.Array.Empty<string>(),
-                        };
-                    }
-
-                    {
-                        if (this.temporarySerializedObject == null) {
-                            var so = new SerializedObject(Temp.CreateInstance<Temp>());
-                            this.temporarySerializedObject = so;
-                        }
-
-                        var dirsProp = this.temporarySerializedObject.FindProperty(nameof(Temp.targetDirsObjects));
-                        dirsProp.arraySize = targetDirs.dirs.Length;
-                        for (var index = 0; index < targetDirs.dirs.Length; ++index) {
-                            var dir = targetDirs.dirs[index];
-                            var folder = AssetDatabase.LoadAssetAtPath<Object>(dir);
-                            dirsProp.GetArrayElementAtIndex(index).objectReferenceValue = folder;
-                        }
-
-                        EditorGUILayout.PropertyField(dirsProp);
-                        if (GUI.changed == true) {
-                            this.temporarySerializedObject.ApplyModifiedProperties();
-                            this.temporarySerializedObject.Update();
-                            System.Array.Resize(ref targetDirs.dirs, dirsProp.arraySize);
-                            for (int i = 0; i < dirsProp.arraySize; ++i) {
-                                var folder = dirsProp.GetArrayElementAtIndex(i).objectReferenceValue;
-                                var dir = AssetDatabase.GetAssetPath(folder);
-                                targetDirs.dirs[i] = dir;
-                            }
-                            this.targetDirs = JsonUtility.ToJson(targetDirs);
-                        }
-                    }
+                    EditorRefLocksPropertyDrawer.Draw(this.serializedObject, "UIWS.Collect");
 
                     GUILayout.Space(10f);
                     GUILayout.BeginHorizontal();
                     GUILayout.FlexibleSpace();
                     if (GUILayout.Button("Collect Prefabs", GUILayout.Width(200f), GUILayout.Height(30f)) == true) {
 
+                        var dirs = WindowSystemEditor.GetRefLock("UIWS.Collect");
                         var list = new List<WindowBase>();
-                        var gameObjects = AssetDatabase.FindAssets("t:GameObject", targetDirs.dirs);
+                        var gameObjects = AssetDatabase.FindAssets("t:GameObject", dirs.Select(x => AssetDatabase.GUIDToAssetPath(x)).ToArray());
                         foreach (var guid in gameObjects) {
 
                             var path = AssetDatabase.GUIDToAssetPath(guid);
@@ -291,7 +232,7 @@ namespace UnityEditor.UI.Windows {
                         
                         GUILayoutExt.Box(4f, 4f, () => {
 
-                            EditorRefLocksPropertyDrawer.Draw(this.serializedObject, true);
+                            EditorRefLocksPropertyDrawer.Draw(this.serializedObject, "UIWS");
                         
                         });
 
@@ -383,6 +324,10 @@ namespace UnityEditor.UI.Windows {
                         GUILayout.FlexibleSpace();
                         if (GUILayout.Button("Validate Resources", GUILayout.Width(200f), GUILayout.Height(30f)) == true) {
 
+                            if (EditorUtility.DisplayDialog("Are you sure?", "This operation will check all prefabs in your project. This can take a very long time.", "Yes", "No, let me think") == false) {
+                                return;
+                            }
+                            
                             EditorApplication.delayCall += () => {
 
                                 try {
@@ -556,6 +501,10 @@ namespace UnityEditor.UI.Windows {
                         GUILayout.BeginHorizontal();
                         GUILayout.FlexibleSpace();
                         if (GUILayout.Button("Validate WindowObjects", GUILayout.Width(200f), GUILayout.Height(30f)) == true) {
+
+                            if (EditorUtility.DisplayDialog("Are you sure?", "This operation will check all prefabs in your project. This can take a very long time.", "Yes", "No, let me think") == false) {
+                                return;
+                            }
 
                             EditorApplication.delayCall += () => {
 
@@ -814,6 +763,14 @@ namespace UnityEditor.UI.Windows {
 
         }
 
+        public static List<string> GetRefLock(string guid) {
+
+            ValidateRefLock();
+            var refLocks = AssetDatabase.LoadAssetAtPath<UnityEngine.UI.Windows.Editor.EditorRefLocks>(EDITOR_REF_LOCKS_PATH);
+            return refLocks.GetItemOrNull(guid).directories;
+
+        }
+
         public static void ValidateRefLock() {
 
             var refLocks = AssetDatabase.LoadAssetAtPath<UnityEngine.UI.Windows.Editor.EditorRefLocks>(EDITOR_REF_LOCKS_PATH);
@@ -841,11 +798,11 @@ namespace UnityEditor.UI.Windows {
         }
 
         private static SerializedObject refLockSo;
-        public static SerializedProperty GetRefLockProperty(Object component) {
+        public static SerializedProperty GetRefLockProperty(string guid) {
             
             ValidateRefLock();
             var refLocks = AssetDatabase.LoadAssetAtPath<UnityEngine.UI.Windows.Editor.EditorRefLocks>(EDITOR_REF_LOCKS_PATH);
-            var isNew = refLocks.GetItem(component, out var index);
+            var isNew = refLocks.GetItem(guid, out var index);
             if (refLockSo == null) {
                 var so = new SerializedObject(refLocks);
                 refLockSo = so;

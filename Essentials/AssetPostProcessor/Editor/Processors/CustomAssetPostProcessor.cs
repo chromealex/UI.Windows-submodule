@@ -2,6 +2,7 @@ namespace UnityEditor.UI.Windows.Essentials.AssetPostProcessor.Editor.Processors
     
     using UnityEngine.UI.Windows.Essentials.AssetPostProcessor.Runtime;
 
+    #if UIWS_ASSET_POSTPROCESSOR
     public class CustomAssetPostProcessor : UnityEditor.AssetPostprocessor {
 
         private const string CONFIG_PATH = "Assets/EditorResources/UI.Windows/AssetPostprocessorConfig.asset";
@@ -108,5 +109,6 @@ namespace UnityEditor.UI.Windows.Essentials.AssetPostProcessor.Editor.Processors
         }*/
 
     }
+    #endif
 
 }

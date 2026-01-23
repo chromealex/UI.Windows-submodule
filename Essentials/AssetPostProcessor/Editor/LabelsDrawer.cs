@@ -2,6 +2,8 @@ using System.Linq;
 
 namespace UnityEditor.UI.Windows.Essentials.AssetPostProcessor.Editor {
 
+    #if UIWS_ASSET_POSTPROCESSOR
+    
     using UnityEngine.UI.Windows.Essentials.AssetPostProcessor.Runtime;
     using UnityEditor;
     using UnityEngine;
@@ -12,7 +14,9 @@ namespace UnityEditor.UI.Windows.Essentials.AssetPostProcessor.Editor {
         //private static System.Collections.Generic.List<string> labels;
         
         public override void OnGUI(UnityEngine.Rect position, SerializedProperty property, UnityEngine.GUIContent label) {
+            #if UIWS_ASSET_POSTPROCESSOR
             var config = UnityEditor.UI.Windows.Essentials.AssetPostProcessor.Editor.Processors.CustomAssetPostProcessor.ValidateConfig();
+            #endif
             /*if (labels == null) {
                 var flags = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.InvokeMethod;
                 var dicLabels = (System.Collections.Generic.Dictionary<string, float>)typeof(AssetDatabase).InvokeMember("GetAllLabels", flags, null, null, null);
@@ -46,5 +50,6 @@ namespace UnityEditor.UI.Windows.Essentials.AssetPostProcessor.Editor {
         }
 
     }
+    #endif
 
 }

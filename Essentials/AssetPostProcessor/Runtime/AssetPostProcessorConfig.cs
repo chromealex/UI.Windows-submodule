@@ -7,7 +7,7 @@ namespace UnityEngine.UI.Windows.Essentials.AssetPostProcessor.Runtime {
         [System.Serializable]
         public struct Item {
 
-            [LabelAttribute]
+            [Label]
             public string label;
             #if UNITY_EDITOR
             [Space]

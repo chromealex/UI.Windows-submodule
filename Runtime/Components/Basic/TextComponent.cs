@@ -88,6 +88,12 @@ namespace UnityEngine.UI.Windows.Components {
             return this.componentModules.modules;
         }
 
+        internal enum CacheLayer {
+            Data  = 1 << 0,
+            Bytes = 1 << 1,
+            Value = 1 << 2,
+        }
+
         public struct TimeFormatFromSeconds : IValueFormat {
 
             public string format;
@@ -350,12 +356,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        internal enum CacheLayer {
-            Data  = 1 << 0,
-            Bytes = 1 << 1,
-            Value = 1 << 2,
-        }
-
         internal override void OnDeInitInternal() {
 
             base.OnDeInitInternal();
@@ -371,12 +371,10 @@ namespace UnityEngine.UI.Windows.Components {
             this.lastBytesText = default;
 
             #if UNITY_LOCALIZATION_SUPPORT
-
             if (this.lastLocalizationKey != null) {
                 this.lastLocalizationKey.StringChanged -= this.OnLocalizationStringChanged;
                 this.lastLocalizationKey = null;
             }
-
             #endif
 
         }
@@ -429,22 +427,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        private string GetFormatTimeString(TimeResultStrings ts, TimeResult result) {
-
-            return new TimeFormat(ts, result).GetString();
-
-        }
-
-        internal void ResetLastCacheOther(CacheLayer layer) {
-            this.ResetLastCache(~layer);
-        }
-
-        internal void ResetLastCache(CacheLayer layer) {
-            if ((layer & CacheLayer.Data) != 0) this.lastData = default;
-            if ((layer & CacheLayer.Bytes) != 0) this.lastBytesText = default;
-            if ((layer & CacheLayer.Value) != 0) this.lastValueData = default;
-        }
-
         private struct ValueFormat : System.IEquatable<ValueFormat> {
 
             public TextFormatResolver provider;
@@ -483,6 +465,22 @@ namespace UnityEngine.UI.Windows.Components {
                 return this.provider.IsValid() == true || string.IsNullOrEmpty(this.valueFormat) == false;
             }
 
+        }
+
+        private string GetFormatTimeString(TimeResultStrings ts, TimeResult result) {
+
+            return new TimeFormat(ts, result).GetString();
+
+        }
+
+        internal void ResetLastCacheOther(CacheLayer layer) {
+            this.ResetLastCache(~layer);
+        }
+
+        internal void ResetLastCache(CacheLayer layer) {
+            if ((layer & CacheLayer.Data) != 0) this.lastData = default;
+            if ((layer & CacheLayer.Bytes) != 0) this.lastBytesText = default;
+            if ((layer & CacheLayer.Value) != 0) this.lastValueData = default;
         }
 
         public bool SetValueFormat(string format) {

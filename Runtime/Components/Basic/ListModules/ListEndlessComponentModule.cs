@@ -7,7 +7,6 @@ namespace UnityEngine.UI.Windows {
 
     public interface IEndlessElement {
 
-        // void GetHeight();
         public int GetIndex();
 
     }
@@ -252,8 +251,7 @@ namespace UnityEngine.UI.Windows {
 
                         var actualInstance = this.instancesToRedraw[i];
 
-                        if (this.instancePrevIndexToListIndex.TryGetValue(itemVisibleIndex, out var indexFitInstance) ==
-                            false) continue;
+                        if (this.instancePrevIndexToListIndex.TryGetValue(itemVisibleIndex, out var indexFitInstance) == false) continue;
 
                         var fitInstance = this.instancesToRedraw[indexFitInstance];
 

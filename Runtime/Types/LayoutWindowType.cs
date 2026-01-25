@@ -224,10 +224,10 @@ namespace UnityEngine.UI.Windows.WindowTypes {
             };
 
             var layoutItem = this;
-            Coroutines.Run(layoutItem.InitLayoutInstance(closure, initialParameters, windowInstance, windowInstance, layoutItem.windowLayout, closure.used, static (state) => {
+            layoutItem.InitLayoutInstance(closure, initialParameters, windowInstance, windowInstance, layoutItem.windowLayout, closure.used, static (state) => {
                 state.onComplete.Invoke(state.state);
                 PoolHashSet<WindowLayout>.Recycle(state.used);
-            }));
+            });
 
         }
 
@@ -238,12 +238,12 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         }
 
         private int loadingCount;
-        private IEnumerator InitLayoutInstance<TState>(TState state, InitialParameters initialParameters, LayoutWindowType windowInstance, WindowObject root, WindowLayout windowLayout, HashSet<WindowLayout> used, System.Action<TState> onComplete, bool isInner = false) {
+        private void InitLayoutInstance<TState>(TState state, InitialParameters initialParameters, LayoutWindowType windowInstance, WindowObject root, WindowLayout windowLayout, HashSet<WindowLayout> used, System.Action<TState> onComplete, bool isInner = false) {
 
             if (((ILayoutInstance)root).windowLayoutInstance != null || windowLayout == null) {
                 
                 if (onComplete != null) onComplete.Invoke(state);
-                yield break;
+                return;
                 
             }
             
@@ -320,32 +320,44 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
             }
 
-            while (this.loadingCount > 0) yield return null;
+            if (arr.Length == 0) return;
             
-            for (int i = 0; i < arr.Length; ++i) {
+            Coroutines.Wait((layout: this, arr, windowLayout, windowLayoutInstance, onComplete, used, state, initialParameters, windowInstance), static (x) => x.layout.loadingCount == 0, static (x) => {
 
-                var layoutComponent = arr[i];
-                if (layoutComponent.windowLayout != windowLayout) continue;
+                var arr = x.arr;
+                var windowLayout = x.windowLayout;
+                var windowLayoutInstance = x.windowLayoutInstance;
+                var onComplete = x.onComplete;
+                var used = x.used;
+                var state = x.state;
+                var initialParameters = x.initialParameters;
+                var windowInstance = x.windowInstance;
+                for (int i = 0; i < arr.Length; ++i) {
 
-                var layoutElement = windowLayoutInstance.GetLayoutElementByTagId(layoutComponent.tag);
-                if (layoutElement.innerLayout != null) {
+                    var layoutComponent = arr[i];
+                    if (layoutComponent.windowLayout != windowLayout) continue;
 
-                    if (used.Contains(layoutElement.innerLayout) == false) {
+                    var layoutElement = windowLayoutInstance.GetLayoutElementByTagId(layoutComponent.tag);
+                    if (layoutElement.innerLayout != null) {
 
-                        yield return this.InitLayoutInstance(state, initialParameters, windowInstance, layoutElement, layoutElement.innerLayout, used, null, isInner: true);
+                        if (used.Contains(layoutElement.innerLayout) == false) {
 
-                    } else {
+                            x.layout.InitLayoutInstance(state, initialParameters, windowInstance, layoutElement, layoutElement.innerLayout, used, null, isInner: true);
 
-                        Debug.LogWarning("Ignoring inner layout because of a cycle");
+                        } else {
+
+                            Debug.LogWarning("Ignoring inner layout because of a cycle");
+
+                        }
 
                     }
 
                 }
 
-            }
+                if (onComplete != null) onComplete.Invoke(state);
 
-            if (onComplete != null) onComplete.Invoke(state);
-
+            });
+            
         }
 
         public void PushToPool() {

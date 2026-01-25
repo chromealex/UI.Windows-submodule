@@ -340,6 +340,8 @@ namespace UnityEngine.UI.Windows.Components {
             if (this.graphics == null) return;
             this.graphics.material = material;
             
+            this.ForEachModule<ImageComponentModule, Material>(material, static (c, state) => c.OnSetMaterial(state));
+
         }
 
         public Material GetMaterial() {

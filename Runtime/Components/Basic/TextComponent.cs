@@ -67,6 +67,19 @@ namespace UnityEngine.UI.Windows.Components {
 
     public partial class TextComponent : WindowComponent, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
 
+        [RequiredReference]
+        public UnityEngine.UI.Graphic graphics;
+        private TimeResultStrings timeResultStrings = new TimeResultStrings() {
+            millisecondsString = @"",
+            secondsString = @"ss",
+            minutesString = @"mm\:",
+            minutesStringEnd = @"mm",
+            hoursString = @"hh\:",
+            daysString = @"d\d\ ",
+        };
+        private ValueData lastValueData;
+        private ValueFormat valueFormat;
+
         System.Type ISearchComponentByTypeEditor.GetSearchType() {
             return typeof(TextComponentModule);
         }
@@ -290,96 +303,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        [RequiredReference]
-        public UnityEngine.UI.Graphic graphics;
-        private TimeResultStrings timeResultStrings = new TimeResultStrings() {
-            millisecondsString = @"",
-            secondsString = @"ss",
-            minutesString = @"mm\:",
-            minutesStringEnd = @"mm",
-            hoursString = @"hh\:",
-            daysString = @"d\d\ ",
-        };
-
-        internal override void OnDeInitInternal() {
-
-            base.OnDeInitInternal();
-
-            this.ResetInstance();
-
-        }
-
-        private void ResetInstance() {
-
-            this.lastValueData = default;
-            this.lastData = default;
-            this.lastBytesText = default;
-
-            #if UNITY_LOCALIZATION_SUPPORT
-
-            if (this.lastLocalizationKey != null) {
-                this.lastLocalizationKey.StringChanged -= this.OnLocalizationStringChanged;
-                this.lastLocalizationKey = null;
-            }
-
-            #endif
-
-        }
-
-        public void SetColor(Color color) {
-
-            if (this.graphics == null) {
-                return;
-            }
-
-            this.graphics.color = color;
-
-            this.ForEachModule<TextComponentModule, Color>(color, static (c, state) => c.OnSetColor(state));
-
-        }
-
-        public Color GetColor() {
-
-            if (this.graphics == null) {
-                return Color.white;
-            }
-
-            return this.graphics.color;
-
-        }
-
-        public void SetTimeResultString(TimeValue timeValue, FormatTimeString str) {
-
-            switch (timeValue) {
-                case TimeValue.Milliseconds:
-                    this.timeResultStrings.millisecondsString = str.GetValue();
-                    break;
-
-                case TimeValue.Seconds:
-                    this.timeResultStrings.secondsString = str.GetValue();
-                    break;
-
-                case TimeValue.Minutes:
-                    this.timeResultStrings.minutesString = str.GetValue();
-                    break;
-
-                case TimeValue.Hours:
-                    this.timeResultStrings.hoursString = str.GetValue();
-                    break;
-
-                case TimeValue.Days:
-                    this.timeResultStrings.daysString = str.GetValue();
-                    break;
-            }
-
-        }
-
-        private string GetFormatTimeString(TimeResultStrings ts, TimeResult result) {
-
-            return new TimeFormat(ts, result).GetString();
-
-        }
-
         [System.Serializable]
         public struct ValueData {
 
@@ -427,12 +350,89 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        private ValueData lastValueData;
-
         internal enum CacheLayer {
             Data  = 1 << 0,
             Bytes = 1 << 1,
             Value = 1 << 2,
+        }
+
+        internal override void OnDeInitInternal() {
+
+            base.OnDeInitInternal();
+
+            this.ResetInstance();
+
+        }
+
+        private void ResetInstance() {
+
+            this.lastValueData = default;
+            this.lastData = default;
+            this.lastBytesText = default;
+
+            #if UNITY_LOCALIZATION_SUPPORT
+
+            if (this.lastLocalizationKey != null) {
+                this.lastLocalizationKey.StringChanged -= this.OnLocalizationStringChanged;
+                this.lastLocalizationKey = null;
+            }
+
+            #endif
+
+        }
+
+        public void SetColor(Color color) {
+
+            if (this.graphics == null) {
+                return;
+            }
+
+            this.graphics.color = color;
+            
+            this.ForEachModule<TextComponentModule, Color>(color, static (c, state) => c.OnSetColor(state));
+
+        }
+
+        public Color GetColor() {
+
+            if (this.graphics == null) {
+                return Color.white;
+            }
+
+            return this.graphics.color;
+
+        }
+
+        public void SetTimeResultString(TimeValue timeValue, FormatTimeString str) {
+
+            switch (timeValue) {
+                case TimeValue.Milliseconds:
+                    this.timeResultStrings.millisecondsString = str.GetValue();
+                    break;
+
+                case TimeValue.Seconds:
+                    this.timeResultStrings.secondsString = str.GetValue();
+                    break;
+
+                case TimeValue.Minutes:
+                    this.timeResultStrings.minutesString = str.GetValue();
+                    break;
+
+                case TimeValue.Hours:
+                    this.timeResultStrings.hoursString = str.GetValue();
+                    break;
+
+                case TimeValue.Days:
+                    this.timeResultStrings.daysString = str.GetValue();
+                    break;
+            }
+
+        }
+
+        private string GetFormatTimeString(TimeResultStrings ts, TimeResult result) {
+
+            return new TimeFormat(ts, result).GetString();
+
         }
 
         internal void ResetLastCacheOther(CacheLayer layer) {
@@ -485,7 +485,6 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        private ValueFormat valueFormat;
         public bool SetValueFormat(string format) {
             var f = new ValueFormat(this.valueFormat.provider, format);
             if (this.valueFormat == f) return false;
@@ -602,7 +601,6 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         #if UNITY_LOCALIZATION_SUPPORT
-
         public static bool localizationTestMode;
         private UnityEngine.Localization.LocalizedString lastLocalizationKey;
         private bool avoidLocalizationUnsubscribe;
@@ -655,7 +653,6 @@ namespace UnityEngine.UI.Windows.Components {
             this.avoidLocalizationUnsubscribe = false;
 
         }
-
         #endif
 
         public virtual void SetText(char[] charArray) {
@@ -693,13 +690,8 @@ namespace UnityEngine.UI.Windows.Components {
             #endif
 
             this.ForEachModule<TextComponentModule, System.ValueTuple<string, string>>((prevText.s0, text), static (c, state) => c.OnSetText(state.Item1, state.Item2));
-            var results = PoolList<TextComponentModule>.Spawn();
-            this.GetModules(results);
-            foreach (var item in results) {
-                text = item.SetText(text);
-            }
-            PoolList<TextComponentModule>.Recycle(results);
-
+            text = this.ForEachModule<TextComponentModule, string>(text, static (c, state) => c.SetText(state));
+            
             this.SetText_INTERNAL(text);
 
         }
@@ -725,9 +717,7 @@ namespace UnityEngine.UI.Windows.Components {
 
             base.ValidateEditor();
 
-            if (this.graphics == null) {
-                this.graphics = this.GetComponent<Graphic>();
-            }
+            if (this.graphics == null) this.graphics = this.GetComponent<Graphic>();
 
         }
 

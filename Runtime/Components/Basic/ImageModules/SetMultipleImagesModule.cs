@@ -9,6 +9,7 @@
             SetSprite = 1 << 0,
             SetTexture = 1 << 1,
             SetColor = 1 << 2,
+            SetMaterial = 1 << 3,
             All = -1,
         }
 
@@ -41,6 +42,16 @@
 
             foreach (var other in this.others) {
                 other.SetColor(color);
+            }
+
+        }
+
+        public override void OnSetMaterial(Material material) {
+            
+            if ((this.flags & ApplyFlag.SetMaterial) == 0) return;
+
+            foreach (var other in this.others) {
+                other.SetMaterial(material);
             }
 
         }

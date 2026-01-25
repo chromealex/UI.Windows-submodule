@@ -111,15 +111,12 @@ namespace UnityEngine.UI.Windows.Components {
         private void OnSearch(string value) {
 
             var lowerValue = value.ToLower();
-            this.list.ForEach<GenericComponent>((item, data) => {
-
+            this.list.Closure(lowerValue).ForEach<GenericComponent>(static (item, data) => {
                 var text = item.Get<TextComponent>();
                 if (text != null) {
-
+                    var lowerValue = data.data;
                     item.ShowHide(lowerValue.Length == 0 || text.GetText().ToLower().Contains(lowerValue));
-                    
                 }
-
             });
             
         }
@@ -198,61 +195,37 @@ namespace UnityEngine.UI.Windows.Components {
             {
                 var contentWidth = contentRect.sizeDelta.x;
                 if (this.minMaxSizeX.x >= 0f) {
-
                     if (contentWidth < this.minMaxSizeX.x) {
-
                         delta.x = this.minMaxSizeX.x;
-
                     } else {
-                        
                         delta.x = contentWidth;
-                        
                     }
-
                 }
 
                 if (this.minMaxSizeX.y >= 0f && contentWidth > this.minMaxSizeX.y) {
-
                     if (contentWidth > this.minMaxSizeX.y) {
-
                         delta.x = this.minMaxSizeX.y;
-
                     } else {
-                        
                         delta.x = contentWidth;
-                        
                     }
-
                 }
             }
             {
                 var contentHeight = contentRect.sizeDelta.y;
                 if (this.minMaxSizeY.x >= 0f) {
-
                     if (contentHeight < this.minMaxSizeY.x) {
-
                         delta.y = this.minMaxSizeY.x;
-
                     } else {
-                        
                         delta.y = contentHeight;
-                        
                     }
-
                 }
 
                 if (this.minMaxSizeY.y >= 0f) {
-
                     if (contentHeight > this.minMaxSizeY.y) {
-
                         delta.y = this.minMaxSizeY.y;
-
                     } else {
-                        
                         delta.y = contentHeight;
-                        
                     }
-
                 }
             }
             rect.sizeDelta = delta;
@@ -274,44 +247,28 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         public void DoToggleDropdown() {
-
             if (this.list.IsVisibleSelf() == true) {
-                
                 this.HideDropdown();
-                
             } else {
-                
                 this.ShowDropdown();
-                
             }
-            
         }
 
         public void HideDropdown() {
-            
             this.list.Hide();
-
         }
 
         public void ShowDropdown() {
-
             this.list.SetSortingOrderDelta(1);
             this.list.Show();
             this.ValidateSearch();
-
         }
         
         public void SetInteractable(bool state) {
-
             this.label.SetInteractable(state);
-
         }
         
-        public bool IsInteractable() {
-
-            return this.label.IsInteractable();
-
-        }
+        public bool IsInteractable() => this.label.IsInteractable();
 
         public void SetCallback(System.Action<int> callback) {
 
@@ -420,13 +377,9 @@ namespace UnityEngine.UI.Windows.Components {
             if (checkbox != null) {
 
                 this.list.Closure(index).ForEach<CheckboxComponent>(static (item, data) => {
-
                     if (data.index != data.data) {
-                        
                         item.SetCheckedState(false, false);
-                        
                     }
-                    
                 });
                 
                 checkbox.SetCheckedState(true, false);

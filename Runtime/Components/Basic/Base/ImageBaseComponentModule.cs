@@ -30,6 +30,8 @@
 
         public virtual void OnSetColor(Color color) { }
 
+        public virtual void OnSetMaterial(Material material) { }
+
     }
     
 }

@@ -302,8 +302,7 @@ namespace UnityEngine.UI.Windows.Components {
         
         public void SetCallbackValueChanged(System.Action<string> callback) {
 
-            this.callbackOnChanged = null;
-            this.callbackOnChanged += callback;
+            this.callbackOnChanged = callback;
 
         }
 
@@ -321,8 +320,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         public void SetCallbackEditEnd(System.Action<string> callback) {
 
-            this.callbackOnEditEnd = null;
-            this.callbackOnEditEnd += callback;
+            this.callbackOnEditEnd = callback;
 
         }
 
@@ -340,8 +338,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         public void SetCallbackValidateChar(System.Func<string, int, char, char> callback) {
 
-            this.callbackValidateChar = null;
-            this.callbackValidateChar += callback;
+            this.callbackValidateChar = callback;
 
         }
 

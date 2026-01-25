@@ -3,14 +3,26 @@
     using Modules;
     
     public enum FocusState {
-
         None,
         Focused,
         Unfocused,
-
     }
 
     public abstract class WindowBase : WindowObject, IHasPreview {
+
+        private struct HideClosure {
+
+            public WindowBase window;
+            public TransitionParameters parameters;
+
+        }
+
+        private class HideCallbackClosure {
+
+            public WindowBase window;
+            public TransitionParameters parameters;
+
+        }
 
         public WindowPreferences preferences = WindowPreferences.Default;
         public WindowModules modules = new WindowModules();
@@ -55,20 +67,6 @@
 
         }
 
-        private struct HideClosure {
-
-            public WindowBase window;
-            public TransitionParameters parameters;
-
-        }
-
-        private class HideCallbackClosure {
-
-            public WindowBase window;
-            public TransitionParameters parameters;
-
-        }
-
         private void HideBase(TransitionParameters parameters) {
             base.Hide(parameters);
         }
@@ -108,25 +106,15 @@
 
         }
 
-        public virtual int GetCanvasOrder() {
+        public virtual int GetCanvasOrder() => 0;
 
-            return 0;
-
-        }
-
-        public virtual Canvas GetCanvas() {
-
-            return null;
-
-        }
+        public virtual Canvas GetCanvas() => null;
 
         public void SetInitialParameters(InitialParameters parameters) {
 
             {
-
                 if (parameters.overrideLayer == true) this.preferences.layer = parameters.layer;
                 if (parameters.overrideSingleInstance == true) this.preferences.singleInstance = parameters.singleInstance;
-
             }
 
             this.ApplyDepth();
@@ -185,41 +173,22 @@
 
         }
 
-        public float GetZDepth() {
+        public float GetZDepth() => this.currentZDepth;
 
-            return this.currentZDepth;
+        public float GetDepth() => this.currentDepth;
 
-        }
-
-        public float GetDepth() {
-
-            return this.currentDepth;
-
-        }
-
-        public int GetCanvasDepth() {
-
-            return this.currentCanvasDepth;
-
-        }
+        public int GetCanvasDepth() => this.currentCanvasDepth;
 
         internal void ApplyCamera() {
 
             var settings = WindowSystem.GetSettings();
             if (this.preferences.cameraMode == UIWSCameraMode.UseSettings) {
-            
                 if (settings.camera.orthographicDefault == true) {
-                    
                     this.ApplyCameraSettings(UIWSCameraMode.Orthographic);
-                    
                 } else {
-                    
                     this.ApplyCameraSettings(UIWSCameraMode.Perspective);
-                    
                 }
-                
                 return;
-                
             }
 
             this.ApplyCameraSettings(this.preferences.cameraMode);

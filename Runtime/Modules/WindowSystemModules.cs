@@ -57,7 +57,7 @@ namespace UnityEngine.UI.Windows.Modules {
         
         public void LoadAsync<TState>(TState state, InitialParameters initialParameters, WindowBase window, System.Action<TState> onComplete) {
 
-            Coroutines.Run(this.InitModules(state, initialParameters, window, onComplete));
+            this.InitModules(state, initialParameters, window, onComplete);
 
         }
 
@@ -74,7 +74,7 @@ namespace UnityEngine.UI.Windows.Modules {
         }
         
         private int loadingCount;
-        private IEnumerator InitModules<TState>(TState state, InitialParameters initialParameters, WindowBase window, System.Action<TState> onComplete) {
+        private void InitModules<TState>(TState state, InitialParameters initialParameters, WindowBase window, System.Action<TState> onComplete) {
 
             var resources = WindowSystem.GetResources();
             var targetData = WindowSystem.GetTargetData();
@@ -119,9 +119,9 @@ namespace UnityEngine.UI.Windows.Modules {
 
             }
 
-            while (this.loadingCount > 0) yield return null;
-
-            onComplete.Invoke(state);
+            Coroutines.Wait((modules: this, onComplete, state), static (x) => x.modules.loadingCount == 0, static (x) => {
+                x.onComplete.Invoke(x.state);
+            });
 
         }
 

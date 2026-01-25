@@ -750,9 +750,7 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public void Setup(WindowComponent component) {
-            this.Setup(component.GetWindow());
-        }
+        public void Setup(WindowComponent component) => this.Setup(component.GetWindow());
 
         internal virtual void Setup(WindowBase source) {
 
@@ -775,34 +773,24 @@ namespace UnityEngine.UI.Windows {
         }
 
         private bool CheckSubObject(List<WindowObject> subObjects, ref int index) {
-            
             if (subObjects[index] == null) {
-
                 if (this == null) return false;
                 Debug.LogError($"Null subObject encountered on window [{(this.window == null ? "Null" : this.window.name)}], object [{this.name}], index [{index}] (previous subObject is [{(index > 0 ? subObjects[index - 1].name : "Empty")}], next subObject is [{(index < subObjects.Count - 1 ? subObjects[index + 1].name : "Empty")}])");
                 this.subObjects.RemoveAt(index);
                 --index;
                 return false;
-                    
             }
-            
             return true;
-
         }
 
         private bool CheckSubObject(List<WindowObject> subObjects, int index) {
-            
             if (subObjects[index] == null) {
-
                 if (this == null) return false;
                 Debug.LogError($"Null subObject encountered on window [{(this.window == null ? "Null" : this.window.name)}], object [{this.name}], index [{index}] (previous subObject is [{(index > 0 ? subObjects[index - 1].name : "Empty")}], next subObject is [{(index < subObjects.Count - 1 ? subObjects[index + 1].name : "Empty")}])");
                 this.subObjects.RemoveAt(index);
                 return false;
-                    
             }
-            
             return true;
-
         }
 
         public bool RegisterSubObject(WindowObject windowObject) {
@@ -817,18 +805,14 @@ namespace UnityEngine.UI.Windows {
                 windowObject.rootObject = this;
                 
                 if (windowObject.GetState() == ObjectState.NotInitialized) {
-                    
                     windowObject.DoInit(new DoInitClosure() {
                         component = this,
                         windowObject = windowObject,
                     }, static (c) => c.component.AdjustObjectState(c.windowObject));
-                    
                 } else {
-                    
                     this.AdjustObjectState(windowObject);
-                    
                 }
-
+                
                 return true;
 
             }
@@ -843,27 +827,19 @@ namespace UnityEngine.UI.Windows {
                         
                 case ObjectState.Initializing:
                 case ObjectState.Initialized:
-
                     if (windowObject.GetState() < ObjectState.Initialized) {
-                        
                         Debug.LogError($"WindowObject must be initialized before AdjustObjectState");
-                        
                     }
-
                     break;
                         
                 case ObjectState.Showing:
-
                     if (windowObject.hiddenByDefault == false) {
-
                         WindowSystem.ShowInstance(windowObject, TransitionParameters.Default.ReplaceImmediately(true), internalCall: true);
-
                     }
                     break;
+                
                 case ObjectState.Shown:
-
                     if (windowObject.hiddenByDefault == false) {
-
                         var closure = PoolClass<WindowObjectClosure>.Spawn();
                         closure.instance = windowObject;
                         WindowSystem.ShowInstance(
@@ -873,25 +849,19 @@ namespace UnityEngine.UI.Windows {
                                 WindowSystem.SetShown(closure.instance, TransitionParameters.Default.ReplaceImmediately(true), true);
                                 PoolClass<WindowObjectClosure>.Recycle(closure);
                             }));
-
                     }
-
                     break;
                         
                 case ObjectState.Hiding:
-
                     windowObject.SetState(this.objectState);
-
                     break;
+                
                 case ObjectState.Hidden:
-
                     windowObject.SetState(this.objectState);
-
                     break;
                         
                 case ObjectState.DeInitializing:
                 case ObjectState.DeInitialized:
-
                     windowObject.DoDeInit();
                     break;
                         
@@ -900,16 +870,11 @@ namespace UnityEngine.UI.Windows {
         }
 
         public virtual bool RemoveSubObject(WindowObject windowObject) {
-
             if (this.subObjects.Remove(windowObject) == true) {
-
                 windowObject.rootObject = null;
                 return true;
-
             }
-
             return false;
-
         }
 
         public virtual void OnObjectRemoved(WindowObject windowObject) { }
@@ -927,21 +892,18 @@ namespace UnityEngine.UI.Windows {
 			
                     case ObjectState.Showing:
                     case ObjectState.Shown:
-
                         // after OnShowEnd
                         windowObject.Hide(TransitionParameters.Default.ReplaceImmediately(true));
                         windowObject.DoDeInit();
                         break;
 
                     case ObjectState.Hiding:
-
                         // after OnHideBegin
                         WindowSystem.SetHidden(windowObject, TransitionParameters.Default.ReplaceImmediately(true), true);
                         windowObject.DoDeInit();
                         break;
 
                     case ObjectState.Hidden:
-
                         // after OnHideEnd
                         windowObject.DoDeInit();
                         break;
@@ -974,13 +936,9 @@ namespace UnityEngine.UI.Windows {
             return (T)(object)this.GetWindow();
         }
 
-        public T GetWindow<T>() where T : class {
-            return (T)(object)this.GetWindow();
-        }
+        public T GetWindow<T>() where T : class => (T)(object)this.GetWindow();
 
-        public bool IsWindow<T>() where T : class {
-            return (this.GetWindow() as T) != null;
-        }
+        public bool IsWindow<T>() where T : class => (this.GetWindow() as T) != null;
 
         public void SetResetStateHierarchy() {
 
@@ -993,9 +951,7 @@ namespace UnityEngine.UI.Windows {
         }
 
         public void SetResetState() {
-
             WindowObjectAnimation.SetResetState(this);
-
         }
 
         protected internal virtual void SendEvent<T>(T data) where T : class {

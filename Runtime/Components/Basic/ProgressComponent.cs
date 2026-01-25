@@ -12,8 +12,7 @@ namespace UnityEngine.UI.Windows.Components {
         [RequiredReference]
         public Slider slider;
         
-        private System.Action<float> callback;
-        private System.Action<ProgressComponent, float> callbackWithInstance;
+        private CallbackRegistries<float> callbackRegistries;
         private bool ignoreCallbacks;
 
         IInteractableNavigation IInteractableNavigation.GetNext(Vector2 direction) => WindowSystem.GetNavigation(this.slider, direction);
@@ -127,13 +126,27 @@ namespace UnityEngine.UI.Windows.Components {
             
             if (this.ignoreCallbacks == true) return;
             
-            if (this.callback != null) this.callback.Invoke(value);
-            if (this.callbackWithInstance != null) this.callbackWithInstance.Invoke(this, value);
+            this.callbackRegistries.Invoke(value);
             
             this.ForEachModule<ProgressComponentModule, float>(value, (p, v) => p.OnValueChanged(v));
             
         }
         
+        public override void ValidateEditor() {
+            
+            base.ValidateEditor();
+
+			if (this.slider == null) this.slider = this.GetComponent<Slider>();
+
+        }
+
+        public void SetCallback<TState>(TState state, System.Action<TState, float> callback) {
+
+            this.RemoveCallbacks();
+            this.AddCallback((state, callback), static (s, state) => s.callback.Invoke(s.state, state));
+
+        }
+
         public void SetCallback(System.Action<float> callback) {
 
             this.RemoveCallbacks();
@@ -148,43 +161,65 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
+        public void SetCallback<T>(System.Action<T, float> callback) where T : ProgressComponent {
+
+            this.RemoveCallbacks();
+            this.AddCallback(callback);
+
+        }
+
         public void AddCallback(System.Action<float> callback) {
 
-            this.callback += callback;
+            this.callbackRegistries.Add(callback);
+
+        }
+
+        public void AddCallback<TState>(TState state, System.Action<TState, float> callback) where TState : System.IEquatable<TState> {
+
+            this.callbackRegistries.Add(state, callback);
 
         }
 
         public void AddCallback(System.Action<ProgressComponent, float> callback) {
 
-            this.callbackWithInstance += callback;
+            this.AddCallback((comp: this, callback), static (cb, state) => cb.callback.Invoke(cb.comp, state));
+
+        }
+
+        public void AddCallback<T>(System.Action<T, float> callback) where T : ProgressComponent {
+
+            this.AddCallback((comp: (T)this, callback), static (cb, state) => cb.callback.Invoke(cb.comp, state));
 
         }
 
         public void RemoveCallback(System.Action<float> callback) {
 
-            this.callback -= callback;
+            this.callbackRegistries.Remove(callback);
 
         }
 
         public void RemoveCallback(System.Action<ProgressComponent, float> callback) {
 
-            this.callbackWithInstance -= callback;
+            this.callbackRegistries.Remove((comp: this, callback), null);
 
         }
-        
-        public virtual void RemoveCallbacks() {
-            
-            this.callback = null;
-            this.callbackWithInstance = null;
-            
+
+        new public void RemoveCallback<TState>(TState state) where TState : System.IEquatable<TState> {
+
+            this.callbackRegistries.Remove(state, null);
+
         }
 
-        public override void ValidateEditor() {
+        public void RemoveCallback<TState>(System.Action<TState, float> callback) where TState : System.IEquatable<TState> {
+
+            this.callbackRegistries.Remove(default, callback);
+
+        }
+
+        public void RemoveCallbacks() {
             
-            base.ValidateEditor();
-
-			if (this.slider == null) this.slider = this.GetComponent<Slider>();
-
+            this.callbackRegistries.Clear();
+            
         }
 
     }

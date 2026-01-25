@@ -10,6 +10,13 @@
 
         private WindowObject loadedAsset;
 
+        public override void PushToPool() {
+            if (this.loadedAsset != null && this.loadedAsset.IsForPool() == true) {
+                this.loadedAsset = null;
+            }
+            base.PushToPool();
+        }
+
         protected override void OnLoadScreenAsync<TState>(TState state, InitialParameters initialParameters, System.Action<TState> onComplete) {
 
             if (this.autoLoad == true) {

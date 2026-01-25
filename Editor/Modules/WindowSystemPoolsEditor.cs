@@ -39,7 +39,7 @@ namespace UnityEditor.UI.Windows {
 
                 UnityEditor.UI.Windows.GUILayoutExt.Box(2f, 2f, () => {
 
-                    GUILayout.Label("Prefab: " + item.Value);
+                    GUILayout.Label($"Prefab: {item.Value}");
                     EditorGUILayout.ObjectField("Object", item.Key, typeof(Object), allowSceneObjects: true);
 
                 });
@@ -51,7 +51,7 @@ namespace UnityEditor.UI.Windows {
 
                 UnityEditor.UI.Windows.GUILayoutExt.Box(2f, 2f, () => {
 
-                    GUILayout.Label("Prefab: " + item.Key);
+                    GUILayout.Label($"Prefab: {item.Key}");
                     foreach (var comp in item.Value) {
 
                         EditorGUILayout.ObjectField(comp, typeof(Object), true);

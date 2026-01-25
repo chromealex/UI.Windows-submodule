@@ -12,6 +12,7 @@ namespace UnityEditor.UI.Windows {
     public class WindowSystemWindowComponentEditor : Editor {
 
         private SerializedProperty createPool;
+        private SerializedProperty isObjectRoot;
         
         private SerializedProperty animationParameters;
         private SerializedProperty hideBehaviour;
@@ -71,6 +72,7 @@ namespace UnityEditor.UI.Windows {
             }
             
             this.createPool = this.serializedObject.FindProperty("createPool");
+            this.isObjectRoot = this.serializedObject.FindProperty("isObjectRoot");
 
             this.animationParameters = this.serializedObject.FindProperty("animationParameters");
             this.hideBehaviour = this.serializedObject.FindProperty("hideBehaviour");
@@ -249,13 +251,26 @@ namespace UnityEditor.UI.Windows {
             
         }
 
+        private void DrawPerformanceOptions() {
+
+            GUILayoutExt.DrawHeader("Performance Options");
+            if (this.isObjectRoot.boolValue == true) {
+                EditorGUILayout.PropertyField(this.createPool);
+            } else {
+                EditorGUI.BeginDisabledGroup(true);
+                this.createPool.boolValue = false;
+                EditorGUILayout.PropertyField(this.createPool);
+                EditorGUILayout.HelpBox("Pool cannot be used while the object is not a prefab main object.", MessageType.Info);
+                EditorGUI.EndDisabledGroup();
+            }
+
+        }
+
         private void DrawCanvas() {
 
             if (this.objectCanvas.objectReferenceValue != null) {
-                
                 GUILayoutExt.DrawHeader("Canvas Options");
                 EditorGUILayout.PropertyField(this.canvasSortingOrderDelta, new GUIContent("Canvas Order Delta"));
-                
             }
             
         }
@@ -285,9 +300,7 @@ namespace UnityEditor.UI.Windows {
                     GUILayoutExt.DrawHeader("Animations");
                     EditorGUILayout.PropertyField(this.animationParameters);
 
-                    GUILayoutExt.DrawHeader("Performance Options");
-                    EditorGUILayout.PropertyField(this.createPool);
-
+                    this.DrawPerformanceOptions();
                     this.DrawCanvas();
 
                 }),
@@ -307,9 +320,7 @@ namespace UnityEditor.UI.Windows {
                     GUILayoutExt.PropertyField(this.hiddenByDefault, (reg) => reg.holdHiddenByDefault);
                     EditorGUILayout.PropertyField(this.subObjects);
 
-                    GUILayoutExt.DrawHeader("Performance Options");
-                    EditorGUILayout.PropertyField(this.createPool);
-                    
+                    this.DrawPerformanceOptions();
                     this.DrawCanvas();
 
                 }),

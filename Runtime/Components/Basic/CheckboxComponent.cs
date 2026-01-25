@@ -15,8 +15,7 @@
         public bool autoToggle = true;
         public ICheckboxGroup group;
 
-        private System.Action<bool> callback;
-        private System.Action<CheckboxComponent, bool> callbackWithInstance;
+        private CallbackRegistries<bool> callbackRegistries;
 
         public override void ValidateEditor() {
 
@@ -50,7 +49,11 @@
 
             if (this.autoToggle == true) {
 
-                this.button.onClick.AddListener(this.ToggleInternal);
+                if (this.button is IButtonExtended buttonExtended) {
+                    buttonExtended.AddListener((button: this, _: 0), static x => x.button.DoClickInternal());
+                } else {
+                    this.button.onClick.AddListener(this.DoClickInternal);
+                }
 
             }
 
@@ -116,13 +119,7 @@
 
             if (call == true && stateChanged == true) {
 
-                if (this.callback != null) {
-                    this.callback.Invoke(state);
-                }
-
-                if (this.callbackWithInstance != null) {
-                    this.callbackWithInstance.Invoke(this, state);
-                }
+                this.callbackRegistries.Invoke(state);
 
             }
 
@@ -150,6 +147,13 @@
 
         }
 
+        public void SetCallback<TState>(TState state, System.Action<TState, bool> callback) {
+
+            this.RemoveCallbacks();
+            this.AddCallback((state, callback), static (s, state) => s.callback.Invoke(s.state, state));
+
+        }
+
         public void SetCallback(System.Action<bool> callback) {
 
             this.RemoveCallbacks();
@@ -164,37 +168,66 @@
 
         }
 
+        public void SetCallback<T>(System.Action<T, bool> callback) where T : CheckboxComponent {
+
+            this.RemoveCallbacks();
+            this.AddCallback(callback);
+
+        }
+
         public void AddCallback(System.Action<bool> callback) {
 
-            this.callback += callback;
+            this.callbackRegistries.Add(callback);
+
+        }
+
+        public void AddCallback<TState>(TState state, System.Action<TState, bool> callback) where TState : System.IEquatable<TState> {
+
+            this.callbackRegistries.Add(state, callback);
 
         }
 
         public void AddCallback(System.Action<CheckboxComponent, bool> callback) {
 
-            this.callbackWithInstance += callback;
+            this.AddCallback((comp: this, callback), static (cb, state) => cb.callback.Invoke(cb.comp, state));
+
+        }
+
+        public void AddCallback<T>(System.Action<T, bool> callback) where T : CheckboxComponent {
+
+            this.AddCallback((comp: (T)this, callback), static (cb, state) => cb.callback.Invoke(cb.comp, state));
 
         }
 
         public void RemoveCallback(System.Action<bool> callback) {
 
-            this.callback -= callback;
+            this.callbackRegistries.Remove(callback);
 
         }
 
         public void RemoveCallback(System.Action<CheckboxComponent, bool> callback) {
 
-            this.callbackWithInstance -= callback;
+            this.callbackRegistries.Remove((comp: this, callback), null);
+
+        }
+
+        new public void RemoveCallback<TState>(TState state) where TState : System.IEquatable<TState> {
+
+            this.callbackRegistries.Remove(state, null);
+
+        }
+
+        public void RemoveCallback<TState>(System.Action<TState, bool> callback) where TState : System.IEquatable<TState> {
+
+            this.callbackRegistries.Remove(default, callback);
 
         }
 
         public override void RemoveCallbacks() {
-
+            
             base.RemoveCallbacks();
-
-            this.callback = null;
-            this.callbackWithInstance = null;
-
+            this.callbackRegistries.Clear();
+            
         }
 
     }

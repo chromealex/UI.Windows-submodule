@@ -76,7 +76,7 @@ namespace UnityEngine.UI.Windows.Components {
 
             this.list.SetOnLayoutChangedCallback(this.OnElementsChanged);
             this.list.SetOnElementsCallback(this.OnElementsChanged);
-            this.label.SetCallback(this.DoToggleDropdown);
+            this.label.SetCallback(this, static x => x.DoToggleDropdown());
             WindowSystem.onPointerUp += this.OnPointerUp;
             WindowSystem.onPointerDown += this.OnPointerDown;
 
@@ -419,9 +419,9 @@ namespace UnityEngine.UI.Windows.Components {
             var checkbox = this.list.GetItem<CheckboxComponent>(index);
             if (checkbox != null) {
 
-                this.list.ForEach<CheckboxComponent>((item, data) => {
+                this.list.Closure(index).ForEach<CheckboxComponent>(static (item, data) => {
 
-                    if (data.index != index) {
+                    if (data.index != data.data) {
                         
                         item.SetCheckedState(false, false);
                         
@@ -463,19 +463,19 @@ namespace UnityEngine.UI.Windows.Components {
 
         public virtual void AddItem(System.Action<WindowComponent> onComplete = null) {
             
-            this.list.AddItem((x, p) => this.TrySetCallbackToInteractable(x, p.index, onComplete));
+            this.list.Closure((comp: this, onComplete)).AddItem<WindowComponent>(static (x, p) => p.data.comp.TrySetCallbackToInteractable(x, p.index, p.data.onComplete));
 
         }
 
         public virtual void AddItem<T>(System.Action<T> onComplete = null) where T : WindowComponent {
             
-            this.list.AddItem<T>((x, p) => this.TrySetCallbackToInteractable(x, p.index, onComplete));
+            this.list.Closure((comp: this, onComplete)).AddItem<T>(static (x, p) => p.data.comp.TrySetCallbackToInteractable(x, p.index, p.data.onComplete));
 
         }
 
         public virtual void AddItem<T>(Resource source, System.Action<T> onComplete = null) where T : WindowComponent {
 
-            this.list.AddItem<T>(source, (x, p) => this.TrySetCallbackToInteractable(x, p.index, onComplete));
+            this.list.Closure((comp: this, onComplete)).AddItem<T>(source, static (x, p) => p.data.comp.TrySetCallbackToInteractable(x, p.index, p.data.onComplete));
             
         }
 

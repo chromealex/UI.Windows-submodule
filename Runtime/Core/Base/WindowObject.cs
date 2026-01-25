@@ -174,6 +174,8 @@ namespace UnityEngine.UI.Windows {
 
         private bool isActiveSelf;
         private ObjectState objectState;
+
+        public bool IsForPool() => this.createPool == true && this.hasObjectCanvas == true;
         
         public bool IsReadyToHide() => this.readyToHide;
 
@@ -516,18 +518,42 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public void PushToPool() {
+        public virtual void PushToPool() {
 
             if (this.createPool == false) {
                 for (int i = this.subObjects.Count - 1; i >= 0; --i) {
-                    if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
+                    if (this.CheckSubObject(this.subObjects, i) == false) continue;
                     this.subObjects[i].PushToPool();
                 }
+                this.TryPushToPool();
+            } else {
+                this.PushToPoolChild();
             }
 
+        }
+
+        private void PushToPoolChild() {
+
+            for (int i = this.subObjects.Count - 1; i >= 0; --i) {
+                if (this.CheckSubObject(this.subObjects, i) == false) continue;
+                this.subObjects[i].PushToPoolChild();
+            }
+            
+            if (this.IsForPool() == true) {
+                this.TryPushToPool();
+            }
+            
+        }
+
+        private void TryPushToPool() {
+            
             if (this.isObjectRoot == true) {
 
-                if (this.rootObject != null) this.rootObject.RemoveSubObject(this);
+                if (this.rootObject != null) {
+                    var rootObject = this.rootObject;
+                    rootObject.RemoveSubObject(this);
+                    rootObject.OnObjectRemoved(this);
+                }
                 
                 this.window = null;
                 this.rootObject = null;
@@ -764,6 +790,21 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        private bool CheckSubObject(List<WindowObject> subObjects, int index) {
+            
+            if (subObjects[index] == null) {
+
+                if (this == null) return false;
+                Debug.LogError($"Null subObject encountered on window [{(this.window == null ? "Null" : this.window.name)}], object [{this.name}], index [{index}] (previous subObject is [{(index > 0 ? subObjects[index - 1].name : "Empty")}], next subObject is [{(index < subObjects.Count - 1 ? subObjects[index + 1].name : "Empty")}])");
+                this.subObjects.RemoveAt(index);
+                return false;
+                    
+            }
+            
+            return true;
+
+        }
+
         public bool RegisterSubObject(WindowObject windowObject) {
 
             if (windowObject == null) return false;
@@ -858,7 +899,7 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public bool RemoveSubObject(WindowObject windowObject) {
+        public virtual bool RemoveSubObject(WindowObject windowObject) {
 
             if (this.subObjects.Remove(windowObject) == true) {
 
@@ -870,7 +911,9 @@ namespace UnityEngine.UI.Windows {
             return false;
 
         }
-        
+
+        public virtual void OnObjectRemoved(WindowObject windowObject) { }
+
         public bool UnRegisterSubObject(WindowObject windowObject) {
 
             if (this.RemoveSubObject(windowObject) == true) {
@@ -904,6 +947,8 @@ namespace UnityEngine.UI.Windows {
                         break;
 
                 }
+
+                this.OnObjectRemoved(windowObject);
                 return true;
 
             }

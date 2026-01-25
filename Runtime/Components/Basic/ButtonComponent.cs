@@ -164,50 +164,10 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
         
-        private struct WithInstance : System.IEquatable<WithInstance> {
-
-            public ButtonComponent component;
-            public System.Action<ButtonComponent> action;
-
-            public bool Equals(WithInstance other) {
-                return this.component == other.component && this.action == other.action;
-            }
-
-        }
-
-        private struct WithInstance<T> : System.IEquatable<WithInstance<T>> where T : WindowObject {
-
-            public WindowObject component;
-            public System.Action<T> action;
-
-            public bool Equals(WithInstance<T> other) {
-                return this.component == other.component && this.action == other.action;
-            }
-
-        }
-
-        private struct SetCallbackData<T> : System.IEquatable<SetCallbackData<T>> {
-
-            public T data;
-            public System.Action<T> callback;
-
-            public bool Equals(SetCallbackData<T> other) {
-                return System.Collections.Generic.EqualityComparer<T>.Default.Equals(this.data, other.data);
-            }
-
-            public override bool Equals(object obj) {
-                return obj is SetCallbackData<T> other && Equals(other);
-            }
-
-            public override int GetHashCode() {
-                return System.Collections.Generic.EqualityComparer<T>.Default.GetHashCode(this.data);
-            }
-        }
-        
         public void SetCallback<TState>(TState state, System.Action<TState> callback) {
 
             this.RemoveCallbacks();
-            this.AddCallback(new SetCallbackData<TState> { data = state, callback = callback }, static (s) => s.callback.Invoke(s.data));
+            this.AddCallback((state, callback), static (s) => s.callback.Invoke(s.state));
 
         }
 
@@ -252,13 +212,13 @@ namespace UnityEngine.UI.Windows.Components {
 
         public void AddCallback(System.Action<ButtonComponent> callback) {
 
-            this.AddCallback(new WithInstance() { component = this, action = callback, }, cb => cb.action.Invoke(cb.component));
+            this.AddCallback((comp: this, callback), static cb => cb.callback.Invoke(cb.comp));
 
         }
 
         public void AddCallback<T>(System.Action<T> callback) where T : ButtonComponent {
 
-            this.AddCallback(new WithInstance<T>() { component = this, action = callback, }, cb => cb.action.Invoke((T)cb.component));
+            this.AddCallback((comp: (T)this, callback), static cb => cb.callback.Invoke(cb.comp));
 
         }
 
@@ -270,7 +230,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         public void RemoveCallback(System.Action<ButtonComponent> callback) {
 
-            this.callbackRegistries.Remove(new WithInstance() { component = this, action = callback, }, null);
+            this.callbackRegistries.Remove((comp: this, callback), null);
 
         }
 

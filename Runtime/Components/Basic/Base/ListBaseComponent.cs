@@ -330,38 +330,26 @@ namespace UnityEngine.UI.Windows.Components {
                 component = this,
             };
             resources.LoadAsync<T, AddItemClosure<T, TClosure>>(this, data, source, static (asset, innerClosure) => {
-
                 ListBaseComponent.SetupLoadedAsset(asset, innerClosure);
-                
             });
 
         }
 
         public virtual void RemoveAt(int index) {
-
             if (index < this.items.Count) {
-
-                var pools = WindowSystem.GetPools();
                 this.UnRegisterSubObject(this.items[index]);
-                pools.Despawn(this.items[index]);
                 this.NotifyModulesComponentRemoved(this.items[index]);
                 this.items.RemoveAt(index);
                 this.OnElementsChanged();
-
+                WindowSystem.GetPools().Despawn(this.items[index]);
             }
-
         }
 
-        public virtual int IndexOf<T>(T component) where T : WindowComponent {
-
+        public virtual int IndexOf<T>(T component) where T : WindowObject {
             for (int i = 0; i < this.items.Count; ++i) {
-
                 if (this.items[i] == component) return i;
-
             }
-
             return -1;
-
         }
 
         public struct DefaultParameters : IListClosureParameters {
@@ -429,6 +417,28 @@ namespace UnityEngine.UI.Windows.Components {
                     onComplete = onComplete,
                 }, static (parameters, result) => {
                     parameters.onComplete?.Invoke(parameters, result);
+                });
+
+            }
+
+            public void AddItem<T>(System.Action<T, Parameters<T>> onComplete) where T : WindowComponent {
+
+                this.list.AddItemInternal<T, Parameters<T>>(this.list.source, new Parameters<T>() {
+                    data = this.state,
+                    onItem = onComplete,
+                }, static (item, parameters) => {
+                    parameters.onItem.Invoke(item, parameters);
+                });
+
+            }
+
+            public void AddItem<T>(Resource source, System.Action<T, Parameters<T>> onComplete) where T : WindowComponent {
+
+                this.list.AddItemInternal<T, Parameters<T>>(source, new Parameters<T>() {
+                    data = this.state,
+                    onItem = onComplete,
+                }, static (item, parameters) => {
+                    parameters.onItem.Invoke(item, parameters);
                 });
 
             }

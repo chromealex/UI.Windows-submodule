@@ -153,6 +153,20 @@ namespace UnityEngine.UI.Windows {
 
             }
 
+            public bool Remove(System.Action<T> callback) {
+
+                if (callback == null) return false;
+                
+                if (this.callback == callback) {
+                    
+                    return true;
+                    
+                }
+
+                return false;
+
+            }
+
         }
 
         private System.Collections.Generic.List<RegistryBase> list;
@@ -226,6 +240,28 @@ namespace UnityEngine.UI.Windows {
                 
             }
             
+        }
+
+        public void Remove<T>(System.Action<T> callback) where T : System.IEquatable<T> {
+
+            if (this.list == null) return;
+
+            for (var i = 0; i < this.list.Count; ++i) {
+
+                var item = this.list[i];
+                if (item is Registry<T> reg) {
+
+                    if (reg.Remove(callback) == true) {
+
+                        this.list.RemoveAt(i);
+                        --i;
+                        
+                    }
+
+                }
+                
+            }
+
         }
 
         public void Add(System.Action callback) {
@@ -321,6 +357,297 @@ namespace UnityEngine.UI.Windows {
 
         public override bool Equals(object obj) {
             return obj is CallbackRegistries other && this.Equals(other);
+        }
+
+        public override int GetHashCode() {
+            return System.HashCode.Combine(this.list);
+        }
+
+    }
+    
+    public struct CallbackRegistries<TInvokeData> : System.IEquatable<CallbackRegistries<TInvokeData>> {
+
+        public abstract class RegistryBase {
+
+            public abstract void Invoke(TInvokeData data);
+            public abstract void Recycle();
+
+        }
+
+        public class RegistryNoState : RegistryBase {
+
+            public System.Action<TInvokeData> callback;
+
+            public override void Invoke(TInvokeData data) {
+
+                this.callback?.Invoke(data);
+
+            }
+
+            public override void Recycle() {
+                
+                this.callback = null;
+                PoolClass<RegistryNoState>.Recycle(this);
+                
+            }
+
+            public bool Remove(System.Action<TInvokeData> callback) {
+
+                if (this.callback == callback) {
+                    
+                    return true;
+                    
+                }
+
+                return false;
+
+            }
+
+        }
+
+        public class Registry<T> : RegistryBase where T : System.IEquatable<T> {
+
+            public System.Action<T, TInvokeData> callback;
+            public T data;
+
+            public void Invoke(T obj, TInvokeData data) {
+
+                this.callback?.Invoke(obj, data);
+
+            }
+
+            public override void Invoke(TInvokeData data) {
+
+                this.callback?.Invoke(this.data, data);
+
+            }
+
+            public override void Recycle() {
+
+                this.callback = null;
+                this.data = default;
+                PoolClass<Registry<T>>.Recycle(this);
+                
+            }
+
+            public bool Remove(T state, System.Action<T, TInvokeData> callback) {
+
+                if (callback == null && this.data.Equals(state) == true) return false;
+                
+                if (this.callback == callback) {
+                    
+                    return true;
+                    
+                }
+
+                return false;
+
+            }
+
+            public bool Remove(System.Action<T, TInvokeData> callback) {
+
+                if (callback == null) return false;
+                
+                if (this.callback == callback) {
+                    
+                    return true;
+                    
+                }
+
+                return false;
+
+            }
+
+        }
+
+        private System.Collections.Generic.List<RegistryBase> list;
+        
+        public int Count => this.list.Count;
+
+        public void InitializeAuto(WindowObject windowObject) {
+            this.Initialize();
+            WindowSystem.GetEvents().RegisterOnce(this, windowObject, WindowEvent.OnDeInitialize, static (obj, state) => {
+                state.DeInitialize();
+            });
+        }
+
+        public void Initialize() {
+
+            if (this.list == null) {
+                this.list = PoolClass<System.Collections.Generic.List<RegistryBase>>.Spawn();
+                this.list.Clear();
+            }
+
+        }
+
+        public void DeInitialize() {
+
+            if (this.list != null) {
+                this.Clear();
+                PoolClass<System.Collections.Generic.List<RegistryBase>>.Recycle(ref this.list);
+            }
+
+        }
+
+        public void Remove(System.Action<TInvokeData> callback) {
+
+            if (this.list == null) return;
+
+            for (var i = 0; i < this.list.Count; ++i) {
+
+                var item = this.list[i];
+                if (item is RegistryNoState reg) {
+
+                    if (reg.Remove(callback) == true) {
+                        
+                        this.list.RemoveAt(i);
+                        --i;
+                        
+                    }
+
+                }
+                
+            }
+
+        }
+
+        public void Remove<TState>(TState state, System.Action<TState, TInvokeData> callback) where TState : System.IEquatable<TState> {
+
+            if (this.list == null) return;
+
+            for (var i = 0; i < this.list.Count; ++i) {
+
+                var item = this.list[i];
+                if (item is Registry<TState> reg) {
+
+                    if (reg.Remove(state, callback) == true) {
+
+                        this.list.RemoveAt(i);
+                        --i;
+                        
+                    }
+
+                }
+                
+            }
+            
+        }
+
+        public void Remove<T>(System.Action<T, TInvokeData> callback) where T : System.IEquatable<T> {
+
+            if (this.list == null) return;
+
+            for (var i = 0; i < this.list.Count; ++i) {
+
+                var item = this.list[i];
+                if (item is Registry<T> reg) {
+
+                    if (reg.Remove(callback) == true) {
+
+                        this.list.RemoveAt(i);
+                        --i;
+                        
+                    }
+
+                }
+                
+            }
+
+        }
+
+        public void Add(System.Action<TInvokeData> callback) {
+            
+            this.Initialize();
+            
+            var item = PoolClass<RegistryNoState>.Spawn();
+            item.callback = callback;
+            this.list.Add(item);
+
+        }
+
+        public void Add<TState>(TState state, System.Action<TState, TInvokeData> callback) where TState : System.IEquatable<TState> {
+
+            this.Initialize();
+
+            var item = PoolClass<Registry<TState>>.Spawn();
+            item.data = state;
+            item.callback = callback;
+            this.list.Add(item);
+
+        }
+
+        public void Add<T>(System.Action<T, TInvokeData> callback) where T : System.IEquatable<T> {
+            
+            this.Initialize();
+            
+            var item = PoolClass<Registry<T>>.Spawn();
+            item.callback = callback;
+            this.list.Add(item);
+
+        }
+
+        public void Clear() {
+
+            if (this.list == null) return;
+
+            for (var i = 0; i < this.list.Count; ++i) {
+
+                var item = this.list[i];
+                item.Recycle();
+
+            }
+            this.list.Clear();
+            
+        }
+
+        public void Invoke(TInvokeData data) {
+
+            if (this.list == null) return;
+
+            var copy = PoolClass<System.Collections.Generic.List<RegistryBase>>.Spawn();
+            copy.Clear();
+            copy.AddRange(this.list);
+            
+            for (var i = 0; i < copy.Count; ++i) {
+
+                var item = copy[i];
+                item.Invoke(data);
+                
+            }
+
+            PoolClass<System.Collections.Generic.List<RegistryBase>>.Recycle(ref copy);
+
+        }
+
+        public void Invoke<T>(T obj, TInvokeData data) where T : System.IEquatable<T> {
+
+            if (this.list == null) return;
+
+            var copy = PoolClass<System.Collections.Generic.List<Registry<T>>>.Spawn();
+            copy.Clear();
+            foreach (var item in this.list) {
+                if (item is Registry<T> reg) {
+                    copy.Add(reg);
+                }
+            }
+            
+            for (var i = 0; i < copy.Count; ++i) {
+
+                var item = copy[i];
+                item.Invoke(obj, data);
+                
+            }
+
+            PoolClass<System.Collections.Generic.List<Registry<T>>>.Recycle(ref copy);
+
+        }
+
+        public bool Equals(CallbackRegistries<TInvokeData> other) {
+            return Equals(this.list, other.list);
+        }
+
+        public override bool Equals(object obj) {
+            return obj is CallbackRegistries<TInvokeData> other && this.Equals(other);
         }
 
         public override int GetHashCode() {

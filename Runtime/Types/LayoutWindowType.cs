@@ -348,16 +348,24 @@ namespace UnityEngine.UI.Windows.WindowTypes {
 
         }
 
+        public void PushToPool() {
+            var arr = this.components;
+            for (int i = 0; i < arr.Length; ++i) {
+                var layoutComponent = arr[i];
+                if (layoutComponent.componentInstance != null && layoutComponent.componentInstance.IsForPool() == true) {
+                    this.windowLayoutInstance.RemoveLoadedComponent(layoutComponent.tag);
+                }
+                layoutComponent.componentInstance = null;
+                arr[i] = layoutComponent;
+            }
+        }
+
         public void Add(DirtyHelper helper, int tag, WindowLayout windowLayout) {
 
             for (int i = 0; i < this.components.Length; ++i) {
-
                 if (this.components[i].tag == tag && this.components[i].windowLayout == windowLayout) {
-
                     return;
-
                 }
-
             }
 
             var list = this.components.ToList();
@@ -514,6 +522,12 @@ namespace UnityEngine.UI.Windows.WindowTypes {
         WindowLayout ILayoutInstance.windowLayoutInstance {
             get => this.layouts.GetActive().windowLayoutInstance;
             set => this.layouts.GetActive().windowLayoutInstance = value;
+        }
+
+        public override void PushToPool() {
+            var currentItem = this.layouts.GetActive();
+            currentItem.PushToPool();
+            base.PushToPool();
         }
 
         public override int GetCanvasOrder() {

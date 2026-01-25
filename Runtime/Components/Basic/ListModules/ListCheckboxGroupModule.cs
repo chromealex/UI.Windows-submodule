@@ -32,7 +32,7 @@ namespace UnityEngine.UI.Windows {
         }
 
         public bool CanBeUnchecked(CheckboxComponent checkbox) {
-            return this.currentSelected == null || this.allowSwitchOff || checkbox != this.currentSelected;
+            return this.currentSelected == null || this.allowSwitchOff == true || checkbox != this.currentSelected;
         }
 
     }

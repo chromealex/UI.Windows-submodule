@@ -18,24 +18,18 @@ namespace UnityEngine.UI.Windows {
         public RectTransform safeZoneRectTransform;
 
         private int order;
-        private Dictionary<int, WindowComponent> loadedComponents = new Dictionary<int, WindowComponent>();
+        private readonly Dictionary<int, WindowComponent> loadedComponents = new Dictionary<int, WindowComponent>();
 
         public void SetLoadedComponent(int tag, WindowComponent instance) {
-            
             this.loadedComponents.Add(tag, instance);
-            
+        }
+
+        public void RemoveLoadedComponent(int tag) {
+            this.loadedComponents.Remove(tag);
         }
 
         public WindowComponent GetLoadedComponent(int tag) {
-
-            if (this.loadedComponents.TryGetValue(tag, out var component) == true) {
-
-                return component;
-
-            }
-
-            return null;
-
+            return this.loadedComponents.GetValueOrDefault(tag);
         }
         
         public override void OnInit() {

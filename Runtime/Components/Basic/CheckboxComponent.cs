@@ -50,9 +50,9 @@
             if (this.autoToggle == true) {
 
                 if (this.button is IButtonExtended buttonExtended) {
-                    buttonExtended.AddListener((button: this, _: 0), static x => x.button.DoClickInternal());
+                    buttonExtended.AddListener((button: this, _: 0), static x => x.button.ToggleInternal());
                 } else {
-                    this.button.onClick.AddListener(this.DoClickInternal);
+                    this.button.onClick.AddListener(this.ToggleInternal);
                 }
 
             }

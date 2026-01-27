@@ -171,7 +171,7 @@ namespace UnityEngine.UI.Windows {
 
         private System.Collections.Generic.List<RegistryBase> list;
         
-        public int Count => this.list.Count;
+        public int Count => this.list?.Count ?? 0;
 
         public void InitializeAuto(WindowObject windowObject) {
             this.Initialize();
@@ -462,7 +462,7 @@ namespace UnityEngine.UI.Windows {
 
         private System.Collections.Generic.List<RegistryBase> list;
         
-        public int Count => this.list.Count;
+        public int Count => this.list?.Count ?? 0;
 
         public void InitializeAuto(WindowObject windowObject) {
             this.Initialize();

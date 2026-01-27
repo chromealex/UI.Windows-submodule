@@ -43,18 +43,14 @@
 
         }
 
-        internal override void OnInitInternal() {
+        protected override int GetRegistryCount() => this.callbackRegistries.Count;
 
-            base.OnInitInternal();
-
+        protected override void RegisterClick() {
+            
             if (this.autoToggle == true) {
 
-                if (this.button is IButtonExtended buttonExtended) {
-                    buttonExtended.AddListener((button: this, _: 0), static x => x.button.ToggleInternal());
-                } else {
-                    this.button.onClick.AddListener(this.ToggleInternal);
-                }
-
+                base.RegisterClick();
+                
             }
 
         }
@@ -85,6 +81,12 @@
 
             this.SetCheckedStateInternal(!this.isChecked);
 
+        }
+
+        protected override void DoClick() {
+            
+            this.ToggleInternal();
+            
         }
 
         internal void SetCheckedStateInternal(bool state, bool call = true, bool checkGroup = true) {

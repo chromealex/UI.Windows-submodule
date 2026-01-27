@@ -65,18 +65,23 @@ namespace UnityEngine.UI.Windows.Components {
         
         internal override void OnInitInternal() {
 
-            if (this.button is IButtonExtended buttonExtended) {
-                buttonExtended.AddListener((button: this, _: 0), static x => x.button.DoClickInternal());
-            } else {
-                this.button.onClick.AddListener(this.DoClickInternal);
-            }
-
+            this.RegisterClick();
             this.callbackRegistries.Initialize();
             
             base.OnInitInternal();
             
         }
 
+        protected virtual void RegisterClick() {
+            
+            if (this.button is IButtonExtended buttonExtended) {
+                buttonExtended.AddListener((button: this, _: 0), static x => x.button.DoClickInternal());
+            } else {
+                this.button.onClick.AddListener(this.DoClickInternal);
+            }
+
+        }
+        
         internal override void OnDeInitInternal() {
             
             base.OnDeInitInternal();
@@ -140,14 +145,12 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
         
+        protected virtual int GetRegistryCount() => this.callbackRegistries.Count;
+        
         internal void DoClickInternal() {
-            
-            if (this.callbackRegistries.Count == 0) {
-                
-                return;
-                
-            }
 
+            if (this.GetRegistryCount() == 0) return;
+            
             if (this.CanClick() == true) {
 
                 WindowSystem.InteractWith(this);

@@ -10,13 +10,6 @@
 
     public abstract class WindowBase : WindowObject, IHasPreview {
 
-        private struct HideClosure {
-
-            public WindowBase window;
-            public TransitionParameters parameters;
-
-        }
-
         private class HideCallbackClosure {
 
             public WindowBase window;
@@ -86,13 +79,11 @@
 
             });
 
+            var tweener = WindowSystem.GetTweener();
+            tweener.Stop(this);
             if (cbParameters.data.replaceDelay == true) {
 
-                var tweener = WindowSystem.GetTweener();
-                tweener.Add(new HideClosure() {
-                    window = this,
-                    parameters = parameters,
-                }, cbParameters.data.delay, 0f, 0f).Tag(this).OnComplete(static (obj) => {
+                tweener.Add((window: this, parameters: cbParameters), cbParameters.data.delay, 0f, 0f).Tag(this).OnComplete(static (obj) => {
                     
                     obj.window.HideBase(obj.parameters.ReplaceDelay(0f));
 

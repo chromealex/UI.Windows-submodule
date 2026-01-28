@@ -5,7 +5,7 @@ namespace UnityEngine.UI.Windows.Components {
     using Modules;
     using Utilities;
 
-    public class ImageComponent : WindowComponent, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
+    public class ImageComponent : GenericComponent, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
 
         System.Type ISearchComponentByTypeEditor.GetSearchType() { return typeof(ImageComponentModule); }
         IList ISearchComponentByTypeSingleEditor.GetSearchTypeArray() { return this.componentModules.modules; }

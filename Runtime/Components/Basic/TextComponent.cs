@@ -65,7 +65,7 @@ namespace UnityEngine.UI.Windows.Components {
 
     }
 
-    public partial class TextComponent : WindowComponent, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
+    public partial class TextComponent : GenericComponent, ISearchComponentByTypeEditor, ISearchComponentByTypeSingleEditor {
 
         [RequiredReference]
         public UnityEngine.UI.Graphic graphics;

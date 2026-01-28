@@ -1005,9 +1005,9 @@ namespace UnityEngine.UI.Windows {
 
             this.OnInitInternal();
             this.OnInit();
-            WindowSystem.RaiseEvent(this, WindowEvent.OnInitialize);
 
             this.SetState(ObjectState.Initialized);
+            WindowSystem.RaiseEvent(this, WindowEvent.OnInitialized);
 
         }
         
@@ -1016,6 +1016,7 @@ namespace UnityEngine.UI.Windows {
             if (this.objectState < ObjectState.Initializing) {
 
                 this.SetState(ObjectState.Initializing);
+                WindowSystem.RaiseEvent(this, WindowEvent.OnInitializing);
 
                 if (this is ILoadable loadable) {
 
@@ -1075,6 +1076,7 @@ namespace UnityEngine.UI.Windows {
                 
             }
             this.SetState(ObjectState.DeInitializing);
+            WindowSystem.RaiseEvent(this, WindowEvent.OnDeInitializing);
 
             for (int i = 0; i < this.subObjects.Count; ++i) {
                 if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
@@ -1084,13 +1086,13 @@ namespace UnityEngine.UI.Windows {
             var resources = WindowSystem.GetResources();
             resources.DeleteAll(this);
 
-            WindowSystem.RaiseEvent(this, WindowEvent.OnDeInitialize);
             this.OnDeInit();
             this.OnDeInitInternal();
 
             this.audioEvents.DeInitialize(this);
             
             this.SetState(ObjectState.DeInitialized);
+            WindowSystem.RaiseEvent(this, WindowEvent.OnDeInitialized);
 
             WindowSystem.ClearEvents(this);
             

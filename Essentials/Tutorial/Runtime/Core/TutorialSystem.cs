@@ -55,7 +55,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public override void OnStart() {
 
             var events = WindowSystem.GetEvents();
-            events.Register(WindowEvent.OnInitialize, this.OnWindowInitialized);
+            events.Register(WindowEvent.OnInitialized, this.OnWindowInitialized);
             events.Register(WindowEvent.OnShowBegin, this.OnWindowShowBegin);
             events.Register(WindowEvent.OnShowEnd, this.OnWindowShowEnd);
             events.Register(WindowEvent.OnFocusTook, this.OnWindowFocusTook);
@@ -69,7 +69,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             
             if (events == null) return;
             
-            events.UnRegister(WindowEvent.OnInitialize, this.OnWindowInitialized);
+            events.UnRegister(WindowEvent.OnInitialized, this.OnWindowInitialized);
             events.UnRegister(WindowEvent.OnShowBegin, this.OnWindowShowBegin);
             events.UnRegister(WindowEvent.OnShowEnd, this.OnWindowShowEnd);
             events.UnRegister(WindowEvent.OnFocusTook, this.OnWindowFocusTook);

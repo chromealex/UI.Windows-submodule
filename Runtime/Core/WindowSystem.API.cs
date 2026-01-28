@@ -346,33 +346,28 @@ namespace UnityEngine.UI.Windows {
         }
 
         public static T FindOpened<T>() {
-
             foreach (var item in WindowSystem.instance.currentWindows) {
-
                 if (item.instance is T win) return win;
-
             }
-
             return default;
+        }
 
+        public static T FindOpened<T>(System.Func<T, bool> filter) where T : WindowBase {
+            foreach (var item in WindowSystem.instance.currentWindows) {
+                if (item.instance is T win && filter?.Invoke(win) == true) return win;
+            }
+            return default;
         }
 
         public static T GetFocused<T>() where T : WindowBase {
-            
             foreach (var item in WindowSystem.instance.currentWindows) {
-
                 if (item.instance is T win && win.GetFocusState() == FocusState.Focused) return win;
-
             }
-
             return default;
-
         }
         
         public static bool HasInstance() {
-
             return WindowSystem.instance != null;
-
         }
 
         public static bool IsStrictMode() {

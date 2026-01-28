@@ -24,7 +24,7 @@ namespace UnityEngine.UI.Windows {
                     return;
                 }
                 
-                WindowSystem.GetEvents().RegisterOnce(window, WindowEvent.OnDeInitialize, this.RemoveFromStack);
+                WindowSystem.GetEvents().RegisterOnce(window, WindowEvent.OnDeInitialized, this.RemoveFromStack);
 
                 this.UpdateStack();
             }
@@ -74,11 +74,11 @@ namespace UnityEngine.UI.Windows {
         }
 
         public override void OnStart() {
-            WindowSystem.GetEvents().Register(WindowEvent.OnInitialize, this.AddToStack);
+            WindowSystem.GetEvents().Register(WindowEvent.OnInitializing, this.AddToStack);
         }
 
         public override void OnDestroy() {
-            WindowSystem.GetEvents().UnRegister(WindowEvent.OnInitialize, this.AddToStack);
+            WindowSystem.GetEvents().UnRegister(WindowEvent.OnInitializing, this.AddToStack);
         }
 #else
         public override void OnStart() {

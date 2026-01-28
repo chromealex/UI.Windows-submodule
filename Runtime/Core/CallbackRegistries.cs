@@ -175,7 +175,7 @@ namespace UnityEngine.UI.Windows {
 
         public void InitializeAuto(WindowObject windowObject) {
             this.Initialize();
-            WindowSystem.GetEvents().RegisterOnce(this, windowObject, WindowEvent.OnDeInitialize, static (obj, state) => {
+            WindowSystem.GetEvents().RegisterOnce(this, windowObject, WindowEvent.OnDeInitialized, static (obj, state) => {
                 state.DeInitialize();
             });
         }
@@ -466,7 +466,7 @@ namespace UnityEngine.UI.Windows {
 
         public void InitializeAuto(WindowObject windowObject) {
             this.Initialize();
-            WindowSystem.GetEvents().RegisterOnce(this, windowObject, WindowEvent.OnDeInitialize, static (obj, state) => {
+            WindowSystem.GetEvents().RegisterOnce(this, windowObject, WindowEvent.OnDeInitialized, static (obj, state) => {
                 state.DeInitialize();
             });
         }

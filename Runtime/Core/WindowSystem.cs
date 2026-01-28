@@ -131,8 +131,10 @@ namespace UnityEngine.UI.Windows {
 
         None = 0,
 
-        OnInitialize,
-        OnDeInitialize,
+        OnInitializing,
+        OnInitialized,
+        OnDeInitializing,
+        OnDeInitialized,
 
         OnShowBegin,
         OnShowEnd,

@@ -75,8 +75,10 @@ namespace UnityEngine.UI.Windows.Components {
         protected virtual void RegisterClick() {
             
             if (this.button is IButtonExtended buttonExtended) {
+                buttonExtended.RemoveAllListeners();
                 buttonExtended.AddListener((button: this, _: 0), static x => x.button.DoClickInternal());
             } else {
+                this.button.onClick.RemoveAllListeners();
                 this.button.onClick.AddListener(this.DoClickInternal);
             }
 

@@ -61,7 +61,7 @@ namespace UnityEngine.UI.Windows {
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
-    public abstract class WindowObject : MonoBehaviour, IOnPoolGet, IOnPoolAdd, ISearchComponentByTypeSingleEditor, IHolder {
+    public abstract class WindowObject : MonoBehaviour, IOnPoolGet, IOnPoolAdd, ISearchComponentByTypeSingleEditor, IHolder, System.IEquatable<WindowObject> {
 
         [System.Serializable]
         public struct RenderItem : System.IEquatable<RenderItem> {
@@ -1468,6 +1468,30 @@ namespace UnityEngine.UI.Windows {
         
         public virtual void OnPoolAdd() {}
         #endregion
+
+        public bool Equals(WindowObject other) {
+            return this == other;
+        }
+
+        public override bool Equals(object obj) {
+            if (obj is null) {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj)) {
+                return true;
+            }
+
+            if (obj.GetType() != this.GetType()) {
+                return false;
+            }
+
+            return this.Equals((WindowObject)obj);
+        }
+
+        public override int GetHashCode() {
+            return base.GetHashCode();
+        }
 
     }
 

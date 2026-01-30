@@ -17,6 +17,7 @@ namespace UnityEngine.UI.Windows {
         public static void RaiseEvent(WindowObject instance, WindowEvent windowEvent) {
 
             var events = WindowSystem.GetEvents();
+            if (events == null) return;
             events.Raise(instance, windowEvent);
 
         }

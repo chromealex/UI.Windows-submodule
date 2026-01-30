@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 196098531136970820}
   - component: {fileID: 5136526574245508469}
   - component: {fileID: -3337425711104511688}
+  - component: {fileID: 3181259942120218750}
   m_Layer: 5
   m_Name: EmptyLayout
   m_TagString: Untagged
@@ -87,7 +88,7 @@ MonoBehaviour:
   - {fileID: 5470113545036599192}
   useSafeZone: 0
   safeZone: {fileID: 0}
-  safeZoneRectTransform: {fileID: 0}
+  rebuilder: {fileID: 3181259942120218750}
 --- !u!223 &3002262861325224963
 Canvas:
   m_ObjectHideFlags: 0
@@ -175,6 +176,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 219f56028dcc04326baf2e70be2fd053, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &3181259942120218750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2835211755995118023}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 030401e319124d37b164ccd10d448f14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  windowLayout: {fileID: 9075030843538608721}
 --- !u!1 &7242518058420311849
 GameObject:
   m_ObjectHideFlags: 0

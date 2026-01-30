@@ -1416,6 +1416,20 @@ namespace UnityEngine.UI.Windows {
 
         }
 
+        public void DoLayoutEvent(CanvasUpdate stage) {
+
+            this.OnLayoutEvent(stage);
+            WindowSystem.RaiseEvent(this, WindowEvent.OnLayoutEvent);
+
+            for (int i = 0; i < this.subObjects.Count; ++i) {
+
+                if (this.CheckSubObject(this.subObjects, ref i) == false) continue;
+                this.subObjects[i].DoLayoutEvent(stage);
+
+            }
+
+        }
+
         internal virtual void OnInitInternal() { }
 
         internal virtual void OnDeInitInternal() { }
@@ -1432,6 +1446,7 @@ namespace UnityEngine.UI.Windows {
         public virtual void OnEvent<T>(T data) where T : class { }
 
         public virtual void OnLayoutReady() { }
+        public virtual void OnLayoutEvent(CanvasUpdate stage) { }
         
         public virtual void OnInit() { }
 

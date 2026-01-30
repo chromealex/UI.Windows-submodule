@@ -104,6 +104,9 @@ namespace UnityEngine.UI.Windows {
         [Tooltip("Override camera mode. You can change camera mode at runtime.")]
         public UIWSCameraMode cameraMode;
 
+        [Tooltip("If set, window will wait for Prelayout stage applied before showing the window.")]
+        public bool waitForLayoutBeforeShow;
+
         [Space(10f)]
         [Tooltip("Collect screens into queue and use this queue automatically on event.")]
         public bool showInSequence;
@@ -112,7 +115,7 @@ namespace UnityEngine.UI.Windows {
         [Header("Performance Options")]
         [Tooltip("If this screen has full-rect opaque background you can set this option as true to deactivate render on all screens behind this.")]
         public bool fullCoverage;
-
+        
     }
 
     public struct InitialParameters {
@@ -146,6 +149,7 @@ namespace UnityEngine.UI.Windows {
         OnFocusLost,
         
         OnLayoutReady,
+        OnLayoutEvent,
 
     }
 
@@ -1173,10 +1177,6 @@ namespace UnityEngine.UI.Windows {
                 var tr = state.transitionParameters.ReplaceCallback(closure, static (data) => {
 
                     var closure = (WindowObjectClosure)data;
-                    var obj = closure.instance;
-                    Coroutines.WaitEndOfFrame(obj, static (obj) => {
-                        obj.DoLayoutReady();
-                    });
                     closure.tr.RaiseCallback();
                     closure.Dispose();
                     PoolClass<WindowObjectClosure>.Recycle(closure);
@@ -1186,7 +1186,18 @@ namespace UnityEngine.UI.Windows {
                 state.instance.DoInit(new DoInitClosure() {
                     component = state.instance,
                     parameters = tr,
-                }, static (data) => data.component.ShowInternal(data.parameters));
+                }, static (data) => {
+                    var instance = (WindowBase)data.component;
+                    if (instance.preferences.waitForLayoutBeforeShow == true) {
+                        instance.layoutStage = -1;
+                        instance.SetVisible();
+                        Coroutines.Wait((data, instance), static (x) => x.instance.layoutStage >= (int)CanvasUpdate.Prelayout, static (x) => {
+                            x.data.component.ShowInternal(x.data.parameters);
+                        });
+                    } else {
+                        data.component.ShowInternal(data.parameters);
+                    }
+                });
 
             });
 

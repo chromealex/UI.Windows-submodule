@@ -30,6 +30,7 @@
         private int currentCanvasDepth;
         
         private FocusState focusState;
+        internal int layoutStage = -1;
 
         public virtual void OnParametersPass() {
         }
@@ -37,6 +38,11 @@
         public virtual void OnEmptyPass() {}
 
         public FocusState GetFocusState() => this.focusState;
+
+        public override void OnLayoutEvent(CanvasUpdate stage) {
+            base.OnLayoutEvent(stage);
+            this.layoutStage = (int)stage;
+        }
 
         internal override void OnDeInitInternal() {
 

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4562398388743874407}
   - component: {fileID: 196098531136970820}
   - component: {fileID: 5136526574245508469}
+  - component: {fileID: 4151769528408639817}
   m_Layer: 5
   m_Name: ConsoleLayout
   m_TagString: Untagged
@@ -91,7 +92,7 @@ MonoBehaviour:
   - {fileID: 4118133958301854147}
   useSafeZone: 0
   safeZone: {fileID: 0}
-  safeZoneRectTransform: {fileID: 0}
+  rebuilder: {fileID: 4151769528408639817}
 --- !u!223 &3002262861325224963
 Canvas:
   m_ObjectHideFlags: 0
@@ -167,6 +168,19 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &4151769528408639817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2835211755995118023}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 030401e319124d37b164ccd10d448f14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  windowLayout: {fileID: 9075030843538608721}
 --- !u!1 &5802094874060986206
 GameObject:
   m_ObjectHideFlags: 0

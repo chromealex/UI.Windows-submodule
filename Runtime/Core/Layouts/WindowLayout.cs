@@ -15,10 +15,10 @@ namespace UnityEngine.UI.Windows {
 
         public bool useSafeZone;
         public WindowLayoutSafeZone safeZone;
-        public RectTransform safeZoneRectTransform;
 
         private int order;
         private readonly Dictionary<int, WindowComponent> loadedComponents = new Dictionary<int, WindowComponent>();
+        public CanvasRebuilderEvents rebuilder;
 
         public void SetLoadedComponent(int tag, WindowComponent instance) {
             this.loadedComponents.Add(tag, instance);
@@ -31,11 +31,27 @@ namespace UnityEngine.UI.Windows {
         public WindowComponent GetLoadedComponent(int tag) {
             return this.loadedComponents.GetValueOrDefault(tag);
         }
-        
+
+        private void OnEnable() {
+            
+            if (this.rebuilder != null) {
+                UnityEngine.UI.CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this.rebuilder);
+            }
+
+        }
+
+        private void OnDisable() {
+            
+            if (this.rebuilder != null) {
+                UnityEngine.UI.CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this.rebuilder);
+            }
+
+        }
+
         public override void OnInit() {
             
             base.OnInit();
-            
+
             if (this.useSafeZone == true && this.isRootLayout == true) {
                 
                 this.safeZone.Apply();
@@ -153,6 +169,9 @@ namespace UnityEngine.UI.Windows {
             this.canvasScaler = this.GetComponent<UnityEngine.UI.CanvasScaler>();
             this.canvas.renderMode = WindowSystem.GetSettings().canvas.renderMode;
 
+            if (this.rebuilder == null) this.rebuilder = this.gameObject.AddComponent<CanvasRebuilderEvents>();
+            if (this.rebuilder != null) this.rebuilder.windowLayout = this;
+            
             if (this.ApplyTagsEditor() == true) {
                 #if UNITY_EDITOR
                 UnityEditor.EditorUtility.SetDirty(this.gameObject);

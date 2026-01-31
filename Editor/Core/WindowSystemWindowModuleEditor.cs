@@ -89,7 +89,7 @@ namespace UnityEditor.UI.Windows {
         
             this.useSafeZone = this.serializedObject.FindProperty("useSafeZone");
             this.safeZone = this.serializedObject.FindProperty("safeZone");
-            this.safeZoneRectTransform = this.serializedObject.FindProperty("safeZoneRectTransform");
+            this.safeZoneRectTransform = this.serializedObject.FindProperty(nameof(WindowLayout.safeZoneRectTransform));
 
             EditorHelpers.SetFirstSibling(this.targets);
 

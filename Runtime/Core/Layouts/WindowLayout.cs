@@ -15,6 +15,7 @@ namespace UnityEngine.UI.Windows {
 
         public bool useSafeZone;
         public WindowLayoutSafeZone safeZone;
+        public RectTransform safeZoneRectTransform;
 
         private int order;
         private readonly Dictionary<int, WindowComponent> loadedComponents = new Dictionary<int, WindowComponent>();

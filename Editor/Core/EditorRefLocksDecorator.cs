@@ -125,6 +125,9 @@ namespace UnityEditor.UI.Windows {
                 if (val != null) {
 
                     isValid = false;
+                    if (PrefabUtility.IsPartOfPrefabInstance(val) == true) {
+                        val = PrefabUtility.GetCorrespondingObjectFromSource(val);
+                    }
                     var path = AssetDatabase.GetAssetPath(val);
                     for (int i = 0; i < dirs.Count; ++i) {
 

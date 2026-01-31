@@ -119,7 +119,7 @@ namespace UnityEditor.UI.Windows {
                 
             }
 
-            if (ObjDrawer.IsValid(property.serializedObject.targetObject as GameObject, newObj, ref prevSelected) == false) {
+            if (ObjDrawer.IsValid((property.serializedObject.targetObject as Component).gameObject, newObj, ref prevSelected) == false) {
                 GUILayoutExt.DrawInvalid(position);
             }
 

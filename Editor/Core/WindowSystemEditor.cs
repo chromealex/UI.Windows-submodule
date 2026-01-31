@@ -61,30 +61,30 @@ namespace UnityEditor.UI.Windows {
         private System.Type textureUtils;
         private System.Reflection.MethodInfo getTextureSizeMethod;
 
-        public void OnEnable() {
+        public void UpdateProperties() {
 
             this.textureUtils = typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.TextureUtil");
             this.getTextureSizeMethod = this.textureUtils.GetMethod("GetStorageMemorySize", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 
-            this.emulatePlatform = this.serializedObject.FindProperty("emulatePlatform");
-            this.emulateRuntimePlatform = this.serializedObject.FindProperty("emulateRuntimePlatform");
-            this.registeredPrefabs = this.serializedObject.FindProperty("registeredPrefabs");
-            this.showRootOnStart = this.serializedObject.FindProperty("showRootOnStart");
-            this.rootScreen = this.serializedObject.FindProperty("rootScreen");
+            this.emulatePlatform = this.targetSerializedObject.FindProperty("emulatePlatform");
+            this.emulateRuntimePlatform = this.targetSerializedObject.FindProperty("emulateRuntimePlatform");
+            this.registeredPrefabs = this.targetSerializedObject.FindProperty("registeredPrefabs");
+            this.showRootOnStart = this.targetSerializedObject.FindProperty("showRootOnStart");
+            this.rootScreen = this.targetSerializedObject.FindProperty("rootScreen");
             
-            this.loaderScreen = this.serializedObject.FindProperty("loaderScreen");
+            this.loaderScreen = this.targetSerializedObject.FindProperty("loaderScreen");
 
-            this.settings = this.serializedObject.FindProperty("settings");
+            this.settings = this.targetSerializedObject.FindProperty("settings");
 
             { // Modules
-                this.breadcrumbs = this.serializedObject.FindProperty("breadcrumbs");
-                this.events = this.serializedObject.FindProperty("events");
-                this.resources = this.serializedObject.FindProperty("resources");
-                this.pools = this.serializedObject.FindProperty("pools");
-                this.tweener = this.serializedObject.FindProperty("tweener");
+                this.breadcrumbs = this.targetSerializedObject.FindProperty("breadcrumbs");
+                this.events = this.targetSerializedObject.FindProperty("events");
+                this.resources = this.targetSerializedObject.FindProperty("resources");
+                this.pools = this.targetSerializedObject.FindProperty("pools");
+                this.tweener = this.targetSerializedObject.FindProperty("tweener");
             }
             
-            this.modules = this.serializedObject.FindProperty("modules");
+            this.modules = this.targetSerializedObject.FindProperty("modules");
             
             EditorHelpers.SetFirstSibling(this.targets);
 
@@ -134,7 +134,15 @@ namespace UnityEditor.UI.Windows {
         private readonly Dictionary<WindowBase, HashSet<UsedResource>> usedResources = new Dictionary<WindowBase, HashSet<UsedResource>>();
         private readonly HashSet<AtlasData> usedAtlases = new HashSet<AtlasData>();
         private bool dependenciesState;
+        private SerializedObject targetSerializedObject;
+        private Object currentTarget;
         private SerializedObject settingsSo;
+
+        public void OnEnable() {
+            this.currentTarget = this.target;
+            this.targetSerializedObject = this.serializedObject;
+            this.UpdateProperties();
+        }
 
         public override void OnInspectorGUI() {
 
@@ -142,9 +150,7 @@ namespace UnityEditor.UI.Windows {
                 this.settingsSo = new SerializedObject(this.settings.objectReferenceValue);
                 if (this.settingsSo.FindProperty("prefabMode").boolValue == true) {
                     if (PrefabUtility.GetPrefabInstanceStatus(this.target) == PrefabInstanceStatus.Connected) {
-                        GUILayoutExt.Box(4f, 4f, () => {
-                            GUILayout.Label("WindowSystem is in Prefab Mode. In this mode you can edit this prefab in source only.");
-                        });
+                        EditorGUILayout.HelpBox("WindowSystem is in Prefab Mode according to your settings. In this mode you can edit this prefab in source only, so this object is displayed from source.", MessageType.Warning);
                         GUILayout.Space(10f);
                         GUILayout.BeginHorizontal();
                         GUILayout.FlexibleSpace();
@@ -153,14 +159,20 @@ namespace UnityEditor.UI.Windows {
                         }
                         GUILayout.FlexibleSpace();
                         GUILayout.EndHorizontal();
-                        return;
+                        GUILayout.Space(10f);
+                        var source = PrefabUtility.GetCorrespondingObjectFromSource(this.target);
+                        if (this.currentTarget != source) {
+                            this.currentTarget = source;
+                            this.targetSerializedObject = new SerializedObject(source);
+                            this.UpdateProperties();
+                        }
                     }
                 }
             }
 
-            this.serializedObject.Update();
+            this.targetSerializedObject.Update();
 
-            GUILayoutExt.DrawComponentHeader(this.serializedObject, "UI", () => {
+            GUILayoutExt.DrawComponentHeader(this.targetSerializedObject, "UI", () => {
                 
                 GUILayout.Label("Window System", GUILayout.Height(36f));
                 
@@ -208,7 +220,7 @@ namespace UnityEditor.UI.Windows {
                     var count = this.registeredPrefabs.arraySize;
                     EditorGUILayout.PropertyField(this.registeredPrefabs, new GUIContent($"Registered Prefabs ({count})"));
 
-                    EditorRefLocksPropertyDrawer.Draw(this.serializedObject, "UIWS.Collect");
+                    EditorRefLocksPropertyDrawer.Draw(this.targetSerializedObject, "UIWS.Collect");
 
                     GUILayout.Space(10f);
                     GUILayout.BeginHorizontal();
@@ -253,7 +265,7 @@ namespace UnityEditor.UI.Windows {
                         
                         GUILayoutExt.Box(4f, 4f, () => {
 
-                            EditorRefLocksPropertyDrawer.Draw(this.serializedObject, "UIWS");
+                            EditorRefLocksPropertyDrawer.Draw(this.targetSerializedObject, "UIWS");
                         
                         });
 
@@ -758,7 +770,7 @@ namespace UnityEditor.UI.Windows {
             /*
             GUILayout.Space(10f);
 
-            var iter = this.serializedObject.GetIterator();
+            var iter = this.targetSerializedObject.GetIterator();
             iter.NextVisible(true);
             do {
 
@@ -770,7 +782,7 @@ namespace UnityEditor.UI.Windows {
 
             } while (iter.NextVisible(false) == true);*/
 
-            this.serializedObject.ApplyModifiedProperties();
+            this.targetSerializedObject.ApplyModifiedProperties();
 
         }
 

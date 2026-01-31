@@ -38,6 +38,11 @@ namespace UnityEngine.UI.Windows.Utilities {
 			
         }
 
+        public static void ResolveWaitTasks() {
+	        WaitTasks.Update();
+	        WaitTasks.EndOfFrameUpdate();
+        }
+
         private struct WaitFrameClosure {
 
 	        public System.Action callback;

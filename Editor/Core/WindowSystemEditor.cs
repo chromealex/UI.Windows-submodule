@@ -134,11 +134,32 @@ namespace UnityEditor.UI.Windows {
         private readonly Dictionary<WindowBase, HashSet<UsedResource>> usedResources = new Dictionary<WindowBase, HashSet<UsedResource>>();
         private readonly HashSet<AtlasData> usedAtlases = new HashSet<AtlasData>();
         private bool dependenciesState;
+        private SerializedObject settingsSo;
 
         public override void OnInspectorGUI() {
 
+            if (this.settings.objectReferenceValue != null) {
+                this.settingsSo = new SerializedObject(this.settings.objectReferenceValue);
+                if (this.settingsSo.FindProperty("prefabMode").boolValue == true) {
+                    if (PrefabUtility.GetPrefabInstanceStatus(this.target) == PrefabInstanceStatus.Connected) {
+                        GUILayoutExt.Box(4f, 4f, () => {
+                            GUILayout.Label("WindowSystem is in Prefab Mode. In this mode you can edit this prefab in source only.");
+                        });
+                        GUILayout.Space(10f);
+                        GUILayout.BeginHorizontal();
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Button("Select Prefab", GUILayout.Width(200f), GUILayout.Height(30f)) == true) {
+                            Selection.activeObject = PrefabUtility.GetCorrespondingObjectFromSource(this.target);
+                        }
+                        GUILayout.FlexibleSpace();
+                        GUILayout.EndHorizontal();
+                        return;
+                    }
+                }
+            }
+
             this.serializedObject.Update();
-            
+
             GUILayoutExt.DrawComponentHeader(this.serializedObject, "UI", () => {
                 
                 GUILayout.Label("Window System", GUILayout.Height(36f));

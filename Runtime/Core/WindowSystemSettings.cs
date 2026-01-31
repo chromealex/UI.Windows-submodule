@@ -86,6 +86,7 @@
         [Tooltip("In StrictMode all API's will not cast objects automatically (for example ImageComponent::SetImage(sprite) will set in Image component only).")]
         public bool strictMode;
         public bool collectDebugInfo;
+        public bool prefabMode;
         
         public Layer GetLayerInfo(int index) {
 

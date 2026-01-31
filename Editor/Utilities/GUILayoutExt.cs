@@ -307,6 +307,29 @@ namespace UnityEditor.UI.Windows {
             
 	    }
 
+	    
+	    public static SerializedProperty FindParentProperty(SerializedProperty serializedProperty) {
+		    var propertyPaths = serializedProperty.propertyPath.Split('.');
+		    if (propertyPaths.Length <= 1) {
+			    return default;
+		    }
+
+		    var parentSerializedProperty = serializedProperty.serializedObject.FindProperty(propertyPaths.First());
+		    for (var index = 1; index < propertyPaths.Length - 1; index++) {
+			    if (propertyPaths[index] == "Array" && propertyPaths.Length > index + 1 && System.Text.RegularExpressions.Regex.IsMatch(propertyPaths[index + 1], "^data\\[\\d+\\]$")) {
+				    var match = System.Text.RegularExpressions.Regex.Match(propertyPaths[index + 1], "^data\\[(\\d+)\\]$");
+				    var arrayIndex = int.Parse(match.Groups[1].Value);
+				    parentSerializedProperty = parentSerializedProperty.GetArrayElementAtIndex(arrayIndex);
+				    index++;
+			    } else {
+				    parentSerializedProperty = parentSerializedProperty.FindPropertyRelative(propertyPaths[index]);
+			    }
+		    }
+
+		    return parentSerializedProperty;
+	    }
+
+	    
 	    public static string GetPropertyToString(SerializedProperty property) {
 
 		    if (property.hasMultipleDifferentValues == true) {
@@ -1332,6 +1355,17 @@ namespace UnityEditor.UI.Windows {
 	        GUI.Label(texRect, new GUIContent(icon, "This reference is invalid because it's used out of valid directories scope.\nMove this asset to the valid directory."));
 	        GUILayoutExt.DrawRect(lineRect, GUI.color);
 	        GUI.color = color;
+        }
+
+        public static void GetRandomValue(SerializedProperty randomValueProperty, out float from, out float to) {
+	        var rnd = randomValueProperty.FindPropertyRelative(nameof(UnityEngine.UI.Windows.Modules.AnimationParameters.RandomValue.random));
+	        var value = randomValueProperty.FindPropertyRelative(nameof(UnityEngine.UI.Windows.Modules.AnimationParameters.RandomValue.randomFromTo));
+	        if (rnd.boolValue == true) {
+		        from = value.vector2Value.x;
+		        to = value.vector2Value.y;
+	        } else {
+		        from = to = value.vector2Value.x;
+	        }
         }
 
     }

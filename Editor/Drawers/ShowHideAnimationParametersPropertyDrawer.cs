@@ -18,7 +18,18 @@ namespace UnityEditor.UI.Windows {
 
             EditorGUI.BeginProperty(position, label, property);
             if (EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Passive, EditorStyles.toolbarDropDown) == true) {
-                PopupWindow.Show(position, new EaseEditorWindow((UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction)property.enumValueIndex) {
+                var parent = GUILayoutExt.FindParentProperty(property);
+                var durationValue = new Vector2(1f, 1f);
+                var delayValue = new Vector2(0f, 0f);
+                if (parent != null) {
+                    var duration = parent.FindPropertyRelative("duration");
+                    GUILayoutExt.GetRandomValue(duration, out var durationFrom, out var durationTo);
+                    durationValue = new Vector2(durationFrom, durationTo);
+                    var delay = parent.FindPropertyRelative("delay");
+                    GUILayoutExt.GetRandomValue(delay, out var delayFrom, out var delayTo);
+                    delayValue = new Vector2(delayFrom, delayTo);
+                }
+                PopupWindow.Show(position, new EaseEditorWindow((UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction)property.enumValueIndex, durationValue, delayValue) {
                     onSelect = (ease) => {
                         property.serializedObject.Update();
                         property.enumValueIndex = (int)ease;
@@ -29,7 +40,7 @@ namespace UnityEditor.UI.Windows {
             }
 
             var lbl = property.enumDisplayNames[property.enumValueIndex];
-            EaseEditorWindow.Item.DrawProgress(new Rect(position.x + 1f, position.y + 1f, position.width - 20f, position.height - 2f), (UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction)property.enumValueIndex, -1f, lbl, false);
+            EaseEditorWindow.Item.DrawProgress(new Rect(position.x + 1f, position.y + 1f, position.width - 20f, position.height - 2f), (UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction)property.enumValueIndex, -1f, null, null, lbl, false);
             EditorGUI.EndProperty();
             
         }
@@ -45,6 +56,8 @@ namespace UnityEditor.UI.Windows {
         private SerializedProperty property;
         private readonly System.Collections.Generic.List<Item> items;
         public System.Action<UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction> onSelect;
+        private readonly Vector2 duration;
+        private readonly Vector2 delay;
 
         public static class Styles {
 
@@ -83,10 +96,18 @@ namespace UnityEditor.UI.Windows {
             private readonly string groupHeader;
             private double progress;
             private double prevTime;
-            
-            public Item(UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction type, bool selected) {
+            private Vector2 duration;
+            private Vector2 delay;
+
+            private float? currentDuration;
+            private float? currentDelay;
+            private double delayValue;
+
+            public Item(UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction type, Vector2 duration, Vector2 delay, bool selected) {
                 this.type = type;
                 this.selected = selected;
+                this.duration = duration;
+                this.delay = delay;
                 var memInfo = type.GetType().GetMember(type.ToString());
                 {
                     var attribute = memInfo[0].GetCustomAttribute(typeof(UnityEngine.UI.Windows.Utilities.Tweener.GroupAttribute), false);
@@ -111,11 +132,11 @@ namespace UnityEditor.UI.Windows {
 
             public void OnGUI(Rect rect) {
 
-                DrawProgress(rect, this.type, (float)this.progress, this.GetCaption(), this.selected);
+                DrawProgress(rect, this.type, (float)this.progress, this.currentDuration, this.currentDelay, this.GetCaption(), this.selected);
 
             }
 
-            public static void DrawProgress(Rect rect, UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction func, float progress, string caption, bool selected) {
+            public static void DrawProgress(Rect rect, UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction func, float progress, float? currentDuration, float? currentDelay, string caption, bool selected) {
 
                 const float sizeX = 10f;
                 const float sizeY = 10f;
@@ -150,7 +171,7 @@ namespace UnityEditor.UI.Windows {
                 System.Buffers.ArrayPool<Vector3>.Shared.Return(points);
                 Handles.EndGUI();
 
-                if (progress > 0f) {
+                if (progress > 0f || (currentDelay != null && currentDelay > 0f)) {
                     var boxRect = new Rect(rect.x + rect.width * progress - sizeX * 0.5f, rect.y + rect.height - funcEase.Invoke(progress, 0f, 1f, 1f) * rect.height - sizeY * 0.5f, sizeX, sizeY);
                     GUI.Box(boxRect, string.Empty, Styles.sliderDot);
                 }
@@ -159,19 +180,34 @@ namespace UnityEditor.UI.Windows {
             
             public void Play() {
 
+                if (this.currentDuration == null) {
+                    this.currentDuration = Random.Range(this.duration.x, this.duration.y);
+                    this.currentDelay = Random.Range(this.delay.x, this.delay.y);
+                }
+                
                 var time = EditorApplication.timeSinceStartup;
                 var deltaTime = time - this.prevTime;
                 this.prevTime = time;
 
-                this.progress += deltaTime;
-                if (this.progress >= 1d) {
-                    this.progress = 0d;
+                this.delayValue += deltaTime;
+                if (this.delayValue >= this.currentDelay) {
+
+                    this.progress += deltaTime / (this.currentDuration ?? 1f);
+                    if (this.progress >= 1d) {
+                        this.progress = 0d;
+                        this.delayValue = 0d;
+                        this.currentDuration = null;
+                    }
+
                 }
 
             }
 
             public void Pause() {
 
+                this.currentDuration = null;
+                this.currentDelay = null;
+                this.delayValue = 0d;
                 this.progress = 0d;
                 this.prevTime = 0d;
 
@@ -191,15 +227,17 @@ namespace UnityEditor.UI.Windows {
 
         }
         
-        public EaseEditorWindow(UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction selected) {
+        public EaseEditorWindow(UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction selected, Vector2 duration, Vector2 delay) {
             var values = System.Enum.GetValues(typeof(UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction));
             this.items = new System.Collections.Generic.List<Item>();
             foreach (var value in values) {
                 var func = (UnityEngine.UI.Windows.Utilities.Tweener.EaseFunction)value;
-                this.items.Add(new Item(func, func == selected));
+                this.items.Add(new Item(func, duration, delay, func == selected));
             }
 
             this.items = this.items.OrderBy(x => x.GetOrder()).ToList();
+            this.duration = duration;
+            this.delay = delay;
         }
 
         public override Vector2 GetWindowSize() {

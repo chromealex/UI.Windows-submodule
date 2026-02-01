@@ -175,7 +175,7 @@ namespace UnityEngine.UI.Windows {
         private bool isActiveSelf;
         private ObjectState objectState;
 
-        public bool IsForPool() => this.createPool == true && this.hasObjectCanvas == true;
+        public virtual bool IsForPool() => this.createPool == true && this.hasObjectCanvas == true;
         
         public bool IsReadyToHide() => this.readyToHide;
 

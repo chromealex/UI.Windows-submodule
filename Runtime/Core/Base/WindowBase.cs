@@ -36,7 +36,9 @@
         }
         
         public virtual void OnEmptyPass() {}
-
+        
+        public override bool IsForPool() => this.createPool == true;
+        
         public FocusState GetFocusState() => this.focusState;
 
         public override void OnLayoutEvent(CanvasUpdate stage) {

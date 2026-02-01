@@ -4,27 +4,47 @@ namespace UnityEngine.UI.Windows {
 
     public interface IUpdate {
         void OnUpdate(float dt);
+        bool IsVisible();
     }
 
     public interface ILateUpdate {
         void OnLateUpdate(float dt);
+        bool IsVisible();
     }
 
     public partial class WindowSystem {
         
-        private readonly List<WindowObject> updates = new List<WindowObject>();
-        private readonly List<WindowObject> lateUpdates = new List<WindowObject>();
-        private readonly List<WindowObject> toRemoveTemp = new List<WindowObject>();
+        private readonly List<IUpdate> updates = new List<IUpdate>();
+        private readonly List<ILateUpdate> lateUpdates = new List<ILateUpdate>();
+        private readonly List<Object> toRemoveTemp = new List<Object>();
 
+        public static bool TryAddUpdateListener(WindowComponentModule module) {
+            var result = false;
+            var instance = WindowSystem.instance;
+            if (module is IUpdate update) {
+                instance.updates.Add(update);
+                result = true;
+            }
+            if (module is ILateUpdate lateUpdate) {
+                instance.lateUpdates.Add(lateUpdate);
+                result = true;
+            }
+
+            if (result == true) {
+                WindowSystem.GetEvents().RegisterOnce((module, _: 0), module.windowComponent, WindowEvent.OnHideEnd, static (obj, module) => TryRemoveUpdateListener(module.module));
+            }
+            return result;
+        }
+        
         public static bool TryAddUpdateListener(WindowObject component) {
             var result = false;
             var instance = WindowSystem.instance;
-            if (component is IUpdate) {
-                instance.updates.Add(component);
+            if (component is IUpdate update) {
+                instance.updates.Add(update);
                 result = true;
             }
-            if (component is ILateUpdate) {
-                instance.lateUpdates.Add(component);
+            if (component is ILateUpdate lateUpdate) {
+                instance.lateUpdates.Add(lateUpdate);
                 result = true;
             }
 
@@ -32,6 +52,11 @@ namespace UnityEngine.UI.Windows {
                 WindowSystem.GetEvents().RegisterOnce(component, WindowEvent.OnHideEnd, static (obj) => TryRemoveUpdateListener(obj));
             }
             return result;
+        }
+
+        public static void TryRemoveUpdateListener(WindowComponentModule module) {
+            var instance = WindowSystem.instance;
+            instance.toRemoveTemp.Add(module);
         }
 
         public static void TryRemoveUpdateListener(WindowObject component) {
@@ -42,11 +67,11 @@ namespace UnityEngine.UI.Windows {
         private void ApplyRemoved() {
 
             foreach (var component in this.toRemoveTemp) {
-                if (component is IUpdate) {
-                    instance.updates.Remove(component);
+                if (component is IUpdate update) {
+                    instance.updates.Remove(update);
                 }
-                if (component is ILateUpdate) {
-                    instance.lateUpdates.Remove(component);
+                if (component is ILateUpdate lateUpdate) {
+                    instance.lateUpdates.Remove(lateUpdate);
                 }
             }
             this.toRemoveTemp.Clear();
@@ -62,7 +87,7 @@ namespace UnityEngine.UI.Windows {
                     continue;
                 }
                 if (component.IsVisible() == false) continue;
-                ((IUpdate)component).OnUpdate(dt);
+                component.OnUpdate(dt);
             }
 
             this.ApplyRemoved();
@@ -78,7 +103,7 @@ namespace UnityEngine.UI.Windows {
                     continue;
                 }
                 if (component.IsVisible() == false) continue;
-                ((ILateUpdate)component).OnLateUpdate(dt);
+                component.OnLateUpdate(dt);
             }
             
             this.ApplyRemoved();

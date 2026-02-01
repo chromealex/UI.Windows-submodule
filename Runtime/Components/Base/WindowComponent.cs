@@ -122,8 +122,11 @@
                 if (this.modules == null) return;
 
                 for (int i = 0; i < this.modules.Length; ++i) {
-                    
-                    if (this.modules[i] != null) this.modules[i].OnShowBegin();
+
+                    if (this.modules[i] != null) {
+                        this.modules[i].OnShowBegin();
+                        WindowSystem.TryAddUpdateListener(this.modules[i]);
+                    }
                     
                 }
 

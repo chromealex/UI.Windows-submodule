@@ -2,7 +2,7 @@ namespace UnityEngine.UI.Windows.Utilities {
     
     using System.Collections.Generic;
 
-    public interface IUpdate {
+    public interface ITasksUpdate {
 
         void Update();
 
@@ -22,8 +22,8 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-        private static readonly List<IUpdate> updates = new List<IUpdate>();
-        private static readonly List<IUpdate> endOfFrameUpdates = new List<IUpdate>();
+        private static readonly List<ITasksUpdate> updates = new List<ITasksUpdate>();
+        private static readonly List<ITasksUpdate> endOfFrameUpdates = new List<ITasksUpdate>();
         
         public static void Add<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
             if (waitFor.Invoke(state) == true) {
@@ -83,7 +83,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
     }
 
-    internal class WaitTasks<TState> : IUpdate {
+    internal class WaitTasks<TState> : ITasksUpdate {
 
         private struct Item {
 
@@ -113,7 +113,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
     }
 
-    internal class WaitTasksEmpty : IUpdate {
+    internal class WaitTasksEmpty : ITasksUpdate {
 
         private struct Item {
 

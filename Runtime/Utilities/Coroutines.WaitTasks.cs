@@ -7,7 +7,33 @@ namespace UnityEngine.UI.Windows.Utilities {
         void Update();
 
     }
-        
+
+    public struct WaitTaskCancellationToken<T> {
+
+        public uint id;
+        public int index;
+        public bool isCreated;
+
+        public bool Cancel() {
+            if (this.isCreated == false) return false;
+            return WaitTasks.Cancel(this);
+        }
+
+    }
+
+    public struct WaitTaskCancellationToken {
+
+        public uint id;
+        public int index;
+        public bool isCreated;
+
+        public bool Cancel() {
+            if (this.isCreated == false) return false;
+            return WaitTasks.Cancel(this);
+        }
+
+    }
+
     public static class WaitTasks {
 
         private static class CacheType<TState> {
@@ -25,37 +51,45 @@ namespace UnityEngine.UI.Windows.Utilities {
         private static readonly List<ITasksUpdate> updates = new List<ITasksUpdate>();
         private static readonly List<ITasksUpdate> endOfFrameUpdates = new List<ITasksUpdate>();
         
-        public static void Add<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+        public static bool Cancel<T>(WaitTaskCancellationToken<T> token) {
+            return CacheType<T>.instance.Cancel(token);
+        }
+
+        public static bool Cancel(WaitTaskCancellationToken token) {
+            return CacheType.instance.Cancel(token);
+        }
+
+        public static WaitTaskCancellationToken<TState> Add<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
             if (waitFor.Invoke(state) == true) {
                 callback.Invoke(state);
-                return;
+                return default;
             }
             if (CacheType<TState>.instance == null) {
                 updates.Add(CacheType<TState>.instance = new WaitTasks<TState>());
             }
-            CacheType<TState>.instance.Add(state, waitFor, callback);
+            return CacheType<TState>.instance.Add(state, waitFor, callback);
         }
 
-        public static void Add(System.Func<bool> waitFor, System.Action callback) {
+        public static WaitTaskCancellationToken Add(System.Func<bool> waitFor, System.Action callback) {
             if (waitFor.Invoke() == true) {
                 callback.Invoke();
-                return;
+                return default;
             }
             if (CacheType.instance == null) {
                 updates.Add(CacheType.instance = new WaitTasksEmpty());
             }
-            CacheType.instance.Add(waitFor, callback);
+            return CacheType.instance.Add(waitFor, callback);
         }
 
-        public static void AddEndOfFrame<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+        public static WaitTaskCancellationToken<TState> AddEndOfFrame<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
             if (waitFor.Invoke(state) == true) {
                 callback.Invoke(state);
-                return;
+                return default;
             }
             if (CacheType<TState>.instance == null) {
                 endOfFrameUpdates.Add(CacheType<TState>.instance = new WaitTasks<TState>());
             }
-            CacheType<TState>.instance.Add(state, waitFor, callback);
+            return CacheType<TState>.instance.Add(state, waitFor, callback);
         }
 
         public static void AddEndOfFrame(System.Func<bool> waitFor, System.Action callback) {
@@ -87,6 +121,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         private struct Item {
 
+            public uint id;
             public TState state;
             public System.Func<TState, bool> waitFor;
             public System.Action<TState> callback;
@@ -94,9 +129,33 @@ namespace UnityEngine.UI.Windows.Utilities {
         }
 
         private static readonly List<Item> items = new List<Item>();
-	        
-        public void Add(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
-            items.Add(new Item { state = state, waitFor = waitFor, callback = callback });
+        private static uint id;
+        
+        public bool Cancel(WaitTaskCancellationToken<TState> token) {
+            
+            for (int i = token.index; i < items.Count; ++i) {
+                var item = items[i];
+                if (item.id == token.id) {
+                    items.RemoveAt(i);
+                    return true;
+                }
+            }
+
+            for (int i = 0; i < items.Count; ++i) {
+                var item = items[i];
+                if (item.id == token.id) {
+                    items.RemoveAt(i);
+                    return true;
+                }
+            }
+
+            return false;
+            
+        }
+
+        public WaitTaskCancellationToken<TState> Add(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+            items.Add(new Item { id = ++id, state = state, waitFor = waitFor, callback = callback });
+            return new WaitTaskCancellationToken<TState>() { id = id, index = items.Count - 1, isCreated = true, };
         }
 
         public void Update() {
@@ -117,15 +176,40 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         private struct Item {
 
+            public uint id;
             public System.Func<bool> waitFor;
             public System.Action callback;
-
+            
         }
 
         private static readonly List<Item> items = new List<Item>();
-	        
-        public void Add(System.Func<bool> waitFor, System.Action callback) {
-            items.Add(new Item { waitFor = waitFor, callback = callback });
+        private uint id;
+        
+        public bool Cancel(WaitTaskCancellationToken token) {
+            
+            for (int i = token.index; i < items.Count; ++i) {
+                var item = items[i];
+                if (item.id == token.id) {
+                    items.RemoveAt(i);
+                    return true;
+                }
+            }
+
+            for (int i = 0; i < items.Count; ++i) {
+                var item = items[i];
+                if (item.id == token.id) {
+                    items.RemoveAt(i);
+                    return true;
+                }
+            }
+
+            return false;
+            
+        }
+
+        public WaitTaskCancellationToken Add(System.Func<bool> waitFor, System.Action callback) {
+            items.Add(new Item { id = ++id, waitFor = waitFor, callback = callback });
+            return new WaitTaskCancellationToken() { id = id, index = items.Count - 1, isCreated = true, };
         }
 
         public void Update() {

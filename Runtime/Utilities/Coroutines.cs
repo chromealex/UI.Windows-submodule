@@ -43,36 +43,6 @@ namespace UnityEngine.UI.Windows.Utilities {
 	        WaitTasks.EndOfFrameUpdate();
         }
 
-        private struct WaitFrameClosure {
-
-	        public System.Action callback;
-	        public int frame;
-
-        }
-
-        private struct WaitFrameClosure<T> {
-
-	        public T state;
-	        public System.Action<T> callback;
-	        public int frame;
-
-        }
-
-        private struct WaitTimeClosure {
-
-	        public System.Action callback;
-	        public float time;
-
-        }
-
-        private struct WaitTimeClosure<T> {
-
-	        public T state;
-	        public System.Action<T> callback;
-	        public float time;
-
-        }
-
         public static void NextFrame<T>(T state, System.Action<T> callback) {
 	        
 	        WaitFrames(state, callback, 1);
@@ -85,39 +55,39 @@ namespace UnityEngine.UI.Windows.Utilities {
 
         }
 
-        public static void WaitFrames<T>(T state, System.Action<T> callback, int frames) {
+        public static WaitTaskCancellationToken<(T, int, System.Action<T>)> WaitFrames<T>(T state, System.Action<T> callback, int frames) {
 	        
-	        WaitTasks.Add(new WaitFrameClosure<T>() { state = state, frame = Time.frameCount + frames, callback = callback }, static (t) => Time.frameCount >= t.frame, static (t) => t.callback.Invoke(t.state));
+	        return WaitTasks.Add((state, frame: Time.frameCount + frames, callback), static (t) => Time.frameCount >= t.frame, static (t) => t.callback.Invoke(t.state));
 
         }
 
-        public static void WaitFrames(System.Action callback, int frames) {
+        public static WaitTaskCancellationToken<(int, System.Action)> WaitFrames(System.Action callback, int frames) {
 	        
-	        WaitTasks.Add(new WaitFrameClosure() { frame = Time.frameCount + frames, callback = callback }, static (t) => Time.frameCount >= t.frame, static (t) => t.callback.Invoke());
+	        return WaitTasks.Add((frame: Time.frameCount + frames, callback), static (t) => Time.frameCount >= t.frame, static (t) => t.callback.Invoke());
 
         }
 
-        public static void WaitTime(float time, System.Action callback) {
+        public static WaitTaskCancellationToken<(float, System.Action)> WaitTime(float time, System.Action callback) {
 	        
-	        WaitTasks.Add(new WaitTimeClosure() { time = Time.time + time, callback = callback }, static (t) => Time.time >= t.time, static (t) => t.callback.Invoke());
+	        return WaitTasks.Add((time: Time.time + time, callback), static (t) => Time.time >= t.time, static (t) => t.callback.Invoke());
             
         }
 
-        public static void WaitTime<TState>(TState state, float time, System.Action<TState> callback) {
+        public static WaitTaskCancellationToken<(TState, float, System.Action<TState>)> WaitTime<TState>(TState state, float time, System.Action<TState> callback) {
 	        
-	        WaitTasks.Add(new WaitTimeClosure<TState>() { state = state, time = Time.time + time, callback = callback }, static (t) => Time.time >= t.time, static (t) => t.callback.Invoke(t.state));
+	        return WaitTasks.Add((state, time: Time.time + time, callback), static (t) => Time.time >= t.time, static (t) => t.callback.Invoke(t.state));
 
         }
 
-        public static void Wait(System.Func<bool> waitFor, System.Action callback) {
+        public static WaitTaskCancellationToken Wait(System.Func<bool> waitFor, System.Action callback) {
 
-	        WaitTasks.Add(waitFor, callback);
+	        return WaitTasks.Add(waitFor, callback);
 	        
         }
 
-        public static void Wait<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
+        public static WaitTaskCancellationToken<TState> Wait<TState>(TState state, System.Func<TState, bool> waitFor, System.Action<TState> callback) {
 
-	        WaitTasks.Add(state, waitFor, callback);
+	        return WaitTasks.Add(state, waitFor, callback);
 	        
         }
 

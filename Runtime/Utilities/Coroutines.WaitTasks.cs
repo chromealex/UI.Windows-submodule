@@ -8,7 +8,7 @@ namespace UnityEngine.UI.Windows.Utilities {
 
     }
 
-    public struct WaitTaskCancellationToken<T> {
+    public struct WaitTaskCancellationToken<T> : System.IEquatable<WaitTaskCancellationToken<T>> {
 
         public uint id;
         public int index;
@@ -19,9 +19,21 @@ namespace UnityEngine.UI.Windows.Utilities {
             return WaitTasks.Cancel(this);
         }
 
+        public bool Equals(WaitTaskCancellationToken<T> other) {
+            return this.id == other.id && this.index == other.index;
+        }
+
+        public override bool Equals(object obj) {
+            return obj is WaitTaskCancellationToken<T> other && this.Equals(other);
+        }
+
+        public override int GetHashCode() {
+            return System.HashCode.Combine(this.id, this.index);
+        }
+
     }
 
-    public struct WaitTaskCancellationToken {
+    public struct WaitTaskCancellationToken : System.IEquatable<WaitTaskCancellationToken> {
 
         public uint id;
         public int index;
@@ -30,6 +42,18 @@ namespace UnityEngine.UI.Windows.Utilities {
         public bool Cancel() {
             if (this.isCreated == false) return false;
             return WaitTasks.Cancel(this);
+        }
+
+        public bool Equals(WaitTaskCancellationToken other) {
+            return this.id == other.id && this.index == other.index;
+        }
+
+        public override bool Equals(object obj) {
+            return obj is WaitTaskCancellationToken other && this.Equals(other);
+        }
+
+        public override int GetHashCode() {
+            return System.HashCode.Combine(this.id, this.index);
         }
 
     }

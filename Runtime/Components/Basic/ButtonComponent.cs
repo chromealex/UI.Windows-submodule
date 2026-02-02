@@ -121,6 +121,8 @@ namespace UnityEngine.UI.Windows.Components {
 
         public bool CanClick() {
 
+            if (this.IsInteractable() == false) return false;
+            
             if (this.GetWindow().GetState() != ObjectState.Showing &&
                 this.GetWindow().GetState() != ObjectState.Shown) {
 

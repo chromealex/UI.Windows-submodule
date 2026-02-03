@@ -14,14 +14,12 @@ namespace UnityEditor.UI.Windows {
 
             int lines = 0;
             var visible = (RectAnimationParameters.AnimationParameter)property.FindPropertyRelative(nameof(RectAnimationParameters.RectState.visible)).enumValueFlag;
-            if ((visible & RectAnimationParameters.AnimationParameter.Position) != 0) ++lines;
-            if ((visible & RectAnimationParameters.AnimationParameter.Rotation) != 0) ++lines;
-            if ((visible & RectAnimationParameters.AnimationParameter.Scale) != 0) ++lines;
-            if ((visible & RectAnimationParameters.AnimationParameter.Size) != 0) ++lines;
-            if ((visible & RectAnimationParameters.AnimationParameter.Pivot) != 0) ++lines;
-            if ((visible & RectAnimationParameters.AnimationParameter.AnchorsMin) != 0) ++lines;
-            if ((visible & RectAnimationParameters.AnimationParameter.AnchorsMax) != 0) ++lines;
-
+            var val = visible;
+            while (val != 0) {
+                val = val & (val - 1);
+                ++lines;
+            }
+            
             return EditorGUIUtility.singleLineHeight * (lines + 1) + EditorGUIUtility.standardVerticalSpacing * (lines + 1);
             
         }
@@ -48,6 +46,7 @@ namespace UnityEditor.UI.Windows {
             if ((visible & RectAnimationParameters.AnimationParameter.Rotation) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.rotation), RectAnimationParameters.AnimationParameter.Rotation, parameters);
             if ((visible & RectAnimationParameters.AnimationParameter.Scale) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.scale), RectAnimationParameters.AnimationParameter.Scale, parameters);
             if ((visible & RectAnimationParameters.AnimationParameter.Size) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.size), RectAnimationParameters.AnimationParameter.Size, parameters);
+            if ((visible & RectAnimationParameters.AnimationParameter.SizeOffset) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.sizeOffset), RectAnimationParameters.AnimationParameter.SizeOffset, parameters);
             if ((visible & RectAnimationParameters.AnimationParameter.Pivot) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.pivot), RectAnimationParameters.AnimationParameter.Pivot, parameters);
             if ((visible & RectAnimationParameters.AnimationParameter.AnchorsMin) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.anchorsMin), RectAnimationParameters.AnimationParameter.AnchorsMin, parameters);
             if ((visible & RectAnimationParameters.AnimationParameter.AnchorsMax) != 0) DrawField(ref position, property, nameof(RectAnimationParameters.RectState.anchorsMax), RectAnimationParameters.AnimationParameter.AnchorsMax, parameters);
@@ -71,12 +70,14 @@ namespace UnityEditor.UI.Windows {
             EditorGUI.PropertyField(fieldRect, value);
             EditorGUI.EndDisabledGroup();
 
-            var res = GUI.Toggle(toggleRect, isSet, EditorGUIUtility.IconContent(isSet == true ? "d_Linked" : "d_Unlinked"), GUIStyle.none);
-            if (res != isSet) {
-                if (res == true) {
-                    parameters.enumValueFlag &= ~(int)flag;
-                } else {
-                    parameters.enumValueFlag |= (int)flag;
+            if (flag != RectAnimationParameters.AnimationParameter.SizeOffset) {
+                var res = GUI.Toggle(toggleRect, isSet, EditorGUIUtility.IconContent(isSet == true ? "d_Linked" : "d_Unlinked"), GUIStyle.none);
+                if (res != isSet) {
+                    if (res == true) {
+                        parameters.enumValueFlag &= ~(int)flag;
+                    } else {
+                        parameters.enumValueFlag |= (int)flag;
+                    }
                 }
             }
 

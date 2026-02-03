@@ -12,6 +12,7 @@
             Pivot    = 1 << 4,
             AnchorsMin = 1 << 5,
             AnchorsMax = 1 << 6,
+            SizeOffset = 1 << 7,
         }
 
         [System.Serializable]
@@ -23,6 +24,7 @@
             public Vector3 rotation;
             public Vector3 scale;
             public Vector2 size;
+            public Vector2 sizeOffset;
             public Vector2 pivot;
             public Vector2 anchorsMin;
             public Vector2 anchorsMax;
@@ -34,6 +36,7 @@
                 this.rotation = _other.rotation;
                 this.scale = _other.scale;
                 this.size = _other.size;
+                this.sizeOffset = _other.sizeOffset;
                 this.pivot = _other.pivot;
                 this.anchorsMin = _other.anchorsMin;
                 this.anchorsMax = _other.anchorsMax;
@@ -51,6 +54,7 @@
                 this.rotation = default;
                 this.scale = default;
                 this.size = default;
+                this.sizeOffset = default;
                 this.pivot = default;
                 this.anchorsMin = default;
                 this.anchorsMax = default;
@@ -85,6 +89,7 @@
         };
 
         private readonly RectState currentState = new RectState();
+        [HideInInspector] public Vector2 currentSizeDelta;
 
         public override void OnValidate() {
             
@@ -101,7 +106,8 @@
             this.SetInitialValues(this.hiddenState);
             this.SetInitialValues(this.shownState);
             this.SetInitialValues(this.resetState);
-            
+            this.currentSizeDelta = this.rectTransform.sizeDelta;
+
         }
 
         public override State LerpState(State from, State to, float value) {
@@ -118,6 +124,7 @@
             if ((this.animatedParameters & AnimationParameter.Rotation) != 0) this.currentState.rotation = Vector3.Slerp(fromState.rotation, toState.rotation, value);
             if ((this.animatedParameters & AnimationParameter.Scale) != 0) this.currentState.scale = Vector3.Lerp(fromState.scale, toState.scale, value);
             if ((this.animatedParameters & AnimationParameter.Size) != 0) this.currentState.size = Vector2.Lerp(fromState.size, toState.size, value);
+            if ((this.animatedParameters & AnimationParameter.SizeOffset) != 0) this.currentState.sizeOffset = Vector2.Lerp(fromState.sizeOffset, toState.sizeOffset, value);
             if ((this.animatedParameters & AnimationParameter.Pivot) != 0) this.currentState.pivot = Vector2.Lerp(fromState.pivot, toState.pivot, value);
             if ((this.animatedParameters & AnimationParameter.AnchorsMin) != 0) this.currentState.anchorsMin = Vector2.Lerp(fromState.anchorsMin, toState.anchorsMin, value);
             if ((this.animatedParameters & AnimationParameter.AnchorsMax) != 0) this.currentState.anchorsMax = Vector2.Lerp(fromState.anchorsMax, toState.anchorsMax, value);
@@ -137,6 +144,7 @@
                 if ((this.animatedParameters & AnimationParameter.Rotation) != 0) this.rectTransform.rotation = Quaternion.Euler(toState.rotation);
                 if ((this.animatedParameters & AnimationParameter.Scale) != 0) this.rectTransform.localScale = toState.scale;
                 if ((this.animatedParameters & AnimationParameter.Size) != 0) this.rectTransform.sizeDelta = toState.size;
+                if ((this.animatedParameters & AnimationParameter.SizeOffset) != 0) this.rectTransform.sizeDelta = this.currentSizeDelta + toState.sizeOffset;
             }
 
             this.currentState.CopyFrom(state);

@@ -567,7 +567,7 @@ namespace UnityEngine.UI.Windows.Modules {
             return result;
         }
         #else
-        public async Task<T> LoadAsync<T>(object handler, Resource resource) where T : class {
+        public async ValueTask<T> LoadAsync<T>(object handler, Resource resource) where T : class {
             var tcs = PoolClass<TaskCompletionSource<T>>.Spawn();
             var preloadResult = this.Load_INTERNAL<T, TaskCompletionSource<T>>(new LoadParameters() { async = true }, handler, tcs, resource, static (asset, s) => s.SetResult(asset));
             if (preloadResult.result == false) {

@@ -11,6 +11,8 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         OnShowEnd,
         OnFocusTook,
         OnHideBegin,
+        OnFocusLost,
+        OnHideEnd,
         
         OnAny,
 
@@ -32,6 +34,13 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
         public bool isList;
         public int listIndex;
         public bool ignoreSearch;
+
+        public override string ToString() {
+            if (this.isList == true) {
+                return $"List tag {this.uiTag} element index {this.listIndex}";
+            }
+            return $"{this.uiTag}";
+        }
 
     }
 
@@ -59,7 +68,9 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             events.Register(WindowEvent.OnShowBegin, this.OnWindowShowBegin);
             events.Register(WindowEvent.OnShowEnd, this.OnWindowShowEnd);
             events.Register(WindowEvent.OnFocusTook, this.OnWindowFocusTook);
+            events.Register(WindowEvent.OnFocusLost, this.OnWindowFocusLost);
             events.Register(WindowEvent.OnHideBegin, this.OnWindowHideBegin);
+            events.Register(WindowEvent.OnHideEnd, this.OnWindowHideEnd);
             
         }
 
@@ -73,7 +84,9 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             events.UnRegister(WindowEvent.OnShowBegin, this.OnWindowShowBegin);
             events.UnRegister(WindowEvent.OnShowEnd, this.OnWindowShowEnd);
             events.UnRegister(WindowEvent.OnFocusTook, this.OnWindowFocusTook);
+            events.UnRegister(WindowEvent.OnFocusLost, this.OnWindowFocusLost);
             events.UnRegister(WindowEvent.OnHideBegin, this.OnWindowHideBegin);
+            events.UnRegister(WindowEvent.OnHideEnd, this.OnWindowHideEnd);
 
         }
 
@@ -101,9 +114,21 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
         }
 
+        private void OnWindowFocusLost(WindowObject window) {
+
+            this.OnWindowEvent(window, TutorialWindowEvent.OnFocusLost);
+
+        }
+
         private void OnWindowHideBegin(WindowObject window) {
             
             this.OnWindowEvent(window, TutorialWindowEvent.OnHideBegin);
+            
+        }
+
+        private void OnWindowHideEnd(WindowObject window) {
+            
+            this.OnWindowEvent(window, TutorialWindowEvent.OnHideEnd);
             
         }
 

@@ -48,7 +48,7 @@ namespace UnityEngine.UI.Windows.Components {
 
     }
         
-    public struct TextFormatResolver {
+    public struct TextFormatResolver : System.IEquatable<TextFormatResolver> {
 
         public System.IFormatProvider provider;
         public ITextFormatter customFormatter;
@@ -61,6 +61,18 @@ namespace UnityEngine.UI.Windows.Components {
 
         public bool IsValid() {
             return this.provider != null || this.customFormatter != null;
+        }
+
+        public bool Equals(TextFormatResolver other) {
+            return Equals(this.provider, other.provider) && Equals(this.customFormatter, other.customFormatter);
+        }
+
+        public override bool Equals(object obj) {
+            return obj is TextFormatResolver other && this.Equals(other);
+        }
+
+        public override int GetHashCode() {
+            return System.HashCode.Combine(this.provider, this.customFormatter);
         }
 
     }
@@ -438,7 +450,7 @@ namespace UnityEngine.UI.Windows.Components {
             }
 
             public bool Equals(ValueFormat other) {
-                return Equals(this.provider, other.provider) && this.valueFormat == other.valueFormat;
+                return this.provider.Equals(other.provider) == true && this.valueFormat == other.valueFormat;
             }
 
             public override bool Equals(object obj) {

@@ -10,7 +10,7 @@ namespace UnityEngine.UI.Windows {
         public struct AtlasData {
 
             public string name;
-            public Resource<UnityEngine.U2D.SpriteAtlas> data;
+            public ResourceRef<UnityEngine.U2D.SpriteAtlas> data;
 
         }
 
@@ -58,7 +58,7 @@ namespace UnityEngine.UI.Windows {
                 var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.U2D.SpriteAtlas>(UnityEditor.AssetDatabase.GUIDToAssetPath(guids[i]));
                 this.items[i] = new AtlasData() {
                     name = asset.name, 
-                    data = Resource<UnityEngine.U2D.SpriteAtlas>.Validate(asset),
+                    data = ResourceRef<UnityEngine.U2D.SpriteAtlas>.Validate(asset),
                 };
 
             }

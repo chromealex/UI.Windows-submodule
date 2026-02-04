@@ -112,6 +112,11 @@ namespace UnityEngine.UI.Windows {
 
         public void Update() {
 
+            if (this.modules != null) {
+                for (int i = 0; i < this.modules.Count; ++i) {
+                    this.modules[i]?.OnUpdate();
+                }
+            }
             this.DoUpdateInput();
             this.DoUpdateComponents(Time.deltaTime);
 

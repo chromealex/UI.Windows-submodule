@@ -9,8 +9,29 @@ namespace UnityEditor.UI.Windows {
     using UnityEngine.UI.Windows;
     using UnityEngine.UI.Windows.Modules;
 
-    [CustomPropertyDrawer(typeof(Resource<>))]
+    [CustomPropertyDrawer(typeof(ResourceRef<>))]
     public class WindowSystemResourcesResourceGenericPropertyDrawer : PropertyDrawer {
+
+        private ObjDrawerCache prevSelected;
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+
+            System.Type type = null;
+            if (this.fieldInfo.FieldType.IsArray == true) {
+                type = this.fieldInfo.FieldType.GetElementType().GetGenericArguments()[0];
+            } else {
+                type = this.fieldInfo.FieldType.GetGenericArguments()[0];
+            }
+
+            var res = property.FindPropertyRelative("data");
+            WindowSystemResourcesResourcePropertyDrawer.DrawGUI(position, ref this.prevSelected, res, label, type, UnityEngine.UI.Windows.Utilities.RequiredType.None);
+            
+        }
+
+    }
+
+    [CustomPropertyDrawer(typeof(Resource<>))]
+    public class WindowSystemResourcesResourceGenericStructPropertyDrawer : PropertyDrawer {
 
         private ObjDrawerCache prevSelected;
 

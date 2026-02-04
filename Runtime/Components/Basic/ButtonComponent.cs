@@ -13,24 +13,22 @@ namespace UnityEngine.UI.Windows.Components {
 
     public interface IInteractableButton : IInteractable {
 
-        void SetCallback(System.Action callback);
-        void AddCallback(System.Action callback);
-        void RemoveCallback(System.Action callback);
+        CallbackHandler SetCallback(System.Action callback);
+        CallbackHandler AddCallback(System.Action callback);
+        void RemoveCallback(CallbackHandler callback);
 
-        void SetCallback(System.Action<ButtonComponent> callback);
-        void AddCallback(System.Action<ButtonComponent> callback);
-        void RemoveCallback(System.Action<ButtonComponent> callback);
-
+        CallbackHandler SetCallback(System.Action<ButtonComponent> callback);
+        CallbackHandler AddCallback(System.Action<ButtonComponent> callback);
+        
         void RemoveCallbacks();
 
     }
 
     public interface IButtonExtended {
 
-        public void AddListener(System.Action callback);
-        public void RemoveListener(System.Action callback);
-        public void AddListener<T>(T data, System.Action<T> callback) where T : System.IEquatable<T>;
-        public void RemoveListener<T>(T data, System.Action<T> callback) where T : System.IEquatable<T>;
+        public CallbackHandler AddListener(System.Action callback);
+        public void RemoveListener(CallbackHandler handler);
+        public CallbackHandler AddListener<T>(T data, System.Action<T> callback);
         public void RemoveAllListeners();
 
     }
@@ -157,8 +155,6 @@ namespace UnityEngine.UI.Windows.Components {
             
             if (this.CanClick() == true) {
 
-                WindowSystem.InteractWith(this);
-                
                 this.DoClick();
 
             }
@@ -167,6 +163,7 @@ namespace UnityEngine.UI.Windows.Components {
 
         protected virtual void DoClick() {
 
+            WindowSystem.InteractWith(this);
             this.callbackRegistries.Invoke();
 
         }
@@ -184,17 +181,17 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public void SetCallback(System.Action callback) {
+        public CallbackHandler SetCallback(System.Action callback) {
 
             this.RemoveCallbacks();
-            this.AddCallback(callback);
+            return this.AddCallback(callback);
 
         }
 
-        public void SetCallback(System.Action<ButtonComponent> callback) {
+        public CallbackHandler SetCallback(System.Action<ButtonComponent> callback) {
 
             this.RemoveCallbacks();
-            this.AddCallback(callback);
+            return this.AddCallback(callback);
 
         }
 
@@ -205,51 +202,33 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public void AddCallback(System.Action callback) {
+        public CallbackHandler AddCallback(System.Action callback) {
 
-            this.callbackRegistries.Add(callback);
-
-        }
-
-        public void AddCallback<TState>(TState state, System.Action<TState> callback) where TState : System.IEquatable<TState> {
-
-            this.callbackRegistries.Add(state, callback);
+            return this.callbackRegistries.Add(callback);
 
         }
 
-        public void AddCallback(System.Action<ButtonComponent> callback) {
+        public CallbackHandler AddCallback<TState>(TState state, System.Action<TState> callback) where TState : System.IEquatable<TState> {
 
-            this.AddCallback((comp: this, callback), static cb => cb.callback.Invoke(cb.comp));
-
-        }
-
-        public void AddCallback<T>(System.Action<T> callback) where T : ButtonComponent {
-
-            this.AddCallback((comp: (T)this, callback), static cb => cb.callback.Invoke(cb.comp));
+            return this.callbackRegistries.Add(state, callback);
 
         }
 
-        public void RemoveCallback(System.Action callback) {
+        public CallbackHandler AddCallback(System.Action<ButtonComponent> callback) {
+
+            return this.AddCallback((comp: this, callback), static cb => cb.callback.Invoke(cb.comp));
+
+        }
+
+        public CallbackHandler AddCallback<T>(System.Action<T> callback) where T : ButtonComponent {
+
+            return this.AddCallback((comp: (T)this, callback), static cb => cb.callback.Invoke(cb.comp));
+
+        }
+
+        public virtual void RemoveCallback(CallbackHandler callback) {
 
             this.callbackRegistries.Remove(callback);
-
-        }
-
-        public void RemoveCallback(System.Action<ButtonComponent> callback) {
-
-            this.callbackRegistries.Remove((comp: this, callback), null);
-
-        }
-
-        public void RemoveCallback<TState>(TState state) where TState : System.IEquatable<TState> {
-
-            this.callbackRegistries.Remove(state, null);
-
-        }
-
-        public void RemoveCallback<TState>(System.Action<TState> callback) where TState : System.IEquatable<TState> {
-
-            this.callbackRegistries.Remove(default, callback);
 
         }
 

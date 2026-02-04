@@ -406,7 +406,7 @@ namespace UnityEditor.UI.Windows {
 
                                             foreach (var component in allComponents) {
                                             
-                                                EditorHelpers.FindType(component, typeof(Resource<>), (fieldInfo, res) => {
+                                                EditorHelpers.FindType(component, typeof(ResourceRef<>), (fieldInfo, res) => {
 
                                                     try {
 
@@ -481,7 +481,7 @@ namespace UnityEditor.UI.Windows {
                                                     return r;
 
                                                 }, visited);
-                                                EditorHelpers.FindType(go, typeof(Resource<>), (fieldInfo, res) => {
+                                                EditorHelpers.FindType(go, typeof(ResourceRef<>), (fieldInfo, res) => {
 
                                                     var rField =
                                                         (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));

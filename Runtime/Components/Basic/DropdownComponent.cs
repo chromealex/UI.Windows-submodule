@@ -247,6 +247,8 @@ namespace UnityEngine.UI.Windows.Components {
         }
 
         public void DoToggleDropdown() {
+            if (WindowSystem.CanInteractWith(this) == false) return;
+            WindowSystem.InteractWith(this);
             if (this.list.IsVisibleSelf() == true) {
                 this.HideDropdown();
             } else {

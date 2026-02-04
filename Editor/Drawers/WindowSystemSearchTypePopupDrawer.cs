@@ -113,6 +113,14 @@ namespace UnityEditor.UI.Windows {
             var target = (string.IsNullOrEmpty(attr.innerField) == true ? property.Copy() : property.FindPropertyRelative(attr.innerField));
             var displayName = string.Empty;
             Object selectButtonObj = null;
+            try {
+                if (target.boxedValue is UnityEngine.ResourceManagement.Util.SerializedType serializedType) {
+                    displayName = serializedType.Value.Name;
+                }
+            } catch (System.Exception) {
+                                
+            }
+            
             if (target.propertyType == SerializedPropertyType.ObjectReference && target.objectReferenceValue != null) {
 
                 selectButtonObj = target.objectReferenceValue;
@@ -227,27 +235,44 @@ namespace UnityEditor.UI.Windows {
                         
                             target.serializedObject.ApplyModifiedProperties();
                             target.serializedObject.Update();
-                            if (target.propertyType == SerializedPropertyType.ObjectReference) {
+                            var usedBoxed = false;
+                            try {
+                                if (target.boxedValue is UnityEngine.ResourceManagement.Util.SerializedType serializedType) {
+                                    serializedType.Value = itemType;
+                                    target.boxedValue = serializedType;
+                                    usedBoxed = true;
+                                    property.serializedObject.SetIsDifferentCacheDirty();
+                                    GUI.changed = true;
+                                    changed = true;
+                                    onChanged?.Invoke();
+                                }
+                            } catch (System.Exception) {
                                 
-                                var go = (target.serializedObject.targetObject as Component).gameObject;
-                                if (target.objectReferenceValue != null) {
+                            }
 
-                                    Object.DestroyImmediate(target.objectReferenceValue, true);
-                                    target.objectReferenceValue = null;
+                            if (usedBoxed == false) {
+                                if (target.propertyType == SerializedPropertyType.ObjectReference) {
+
+                                    var go = (target.serializedObject.targetObject as Component)?.gameObject;
+                                    if (go != null) {
+                                        if (target.objectReferenceValue != null) {
+                                            Object.DestroyImmediate(target.objectReferenceValue, true);
+                                            target.objectReferenceValue = null;
+                                        }
+
+                                        target.objectReferenceValue = go.AddComponent(itemType);
+                                    }
+
+                                } else if (target.propertyType == SerializedPropertyType.ManagedReference) {
+
+                                    target.managedReferenceValue = System.Activator.CreateInstance(itemType);
+                                    property.isExpanded = true;
+                                    property.serializedObject.SetIsDifferentCacheDirty();
+                                    GUI.changed = true;
+                                    changed = true;
+                                    onChanged?.Invoke();
 
                                 }
-
-                                target.objectReferenceValue = go.AddComponent(itemType);
-                                
-                            } else if (target.propertyType == SerializedPropertyType.ManagedReference) {
-                                
-                                target.managedReferenceValue = System.Activator.CreateInstance(itemType);
-                                property.isExpanded = true;
-                                property.serializedObject.SetIsDifferentCacheDirty();
-                                GUI.changed = true;
-                                changed = true;
-                                onChanged?.Invoke();
-
                             }
 
                             target.serializedObject.ApplyModifiedProperties();

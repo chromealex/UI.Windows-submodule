@@ -7,16 +7,12 @@
 
         public ActionResult Execute(in Context context) {
 
-            var contextData = context;
-            System.Action onPointerUp = null;
-            onPointerUp = () => {
-                
-                WindowSystem.onPointerUp -= onPointerUp;
-
+            WindowSystem.RegisterOnPointerUp(context, static (contextData, cbk) => {
+            
+                WindowSystem.UnRegisterOnPointerUp(cbk);
                 contextData.data.RunActions(contextData, contextData.index + 1);
 
-            };
-            WindowSystem.onPointerUp += onPointerUp;
+            });
             
             return ActionResult.Break;
 

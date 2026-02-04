@@ -1,9 +1,12 @@
 ﻿namespace UnityEngine.UI.Windows {
 
+    using UnityEngine.UI.Windows.Modules;
+
     public class ResourceTextureLoadModule : ImageComponentModule {
 
-        public Resource<Texture> resource;
-        
+        [ResourceType(typeof(Sprite))]
+        public Resource resource;
+
         public override void OnInit() {
             
             base.OnInit();

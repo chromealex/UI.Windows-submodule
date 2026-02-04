@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.UI.Windows.Modules;
 
 namespace UnityEngine.UI.Windows {
     
@@ -14,6 +15,20 @@ namespace UnityEngine.UI.Windows {
         OnHideBegin,
         OnHideEnd,
         OnDeInit,
+
+    }
+
+    public class ResourceTypeAttribute : PropertyAttribute {
+
+        public System.Type type;
+        public RequiredType required;
+
+        public ResourceTypeAttribute(System.Type type, RequiredType required = RequiredType.None) {
+
+            this.type = type;
+            this.required = required;
+
+        }
 
     }
 
@@ -35,12 +50,11 @@ namespace UnityEngine.UI.Windows {
     }
 
     [System.Serializable]
-    public class Resource<T> : IResourceProvider where T : UnityEngine.Object {
+    public class ResourceRef<T> : IResourceProvider where T : UnityEngine.Object {
         
         private struct AsyncClosure {
 
-            public TaskCompletionSource<T> tcs;
-            public Resource<T> resource;
+            public ResourceRef<T> resourceRef;
             public System.Action<T> callback;
 
         }
@@ -49,19 +63,19 @@ namespace UnityEngine.UI.Windows {
         private Resource data;
         private T loaded;
         
-        internal Resource() { }
+        internal ResourceRef() { }
         
         ref Resource IResourceProvider.GetResource() => ref this.data;
 
         #if UNITY_EDITOR
         public void ValidateSource(T resource) {
-            var res = Resource<T>.Validate(resource);
+            var res = ResourceRef<T>.Validate(resource);
             this.data = res.data;
             this.loaded = res.loaded;
         }
         
-        public static Resource<T> Validate(T resource) {
-            var res = new Resource<T>();
+        public static ResourceRef<T> Validate(T resource) {
+            var res = new ResourceRef<T>();
             res.data.directRef = resource;
             res.data.objectType = Resource.ObjectType.Unknown;
             res.data.guid = UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(resource));
@@ -83,13 +97,13 @@ namespace UnityEngine.UI.Windows {
                 callback.Invoke(this.loaded);
             } else {
                 var closure = new AsyncClosure {
-                    resource = this,
+                    resourceRef = this,
                     callback = callback,
                 };
                 
-                var preloadResult = WindowSystem.GetResources().Load_INTERNAL<T, AsyncClosure>(new UnityEngine.UI.Windows.Modules.WindowSystemResources.LoadParameters() { async = true }, handler, closure, this.data, static (asset, p) => {
-                    p.resource.loaded = asset;
-                    p.callback.Invoke(p.resource.loaded);
+                var preloadResult = WindowSystem.GetResources().Load_INTERNAL<T, AsyncClosure>(new WindowSystemResources.LoadParameters() { async = true }, handler, closure, this.data, static (asset, p) => {
+                    p.resourceRef.loaded = asset;
+                    p.callback.Invoke(p.resourceRef.loaded);
                 });
                 if (preloadResult.result == false) {
                     Coroutines.Run(preloadResult.op);
@@ -114,12 +128,19 @@ namespace UnityEngine.UI.Windows {
             this.loaded = null;
         }
         
-        public static implicit operator T(Resource<T> item) {
+        public static implicit operator T(ResourceRef<T> item) {
             return item.loaded;
         }
 
     }
-    
+
+    [System.Serializable]
+    public struct Resource<T> {
+
+        public Resource data;
+
+    }
+
     [System.Serializable]
     public struct Resource : System.IEquatable<Resource> {
 
@@ -288,20 +309,6 @@ namespace UnityEngine.UI.Windows.Modules {
         public void Deconstruct(ref T obj) {
 
             obj = default;
-
-        }
-
-    }
-
-    public class ResourceTypeAttribute : PropertyAttribute {
-
-        public System.Type type;
-        public RequiredType required;
-
-        public ResourceTypeAttribute(System.Type type, RequiredType required = RequiredType.None) {
-
-            this.type = type;
-            this.required = required;
 
         }
 

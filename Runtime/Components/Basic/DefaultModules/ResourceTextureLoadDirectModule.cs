@@ -2,20 +2,20 @@
 
     public class ResourceTextureLoadDirectModule : WindowComponentModule {
 
-        public Resource<Texture> resource;
+        public ResourceRef<Texture> resourceRef;
         public RawImage image;
         
         public override void OnInit() {
             
             base.OnInit();
             
-            this.image.texture = this.resource.Load(this);
+            this.image.texture = this.resourceRef.Load(this);
             
         }
 
         public override void OnDeInit() {
             
-            this.resource.Unload(this);
+            this.resourceRef.Unload(this);
             
             base.OnDeInit();
             

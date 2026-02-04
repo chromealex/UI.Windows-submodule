@@ -19,7 +19,7 @@ namespace UnityEngine.UI.Windows.Components {
 
     public abstract partial class ListBaseComponent : WindowComponent, ILayoutSelfController {
 
-        [UnityEngine.UI.Windows.Modules.ResourceTypeAttribute(typeof(WindowComponent), RequiredType.Warning)]
+        [ResourceType(typeof(WindowComponent), RequiredType.Warning)]
         public Resource source;
         public Transform customRoot;
         public ScrollRect scrollRect;

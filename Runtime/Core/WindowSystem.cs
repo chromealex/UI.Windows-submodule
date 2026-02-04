@@ -161,6 +161,7 @@ namespace UnityEngine.UI.Windows {
     public partial class WindowSystem : MonoBehaviour {
 
         private const float CLICK_THRESHOLD = 0.125f;
+        
         [System.Serializable]
         public struct WindowItem {
 
@@ -168,9 +169,6 @@ namespace UnityEngine.UI.Windows {
             public WindowBase instance;
 
         }
-
-        public static event System.Action onPointerUp;
-        public static event System.Action onPointerDown;
 
         [Tooltip("Automatically show `Root Screen` on Start.")]
         public bool showRootOnStart;

@@ -125,7 +125,9 @@ namespace UnityEngine.UI.Windows.Components {
         private void OnValueChanged(float value) {
             
             if (this.ignoreCallbacks == true) return;
-            
+
+            if (WindowSystem.CanInteractWith(this) == false) return;
+            WindowSystem.InteractWith(this);
             this.callbackRegistries.Invoke(value);
             
             this.ForEachModule<ProgressComponentModule, float>(value, (p, v) => p.OnValueChanged(v));
@@ -140,79 +142,61 @@ namespace UnityEngine.UI.Windows.Components {
 
         }
 
-        public void SetCallback<TState>(TState state, System.Action<TState, float> callback) {
+        public CallbackHandler SetCallback<TState>(TState state, System.Action<TState, float> callback) {
 
             this.RemoveCallbacks();
-            this.AddCallback((state, callback), static (s, state) => s.callback.Invoke(s.state, state));
+            return this.AddCallback((state, callback), static (s, state) => s.callback.Invoke(s.state, state));
 
         }
 
-        public void SetCallback(System.Action<float> callback) {
+        public CallbackHandler SetCallback(System.Action<float> callback) {
 
             this.RemoveCallbacks();
-            this.AddCallback(callback);
+            return this.AddCallback(callback);
 
         }
 
-        public void SetCallback(System.Action<ProgressComponent, float> callback) {
+        public CallbackHandler SetCallback(System.Action<ProgressComponent, float> callback) {
 
             this.RemoveCallbacks();
-            this.AddCallback(callback);
+            return this.AddCallback(callback);
 
         }
 
-        public void SetCallback<T>(System.Action<T, float> callback) where T : ProgressComponent {
+        public CallbackHandler SetCallback<T>(System.Action<T, float> callback) where T : ProgressComponent {
 
             this.RemoveCallbacks();
-            this.AddCallback(callback);
+            return this.AddCallback(callback);
 
         }
 
-        public void AddCallback(System.Action<float> callback) {
+        public CallbackHandler AddCallback(System.Action<float> callback) {
 
-            this.callbackRegistries.Add(callback);
-
-        }
-
-        public void AddCallback<TState>(TState state, System.Action<TState, float> callback) where TState : System.IEquatable<TState> {
-
-            this.callbackRegistries.Add(state, callback);
+            return this.callbackRegistries.Add(callback);
 
         }
 
-        public void AddCallback(System.Action<ProgressComponent, float> callback) {
+        public CallbackHandler AddCallback<TState>(TState state, System.Action<TState, float> callback) where TState : System.IEquatable<TState> {
 
-            this.AddCallback((comp: this, callback), static (cb, state) => cb.callback.Invoke(cb.comp, state));
-
-        }
-
-        public void AddCallback<T>(System.Action<T, float> callback) where T : ProgressComponent {
-
-            this.AddCallback((comp: (T)this, callback), static (cb, state) => cb.callback.Invoke(cb.comp, state));
+            return this.callbackRegistries.Add(state, callback);
 
         }
 
-        public void RemoveCallback(System.Action<float> callback) {
+        public CallbackHandler AddCallback(System.Action<ProgressComponent, float> callback) {
+
+            return this.AddCallback((comp: this, callback), static (cb, state) => cb.callback.Invoke(cb.comp, state));
+
+        }
+
+        public CallbackHandler AddCallback<T>(System.Action<T, float> callback) where T : ProgressComponent {
+
+            return this.AddCallback((comp: (T)this, callback), static (cb, state) => cb.callback.Invoke(cb.comp, state));
+
+        }
+
+        public void RemoveCallback(CallbackHandler callback) {
 
             this.callbackRegistries.Remove(callback);
-
-        }
-
-        public void RemoveCallback(System.Action<ProgressComponent, float> callback) {
-
-            this.callbackRegistries.Remove((comp: this, callback), null);
-
-        }
-
-        new public void RemoveCallback<TState>(TState state) where TState : System.IEquatable<TState> {
-
-            this.callbackRegistries.Remove(state, null);
-
-        }
-
-        public void RemoveCallback<TState>(System.Action<TState, float> callback) where TState : System.IEquatable<TState> {
-
-            this.callbackRegistries.Remove(default, callback);
 
         }
 

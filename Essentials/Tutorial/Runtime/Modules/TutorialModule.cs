@@ -4,7 +4,7 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
     public class TutorialModule : WindowModule {
 
-        public Resource<TutorialData> data;
+        public ResourceRef<TutorialData> data;
 
     }
 

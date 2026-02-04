@@ -5,45 +5,59 @@ namespace UnityEngine.UI.Windows {
 
     public partial class WindowSystem {
 
+        private static CallbackRegistries onPointerUpCallback;
+        private static CallbackRegistries onPointerDownCallback;
+        
+        public static System.Action onPointerUp;
+        public static System.Action onPointerDown;
+
         private System.Action<WindowComponent> showSystemKeyboard;
         private Vector2 pointerScreenPosition;
         private bool hasPointerUpThisFrame;
         private bool hasPointerDownThisFrame;
         private float lastPointerActionTime;
 
+        public static bool UnRegisterOnPointerUp(CallbackHandler callback) {
+            return onPointerUpCallback.Remove(callback);
+        }
+
+        public static bool UnRegisterOnPointerDown(CallbackHandler callback) {
+            return onPointerDownCallback.Remove(callback);
+        }
+
+        public static CallbackHandler RegisterOnPointerUp<T>(T data, System.Action<T> callback) {
+            return onPointerUpCallback.Add(data, callback);
+        }
+
+        public static CallbackHandler RegisterOnPointerDown<T>(T data, System.Action<T> callback) {
+            return onPointerDownCallback.Add(data, callback);
+        }
+
+        public static CallbackHandler RegisterOnPointerUp<T>(T data, System.Action<T, CallbackHandler> callback) {
+            return onPointerUpCallback.Add(data, callback);
+        }
+
+        public static CallbackHandler RegisterOnPointerDown<T>(T data, System.Action<T, CallbackHandler> callback) {
+            return onPointerDownCallback.Add(data, callback);
+        }
+
         public static void RegisterSystemKeyboard(System.Action<WindowComponent> callback) {
             WindowSystem.instance.showSystemKeyboard = callback;
         }
 
         public static Vector2 GetPointerPosition() {
-
             return WindowSystem.instance.pointerScreenPosition;
-
         }
 
         public static bool HasPointerUpThisFrame() {
-
             return WindowSystem.instance.hasPointerUpThisFrame;
-
         }
         
         public static bool HasPointerDownThisFrame() {
-
             return WindowSystem.instance.hasPointerDownThisFrame;
-
         }
         
         public void DoUpdateInput() {
-
-            if (this.modules != null) {
-
-                for (int i = 0; i < this.modules.Count; ++i) {
-
-                    this.modules[i]?.OnUpdate();
-
-                }
-
-            }
 
             this.hasPointerUpThisFrame = false;
             this.hasPointerDownThisFrame = false;
@@ -57,6 +71,7 @@ namespace UnityEngine.UI.Windows {
                 
                 this.pointerScreenPosition = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
                 if (WindowSystem.onPointerDown != null) WindowSystem.onPointerDown.Invoke();
+                onPointerDownCallback.Invoke();
                 
             }
             if (UnityEngine.InputSystem.Mouse.current != null &&
@@ -68,6 +83,7 @@ namespace UnityEngine.UI.Windows {
                 this.hasPointerUpThisFrame = true;
                 this.lastPointerActionTime = Time.realtimeSinceStartup;
                 if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
+                onPointerUpCallback.Invoke();
                 
             }
 
@@ -82,6 +98,7 @@ namespace UnityEngine.UI.Windows {
                         this.pointerScreenPosition = touch.screenPosition;
                         this.lastPointerActionTime = Time.realtimeSinceStartup;
                         if (WindowSystem.onPointerDown != null) WindowSystem.onPointerDown.Invoke();
+                        onPointerDownCallback.Invoke();
                         
                     } else if (touch.phase == UnityEngine.InputSystem.TouchPhase.Ended || touch.phase == UnityEngine.InputSystem.TouchPhase.Canceled) {
 
@@ -90,6 +107,7 @@ namespace UnityEngine.UI.Windows {
                         WindowSystemInput.hasPointerClickThisFrame.Data = (Time.realtimeSinceStartup - this.lastPointerActionTime) <= CLICK_THRESHOLD;
                         this.lastPointerActionTime = Time.realtimeSinceStartup;
                         if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
+                        onPointerUpCallback.Invoke();
 
                     }
 
@@ -105,6 +123,7 @@ namespace UnityEngine.UI.Windows {
                 this.hasPointerDownThisFrame = true;
                 this.lastPointerActionTime = Time.realtimeSinceStartup;
                 if (WindowSystem.onPointerDown != null) WindowSystem.onPointerDown.Invoke();
+                onPointerDownCallback.Invoke();
                 
             }
             
@@ -117,6 +136,7 @@ namespace UnityEngine.UI.Windows {
                 WindowSystemInput.hasPointerClickThisFrame.Data = (Time.realtimeSinceStartup - this.lastPointerActionTime) <= CLICK_THRESHOLD;
                 this.lastPointerActionTime = Time.realtimeSinceStartup;
                 if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
+                onPointerUpCallback.Invoke();
                 
             }
 
@@ -130,12 +150,14 @@ namespace UnityEngine.UI.Windows {
                         this.pointerScreenPosition = touch.position;
                         this.lastPointerActionTime = Time.realtimeSinceStartup;
                         if (WindowSystem.onPointerDown != null) WindowSystem.onPointerDown.Invoke();
+                        onPointerDownCallback.Invoke();
                         
                     } else if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled) {
                         
                         this.pointerScreenPosition = touch.position;
                         this.hasPointerUpThisFrame = true;
                         if (WindowSystem.onPointerUp != null) WindowSystem.onPointerUp.Invoke();
+                        onPointerUpCallback.Invoke();
 
                     }
 

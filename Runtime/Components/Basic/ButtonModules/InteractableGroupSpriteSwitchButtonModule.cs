@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI.Windows.Components;
+using UnityEngine.UI.Windows.Modules;
 
 namespace UnityEngine.UI.Windows {
 
@@ -9,8 +10,10 @@ namespace UnityEngine.UI.Windows {
         public struct Item {
             
             public ImageComponent source;
-            public Resource<Sprite> disabled;
-            public Resource<Sprite> normal;
+            [ResourceType(typeof(Sprite))]
+            public Resource disabled;
+            [ResourceType(typeof(Sprite))]
+            public Resource normal;
             
         }
         

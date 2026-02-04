@@ -47,33 +47,31 @@
 			this.callbackRegistries.Add(callback);
 		}
 
-		public void AddCallback(System.Action callback) => this.callbackRegistries.Add(callback);
-		public void RemoveCallback(System.Action callback) => this.callbackRegistries.Remove(callback);
+		public CallbackHandler AddCallback(System.Action callback) => this.callbackRegistries.Add(callback);
+		public void RemoveCallback(CallbackHandler callback) => this.callbackRegistries.Remove(callback);
 
-		public void SetCallback<T>(T data, System.Action<T> callback) where T : System.IEquatable<T> {
+		public void SetCallback<T>(T data, System.Action<T> callback) {
 			this.callbackRegistries.Clear();
 			this.callbackRegistries.Add(data, callback);
 		}
 		
-		public void AddCallback<T>(T data, System.Action<T> callback) where T : System.IEquatable<T> => this.callbackRegistries.Add(data, callback);
-		public void RemoveCallback<T>(T data, System.Action<T> callback) where T : System.IEquatable<T> => this.callbackRegistries.Remove(data, callback);
-
+		public CallbackHandler AddCallback<T>(T data, System.Action<T> callback) => this.callbackRegistries.Add(data, callback);
+		
 		public void SetOnBreakCallback(System.Action callback) {
 			this.callbackOnBreakRegistries.Clear();
 			this.callbackOnBreakRegistries.Add(callback);
 		}
 
-		public void AddOnBreakCallback(System.Action callback) => this.callbackOnBreakRegistries.Add(callback);
-		public void RemoveOnBreakCallback(System.Action callback) => this.callbackOnBreakRegistries.Remove(callback);
+		public CallbackHandler AddOnBreakCallback(System.Action callback) => this.callbackOnBreakRegistries.Add(callback);
+		public void RemoveOnBreakCallback(CallbackHandler callback) => this.callbackOnBreakRegistries.Remove(callback);
 
-		public void SetOnBreakCallback<T>(T data, System.Action<T> callback) where T : System.IEquatable<T> {
+		public void SetOnBreakCallback<T>(T data, System.Action<T> callback) {
 			this.callbackOnBreakRegistries.Clear();
 			this.callbackOnBreakRegistries.Add(data, callback);
 		}
 		
-		public void AddOnBreakCallback<T>(T data, System.Action<T> callback) where T : System.IEquatable<T> => this.callbackOnBreakRegistries.Add(data, callback);
-		public void RemoveOnBreakCallback<T>(T data, System.Action<T> callback) where T : System.IEquatable<T> => this.callbackOnBreakRegistries.Remove(data, callback);
-
+		public CallbackHandler AddOnBreakCallback<T>(T data, System.Action<T> callback) => this.callbackOnBreakRegistries.Add(data, callback);
+		
 		public void RemoveAllCallbacks() {
 
 			this.callbackRegistries.Clear();

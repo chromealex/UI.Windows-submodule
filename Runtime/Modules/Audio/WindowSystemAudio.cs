@@ -9,6 +9,15 @@ namespace UnityEngine.UI.Windows {
     [CreateAssetMenu(menuName = "UI.Windows/Modules/Audio")]
     public class WindowSystemAudio : WindowSystemModule {
 
+        [System.Serializable]
+        public struct InteractableType {
+
+            [UnityEngine.UI.Windows.Utilities.SearchComponentsByTypePopupAttribute(typeof(IInteractable), menuName: "Type", singleOnly: true)]
+            public UnityEngine.ResourceManagement.Util.SerializedType type;
+            public UIWSAudioEvent audioEvent;
+
+        }
+
         private struct ClipInfo {
 
             public System.Collections.Generic.List<float> timers;
@@ -29,7 +38,8 @@ namespace UnityEngine.UI.Windows {
         
         public static WindowSystemAudio Instance { get; private set; }
 
-        public UIWSAudioEvent defaultButtonClickEvent;
+        public InteractableType[] defaultEvents = System.Array.Empty<InteractableType>();
+
         #if !FMOD_SUPPORT
         public AudioSource audioSource;
         
@@ -107,10 +117,11 @@ namespace UnityEngine.UI.Windows {
         }
 
         private void OnAnyInteractable(UnityEngine.UI.Windows.Components.IInteractable obj) {
-            if (obj is ButtonComponent button) {
-                if (button.GetModule<IAudioComponentModule>() == null) {
-                    if (this.defaultButtonClickEvent != null) {
-                        this.defaultButtonClickEvent.Play();
+            if (obj is WindowComponent windowComponent && windowComponent.GetModule<IAudioComponentModule>() == null) {
+                foreach (var type in this.defaultEvents) {
+                    if (obj.GetType().IsAssignableFrom(type.type.Value) == true) {
+                        type.audioEvent?.Play();
+                        return;
                     }
                 }
             }

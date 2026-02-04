@@ -2,20 +2,20 @@
 
     public class ResourceSpriteLoadDirectModule : WindowComponentModule {
 
-        public Resource<Sprite> resource;
+        public ResourceRef<Sprite> resourceRef;
         public Image image;
         
         public override void OnInit() {
             
             base.OnInit();
             
-            this.image.sprite = this.resource.Load(this);
+            this.image.sprite = this.resourceRef.Load(this);
             
         }
 
         public override void OnDeInit() {
             
-            this.resource.Unload(this);
+            this.resourceRef.Unload(this);
             
             base.OnDeInit();
             

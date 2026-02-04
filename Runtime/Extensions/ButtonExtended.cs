@@ -10,20 +10,16 @@ namespace UnityEngine.UI {
         
         private UnityEngine.UI.Windows.CallbackRegistries callbackRegistries;
 
-        public void AddListener(System.Action callback) {
-            this.callbackRegistries.Add(callback);
+        public UnityEngine.UI.Windows.CallbackHandler AddListener(System.Action callback) {
+            return this.callbackRegistries.Add(callback);
         }
 
-        public void RemoveListener(System.Action callback) {
-            this.callbackRegistries.Add(callback);
+        public void RemoveListener(UnityEngine.UI.Windows.CallbackHandler callback) {
+            this.callbackRegistries.Remove(callback);
         }
 
-        public void AddListener<T>(T data, System.Action<T> callback) where T : System.IEquatable<T> {
-            this.callbackRegistries.Add(data, callback);
-        }
-
-        public void RemoveListener<T>(T data, System.Action<T> callback) where T : System.IEquatable<T> {
-            this.callbackRegistries.Remove(data, callback);
+        public UnityEngine.UI.Windows.CallbackHandler AddListener<T>(T data, System.Action<T> callback) {
+            return this.callbackRegistries.Add(data, callback);
         }
 
         public void RemoveAllListeners() {

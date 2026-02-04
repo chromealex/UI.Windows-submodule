@@ -48,15 +48,15 @@ namespace ME.Taptic {
         public static int LightAmplitude = 40;
         public static int MediumAmplitude = 120;
         public static int HeavyAmplitude = 255;
-        private static long[] _successPattern = { 0, TapticBridgeAndroid.LightDuration, TapticBridgeAndroid.LightDuration, TapticBridgeAndroid.HeavyDuration };
-        private static int[] _successPatternAmplitude = { 0, TapticBridgeAndroid.LightAmplitude, 0, TapticBridgeAndroid.HeavyAmplitude };
-        private static long[] _warningPattern = { 0, TapticBridgeAndroid.HeavyDuration, TapticBridgeAndroid.LightDuration, TapticBridgeAndroid.MediumDuration };
-        private static int[] _warningPatternAmplitude = { 0, TapticBridgeAndroid.HeavyAmplitude, 0, TapticBridgeAndroid.MediumAmplitude };
-        private static long[] _failurePattern = {
+        private static readonly long[] _successPattern = { 0, TapticBridgeAndroid.LightDuration, TapticBridgeAndroid.LightDuration, TapticBridgeAndroid.HeavyDuration };
+        private static readonly int[] _successPatternAmplitude = { 0, TapticBridgeAndroid.LightAmplitude, 0, TapticBridgeAndroid.HeavyAmplitude };
+        private static readonly long[] _warningPattern = { 0, TapticBridgeAndroid.HeavyDuration, TapticBridgeAndroid.LightDuration, TapticBridgeAndroid.MediumDuration };
+        private static readonly int[] _warningPatternAmplitude = { 0, TapticBridgeAndroid.HeavyAmplitude, 0, TapticBridgeAndroid.MediumAmplitude };
+        private static readonly long[] _failurePattern = {
             0, TapticBridgeAndroid.MediumDuration, TapticBridgeAndroid.LightDuration, TapticBridgeAndroid.MediumDuration, TapticBridgeAndroid.LightDuration,
             TapticBridgeAndroid.HeavyDuration, TapticBridgeAndroid.LightDuration, TapticBridgeAndroid.LightDuration
         };
-        private static int[] _failurePatternAmplitude = {
+        private static readonly int[] _failurePatternAmplitude = {
             0, TapticBridgeAndroid.MediumAmplitude, 0, TapticBridgeAndroid.MediumAmplitude, 0, TapticBridgeAndroid.HeavyAmplitude, 0, TapticBridgeAndroid.LightAmplitude
         };
 
@@ -99,12 +99,18 @@ namespace ME.Taptic {
                 Debug.Log(e.StackTrace);
             }
         }
+
+        private static readonly long[] vibrateCallCache = new long[] { 0L, };
+        private static readonly object[] createWaveformCallCache = new object[] { null, null, null, };
+        private static readonly object[] vibratePatternCallCache = new object[] { null, null, };
+        private static readonly object[] createOneShot = new object[] { null, null, };
         
         public void AndroidVibrate(long milliseconds) {
             
             if (this.androidVibrator != null) {
                 
-                this.androidVibrator.Call("vibrate", milliseconds);
+                vibrateCallCache[0] = milliseconds;
+                this.androidVibrator.Call("vibrate", vibrateCallCache);
                 
             }
             
@@ -115,8 +121,10 @@ namespace ME.Taptic {
             if (this.AndroidSDKVersion() < TapticBridgeAndroid.MIN_SDK_VERSION) {
                 
                 if (this.androidVibrator != null) {
-                    
-                    this.androidVibrator.Call("vibrate", pattern, repeat);
+
+                    vibratePatternCallCache[0] = pattern;
+                    vibratePatternCallCache[1] = repeat;
+                    this.androidVibrator.Call("vibrate", vibratePatternCallCache);
                     
                 }
                 
@@ -125,7 +133,10 @@ namespace ME.Taptic {
                 this.VibrationEffectClassInitialization();
                 if (this.vibrationEffectClass != null) {
 
-                    this.CreateVibrationEffect("createWaveform", new object[] { pattern, amplitudes, repeat });
+                    createWaveformCallCache[0] = pattern;
+                    createWaveformCallCache[1] = amplitudes;
+                    createWaveformCallCache[2] = repeat;
+                    this.CreateVibrationEffect("createWaveform", createWaveformCallCache);
                     
                 }
                 
@@ -144,7 +155,9 @@ namespace ME.Taptic {
                 this.VibrationEffectClassInitialization();
                 if (this.vibrationEffectClass != null) {
 
-                    if (this.CreateVibrationEffect("createOneShot", new object[] { milliseconds, amplitude }) == false) {
+                    createOneShot[0] = milliseconds;
+                    createOneShot[1] = amplitude;
+                    if (this.CreateVibrationEffect("createOneShot", createOneShot) == false) {
                         
                         this.AndroidVibrate(milliseconds);
 
@@ -160,6 +173,7 @@ namespace ME.Taptic {
             
         }
 
+        private static readonly AndroidJavaObject[] cacheCall = new AndroidJavaObject[] { null, };
         private bool CreateVibrationEffect(string function, params object[] args) {
             
             if (this.androidVibrator !=null) {
@@ -167,7 +181,8 @@ namespace ME.Taptic {
                 var vibrationEffect = this.vibrationEffectClass.CallStatic<AndroidJavaObject>(function, args);
                 if (vibrationEffect != null) {
                     
-                    this.androidVibrator.Call("vibrate", vibrationEffect);
+                    cacheCall[0] = vibrationEffect;
+                    this.androidVibrator.Call("vibrate", cacheCall);
                     return true;
 
                 }

@@ -28,10 +28,13 @@ namespace UnityEngine.UI.Windows.Runtime.Modules.Audio {
             public bool loop;
 
         }
-
-        public UnityEngine.UI.Windows.WindowSystemAudio.EventType eventType;
         
         [UnityEngine.HeaderAttribute("Audio")]
+        #if FMOD_SUPPORT
+        public FMODAudioComponent fmodAudioComponent;
+        #else
+        public UnityEngine.UI.Windows.WindowSystemAudio.EventType eventType;
+        
         public UnityEngine.AudioClip audioClip;
         public UnityEngine.AudioClip[] randomClips;
 
@@ -45,11 +48,12 @@ namespace UnityEngine.UI.Windows.Runtime.Modules.Audio {
         public UnityEngine.UI.Windows.WindowSystemAudio.Behaviour behaviour;
         [UnityEngine.RangeAttribute(1, UnityEngine.UI.Windows.WindowSystemAudio.CHANNELS_COUNT)]
         public int musicChannel;
+        #endif
 
         [UnityEngine.HeaderAttribute("Vibration")]
         public bool vibrate;
-        public bool tapticByCurve;
         public ME.Taptic.TapticType taptic;
+        public bool tapticByCurve;
         public UnityEngine.AnimationCurve tapticCurve;
         
         public void Play() {
@@ -74,6 +78,12 @@ namespace UnityEngine.UI.Windows.Runtime.Modules.Audio {
             
             audio.Stop(this);
 
+        }
+
+        public void Release() {
+            #if FMOD_SUPPORT
+            this.fmodAudioComponent.Release();
+            #endif
         }
 
     }

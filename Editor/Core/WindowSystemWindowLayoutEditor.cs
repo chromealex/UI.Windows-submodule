@@ -227,6 +227,7 @@ namespace UnityEditor.UI.Windows {
         private void DrawElement(SceneView sceneView, WindowLayoutElement layoutElement, Transform root, float scale) {
 
             var rectTransform = layoutElement.rectTransform;
+            if (rectTransform == null) return;
             var rect = rectTransform.rect;
             var position = rectTransform.position;
             var pivot = rectTransform.pivot;

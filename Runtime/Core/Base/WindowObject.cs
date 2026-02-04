@@ -340,7 +340,7 @@ namespace UnityEngine.UI.Windows {
         /// Check object state is Showing or Shown
         /// </summary>
         /// <returns>TRUE - if object's state is Showing or Shown, otherwise FALSE</returns>
-        public bool IsVisibleSelf() {
+        public virtual bool IsVisibleSelf() {
 
             return this.objectState == ObjectState.Showing || this.objectState == ObjectState.Shown;
 

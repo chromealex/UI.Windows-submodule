@@ -195,16 +195,12 @@ namespace UnityEditor.UI.Windows {
 
             if (validationRequired.boolValue == true || newRes.changed == true) {
 
-                property.serializedObject.Update();
-                {
-                    guid.stringValue = newRes.resource.guid;
-                    address.stringValue = newRes.resource.address;
-                    loadType.enumValueIndex = (int)newRes.resource.type;
-                    objectType.enumValueIndex = (int)newRes.resource.objectType;
-                    directRef.objectReferenceValue = newRes.resource.directRef;
-                    validationRequired.boolValue = false;
-                }
-                property.serializedObject.ApplyModifiedProperties();
+                guid.stringValue = newRes.resource.guid;
+                address.stringValue = newRes.resource.address;
+                loadType.enumValueIndex = (int)newRes.resource.type;
+                objectType.enumValueIndex = (int)newRes.resource.objectType;
+                directRef.objectReferenceValue = newRes.resource.directRef;
+                validationRequired.boolValue = false;
 
             }
 

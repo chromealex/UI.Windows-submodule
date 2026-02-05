@@ -92,6 +92,7 @@ MonoBehaviour:
   - {fileID: 4118133958301854147}
   useSafeZone: 0
   safeZone: {fileID: 0}
+  safeZoneRectTransform: {fileID: 0}
   rebuilder: {fileID: 4151769528408639817}
 --- !u!223 &3002262861325224963
 Canvas:

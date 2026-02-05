@@ -852,6 +852,7 @@ MonoBehaviour:
     clip: {fileID: 0}
   componentModules:
     modules: []
+  components: []
   graphics: {fileID: 1565843327551206096}
   preserveAspect: 0
   useSpriteMesh: 0
@@ -1049,6 +1050,7 @@ MonoBehaviour:
     clip: {fileID: 0}
   componentModules:
     modules: []
+  components: []
   graphics: {fileID: 4070916238433496631}
 --- !u!222 &3016808032470598225
 CanvasRenderer:

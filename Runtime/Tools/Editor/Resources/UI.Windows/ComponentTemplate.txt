@@ -1,0 +1,12 @@
+namespace {{NAMESPACE_ROOT}} {
+    
+    using UnityEngine.UI.Windows;
+    using UnityEngine.UI.Windows.Components;
+    
+    public class {{COMPONENT_NANE}} : WindowComponent {
+        
+        {{ITEMS}}
+        
+    }
+    
+}

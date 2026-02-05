@@ -328,6 +328,7 @@ MonoBehaviour:
     clip: {fileID: 0}
   componentModules:
     modules: []
+  components: []
   graphics: {fileID: 5048931175835979990}
 --- !u!222 &1053871952593780424
 CanvasRenderer:

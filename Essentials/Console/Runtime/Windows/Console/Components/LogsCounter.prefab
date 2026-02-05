@@ -367,6 +367,7 @@ MonoBehaviour:
     clip: {fileID: 0}
   componentModules:
     modules: []
+  components: []
   graphics: {fileID: 5927208229175502218}
 --- !u!114 &1437163868691860205
 MonoBehaviour:
@@ -1356,6 +1357,7 @@ MonoBehaviour:
     clip: {fileID: 0}
   componentModules:
     modules: []
+  components: []
   graphics: {fileID: 3946599848712371387}
 --- !u!114 &6729519080319136710
 MonoBehaviour:
@@ -1670,6 +1672,7 @@ MonoBehaviour:
     clip: {fileID: 0}
   componentModules:
     modules: []
+  components: []
   graphics: {fileID: 8478983632266749481}
 --- !u!114 &2124051568770619656
 MonoBehaviour:

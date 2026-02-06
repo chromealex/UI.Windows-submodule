@@ -13,10 +13,13 @@ namespace UnityEngine.UI.Windows {
         
 #if UNITY_URP
         private bool awaitForCamera;
-        private void AddToStack(WindowObject obj) {
+
+        protected virtual System.Collections.Generic.List<Camera> GetCameras() => this.cameras;
+        
+        protected virtual void AddToStack(WindowObject obj) {
 
             if (obj is WindowBase window) {
-                this.cameras.Add(window.workCamera);
+                this.GetCameras().Add(window.workCamera);
                 this.SortCameras();
                 
                 if (this.MainCamera == null) {
@@ -24,38 +27,38 @@ namespace UnityEngine.UI.Windows {
                     return;
                 }
                 
-                WindowSystem.GetEvents().RegisterOnce(window, WindowEvent.OnDeInitialized, this.RemoveFromStack);
+                WindowSystem.GetEvents().RegisterOnce((module: this, window), window, WindowEvent.OnDeInitialized, static (obj, data) => data.module.RemoveFromStack(obj));
 
                 this.UpdateStack();
             }
             
         }
 
-        private void UpdateStack() {
+        protected virtual void UpdateStack() {
             
-            this.cameras.RemoveAll(x => x == null);
+            this.GetCameras().RemoveAll(x => x == null);
             
             var data = this.MainCamera.GetUniversalAdditionalCameraData();
-            foreach (var camera in this.cameras) {
+            foreach (var camera in this.GetCameras()) {
                 data.cameraStack.Remove(camera);
             }
-            foreach (var camera in this.cameras) {
+            foreach (var camera in this.GetCameras()) {
                 data.cameraStack.Add(camera);
             }
 
         }
 
-        private void SortCameras() {
-            this.cameras.Sort((c1, c2) => {
+        protected virtual void SortCameras() {
+            this.GetCameras().Sort((c1, c2) => {
                 if (c1 == null || c2 == null) return 0;
                 return c1.depth.CompareTo(c2.depth);
             });
         }
 
-        private void RemoveFromStack(WindowObject obj) {
+        protected virtual void RemoveFromStack(WindowObject obj) {
             
             if (obj is WindowBase window) {
-                this.cameras.Remove(window.workCamera);
+                this.GetCameras().Remove(window.workCamera);
                 if (this.MainCamera == null) {
                     return;
                 }

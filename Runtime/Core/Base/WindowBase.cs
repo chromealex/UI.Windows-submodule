@@ -251,10 +251,11 @@
             this.currentZDepth = zDepth;
             this.currentCanvasDepth = canvasDepth;
 
+            var settings = WindowSystem.GetSettings();
             var tr = this.transform;
-            this.workCamera.depth = depth;
+            this.workCamera.depth = settings.layers.baseDepth + depth;
             var pos = tr.position;
-            pos.z = zDepth;
+            pos.z = settings.layers.baseDepthZ + zDepth;
             tr.position = pos;
             
         }

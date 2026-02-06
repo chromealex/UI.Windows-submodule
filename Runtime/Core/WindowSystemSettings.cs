@@ -11,7 +11,7 @@
             public float maxDepth;
             public float minZDepth;
             public float maxZDepth;
-            
+
         }
 
         public int windowsPerLayer = 1000;
@@ -21,10 +21,12 @@
 
             public float depthStep;
             public float zDepthStep;
-
+            public float baseDepth;
+            public float baseDepthZ;
+            
         }
 
-        public Layers layers = new Layers() { depthStep = 10f, zDepthStep = 1000f };
+        public Layers layers = new Layers() { depthStep = 10f, zDepthStep = 1000f, baseDepth = 0f, baseDepthZ = 0f, };
 
         [System.Serializable]
         public struct Components {

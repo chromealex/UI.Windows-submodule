@@ -48,7 +48,7 @@ namespace UnityEditor.UI.Windows {
             instance.gameObject = go.GetInstanceID();
             instance.path = GetComponentsPath(path, out var screenPath, out var screenName);
 
-            instance.namespaceRoot = screenPath.Replace("Assets/", string.Empty).Replace("/", ".");
+            instance.namespaceRoot = screenPath.Replace("Assets/", string.Empty).Replace("/", ".").Replace("UIScreens", "Screens");
             instance.screenName = screenName;
 
             instance.tempObj = ScriptableObject.CreateInstance<TempObj>();

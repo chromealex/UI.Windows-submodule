@@ -6,7 +6,6 @@ namespace {{NAMESPACE_ROOT}} {
     public class {{COMPONENT_NANE}} : WindowComponent {
         
         {{ITEMS}}
-        
     }
     
 }

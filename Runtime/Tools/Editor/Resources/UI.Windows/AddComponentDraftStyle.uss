@@ -1,0 +1,68 @@
+.error {
+    margin: 5px;
+    padding: 5px;
+    border-width: 1px;
+    border-radius: 5px;
+    background-color: rgba(255, 0, 0, 0.05);
+    color: rgba(255, 0, 0, 1);
+    display: none;
+}
+
+.text-field {
+    margin: 4px;
+}
+.text-field Label, .text-field TextElement {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.component-name-field {
+    font-size: 16px;
+}
+.component-name-field Label {
+    color: rgba(255, 255, 255, 1);
+}
+
+.gui-container {
+    margin: 4px;
+    padding-top: 10px;
+    margin-top: 10px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.25);
+    border-radius: 5px;
+}
+
+.save-preset-button, .create-button {
+    margin: 4px;
+    align-content: center;
+    align-self: center;
+    height: 30px;
+    border-radius: 5px;
+    width: 200px;
+    font-size: 18px;
+}
+
+.presets-container .preset-item {
+    flex-direction: row;
+    align-items: center;
+    margin: 2px;
+    padding: 2px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.25);
+    border-radius: 5px;
+}
+
+.presets-container .text {
+    padding: 5px;
+    flex-grow: 1;
+    -unity-font-definition: resource("Fonts/RobotoMono/RobotoMono-Regular.ttf");
+    font-size: 11px;
+}
+
+.presets-container Button {
+    height: 20px;
+}
+
+.preset-item .button-delete {
+    background-color: #570000;
+    color: white;
+}

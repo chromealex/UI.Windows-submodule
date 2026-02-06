@@ -115,10 +115,14 @@ namespace UnityEditor.UI.Windows {
             Object selectButtonObj = null;
             try {
                 if (target.boxedValue is UnityEngine.ResourceManagement.Util.SerializedType serializedType) {
-                    displayName = serializedType.Value.Name;
+                    if (serializedType.Value.Namespace?.StartsWith("UnityEngine.UI.Windows") == true) {
+                        displayName = $"{serializedType.Value.Name}";
+                    } else {
+                        displayName = $"{serializedType.Value.Name} ({serializedType.Value.Namespace})";
+                    }
                 }
             } catch (System.Exception) {
-                                
+                
             }
             
             if (target.propertyType == SerializedPropertyType.ObjectReference && target.objectReferenceValue != null) {
@@ -227,7 +231,11 @@ namespace UnityEditor.UI.Windows {
 
                         } else {
 
-                            displayName = EditorHelpers.StringToCaption(type.Name);
+                            if (type.Namespace.StartsWith("UnityEngine.UI.Windows") == true) {
+                                displayName = $"{type.Name}";
+                            } else {
+                                displayName = $"{type.Name} ({type.Namespace})";
+                            }
 
                         }
                         

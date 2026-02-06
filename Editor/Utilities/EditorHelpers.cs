@@ -509,6 +509,30 @@ namespace UnityEditor.UI.Windows {
 
         }
         
+        public static string FormatIndentation(string code, int indentSize = 4) {
+            var sb = new System.Text.StringBuilder();
+            int indentLevel = 0;
+
+            var lines = code.Replace("\r\n", "\n").Split('\n');
+
+            foreach (var rawLine in lines) {
+                var line = rawLine.Trim();
+
+                if (line.StartsWith("}")) {
+                    indentLevel = System.Math.Max(0, indentLevel - 1);
+                }
+                
+                sb.Append(new string(' ', indentLevel * indentSize));
+                sb.AppendLine(line);
+
+                if (line.EndsWith("{")) {
+                    ++indentLevel;
+                }
+            }
+
+            return sb.ToString();
+        }
+        
         public static string StringToCaption(string str) {
 
             return System.Text.RegularExpressions.Regex.Replace(str, "[A-Z]", (match) => { return " " + match.Value.Trim(); }).Trim();

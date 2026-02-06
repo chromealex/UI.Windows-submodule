@@ -5,7 +5,7 @@ using UnityEditor;
 #endif
 
 [AddComponentMenu("UI.Windows/Add Component Draft")]
-public class OpenAddWindowComponent : WindowComponent {
+public class OpenAddWindowComponent : WindowObject {
     #if UNITY_EDITOR
     private void Reset() {
         UnityEditor.UI.Windows.CreateComponentDraftWindow.Open(this.gameObject);

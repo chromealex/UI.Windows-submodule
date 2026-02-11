@@ -128,7 +128,7 @@
             
         }
 
-        public static RectOffset GetRectOffset(RectOffset rectOffset, PaddingType paddingType, CustomPaddings customPaddings) {
+        public static RectOffset GetRectOffset(float scaleFactor, RectOffset rectOffset, PaddingType paddingType, CustomPaddings customPaddings) {
             
             var w = Screen.width;
             var h = Screen.height;
@@ -138,33 +138,33 @@
 
             if ((paddingType & PaddingType.Left) != 0) {
                 rectOffset.left = Mathf.RoundToInt(
-                    safeArea.xMin +
-                    custom.paddingPixels.xMin +
-                    custom.paddingPercent.xMin * w
+                    (safeArea.xMin +
+                    custom.paddingPixels.xMin * scaleFactor +
+                    custom.paddingPercent.xMin * w) / scaleFactor
                 );
             }
 
             if ((paddingType & PaddingType.Right) != 0) {
                 rectOffset.right = Mathf.RoundToInt(
-                    w - safeArea.xMax +
-                    custom.paddingPixels.xMax +
-                    custom.paddingPercent.xMax * w
+                    (w - safeArea.xMax +
+                    custom.paddingPixels.xMax * scaleFactor +
+                    custom.paddingPercent.xMax * w) / scaleFactor
                 );
             }
 
             if ((paddingType & PaddingType.Bottom) != 0) {
                 rectOffset.bottom = Mathf.RoundToInt(
-                    safeArea.yMin +
-                    custom.paddingPixels.yMin +
-                    custom.paddingPercent.yMin * h
+                    (safeArea.yMin +
+                    custom.paddingPixels.yMin * scaleFactor +
+                    custom.paddingPercent.yMin * h) / scaleFactor
                 );
             }
 
             if ((paddingType & PaddingType.Top) != 0) {
                 rectOffset.top = Mathf.RoundToInt(
-                    h - safeArea.yMax +
-                    custom.paddingPixels.yMax +
-                    custom.paddingPercent.yMax * h
+                    (h - safeArea.yMax +
+                    custom.paddingPixels.yMax * scaleFactor +
+                    custom.paddingPercent.yMax * h) / scaleFactor
                 );
             }
 

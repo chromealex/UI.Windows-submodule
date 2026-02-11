@@ -47,7 +47,7 @@
                 this.rectTransform.sizeDelta = Vector2.zero;
                 this.rectTransform.anchoredPosition = Vector2.zero;
             } else if (this.targetType == TargetType.LayoutGroup) {
-                WindowLayoutSafeZone.GetRectOffset(this.layoutGroup.padding, this.config.PaddingType, this.config.CustomPaddings);
+                WindowLayoutSafeZone.GetRectOffset(this.GetWindow().GetCanvas().scaleFactor, this.layoutGroup.padding, this.config.PaddingType, this.config.CustomPaddings);
             }
 
         }

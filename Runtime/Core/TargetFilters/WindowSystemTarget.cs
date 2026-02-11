@@ -25,7 +25,7 @@
         public bool checkAspects;
         public Aspects aspects;
 
-        public bool IsValid(TargetData data) {
+        public virtual bool IsValid(TargetData data) {
 
             if (this.checkPlatform == true) {
 

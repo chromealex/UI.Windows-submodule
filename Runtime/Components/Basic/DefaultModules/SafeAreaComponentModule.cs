@@ -8,8 +8,7 @@
         }
         
         public TargetType targetType;
-        public WindowLayoutSafeZone.PaddingType paddingType;
-        public WindowLayoutSafeZone.CustomPaddings customPaddings;
+        public SafeArea config = SafeArea.Default;
         public RectTransform rectTransform;
         public LayoutGroup layoutGroup;
         
@@ -42,13 +41,13 @@
             this.screenCache.Update();
 
             if (this.targetType == TargetType.RectTransformAnchors) {
-                var (anchorMin, anchorMax) = WindowLayoutSafeZone.GetAnchors(this.paddingType, this.customPaddings);
+                var (anchorMin, anchorMax) = WindowLayoutSafeZone.GetAnchors(this.config.PaddingType, this.config.CustomPaddings);
                 this.rectTransform.anchorMin = anchorMin;
                 this.rectTransform.anchorMax = anchorMax;
                 this.rectTransform.sizeDelta = Vector2.zero;
                 this.rectTransform.anchoredPosition = Vector2.zero;
             } else if (this.targetType == TargetType.LayoutGroup) {
-                WindowLayoutSafeZone.GetRectOffset(this.layoutGroup.padding, this.paddingType, this.customPaddings);
+                WindowLayoutSafeZone.GetRectOffset(this.layoutGroup.padding, this.config.PaddingType, this.config.CustomPaddings);
             }
 
         }

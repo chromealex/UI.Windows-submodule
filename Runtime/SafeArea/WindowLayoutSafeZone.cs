@@ -130,6 +130,8 @@
 
         public static RectOffset GetRectOffset(float scaleFactor, RectOffset rectOffset, PaddingType paddingType, CustomPaddings customPaddings) {
             
+            if (scaleFactor <= 0f) scaleFactor = 1f;
+            
             var w = Screen.width;
             var h = Screen.height;
             var safeArea = Screen.safeArea;

@@ -29,7 +29,6 @@ namespace UnityEditor.UI.Windows {
 
         private TempObj tempObj;
 
-        [MenuItem("Tools/My Tool Window")]
         public static void Open(GameObject go) {
             var path = string.Empty;
             var stage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();

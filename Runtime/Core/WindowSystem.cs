@@ -480,12 +480,12 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        internal static void ShowInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
+        internal static bool ShowInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
             
             if (instance.GetState() == ObjectState.Showing || instance.GetState() == ObjectState.Shown) {
                 
                 parameters.RaiseCallback();
-                return;
+                return false;
                 
             }
 
@@ -620,6 +620,8 @@ namespace UnityEngine.UI.Windows {
                 
             }
 
+            return true;
+
         }
 
         internal static void SetShown(WindowObject instance, TransitionParameters parameters, bool internalCall) {
@@ -690,19 +692,19 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public static void HideInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
+        public static bool HideInstance(WindowObject instance, TransitionParameters parameters, bool internalCall = false) {
 
             if (instance.GetState() <= ObjectState.Initializing) {
                 
                 Debug.LogWarning($"Object is out of state: {instance}", instance);
-                return;
+                return false;
                 
             }
 
             if (instance.GetState() == ObjectState.Hiding || instance.GetState() == ObjectState.Hidden) {
                 
                 parameters.RaiseCallback();
-                return;
+                return false;
                 
             }
             instance.SetState(ObjectState.Hiding);
@@ -861,6 +863,8 @@ namespace UnityEngine.UI.Windows {
                 }
 
             });
+
+            return true;
 
         }
 

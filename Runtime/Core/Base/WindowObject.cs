@@ -1157,23 +1157,23 @@ namespace UnityEngine.UI.Windows {
 
         }
 
-        public void ShowHide(bool state) {
-            this.ShowHide(state, default);
+        public bool ShowHide(bool state) {
+            return this.ShowHide(state, default);
         }
 
-        public void ShowHide(bool state, TransitionParameters parameters) {
+        public bool ShowHide(bool state, TransitionParameters parameters) {
             if (state == true) {
-                this.Show(parameters);
+                return this.Show(parameters);
             } else {
-                this.Hide(parameters);
+                return this.Hide(parameters);
             }
         }
 
-        public void Show() {
-            this.Show(default);
+        public bool Show() {
+            return this.Show(default);
         }
 
-        public virtual void Show(TransitionParameters parameters) {
+        public virtual bool Show(TransitionParameters parameters) {
 
             if (this.objectState <= ObjectState.Initializing) {
 
@@ -1192,14 +1192,14 @@ namespace UnityEngine.UI.Windows {
 
                 }
 
-                return;
+                return false;
 
             }
 
             if (this.objectState == ObjectState.Showing || this.objectState == ObjectState.Shown) {
                 
                 parameters.RaiseCallback();
-                return;
+                return false;
                 
             }
 
@@ -1215,7 +1215,7 @@ namespace UnityEngine.UI.Windows {
                 WindowSystem.SetShown(obj.instance, obj.tr, false);
                 PoolClass<WindowObjectClosure>.Recycle(obj);
             });
-            WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
+            return WindowSystem.ShowInstance(this, cbParameters, internalCall: true);
 
         }
 
@@ -1225,7 +1225,7 @@ namespace UnityEngine.UI.Windows {
             
         }
 
-        public virtual void Hide(TransitionParameters parameters) {
+        public virtual bool Hide(TransitionParameters parameters) {
 
             if (parameters.data.replaceHideBehaviour == false) {
                 parameters = parameters.ReplaceHideBehaviour(this.hideBehaviour);
@@ -1241,12 +1241,12 @@ namespace UnityEngine.UI.Windows {
                     }, static (c) => {
                         c.component.Hide(c.parameters);
                     });
-                    return;
+                    return false;
                     
                 } else {
 
                     Debug.LogWarning($"Object is out of state: {this}", this);
-                    return;
+                    return false;
 
                 }
                 
@@ -1255,7 +1255,7 @@ namespace UnityEngine.UI.Windows {
             if (this.objectState == ObjectState.Hiding || this.objectState == ObjectState.Hidden) {
                 
                 parameters.RaiseCallback();
-                return;
+                return false;
                 
             }
             
@@ -1271,7 +1271,7 @@ namespace UnityEngine.UI.Windows {
                 WindowSystem.SetHidden(obj.instance, obj.tr, false);
                 PoolClass<WindowObjectClosure>.Recycle(obj);
             });
-            WindowSystem.HideInstance(this, cbParameters, internalCall: true);
+            return WindowSystem.HideInstance(this, cbParameters, internalCall: true);
 
         }
 

@@ -68,11 +68,11 @@
 
         }
 
-        private void HideBase(TransitionParameters parameters) {
-            base.Hide(parameters);
+        private bool HideBase(TransitionParameters parameters) {
+            return base.Hide(parameters);
         }
 
-        public override void Hide(TransitionParameters parameters) {
+        public override bool Hide(TransitionParameters parameters) {
 
             parameters = parameters.ReplaceIgnoreTouch(true);
             var closure = PoolClass<HideCallbackClosure>.Spawn();
@@ -96,10 +96,11 @@
                     obj.window.HideBase(obj.parameters.ReplaceDelay(0f));
 
                 });
+                return true;
 
             } else {
 
-                base.Hide(cbParameters);
+                return base.Hide(cbParameters);
 
             }
 

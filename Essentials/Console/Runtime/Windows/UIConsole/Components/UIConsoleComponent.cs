@@ -97,6 +97,16 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
         }
 
+        public override void OnInit() {
+            base.OnInit();
+            this.document.panelSettings = Object.Instantiate(this.document.panelSettings);
+        }
+
+        public override void OnDeInit() {
+            Object.DestroyImmediate(this.document.panelSettings);
+            base.OnDeInit();
+        }
+
         private void ShowLine(ClickEvent evt, LineInfo lineInfo) {
             
             this.linePopupComponent.Show();

@@ -410,7 +410,9 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             }
 
             this.document.rootVisualElement.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
-            
+            this.document.panelSettings.sortingOrder = this.GetWindow().GetCanvas().sortingOrder;
+            this.document.sortingOrder = this.GetWindow().GetCanvas().sortingOrder;
+
             base.OnShowBegin();
             
         }

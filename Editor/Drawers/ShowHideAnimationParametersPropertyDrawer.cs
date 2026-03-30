@@ -328,7 +328,7 @@ namespace UnityEditor.UI.Windows {
             var delay = property.FindPropertyRelative(nameof(AnimationParameters.ShowHideParameters.delay));
             var ease = property.FindPropertyRelative(nameof(AnimationParameters.ShowHideParameters.ease));
 
-            const float offset = 15f;
+            //const float offset = 15f;
             const float labelWidth = 80f;
             const float easeWidth = 120f;
             var s = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;

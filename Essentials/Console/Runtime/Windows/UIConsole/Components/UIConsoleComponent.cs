@@ -342,7 +342,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         public void SetInfo(UIDocument document) {
 
             this.autoScroll = true;
-            if (this.document.panelSettings != null) Object.DestroyImmediate(this.document.panelSettings);
+            if (this.document != null && this.document.panelSettings != null) Object.DestroyImmediate(this.document.panelSettings);
             this.document = document;
             this.document.panelSettings = Object.Instantiate(this.document.panelSettings);
             {

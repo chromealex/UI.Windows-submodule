@@ -97,13 +97,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
         }
 
-        public override void OnInit() {
-            base.OnInit();
-            this.document.panelSettings = Object.Instantiate(this.document.panelSettings);
-        }
-
         public override void OnDeInit() {
-            Object.DestroyImmediate(this.document.panelSettings);
+            if (this.document != null) Object.DestroyImmediate(this.document.panelSettings);
             base.OnDeInit();
         }
 
@@ -347,7 +342,9 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         public void SetInfo(UIDocument document) {
 
             this.autoScroll = true;
+            if (this.document.panelSettings != null) Object.DestroyImmediate(this.document.panelSettings);
             this.document = document;
+            this.document.panelSettings = Object.Instantiate(this.document.panelSettings);
             {
 
                 this.console = WindowSystem.GetWindowSystemModule<WindowSystemConsoleModule>().console;

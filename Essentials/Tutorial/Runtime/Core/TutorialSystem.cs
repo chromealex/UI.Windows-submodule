@@ -187,9 +187,13 @@ namespace UnityEngine.UI.Windows.Essentials.Tutorial {
             
             var tutorialData = this.itemsExecutedByName.FirstOrDefault(i => i.name == tutorialName);
             if (tutorialData == null) return;
-            var windowItem = WindowSystem.GetCurrentOpened().FirstOrDefault(i => UnityEngine.UI.Windows.Utilities.TypesCache.GetFullName(i.instance.GetType()) == tutorialData.forWindowType.type);
-            if (windowItem.instance == null) return;
-            this.TryToStart(windowItem.instance, tutorialData, tutorialData.startEvent);
+            WindowBase instance = null;
+            if (string.IsNullOrEmpty(tutorialData.forWindowType.type) == false) {
+                var windowItem = WindowSystem.GetCurrentOpened().FirstOrDefault(i => UnityEngine.UI.Windows.Utilities.TypesCache.GetFullName(i.instance.GetType()) == tutorialData.forWindowType.type);
+                if (windowItem.instance == null) return;
+                instance = windowItem.instance;
+            }
+            this.TryToStart(instance, tutorialData, tutorialData.startEvent);
             
         }
 

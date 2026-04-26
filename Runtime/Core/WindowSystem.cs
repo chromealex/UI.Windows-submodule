@@ -151,6 +151,8 @@ namespace UnityEngine.UI.Windows {
         OnLayoutReady,
         OnLayoutEvent,
 
+        OnBeforeShowBegin,
+
     }
 
     public class RTLModeChangedEvent {
@@ -493,6 +495,7 @@ namespace UnityEngine.UI.Windows {
 
             {
 
+                WindowSystem.RaiseEvent(instance, WindowEvent.OnBeforeShowBegin);
                 WindowSystem.TryAddUpdateListener(instance);
                 instance.OnShowBeginInternal();
                 instance.OnShowBegin();

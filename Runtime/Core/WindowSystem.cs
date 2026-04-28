@@ -151,7 +151,9 @@ namespace UnityEngine.UI.Windows {
         OnLayoutReady,
         OnLayoutEvent,
 
-        OnBeforeShowBegin,
+        OnPoolGet,
+        OnNewCreated,
+        OnObjectAppear,
 
     }
 
@@ -495,7 +497,6 @@ namespace UnityEngine.UI.Windows {
 
             {
 
-                WindowSystem.RaiseEvent(instance, WindowEvent.OnBeforeShowBegin);
                 WindowSystem.TryAddUpdateListener(instance);
                 instance.OnShowBeginInternal();
                 instance.OnShowBegin();
@@ -1096,6 +1097,12 @@ namespace UnityEngine.UI.Windows {
             #endif
             instance.SetInitialParameters(initialParameters);
             GameObject.DontDestroyOnLoad(instance.gameObject);
+            if (fromPool == true) {
+                WindowSystem.RaiseEvent(instance, WindowEvent.OnPoolGet);
+            } else {
+                WindowSystem.RaiseEvent(instance, WindowEvent.OnNewCreated);
+            }
+            WindowSystem.RaiseEvent(instance, WindowEvent.OnObjectAppear);
 
             if (instance.preferences.showInSequence == true) {
 

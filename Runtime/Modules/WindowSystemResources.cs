@@ -138,6 +138,10 @@ namespace UnityEngine.UI.Windows {
     public struct Resource<T> {
 
         public Resource data;
+        
+        public static implicit operator Resource(Resource<T> res) {
+            return res.data;
+        }
 
     }
 

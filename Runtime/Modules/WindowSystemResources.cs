@@ -196,10 +196,10 @@ namespace UnityEngine.UI.Windows {
         }
 
         public override int GetHashCode() {
-            return (int)this.type ^ (int)this.objectType ^ (this.guid != null ? this.guid.GetHashCode() : 0);
+            return (int)this.type ^ (int)this.objectType ^ (this.guid != null ? this.guid.GetHashCode() : 0) ^ (this.address != null ? this.address.GetHashCode() : 0);
         }
 
-        public bool IsEquals(in Resource other) {
+        public readonly bool IsEquals(in Resource other) {
             return this.type == other.type &&
                    this.objectType == other.objectType &&
                    this.address == other.address &&
@@ -334,7 +334,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
             public bool Equals(InternalTask other) {
 
-                return other.resourceId == this.resourceId;
+                return other.resourceId == this.resourceId && this.resourceSource.IsEquals(other.resourceSource);
 
             }
 

@@ -41,9 +41,9 @@ namespace UnityEngine.UI.Windows {
     public interface ICustomLoader {
 
         #if UNITY_6000_0_OR_NEWER
-        public Awaitable<T> Load<T>(UnityEngine.UI.Windows.Modules.WindowSystemResources.LoadParameters loadParameters, Resource resource);
+        public Awaitable<T> Load<T>(UnityEngine.UI.Windows.Modules.WindowSystemResources.LoadParameters loadParameters, Resource resource) where T : UnityEngine.Object;
         #else
-        public Task<T> Load<T>(UnityEngine.UI.Windows.Modules.WindowSystemResources.LoadParameters loadParameters, Resource resource);
+        public Task<T> Load<T>(UnityEngine.UI.Windows.Modules.WindowSystemResources.LoadParameters loadParameters, Resource resource) where T : UnityEngine.Object;
         #endif
         void Unload(object obj);
 
@@ -484,7 +484,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         public Dictionary<InternalTask, CallbackList> GetTasks() => this.tasks;
 
-        private bool RequestLoad<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        private bool RequestLoad<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : UnityEngine.Object {
             
             var item = new InternalTask(resource);
             if (this.tasks.TryGetValue(item, out var onCompleteActions) == true) {
@@ -528,7 +528,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        public void LoadAsync<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        public void LoadAsync<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : UnityEngine.Object {
 
             var preloadResult = this.Load_INTERNAL(loadParameters, handler, closure, resource, onComplete);
             if (preloadResult.result == false) {
@@ -537,13 +537,13 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
 
-        public void LoadAsync<T>(object handler, Resource resource, System.Action<T, DefaultClosureData> onComplete) where T : class {
+        public void LoadAsync<T>(object handler, Resource resource, System.Action<T, DefaultClosureData> onComplete) where T : UnityEngine.Object {
 
             this.LoadAsync(handler, new DefaultClosureData(), resource, onComplete);
 
         }
 
-        public void LoadAsync<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        public void LoadAsync<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : UnityEngine.Object {
             
             var preloadResult = this.Load_INTERNAL(new LoadParameters() { async = true }, handler, closure, resource, onComplete);
             if (preloadResult.result == false) {
@@ -552,20 +552,20 @@ namespace UnityEngine.UI.Windows.Modules {
             
         }
 
-        public (bool result, IEnumerator op) LoadAsyncWait<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        public (bool result, IEnumerator op) LoadAsyncWait<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : UnityEngine.Object {
             
             return this.Load_INTERNAL(loadParameters, handler, closure, resource, onComplete);
             
         }
 
-        public (bool result, IEnumerator op) LoadAsyncWait<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        public (bool result, IEnumerator op) LoadAsyncWait<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : UnityEngine.Object {
             
             return this.Load_INTERNAL(new LoadParameters() { async = true }, handler, closure, resource, onComplete);
             
         }
         
         #if UNITY_6000_0_OR_NEWER
-        public async Awaitable<T> LoadAsync<T>(object handler, Resource resource) where T : class {
+        public async Awaitable<T> LoadAsync<T>(object handler, Resource resource) where T : UnityEngine.Object {
             var tcs = PoolClass<TaskCompletionSource<T>>.Spawn();
             var preloadResult = this.Load_INTERNAL<T, TaskCompletionSource<T>>(new LoadParameters() { async = true }, handler, tcs, resource, static (asset, s) => s.SetResult(asset));
             if (preloadResult.result == false) {
@@ -578,7 +578,7 @@ namespace UnityEngine.UI.Windows.Modules {
             return result;
         }
         #else
-        public async ValueTask<T> LoadAsync<T>(object handler, Resource resource) where T : class {
+        public async ValueTask<T> LoadAsync<T>(object handler, Resource resource) where T : UnityEngine.Object {
             var tcs = PoolClass<TaskCompletionSource<T>>.Spawn();
             var preloadResult = this.Load_INTERNAL<T, TaskCompletionSource<T>>(new LoadParameters() { async = true }, handler, tcs, resource, static (asset, s) => s.SetResult(asset));
             if (preloadResult.result == false) {
@@ -593,7 +593,7 @@ namespace UnityEngine.UI.Windows.Modules {
         }
         #endif
 
-        public T Load<T>(object handler, Resource resource) where T : class {
+        public T Load<T>(object handler, Resource resource) where T : UnityEngine.Object {
             
             var closure = PoolClass<ClosureResult<T>>.Spawn();
             var preloadResult = this.Load_INTERNAL<T, ClosureResult<T>>(new LoadParameters() { async = false }, handler, closure, resource, static (asset, c) => {
@@ -624,7 +624,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        internal (bool result, IEnumerator op) Load_INTERNAL<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        internal (bool result, IEnumerator op) Load_INTERNAL<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : UnityEngine.Object {
             
             if (typeof(Component).IsAssignableFrom(typeof(T)) == true) {
                 resource.objectType = Resource.ObjectType.Component;
@@ -675,7 +675,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        internal IEnumerator Load_INTERNAL_YIELD<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : class {
+        internal IEnumerator Load_INTERNAL_YIELD<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : UnityEngine.Object {
 
             switch (resource.type) {
 
@@ -704,7 +704,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        private IEnumerator LoadCustomLoader_INTERNAL<TResource>(LoadParameters loadParameters, object handler, Resource resource) {
+        private IEnumerator LoadCustomLoader_INTERNAL<TResource>(LoadParameters loadParameters, object handler, Resource resource) where TResource : UnityEngine.Object {
 
             var task = this.customLoader.Load<TResource>(loadParameters, resource);
             yield return task;

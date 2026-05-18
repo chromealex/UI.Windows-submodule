@@ -1115,8 +1115,7 @@ namespace UnityEngine.UI.Windows {
 
             if (this.hiddenByDefault == true || this.IsInternalManualTouch(parameters) == true) {
                 if (this.internalManualShow == false) {
-                    this.HideInternal(TransitionParameters.Default.ReplaceImmediately(true));
-                    this.SetInvisible();
+                    this.Hide(TransitionParameters.Default.ReplaceImmediately(true));
                 }
                 parameters.RaiseCallback();
                 return;

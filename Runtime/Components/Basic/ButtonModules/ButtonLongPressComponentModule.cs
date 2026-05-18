@@ -9,6 +9,9 @@
         [Header("Use long press via callback, not by overriding RaiseClick()")]
         public bool callbackMode;
 
+        [Header("Don't cleanup short press callback, when callbackMode is `true`")]
+        public bool preserveShortPressCallback;
+
         private float pressTimer;
         private bool isPressed;
 
@@ -108,7 +111,9 @@
 
             if (this.callbackMode == true && dt > this.pressTime) {
 
-	            this.callbackOnBreakRegistries.Clear();
+	            if (this.preserveShortPressCallback == false) {
+		            this.callbackOnBreakRegistries.Clear();
+	            }
 	            this.callbackRegistries.Invoke();
 	            this.isPressed = false;
 
@@ -134,6 +139,7 @@
         
         public void OnPointerUp(UnityEngine.EventSystems.PointerEventData eventData) {
 
+	        var isLongPressFired = this.isPressed == false;
             this.isPressed = false;
 
             if (this.progressComponent != null) {
@@ -143,7 +149,10 @@
 		            this.progressComponent.SetNormalizedValue(0f);
 	            }
             }
-            this.callbackOnBreakRegistries.Invoke();
+
+            if (this.preserveShortPressCallback == false || isLongPressFired == false) {
+	            this.callbackOnBreakRegistries.Invoke();
+            }
             
             if (this.callbackMode == true) return;
 

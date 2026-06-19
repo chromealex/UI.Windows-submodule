@@ -183,7 +183,7 @@ namespace UnityEditor.UI.Windows {
                     if (movedParents.Any(p => WindowLayoutUtility.IsRecursiveParent(p, comp.transform))) continue;
 
                     var compType = comp.GetType();
-                    if (compType == typeof(WindowLayoutElement)) continue;
+                    if (compType == typeof(WindowLayoutElement) || compType == typeof(WindowLayoutSafeZone)) continue;
 
                     if (comp != null && comp.transform.parent != null) {
                         result.Add((comp, comp.transform.parent, siblingIndices[comp.transform]));

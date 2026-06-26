@@ -456,15 +456,15 @@ namespace UnityEngine.UI.Windows {
         public static int GetNextCanvasDepth(UIWSLayer layer) {
 
             var settings = WindowSystem.GetSettings();
+            int windowDepthStep = 1 * 100;
 
             if (WindowSystem.instance.topWindowsByLayer.TryGetValue(layer.value, out var instance) == true) {
 
-                var step = settings.windowsPerLayer;
-                return instance.GetCanvasDepth() + step;
+                return instance.GetCanvasDepth() + windowDepthStep;
 
             }
 
-            return layer.value * settings.windowsPerLayer;
+            return layer.value * settings.windowsPerLayer + windowDepthStep;
 
         }
 

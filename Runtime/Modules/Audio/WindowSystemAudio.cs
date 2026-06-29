@@ -41,7 +41,10 @@ namespace UnityEngine.UI.Windows {
         public InteractableType[] defaultEvents = System.Array.Empty<InteractableType>();
 
         #if !FMOD_SUPPORT
+        [Tooltip("For music")]
         public AudioSource audioSource;
+        [Tooltip("For SFX. Music source will be used if null")]
+        public AudioSource audioSourceSfx;
         
         private AudioSource sfxSource;
         private AudioSource[] musicSources;
@@ -65,7 +68,7 @@ namespace UnityEngine.UI.Windows {
             WindowSystem.AddCallbackOnAnyInteractable(this.OnAnyInteractable);
             
             #if !FMOD_SUPPORT
-            this.sfxSource = Instantiate(this.audioSource);
+            this.sfxSource = Instantiate(this.audioSourceSfx ?? this.audioSource);
             this.sfxSource.name = "[Audio] SFX";
             this.sfxSource.gameObject.SetActive(true);
             GameObject.DontDestroyOnLoad(this.sfxSource.gameObject);
@@ -192,10 +195,10 @@ namespace UnityEngine.UI.Windows {
             if (clip.eventType == EventType.SFX) {
                 AudioClip audioClip = null;
                 if (clip.randomClips?.Length > 0) {
-                    this.ApplyParameters(this.sfxSource, clip);
+                    this.ApplyParameters(this.sfxSource, clip, EventType.SFX);
                     audioClip = clip.randomClips[Random.Range(0, clip.randomClips.Length)];
                 } else if (clip.audioClip != null) {
-                    this.ApplyParameters(this.sfxSource, clip);
+                    this.ApplyParameters(this.sfxSource, clip, EventType.SFX);
                     audioClip = clip.audioClip;
                 }
 
@@ -210,7 +213,7 @@ namespace UnityEngine.UI.Windows {
                 }
 
                 var source = this.GetChannel(clip.musicChannel);
-                this.ApplyParameters(source, clip);
+                this.ApplyParameters(source, clip, EventType.Music);
                 source.clip = clip.audioClip;
                 source.Play();
             }
@@ -277,7 +280,7 @@ namespace UnityEngine.UI.Windows {
             return true;
         }
 
-        private void ApplyParameters(AudioSource source, UIWSAudioEvent clip) {
+        private void ApplyParameters(AudioSource source, UIWSAudioEvent clip, EventType eventType) {
             var parameters = clip.parameters;
             if (parameters.changePitch == true) {
                 if (parameters.randomPitch == true) {
@@ -286,7 +289,11 @@ namespace UnityEngine.UI.Windows {
                     source.pitch = parameters.pitchValue;
                 }
             } else {
-                source.pitch = this.audioSource.pitch;
+                if (eventType == EventType.SFX && this.audioSourceSfx != null) {
+                    source.pitch = this.audioSourceSfx.pitch;
+                } else {
+                    source.pitch = this.audioSource.pitch;
+                }
             }
 
             if (parameters.changeVolume == true) {

@@ -707,14 +707,17 @@ namespace UnityEngine.UI.Windows.Modules {
         private IEnumerator LoadCustomLoader_INTERNAL<TResource>(LoadParameters loadParameters, object handler, Resource resource) where TResource : UnityEngine.Object {
 
             var task = this.customLoader.Load<TResource>(loadParameters, resource);
-            yield return task;
+            while (task.GetAwaiter().IsCompleted == false) {
+                yield return null;
+            }
             
-            if (task.GetAwaiter().IsCompleted == true) {
+            {
 
                 var asset = task.GetAwaiter().GetResult();
                 if (asset == null) {
 
-                    this.CompleteTask(handler, resource, default);
+                    if (this.showLogs == true) Debug.LogError($"[ UIWR ] Resource failed while loading: {resource}");
+                    this.CompleteTask(handler, resource, null);
 
                 } else {
 
@@ -724,11 +727,6 @@ namespace UnityEngine.UI.Windows.Modules {
 
                 }
 
-            } else {
-                
-                if (this.showLogs == true) Debug.LogError($"[ UIWR ] Resource failed while loading: {resource}");
-                this.CompleteTask(handler, resource, null);
-                
             }
             
         }

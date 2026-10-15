@@ -233,7 +233,8 @@ namespace UnityEngine.UI.Windows {
                 if (WindowSystem.HasInstance() == false) return;
                 UnityEditor.EditorApplication.delayCall += () => {
                     
-                    if (this != null) this.ValidateEditor();
+                    // The scene owning WindowSystem can close before this delayed prefab validation runs.
+                    if (this != null && WindowSystem.GetSettings() != null) this.ValidateEditor();
                     
                 };
 

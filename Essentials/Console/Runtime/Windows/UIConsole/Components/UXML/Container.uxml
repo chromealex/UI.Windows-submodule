@@ -1,15 +1,18 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <Style src="../USS/Styles.uss" />
     <ui:VisualElement name="Container" class="container">
-        <ui:VisualElement name="Buttons" class="top-panel">
-        </ui:VisualElement>
+        <ui:ScrollView class="fastlinks-scroll" mode="Vertical">
+            <ui:VisualElement name="Buttons" class="top-panel" />
+        </ui:ScrollView>
         <ui:VisualElement name="Content-Container" class="content-container">
             <ui:ListView focusable="true" name="Content" selection-type="None" class="content" />
         </ui:VisualElement>
         <ui:VisualElement name="BottomPanel" class="bottom-panel">
-            <ui:TextField picking-mode="Ignore" name="CommandInput" text="command" class="command-input unity-label" style="flex-shrink: 0; align-items: stretch; flex-grow: 1; justify-content: flex-start;" />
-            <ui:Button text="&gt;&gt;" display-tooltip-when-elided="true" name="SendButton" class="button button-send" />
-            <ui:VisualElement name="BottomPanel" class="buttons">
+            <ui:VisualElement name="CommandRow" class="command-row">
+                <ui:TextField name="CommandInput" class="command-input" />
+                <ui:Button text="Apply" display-tooltip-when-elided="true" name="SendButton" class="button button-send" />
+            </ui:VisualElement>
+            <ui:VisualElement name="LogFilters" class="buttons">
                 <ui:Button display-tooltip-when-elided="true" name="ButtonInfo" class="button button-info">
                     <ui:VisualElement class="selected-item" />
                     <ui:VisualElement name="Icon" class="icon" />

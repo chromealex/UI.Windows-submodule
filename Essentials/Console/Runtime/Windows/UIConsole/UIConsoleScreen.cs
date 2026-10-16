@@ -25,6 +25,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
         }
         
         public override void OnInit() {
+
+            this.document.enabled = false;
             
             base.OnInit();
 
@@ -49,7 +51,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows {
             
             base.OnShowBegin();
 
-            this.consoleComponent.SetInfo(this.document);
+            this.consoleComponent.SetInfo(this.document, this.GetConsole(), this.GetCanvas().sortingOrder);
 
         }
 

@@ -29,6 +29,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         public void SetInfo(UIConsoleComponent component, LineInfo lineInfo) {
 
             this.uiConsole = component;
+            component.ApplyPopupInsets(this.document.rootVisualElement);
 
             this.text = this.document.rootVisualElement.Q<TextField>();
             this.prev = this.document.rootVisualElement.Q<Button>("Prev");

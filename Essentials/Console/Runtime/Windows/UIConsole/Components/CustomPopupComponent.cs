@@ -19,6 +19,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         public void SetInfo(UIConsoleComponent component, VisualElement root) {
 
             this.uiConsole = component;
+            component.ApplyPopupInsets(this.document.rootVisualElement);
 
             this.content = this.document.rootVisualElement.Q<VisualElement>("Content");
             this.close = this.document.rootVisualElement.Q<Button>("CloseButton");
@@ -26,6 +27,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             this.close.UnregisterCallback<ClickEvent>(this.Close);
             this.close.RegisterCallback<ClickEvent>(this.Close);
             
+            this.content.Clear();
             this.content.Add(root);
             
         }

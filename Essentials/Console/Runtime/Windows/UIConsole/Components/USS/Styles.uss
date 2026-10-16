@@ -3,10 +3,12 @@
     margin-right: 6px;
     margin-top: 6px;
     margin-bottom: 6px;
+    margin: 0 48px 8px 0;
+    flex-shrink: 0;
 }
 
 .line {
-    font-size: 16px;
+    font-size: 18px;
     -unity-font-style: normal;
     background-color: rgba(255, 255, 255, 0);
     -unity-slice-left: 0;
@@ -18,11 +20,13 @@
     justify-content: flex-start;
     flex-wrap: nowrap;
     flex-direction: row;
-    flex-shrink: 1;
+
+    flex-shrink: 0;
     flex-grow: 0;
     padding-top: 0;
     padding-bottom: 0;
-    align-items: stretch;
+
+    align-items: flex-start;
     margin-left: 0;
     margin-right: 0;
     margin-top: 0;
@@ -30,6 +34,7 @@
     padding-left: 0;
     padding-right: 0;
     white-space: normal;
+    min-height: 48px;
 }
 
 .line .line-button:hover {
@@ -39,7 +44,8 @@
 .line .line-button {
     -unity-font: resource('UIWS.UIConsole/Fonts/Font');
     -unity-font-definition: resource('UIWS.UIConsole/Fonts/RobotoMono-Regular SDF');
-    font-size: 16px;
+
+    font-size: 18px;
     -unity-font-style: normal;
     background-color: rgba(255, 255, 255, 0);
     -unity-slice-left: 0;
@@ -51,8 +57,10 @@
     justify-content: flex-start;
     flex-wrap: wrap;
     flex-direction: column;
+
     flex-shrink: 1;
-    flex-grow: 0;
+
+    flex-grow: 1;
     padding-top: 0;
     padding-bottom: 0;
     align-items: stretch;
@@ -63,7 +71,8 @@
     padding-left: 0;
     padding-right: 0;
     white-space: normal;
-    width: 100%;
+    min-height: 48px;
+    min-width: 0;
 }
 
 .line .copy-button {
@@ -79,7 +88,8 @@
     justify-content: flex-start;
     flex-wrap: wrap;
     flex-direction: column;
-    flex-shrink: 1;
+
+    flex-shrink: 0;
     flex-grow: 0;
     padding-top: 0;
     padding-bottom: 0;
@@ -92,8 +102,10 @@
     padding-right: 0;
     white-space: normal;
     background-image: resource('UIWS.UIConsole/Icons/copy');
-    width: 24px;
-    height: 24px;
+
+    width: 48px;
+
+    height: 48px;
     -unity-background-image-tint-color: rgb(0, 149, 255);
 }
 
@@ -113,20 +125,26 @@
 }
 
 .container {
-    height: 100%;
     background-color: rgba(0, 0, 0, 0.85);
+    flex-grow: 1;
+    min-height: 0;
+    font-size: 18px;
 }
 
 .top-panel {
     margin-bottom: 20px;
     flex-direction: row;
     flex-wrap: wrap;
+    margin: 0 48px 8px 0;
+    flex-shrink: 0;
 }
 
 .fastlink-button .label {
     margin: 2px 2px 2px 2px;
     -unity-font: resource('UIWS.UIConsole/Fonts/Font');
     -unity-font-definition: resource('UIWS.UIConsole/Fonts/RobotoMono-Regular SDF');
+    font-size: 18px;
+    white-space: normal;
 }
 
 .fastlink-button {
@@ -136,11 +154,17 @@
     border-radius: 4px;
     flex-direction: row;
     align-items: center;
-    height: 30px;
-    padding: 4px;
-    margin: 3px;
+
+    height: auto;
+
+    padding: 6px;
+
+    margin: 2px;
     padding-left: 4px;
     opacity: 0.9;
+    min-height: 48px;
+    min-width: 48px;
+    flex-shrink: 0;
 }
 
 .fastlink-button#Notice {
@@ -182,20 +206,19 @@
 }
 
 .content-container {
-    height: 100%;
-    margin-top: 10px;
-    margin-left: 10px;
-    margin-bottom: 0;
-    margin-right: 10px;
     padding-top: 4px;
     padding-left: 4px;
     padding-bottom: 4px;
     background-color: rgba(0, 0, 0, 0.5);
     border-radius: 4px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+    margin: 0 0 8px 0;
 }
 
-.content-container .content {
-    height: 100%;
+.content-container .content {    flex-grow: 1;
+    min-height: 0;
 }
 
 .content .unity-scroller {
@@ -232,21 +255,32 @@
 }
 
 .bottom-panel {
-    margin-left: 10px;
-    margin-bottom: 10px;
-    margin-right: 10px;
-    height: 43px;
-    min-height: 43px;
-    max-height: 43px;
+    height: auto;
+
+    min-height: 48px;
+
+    flex-direction: column;
+
+    flex-shrink: 0;
+    justify-content: flex-end;
+    margin: 0;
+}
+
+.command-row {
     flex-direction: row;
     flex-wrap: nowrap;
-    flex-shrink: 1;
-    justify-content: flex-end;
+    flex-shrink: 0;
+    min-height: 48px;
 }
 
 .bottom-panel .buttons {
     flex-direction: row;
     flex-wrap: nowrap;
+    flex-grow: 0;
+    flex-shrink: 0;
+    align-self: flex-end;
+    justify-content: flex-end;
+    margin-top: 8px;
 }
 
 .bottom-panel .button {
@@ -256,13 +290,22 @@
     background-color: rgb(0, 0, 0);
     border-color: rgb(30, 30, 30);
     opacity: 0.9;
-    padding: 10px;
+
+    padding: 6px;
     margin-top: 8px;
     margin-bottom: 6px;
+    min-width: 48px;
+    min-height: 48px;
+    font-size: 18px;
+    margin: 0;
 }
 
 .bottom-panel .button-send {
-    color: rgb(26, 115, 232);
+    color: white;
+    background-color: rgb(26, 115, 232);
+    flex-shrink: 0;
+    padding-left: 12px;
+    padding-right: 12px;
     margin-left: 0;
     border-bottom-left-radius: 0;
     border-top-left-radius: 0;
@@ -274,6 +317,8 @@
 
 .bottom-panel .buttons .button {
     padding: 6px;
+    min-height: 48px;
+    min-width: 48px;
 }
 
 .bottom-panel .buttons .button .selected-item {
@@ -282,6 +327,8 @@
 
 .bottom-panel .buttons .button {
     opacity: 0.5;
+    min-height: 48px;
+    min-width: 48px;
 }
 
 .bottom-panel .buttons .button.selected {
@@ -307,8 +354,9 @@
 }
 
 .bottom-panel .button .icon {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+
+    height: 20px;
 }
 
 .bottom-panel .button.button-info {
@@ -350,12 +398,17 @@
 .command-input {
     -unity-font: resource('UIWS.UIConsole/Fonts/Font');
     -unity-font-definition: resource('UIWS.UIConsole/Fonts/RobotoMono-Regular SDF');
-    margin-right: 0;
-    padding-right: 0;
+    margin: 0;
+    padding: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    min-height: 48px;
 }
 
 .command-input .unity-base-field__input {
-    padding: 10px 4px 10px 4px;
+    padding: 8px;
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 10px;
@@ -376,33 +429,35 @@
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     color: rgb(0, 157, 255);
-    font-size: 16px;
+
+    font-size: 18px;
+    min-height: 48px;
 }
 
 .collapse-counter {
     -unity-font: resource('UIWS.UIConsole/Fonts/Font');
     -unity-font-definition: resource('UIWS.UIConsole/Fonts/RobotoMono-Regular SDF');
     background-color: rgba(255, 255, 255, 0.3);
-    font-size: 9px;
+
+    font-size: 14px;
     margin: 4px;
     border-radius: 6px;
     padding-left: 6px;
     padding-right: 6px;
     color: white;
     -unity-text-align: middle-center;
+    flex-shrink: 0;
 }
 
 .line-popup-container {
-    padding-left: 20px;
-    padding-right: 20px;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    height: 100%;
     background-color: rgba(0, 0, 0, 0.95);
+    flex-grow: 1;
+    min-height: 0;
+    padding: 8px;
 }
 
-.line-popup-container ScrollView {
-    height: 100%;
+.line-popup-container ScrollView {    flex-grow: 1;
+    min-height: 0;
 }
 
 .line-popup-container ScrollView TextField {
@@ -410,6 +465,7 @@
     -unity-font-definition: resource('UIWS.UIConsole/Fonts/RobotoMono-Regular SDF');
     white-space: normal;
     color: white;
+    font-size: 18px;
 }
 .line-popup-container ScrollView TextField TextInput {
     background-color: rgba(0, 0, 0, 0);
@@ -419,8 +475,10 @@
     align-items: stretch;
     flex-direction: row;
     justify-content: space-between;
-    height: 50px;
-    flex-wrap: nowrap;
+
+    height: auto;
+
+    flex-wrap: wrap;
     background-color: rgb(0, 0, 0);
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
@@ -428,6 +486,8 @@
     border-bottom-right-radius: 4px;
     padding-left: 6px;
     padding-right: 6px;
+    min-height: 48px;
+    flex-shrink: 0;
 }
 
 .line-popup-buttons .button {
@@ -441,6 +501,10 @@
     padding: 10px;
     margin-top: 8px;
     margin-bottom: 6px;
+    min-height: 48px;
+    min-width: 48px;
+    font-size: 18px;
+    margin: 0;
 }
 
 .line-popup-buttons .button:hover {
@@ -459,11 +523,14 @@
     position: absolute;
     right: 0;
     top: 0;
-    width: 30px;
-    height: 30px;
+
+    width: 48px;
+
+    height: 48px;
     margin: 0;
     -unity-font-style: bold;
-    font-size: 15px;
+
+    font-size: 24px;
     background-color: rgb(200, 54, 54);
     opacity: 1;
     border-width: 0;
@@ -471,6 +538,7 @@
     border-bottom-left-radius: 15px;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
+    color: white;
 }
 
 .close-button:hover {
@@ -482,7 +550,8 @@
 }
 
 .popup-container {
-    height: 100%;
+    flex-grow: 1;
+    min-height: 0;
 }
 
 #LinePopup-container, #CustomPopup-container {
@@ -494,5 +563,13 @@
 }
 
 #LinePopup-container #Container, #CustomPopup-container #Container {
-    height: 100%;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.fastlinks-scroll {
+    max-height: 35%;
+    min-height: 48px;
+    flex-shrink: 0;
+    margin-bottom: 8px;
 }

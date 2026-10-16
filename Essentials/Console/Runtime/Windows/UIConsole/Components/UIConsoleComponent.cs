@@ -7,14 +7,6 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
     using Button = UnityEngine.UIElements.Button;
 
-    internal enum EventSource {
-
-        UIButton,
-        Keyboard,
-        Input,
-
-    }
-    
     public class UIConsoleComponent : WindowComponent, IUpdate {
 
         public LinePopupComponent linePopupComponent;
@@ -23,7 +15,15 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         private UnityEngine.UIElements.UIDocument document;
         public VisualTreeAsset lineElement;
         public VisualTreeAsset fastLinkButtonElement;
-        public int itemHeight = 25;
+        public int itemHeight = 48;
+        private PanelSettings ownedPanelSettings;
+        private PanelSettings sourcePanelSettings;
+        private VisualElement boundRoot;
+        private VisualElement container;
+        private bool visible;
+        private Vector2Int viewport;
+        private Rect safeArea;
+        private Vector2 panelSize;
 
         internal UnityEngine.UI.Windows.WindowSystemConsole console;
 
@@ -98,8 +98,27 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         }
 
         public override void OnDeInit() {
-            if (this.document != null) Object.DestroyImmediate(this.document.panelSettings);
+            this.visible = false;
+            this.UnbindDocument();
+            if (this.document != null) this.document.enabled = false;
+            if (this.document != null && this.document.panelSettings == this.ownedPanelSettings) this.document.panelSettings = this.sourcePanelSettings;
+            if (this.linePopupComponent?.document != null && this.linePopupComponent.document.panelSettings == this.ownedPanelSettings) this.linePopupComponent.document.panelSettings = this.sourcePanelSettings;
+            if (this.customPopupComponent?.document != null && this.customPopupComponent.document.panelSettings == this.ownedPanelSettings) this.customPopupComponent.document.panelSettings = this.sourcePanelSettings;
+            if (this.ownedPanelSettings != null) {
+                if (Application.isPlaying) Object.Destroy(this.ownedPanelSettings);
+                else Object.DestroyImmediate(this.ownedPanelSettings);
+            }
+            this.ownedPanelSettings = null;
+            this.document = null;
             base.OnDeInit();
+        }
+
+        private void UnbindDocument() {
+            this.boundRoot?.UnregisterCallback<GeometryChangedEvent>(this.OnGeometryChanged);
+            if (this.sendButton != null) this.sendButton.clicked -= this.OnSendClicked;
+            this.commandField?.UnregisterCallback<KeyDownEvent>(this.OnCommandKeyDown, TrickleDown.TrickleDown);
+            this.commandField?.UnregisterCallback<NavigationSubmitEvent>(this.OnCommandSubmit, TrickleDown.TrickleDown);
+            this.boundRoot = null;
         }
 
         private void ShowLine(ClickEvent evt, LineInfo lineInfo) {
@@ -149,8 +168,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
         private void ClearInput() {
 
-            this.commandField.SetValueWithoutNotify(" ");
-            this.commandField.Focus();
+            this.ReplaceInput(string.Empty);
+            this.TryToFocus();
 
         }
 
@@ -162,16 +181,15 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
         private void TryToFocus() {
 
-            if (Application.isMobilePlatform == false) {
+            if (this.visible && Application.isMobilePlatform == false) {
 
                 if (this.customPopupComponent.IsVisible() == true ||
                     this.linePopupComponent.IsVisible() == true) {
                     return;
                 }
 
-                this.commandField.schedule.Execute(() => {
-                    this.commandField.Focus();
-                });
+                this.commandField.Focus();
+                this.commandField.SelectRange(this.commandField.value.Length, this.commandField.value.Length);
 
             }
 
@@ -179,14 +197,16 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
         private void ReplaceInput(string newText) {
 
-            this.commandField.value = newText;
+            this.commandField.SetValueWithoutNotify(newText);
+            this.commandField.SelectRange(newText.Length, newText.Length);
 
         }
 
         private int prevScreenSize;
         public void OnUpdate(float dt) {
 
-            if (this.console == null) return;
+            if (this.console == null || !this.visible) return;
+            this.ApplyViewport();
             
             if (this.prevScreenSize != Screen.width) {
                 
@@ -204,15 +224,62 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             
             if (this.autoScroll == true) this.ScrollDown();
 
-            this.UpdateList();
+            this.sendButton.SetEnabled(!string.IsNullOrWhiteSpace(this.commandField.value));
 
+        }
+
+        public override void OnHideBegin() {
+            this.visible = false;
+            this.commandField?.Blur();
+            this.UnbindDocument();
+            if (this.document != null) this.document.enabled = false;
+            base.OnHideBegin();
+        }
+
+        private void OnGeometryChanged(GeometryChangedEvent evt) {
+            this.ApplyViewport();
+            if (this.content != null && !Mathf.Approximately(evt.oldRect.width, evt.newRect.width)) this.content.Rebuild();
+        }
+
+        private void ApplyViewport() {
+            var panel = this.document?.rootVisualElement?.panel;
+            if (panel == null) return;
+            this.ApplyViewport(new Vector2Int(Screen.width, Screen.height), Screen.safeArea, panel.visualTree.layout.size);
+        }
+
+        private void ApplyViewport(Vector2Int size, Rect safe, Vector2 logicalSize) {
+            if (size.x <= 0 || size.y <= 0 || logicalSize.x <= 0 || logicalSize.y <= 0) return;
+            if (size == this.viewport && safe == this.safeArea && logicalSize == this.panelSize) return;
+            this.viewport = size;
+            this.safeArea = safe;
+            this.panelSize = logicalSize;
+            this.container.style.paddingLeft = safe.xMin / size.x * logicalSize.x + 8f;
+            this.container.style.paddingRight = (size.x - safe.xMax) / size.x * logicalSize.x + 8f;
+            this.container.style.paddingTop = (size.y - safe.yMax) / size.y * logicalSize.y + 8f;
+            this.container.style.paddingBottom = safe.yMin / size.y * logicalSize.y + 8f;
+            this.ApplyPopupInsets(this.linePopupComponent.document.rootVisualElement);
+            this.ApplyPopupInsets(this.customPopupComponent.document.rootVisualElement);
+            this.content?.Rebuild();
+        }
+
+        internal void ApplyPopupInsets(VisualElement popup) {
+            if (popup == null) return;
+            var content = popup.Q<VisualElement>("Container");
+            content.style.paddingLeft = this.container.style.paddingLeft;
+            content.style.paddingRight = this.container.style.paddingRight;
+            content.style.paddingTop = this.container.style.paddingTop;
+            content.style.paddingBottom = this.container.style.paddingBottom;
+            var close = popup.Q<Button>("CloseButton");
+            if (close != null) {
+                close.style.top = this.container.style.paddingTop;
+                close.style.right = this.container.style.paddingRight;
+            }
         }
 
         public override void OnHideEnd() {
             
             base.OnHideEnd();
             
-            this.document.rootVisualElement.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
             
         }
 
@@ -339,22 +406,39 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
         }
 
-        public void SetInfo(UIDocument document) {
+        public void SetInfo(UIDocument document, WindowSystemConsole console, int sortingOrder) {
 
             this.autoScroll = true;
-            if (this.document != null && this.document.panelSettings != null) Object.DestroyImmediate(this.document.panelSettings);
             this.document = document;
-            this.document.panelSettings = Object.Instantiate(this.document.panelSettings);
-            {
-
-                this.console = WindowSystem.GetWindowSystemModule<WindowSystemConsoleModule>().console;
+            this.console = console;
+            if (!this.visible) document.enabled = false;
+            if (this.ownedPanelSettings == null) {
+                this.sourcePanelSettings = document.panelSettings;
+                this.ownedPanelSettings = Object.Instantiate(this.sourcePanelSettings);
+                this.ownedPanelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
+                this.ownedPanelSettings.referenceResolution = new Vector2Int(480, 480);
+                this.ownedPanelSettings.screenMatchMode = PanelScreenMatchMode.Expand;
+                this.ownedPanelSettings.scale = 1f;
+            }
+            document.panelSettings = this.ownedPanelSettings;
+            this.linePopupComponent.document.panelSettings = this.ownedPanelSettings;
+            this.customPopupComponent.document.panelSettings = this.ownedPanelSettings;
+            this.linePopupComponent.document.position = Position.Absolute;
+            this.customPopupComponent.document.position = Position.Absolute;
+            this.ownedPanelSettings.sortingOrder = sortingOrder;
+            document.sortingOrder = sortingOrder;
+            document.enabled = true;
+            if (this.boundRoot != document.rootVisualElement) {
+                this.UnbindDocument();
+                this.boundRoot = document.rootVisualElement;
+                this.boundRoot.RegisterCallback<GeometryChangedEvent>(this.OnGeometryChanged);
+                this.container = this.boundRoot.Q<VisualElement>("Container");
 
                 this.commandField = this.document.rootVisualElement.Q<TextField>(className: "command-input");
                 this.sendButton = this.document.rootVisualElement.Q<Button>(className: "button-send");
-                this.sendButton.RegisterCallback<ClickEvent>(evt => {
-                    if (this.commandField == null) return;
-                    this.OnEditEnd(this.commandField.text, EventSource.UIButton);
-                });
+                this.sendButton.clicked += this.OnSendClicked;
+                this.commandField.selectAllOnFocus = false;
+                this.commandField.selectAllOnMouseUp = false;
 
                 this.fastLinksContainer = this.document.rootVisualElement.Q<VisualElement>(className: "top-panel");
 
@@ -403,22 +487,21 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
                     });
                 });
                 
-                this.commandField.RegisterCallback<InputEvent>(evt => { this.OnEditEnd(evt.newData, EventSource.Input); });
-                this.commandField.RegisterCallback<KeyDownEvent>(evt => {
-                    if (this.commandField == null) return;
-                    this.OnEditEnd(this.commandField.text, EventSource.Keyboard);
-                });
-
-                this.GenerateFastLinks();
+                this.commandField.RegisterCallback<KeyDownEvent>(this.OnCommandKeyDown, TrickleDown.TrickleDown);
+                this.commandField.RegisterCallback<NavigationSubmitEvent>(this.OnCommandSubmit, TrickleDown.TrickleDown);
+                this.ReplaceInput(string.Empty);
                 this.UpdateCounters();
                 this.UpdateButtons();
-                this.UpdateFilters();
 
             }
 
-            this.document.rootVisualElement.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
-            this.document.panelSettings.sortingOrder = this.GetWindow().GetCanvas().sortingOrder;
-            this.document.sortingOrder = this.GetWindow().GetCanvas().sortingOrder;
+            this.visible = true;
+            this.viewport = default;
+            this.document.rootVisualElement.style.display = DisplayStyle.Flex;
+            this.ApplyViewport();
+            this.GenerateFastLinks();
+            this.UpdateFilters();
+            this.TryToFocus();
 
             base.OnShowBegin();
             
@@ -440,7 +523,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             if (commands.Count == 0) return;
             --this.currentIndex;
             if (this.currentIndex < 0) this.currentIndex = 0;
-            this.commandField.value = commands[this.currentIndex].str;
+            this.ReplaceInput(commands[this.currentIndex].str);
 
         }
 
@@ -452,80 +535,44 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             if (commands.Count == 0) return;
             ++this.currentIndex;
             if (this.currentIndex >= commands.Count) this.currentIndex = commands.Count - 1;
-            this.commandField.value = commands[this.currentIndex].str;
+            this.ReplaceInput(commands[this.currentIndex].str);
 
         }
 
-        private void UpdateList() {
-
-            #if ENABLE_INPUT_SYSTEM
-
-            if (UnityEngine.InputSystem.Keyboard.current?.upArrowKey.wasPressedThisFrame == true) {
-
-                this.MoveUp();
-
-            }
-
-            if (UnityEngine.InputSystem.Keyboard.current?.downArrowKey.wasPressedThisFrame == true) {
-
-                this.MoveDown();
-
-            }
-
-            if (UnityEngine.InputSystem.Keyboard.current?.tabKey.wasPressedThisFrame == true) {
-
-                this.AutoComplete();
-
-            }
-
-            #else
-            if (Input.GetKeyDown(KeyCode.UpArrow) == true) {
-
-                this.MoveUp();
-
-            }
-
-            if (Input.GetKeyDown(KeyCode.DownArrow) == true) {
-
-                this.MoveDown();
-
-            }
-
-            if (Input.GetKeyDown(KeyCode.Tab) == true) {
-
-                this.AutoComplete();
-
-            }
-
-            #endif
-
-            this.TryToFocus();
-
-            this.sendButton.SetEnabled(this.commandField.text.Length > 0);
-            
+        private void OnSendClicked() {
+            if (this.visible) this.ApplyCommand(this.commandField.value);
         }
 
-        private void OnEditEnd(string text, EventSource eventSource) {
+        private void OnCommandSubmit(NavigationSubmitEvent evt) {
+            if (!this.visible) return;
+            evt.StopImmediatePropagation();
+            this.ApplyCommand(this.commandField.value);
+        }
 
-            if (eventSource == EventSource.UIButton) {
-                this.ApplyCommand(text);
+        private void OnCommandKeyDown(KeyDownEvent evt) {
+            if (!this.visible) return;
+            // Some input backends deliver only the character; EventSystem also sends NavigationSubmit.
+            if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter || evt.character == '\n' || evt.character == '\r') {
+                evt.StopImmediatePropagation();
+                this.ApplyCommand(this.commandField.value);
                 return;
             }
-
-            #if ENABLE_INPUT_SYSTEM
-            var shouldApply = UnityEngine.InputSystem.Keyboard.current?.enterKey.wasPressedThisFrame == true;
-            #else
-            var shouldApply = Input.GetKeyDown(KeyCode.KeypadEnter) == true || Input.GetKeyDown(KeyCode.Return);
-            #endif
-
-            if (shouldApply == true) {
-
-                this.ApplyCommand(text);
-
+            switch (evt.keyCode) {
+                case KeyCode.UpArrow:
+                    evt.StopImmediatePropagation();
+                    this.MoveUp();
+                    break;
+                case KeyCode.DownArrow:
+                    evt.StopImmediatePropagation();
+                    this.MoveDown();
+                    break;
+                case KeyCode.Tab:
+                    evt.StopImmediatePropagation();
+                    this.AutoComplete();
+                    break;
             }
-
         }
-        
+
         public object RunCommand(WindowSystemConsole.CommandItem command) {
 
             var console = this.console;
@@ -537,7 +584,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         
         private void AutoComplete() {
             
-            this.ApplyCommand(this.commandField.text, autoComplete: true);
+            this.ApplyCommand(this.commandField.value, autoComplete: true);
             
         }
         
@@ -636,6 +683,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             var result = this.RunCommand(item);
 
             this.ClearInput();
+            if (!this.visible) return;
             this.ScrollDown();
 
             if (result is ConsolePopup popup) {

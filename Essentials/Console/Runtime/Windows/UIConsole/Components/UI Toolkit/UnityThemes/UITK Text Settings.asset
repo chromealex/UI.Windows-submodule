@@ -13,12 +13,14 @@ MonoBehaviour:
   m_Name: UITK Text Settings
   m_EditorClassIdentifier: 
   m_Version: 
-  m_DefaultFontAsset: {fileID: 0}
+  m_DefaultFontAsset: {fileID: 11400000, guid: 0469c575ce593574cb24961f1a84a5c9, type: 2}
   m_DefaultFontAssetPath: Fonts & Materials/
   m_FallbackFontAssets: []
   m_MatchMaterialPreset: 0
   m_MissingCharacterUnicode: 0
   m_ClearDynamicDataOnBuild: 1
+  m_EnableEmojiSupport: 0
+  m_EmojiFallbackTextAssets: []
   m_DefaultSpriteAsset: {fileID: 0}
   m_DefaultSpriteAssetPath: Sprite Assets/
   m_FallbackSpriteAssets: []

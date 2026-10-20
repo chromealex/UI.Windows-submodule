@@ -80,7 +80,11 @@ namespace UnityEngine.UI.Windows.Components {
 
             base.OnDeInitInternal();
 
-            if (this.autoUnloadResourcesOnEvent == UnloadResourceEventType.OnDeInit) {
+            // WindowObject.DoDeInit releases managed references even with manual unload policy.
+            // Their stale sprite must not release a newly acquired reference on pool reuse.
+            if (this.autoUnloadResourcesOnEvent == UnloadResourceEventType.OnDeInit ||
+                this.prevResourceLoad.type == Resource.Type.CustomLoader ||
+                this.prevResourceLoad.type == Resource.Type.Addressables) {
 
                 this.UnloadCurrentResources();
 

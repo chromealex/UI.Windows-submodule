@@ -368,6 +368,7 @@ namespace UnityEngine.UI.Windows.Modules {
             public HashSet<object> handlers;
             public System.Action<WindowSystemResources, object, IResourceConstructorContainer> deconstruct;
             public IResourceConstructorContainer resourceConstructor;
+            internal IntResource nextForObject;
 
             public int referencesCount => this.references.Count;
 
@@ -379,6 +380,7 @@ namespace UnityEngine.UI.Windows.Modules {
                 this.handlers = null;
                 this.deconstruct = null;
                 this.resourceConstructor = null;
+                this.nextForObject = null;
 
             }
 
@@ -406,6 +408,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
             private abstract class ObjBase {
 
+                public object handler;
                 public abstract void Invoke(object obj);
                 public abstract void Dispose();
 
@@ -422,6 +425,8 @@ namespace UnityEngine.UI.Windows.Modules {
 
                 public override void Dispose() {
                     this.obj = default;
+                    this.action = null;
+                    this.handler = null;
                     PoolClass<Obj<T>>.Recycle(this);
                 }
 
@@ -441,10 +446,21 @@ namespace UnityEngine.UI.Windows.Modules {
             }
             
             public void Add<T>(T closure, System.Action<T, object> action) {
+                this.Add(closure, action, handler: null);
+            }
+
+            internal void Add<T>(T closure, System.Action<T, object> action, object handler) {
                 var instance = PoolClass<Obj<T>>.Spawn();
                 instance.obj = closure;
                 instance.action = action;
+                instance.handler = handler;
                 this.callbackRegistries.Add(instance);
+            }
+
+            internal void AddReferences(IntResource resource) {
+                foreach (var item in this.callbackRegistries) {
+                    AddReference(item.handler, resource);
+                }
             }
 
             public void Invoke(object result) {
@@ -470,7 +486,6 @@ namespace UnityEngine.UI.Windows.Modules {
         private readonly Dictionary<int, HashSet<System.Action>> handlerToTasks = new Dictionary<int, HashSet<System.Action>>();
         private readonly Dictionary<Resource, IntResource> loaded = new Dictionary<Resource, IntResource>(new ResourceComparer());
         private readonly Dictionary<object, IntResource> loadedObjCache = new Dictionary<object, IntResource>();
-        private readonly List<object> internalDeleteAllCache = new List<object>();
         public bool showLogs;
 
         private ICustomLoader customLoader;
@@ -487,42 +502,36 @@ namespace UnityEngine.UI.Windows.Modules {
         private bool RequestLoad<T, TClosure>(object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : UnityEngine.Object {
             
             var item = new InternalTask(resource);
-            if (this.tasks.TryGetValue(item, out var onCompleteActions) == true) {
-
-                onCompleteActions.Add(new RequestLoadItem<T, TClosure>() {
-                    data = closure,
-                    onComplete = onComplete,
-                }, static (closure, obj) => {
-                    closure.onComplete.Invoke((T)obj, closure.data);
-                });
-                this.tasks[item] = onCompleteActions;
-                return true;
-
-            } else {
-                
+            var isPending = this.tasks.TryGetValue(item, out var onCompleteActions);
+            if (isPending == false) {
                 onCompleteActions.Initialize();
-                onCompleteActions.Add(new RequestLoadItem<T, TClosure>() {
-                    data = closure,
-                    onComplete = onComplete,
-                }, static (closure, obj) => {
-                    closure.onComplete.Invoke((T)obj, closure.data);
-                });
-                this.tasks.Add(item, onCompleteActions);
-                
             }
-
-            return false;
+            onCompleteActions.Add(new RequestLoadItem<T, TClosure>() {
+                data = closure,
+                onComplete = onComplete,
+            }, static (closure, obj) => {
+                closure.onComplete.Invoke((T)obj, closure.data);
+            }, handler);
+            this.tasks[item] = onCompleteActions;
+            return isPending;
 
         }
 
-        private void CompleteTask(object handler, Resource resource, object result) {
+        private void CompleteTask(Resource resource, object result) {
 
             var item = new InternalTask(resource);
             if (this.tasks.TryGetValue(item, out var onCompleteActions) == true) {
 
-                onCompleteActions.Invoke(result);
-                onCompleteActions.Dispose();
                 this.tasks.Remove(item);
+                try {
+                    if (result != null && this.loaded.TryGetValue(resource, out var internalResource) == true) {
+                        // Every receiver owns its reference before any receiver can release it.
+                        onCompleteActions.AddReferences(internalResource);
+                    }
+                    onCompleteActions.Invoke(result);
+                } finally {
+                    onCompleteActions.Dispose();
+                }
 
             }
 
@@ -610,12 +619,11 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        private bool IsLoaded(object handler, Resource resource) {
+        private bool IsLoaded(Resource resource) {
 
             if (this.loaded.TryGetValue(resource, out var internalResource) == true) {
 
-                this.AddObject(handler, internalResource.loaded, null, resource, internalResource.deconstruct);
-                this.CompleteTask(handler, resource, internalResource.loaded);
+                this.CompleteTask(resource, internalResource.loaded);
                 return true;
                 
             }
@@ -625,7 +633,8 @@ namespace UnityEngine.UI.Windows.Modules {
         }
 
         internal (bool result, IEnumerator op) Load_INTERNAL<T, TClosure>(LoadParameters loadParameters, object handler, TClosure closure, Resource resource, System.Action<T, TClosure> onComplete) where T : UnityEngine.Object {
-            
+            if (handler == null) handler = this;
+
             if (typeof(Component).IsAssignableFrom(typeof(T)) == true) {
                 resource.objectType = Resource.ObjectType.Component;
             }
@@ -637,7 +646,7 @@ namespace UnityEngine.UI.Windows.Modules {
                     return (true, null);
                 }
 
-                if (this.IsLoaded(handler, resource) == true) {
+                if (this.IsLoaded(resource) == true) {
                     return (true, null);
                 }
                 
@@ -646,7 +655,7 @@ namespace UnityEngine.UI.Windows.Modules {
             switch (resource.type) {
                 
                 case Resource.Type.Manual: {
-                    this.CompleteTask(handler, resource, default);
+                    this.CompleteTask(resource, default);
                     break;
                 }
 
@@ -717,13 +726,13 @@ namespace UnityEngine.UI.Windows.Modules {
                 if (asset == null) {
 
                     if (this.showLogs == true) Debug.LogError($"[ UIWR ] Resource failed while loading: {resource}");
-                    this.CompleteTask(handler, resource, null);
+                    this.CompleteTask(resource, null);
 
                 } else {
 
                     var result = asset;
-                    this.AddObject(handler, result, null, resource, static (res, obj, _) => res.customLoader.Unload(obj));
-                    this.CompleteTask(handler, resource, result);
+                    this.AddObject(result, null, resource, static (res, obj, _) => res.customLoader.Unload(obj));
+                    this.CompleteTask(resource, result);
 
                 }
 
@@ -749,26 +758,26 @@ namespace UnityEngine.UI.Windows.Modules {
                 var asset = op.Result;
                 if (asset == null) {
 
-                    this.CompleteTask(handler, resource, default);
+                    this.CompleteTask(resource, default);
 
                 } else {
 
                     var result = converter.Invoke(asset);
-                    this.AddObject(handler, result, null, resource, static (_, obj, _) => {
+                    this.AddObject(result, null, resource, static (_, obj, _) => {
                         if (obj is Component component) {
                             UnityEngine.AddressableAssets.Addressables.Release(component.gameObject);
                             return;
                         }
                         UnityEngine.AddressableAssets.Addressables.Release(obj);
                     });
-                    this.CompleteTask(handler, resource, result);
+                    this.CompleteTask(resource, result);
 
                 }
 
             } else {
                 
                 if (this.showLogs == true) Debug.LogError($"[ UIWR ] Resource failed while loading: {resource}\nValid: {op.IsValid()}");
-                this.CompleteTask(handler, resource, null);
+                this.CompleteTask(resource, null);
                             
             }
                         
@@ -842,10 +851,11 @@ namespace UnityEngine.UI.Windows.Modules {
             var obj = resourceConstructor.Construct();
             var constructor = PoolClass<ConstructorContainer<TConstruct>>.Spawn();
             constructor.constructor = resourceConstructor;
-            this.AddObject(handler, obj, constructor, new Resource() { type = Resource.Type.Manual }, static (_, o, resourceConstructor) => {
+            var internalResource = this.AddObject(obj, constructor, new Resource() { type = Resource.Type.Manual }, static (_, o, resourceConstructor) => {
                 var obj = (T)o;
                 ((ConstructorContainer<TConstruct>)resourceConstructor).constructor.Deconstruct(ref obj);
             });
+            AddReference(handler, internalResource);
             return obj;
 
         }
@@ -883,27 +893,32 @@ namespace UnityEngine.UI.Windows.Modules {
 
             if (handler == null) handler = this;
 
-            this.internalDeleteAllCache.Clear();
-            foreach (var kv in this.loaded) {
-                if (kv.Value.handlers.Contains(handler) == true) {
-                    foreach (var item in kv.Value.references) {
-                        this.internalDeleteAllCache.Add(kv.Value.loaded);
+            var deleteAllCache = PoolList<object>.Spawn();
+            try {
+                foreach (var kv in this.loaded) {
+                    foreach (var reference in kv.Value.references) {
+                        if (reference == handler) deleteAllCache.Add(kv.Value.loaded);
                     }
                 }
+                foreach (var obj in deleteAllCache) {
+                    this.RemoveObject(handler, obj);
+                }
+            } finally {
+                PoolList<object>.Recycle(ref deleteAllCache);
             }
-
-            foreach (var obj in this.internalDeleteAllCache) {
-                this.RemoveObject(handler, obj);
-            }
-            this.internalDeleteAllCache.Clear();
             
         }
         
         private bool RemoveObject<T>(object handler, T obj) where T : class {
 
             if (this.loadedObjCache.TryGetValue(obj, out var intResource) == true) {
-
-                if (intResource.handlers.Contains(handler) == true) {
+                IntResource previous = null;
+                while (intResource != null) {
+                    if (intResource.handlers.Contains(handler) == false) {
+                        previous = intResource;
+                        intResource = intResource.nextForObject;
+                        continue;
+                    }
 
                     var hidx = 0;
                     var count = 0;
@@ -921,19 +936,27 @@ namespace UnityEngine.UI.Windows.Modules {
                         if (this.loaded.Remove(intResource.resource) == false) {
                             if (this.showLogs == true) Debug.LogError($"[ UIWR ] Remove resource failed while refCount = 0 and resource is {intResource.resource}");
                         }
-                        this.loadedObjCache.Remove(obj);
-                        
-                        intResource.handlers.Remove(handler);
-                        intResource.deconstruct?.Invoke(this, intResource.loaded, intResource.resourceConstructor);
-                        intResource.resourceConstructor?.Dispose();
-                        PoolHashSet<object>.Recycle(ref intResource.handlers);
-                        PoolList<object>.Recycle(ref intResource.references);
-                        intResource.Reset();
-                        PoolClass<IntResource>.Recycle(intResource);
-                        return true;
+                        if (previous != null) {
+                            previous.nextForObject = intResource.nextForObject;
+                        } else if (intResource.nextForObject != null) {
+                            this.loadedObjCache[obj] = intResource.nextForObject;
+                        } else {
+                            this.loadedObjCache.Remove(obj);
+                        }
+
+                        try {
+                            intResource.deconstruct?.Invoke(this, intResource.loaded, intResource.resourceConstructor);
+                        } finally {
+                            intResource.resourceConstructor?.Dispose();
+                            PoolHashSet<object>.Recycle(ref intResource.handlers);
+                            PoolList<object>.Recycle(ref intResource.references);
+                            intResource.Reset();
+                            PoolClass<IntResource>.Recycle(intResource);
+                        }
                         
                     }
 
+                    return true;
                 }
                 
             }
@@ -942,7 +965,7 @@ namespace UnityEngine.UI.Windows.Modules {
 
         }
 
-        private void AddObject(object handler, object obj, IResourceConstructorContainer resourceConstructor, Resource resource, System.Action<WindowSystemResources, object, IResourceConstructorContainer> deconstruct) {
+        private IntResource AddObject(object obj, IResourceConstructorContainer resourceConstructor, Resource resource, System.Action<WindowSystemResources, object, IResourceConstructorContainer> deconstruct) {
 
             if (this.loaded.TryGetValue(resource, out var intResource) == false) {
 
@@ -954,12 +977,19 @@ namespace UnityEngine.UI.Windows.Modules {
                 intResource.resource = resource;
                 intResource.deconstruct = deconstruct;
                 this.loaded.Add(resource, intResource);
-                this.loadedObjCache.Add(obj, intResource);
+                this.loadedObjCache.TryGetValue(obj, out var previous);
+                intResource.nextForObject = previous;
+                this.loadedObjCache[obj] = intResource;
 
             }
             
-            intResource.handlers.Add(handler);
-            intResource.references.Add(handler);
+            return intResource;
+
+        }
+
+        private static void AddReference(object handler, IntResource resource) {
+            resource.handlers.Add(handler);
+            resource.references.Add(handler);
 
         }
 

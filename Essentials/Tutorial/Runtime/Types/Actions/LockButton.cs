@@ -1,5 +1,6 @@
 namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
+    [System.Serializable]
     [ComponentModuleDisplayName("UI/Lock Button")]
     public struct LockButton : IAction {
 

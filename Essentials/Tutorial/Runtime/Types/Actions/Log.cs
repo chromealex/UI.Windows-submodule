@@ -1,5 +1,6 @@
 namespace UnityEngine.UI.Windows.Essentials.Tutorial {
 
+    [System.Serializable]
     [UnityEngine.UI.Windows.ComponentModuleDisplayNameAttribute("Print Log")]
     public struct Log : IAction {
 

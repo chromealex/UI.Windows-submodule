@@ -19,7 +19,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         public void SetInfo(UIConsoleComponent component, VisualElement root) {
 
             this.uiConsole = component;
-            component.ApplyPopupInsets(this.document.rootVisualElement);
+            component.ApplyPopupStyles(this.document.rootVisualElement);
 
             this.content = this.document.rootVisualElement.Q<VisualElement>("Content");
             this.close = this.document.rootVisualElement.Q<Button>("CloseButton");

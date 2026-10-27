@@ -17,6 +17,8 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         public VisualTreeAsset fastLinkButtonElement;
         public int itemHeight = 48;
         private PanelSettings ownedPanelSettings;
+        private PanelTextSettings ownedTextSettings;
+        private UnityEngine.TextCore.Text.FontAsset ownedFontAsset;
         private PanelSettings sourcePanelSettings;
         private VisualElement boundRoot;
         private VisualElement container;
@@ -100,15 +102,37 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
         public override void OnDeInit() {
             this.visible = false;
             this.UnbindDocument();
-            if (this.document != null) this.document.enabled = false;
-            if (this.document != null && this.document.panelSettings == this.ownedPanelSettings) this.document.panelSettings = this.sourcePanelSettings;
-            if (this.linePopupComponent?.document != null && this.linePopupComponent.document.panelSettings == this.ownedPanelSettings) this.linePopupComponent.document.panelSettings = this.sourcePanelSettings;
-            if (this.customPopupComponent?.document != null && this.customPopupComponent.document.panelSettings == this.ownedPanelSettings) this.customPopupComponent.document.panelSettings = this.sourcePanelSettings;
-            if (this.ownedPanelSettings != null) {
-                if (Application.isPlaying) Object.Destroy(this.ownedPanelSettings);
-                else Object.DestroyImmediate(this.ownedPanelSettings);
+            if (this.document != null) {
+                this.document.enabled = false;
+            }
+            if (this.linePopupComponent?.document != null) {
+                this.linePopupComponent.document.enabled = false;
+            }
+            if (this.customPopupComponent?.document != null) {
+                this.customPopupComponent.document.enabled = false;
+            }
+            if (this.document != null && this.document.panelSettings == this.ownedPanelSettings) {
+                this.document.panelSettings = this.sourcePanelSettings;
+            }
+            if (this.linePopupComponent?.document != null && this.linePopupComponent.document.panelSettings == this.ownedPanelSettings) {
+                this.linePopupComponent.document.panelSettings = this.sourcePanelSettings;
+            }
+            if (this.customPopupComponent?.document != null && this.customPopupComponent.document.panelSettings == this.ownedPanelSettings) {
+                this.customPopupComponent.document.panelSettings = this.sourcePanelSettings;
+            }
+            if (Application.isPlaying == true) {
+                Object.Destroy(this.ownedPanelSettings);
+                Object.Destroy(this.ownedTextSettings);
+                Object.Destroy(this.ownedFontAsset);
+            } else {
+                Object.DestroyImmediate(this.ownedPanelSettings);
+                Object.DestroyImmediate(this.ownedTextSettings);
+                Object.DestroyImmediate(this.ownedFontAsset);
             }
             this.ownedPanelSettings = null;
+            this.ownedTextSettings = null;
+            this.ownedFontAsset = null;
+            this.sourcePanelSettings = null;
             this.document = null;
             base.OnDeInit();
         }
@@ -257,13 +281,16 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             this.container.style.paddingRight = (size.x - safe.xMax) / size.x * logicalSize.x + 8f;
             this.container.style.paddingTop = (size.y - safe.yMax) / size.y * logicalSize.y + 8f;
             this.container.style.paddingBottom = safe.yMin / size.y * logicalSize.y + 8f;
-            this.ApplyPopupInsets(this.linePopupComponent.document.rootVisualElement);
-            this.ApplyPopupInsets(this.customPopupComponent.document.rootVisualElement);
+            this.ApplyPopupStyles(this.linePopupComponent.document.rootVisualElement);
+            this.ApplyPopupStyles(this.customPopupComponent.document.rootVisualElement);
             this.content?.Rebuild();
         }
 
-        internal void ApplyPopupInsets(VisualElement popup) {
-            if (popup == null) return;
+        internal void ApplyPopupStyles(VisualElement popup) {
+            if (popup == null) {
+                return;
+            }
+            popup.style.unityFontDefinition = FontDefinition.FromSDFFont(this.ownedFontAsset);
             var content = popup.Q<VisualElement>("Container");
             content.style.paddingLeft = this.container.style.paddingLeft;
             content.style.paddingRight = this.container.style.paddingRight;
@@ -411,16 +438,37 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             this.autoScroll = true;
             this.document = document;
             this.console = console;
-            if (!this.visible) document.enabled = false;
+            if (this.visible == false) {
+                document.enabled = false;
+            }
             if (this.ownedPanelSettings == null) {
                 this.sourcePanelSettings = document.panelSettings;
+                this.ownedFontAsset = UnityEngine.TextCore.Text.FontAsset.CreateFontAsset(
+                    font: Resources.Load<Font>("UIWS.UIConsole/Fonts/Font"),
+                    samplingPointSize: 90, atlasPadding: 9,
+                    renderMode: UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA,
+                    atlasWidth: 1024, atlasHeight: 1024,
+                    atlasPopulationMode: UnityEngine.TextCore.Text.AtlasPopulationMode.Dynamic,
+                    enableMultiAtlasSupport: true);
+                this.ownedFontAsset.hideFlags = HideFlags.HideAndDontSave;
+                this.ownedTextSettings = Object.Instantiate(this.sourcePanelSettings.textSettings);
+                this.ownedTextSettings.hideFlags = HideFlags.HideAndDontSave;
+                this.ownedTextSettings.defaultFontAsset = this.ownedFontAsset;
                 this.ownedPanelSettings = Object.Instantiate(this.sourcePanelSettings);
+                this.ownedPanelSettings.hideFlags = HideFlags.HideAndDontSave;
+                this.ownedPanelSettings.textSettings = this.ownedTextSettings;
                 this.ownedPanelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
                 this.ownedPanelSettings.referenceResolution = new Vector2Int(480, 480);
                 this.ownedPanelSettings.screenMatchMode = PanelScreenMatchMode.Expand;
                 this.ownedPanelSettings.scale = 1f;
             }
             document.panelSettings = this.ownedPanelSettings;
+            if (this.linePopupComponent.document.panelSettings != this.ownedPanelSettings) {
+                this.linePopupComponent.document.enabled = false;
+            }
+            if (this.customPopupComponent.document.panelSettings != this.ownedPanelSettings) {
+                this.customPopupComponent.document.enabled = false;
+            }
             this.linePopupComponent.document.panelSettings = this.ownedPanelSettings;
             this.customPopupComponent.document.panelSettings = this.ownedPanelSettings;
             this.linePopupComponent.document.position = Position.Absolute;
@@ -428,6 +476,7 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
             this.ownedPanelSettings.sortingOrder = sortingOrder;
             document.sortingOrder = sortingOrder;
             document.enabled = true;
+            document.rootVisualElement.style.unityFontDefinition = FontDefinition.FromSDFFont(this.ownedFontAsset);
             if (this.boundRoot != document.rootVisualElement) {
                 this.UnbindDocument();
                 this.boundRoot = document.rootVisualElement;
@@ -495,6 +544,10 @@ namespace UnityEngine.UI.Windows.Runtime.Windows.Components {
 
             }
 
+            this.linePopupComponent.document.enabled = true;
+            this.customPopupComponent.document.enabled = true;
+            this.ApplyPopupStyles(this.linePopupComponent.document.rootVisualElement);
+            this.ApplyPopupStyles(this.customPopupComponent.document.rootVisualElement);
             this.visible = true;
             this.viewport = default;
             this.document.rootVisualElement.style.display = DisplayStyle.Flex;

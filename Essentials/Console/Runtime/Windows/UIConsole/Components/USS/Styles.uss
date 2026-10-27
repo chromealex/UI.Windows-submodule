@@ -43,7 +43,6 @@
 
 .line .line-button {
     -unity-font: resource('UIWS.UIConsole/Fonts/Font');
-    -unity-font-definition: resource('UIWS.UIConsole/Fonts/ConsoleFont');
 
     font-size: 18px;
     -unity-font-style: normal;
@@ -142,7 +141,6 @@
 .fastlink-button .label {
     margin: 2px 2px 2px 2px;
     -unity-font: resource('UIWS.UIConsole/Fonts/Font');
-    -unity-font-definition: resource('UIWS.UIConsole/Fonts/ConsoleFont');
     font-size: 18px;
     white-space: normal;
 }
@@ -397,7 +395,6 @@
 
 .command-input {
     -unity-font: resource('UIWS.UIConsole/Fonts/Font');
-    -unity-font-definition: resource('UIWS.UIConsole/Fonts/ConsoleFont');
     margin: 0;
     padding: 0;
     flex-grow: 1;
@@ -436,7 +433,6 @@
 
 .collapse-counter {
     -unity-font: resource('UIWS.UIConsole/Fonts/Font');
-    -unity-font-definition: resource('UIWS.UIConsole/Fonts/ConsoleFont');
     background-color: rgba(255, 255, 255, 0.3);
 
     font-size: 14px;
@@ -462,7 +458,6 @@
 
 .line-popup-container ScrollView TextField {
     -unity-font: resource('UIWS.UIConsole/Fonts/Font');
-    -unity-font-definition: resource('UIWS.UIConsole/Fonts/ConsoleFont');
     white-space: normal;
     color: white;
     font-size: 18px;
@@ -492,7 +487,6 @@
 
 .line-popup-buttons .button {
     -unity-font: resource('UIWS.UIConsole/Fonts/Font');
-    -unity-font-definition: resource('UIWS.UIConsole/Fonts/ConsoleFont');
     border-radius: 4px;
     background-color: rgb(0, 0, 0);
     border-color: rgb(30, 30, 30);
